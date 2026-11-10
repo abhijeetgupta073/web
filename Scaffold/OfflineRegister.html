@@ -1,0 +1,2424 @@
+﻿
+<!DOCTYPE html>
+<html xmlns="https://www.w3.org/1999/xhtml" manifest="OfflineRegister.appcache">
+<head>
+    <title>SCAFPAC</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+
+    <link href="/Content/Css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="/Content/Css/custom.css" rel="stylesheet" />
+    <link href="/Content/Css/w3.css" rel="stylesheet" />
+    <link href="/Content/Css/SecStyle.css" rel="stylesheet" />
+    <link href="/Content/Css/CustomAlert.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery-ui.css" rel="stylesheet" />
+
+    <script src="/Content/js/jquery.min.js"></script>
+    <script src="/Content/js/jquery-ui.min.js"></script>
+    <script src="/Content/js/bootstrap.min.js"></script>
+    <script src="/Content/js/bootbox.min.js"></script>
+    <script src="Content/js/CustomAlert.js"></script>
+    <script src="/Content/js/jquery.dataTables.min.js"></script>
+    <!--<script src="/Content/js/Register-sw.js"></script>-->
+    <script src="Content/js/OfflineEncryptDecript.js"></script>
+    <script src="Content/js/crypto-js.min.js"></script>
+    <script src="Content/js/OfflineRegister.js?v=2.1"></script>
+    <link href="/Content/Css/jquery.datetimepicker.min.css" rel="stylesheet" />
+    <script src="/Content/js/jquery.datetimepicker.js"></script>
+    <link href="/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <style>
+                .button-30-blue {
+                    background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+                }
+
+                .button-30-current {
+                    background-image: radial-gradient(100% 100% at 100% 0, #a1abe0 0%, #303F9F 100%);
+                }
+
+                .button-30-purple {
+                    background-image: radial-gradient(100% 100% at 100% 0, #cabbcc 0%, #7B1FA2 100%);
+                }
+
+                .button-30-green {
+                    background-image: radial-gradient(100% 100% at 100% 0, #95a87b 0%, #388E3C 100%);
+                }
+
+                .button-30-orange {
+                    background-image: radial-gradient(100% 100% at 100% 0, #581661 0%, #90921e 100%);
+                }
+
+                .button-30-teal {
+                    background-image: radial-gradient(100% 100% at 100% 0, #337ab7 0%, #00796B 100%);
+                }
+
+                .button-30-gray {
+                    background-image: radial-gradient(100% 100% at 100% 0, #607d8b 0%, #757575 100%);
+                }
+
+                .button-30-cyan {
+                    background-image: radial-gradient(100% 100% at 100% 0, #607d8b 0%, #A39480 100%);
+                }
+
+                .button-30-red {
+                    background-image: radial-gradient(100% 100% at 100% 0, #b70606 0%, #a60606 100%);
+                }
+
+                .button-30 {
+                    align-items: center;
+                    appearance: none;
+                    /*        background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+        */ border: 2px;
+                    border-radius: 3px;
+                    box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset;
+                    box-sizing: border-box;
+                    color: #fff;
+                    cursor: pointer;
+                    display: inline-flex;
+                    font-family: "JetBrains Mono",monospace;
+                    height: 26px;
+                    justify-content: center;
+                    line-height: 1;
+                    list-style: none;
+                    overflow: hidden;
+                    padding-left: 16px;
+                    padding-right: 16px;
+                    position: relative;
+                    text-align: left;
+                    text-decoration: none;
+                    transition: box-shadow .15s,transform .15s;
+                    user-select: none;
+                    -webkit-user-select: none;
+                    touch-action: manipulation;
+                    white-space: nowrap;
+                    will-change: box-shadow,transform;
+                    font-size: 14px;
+                }
+
+                    .button-30:focus {
+                        box-shadow: #006400 0 0 0 5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #006400 0 -3px 0 inset;
+                    }
+
+                    .button-30:hover {
+                        /*box-shadow: #006400 0 0 0 5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #006400 0 -3px 0 inset;*/
+                        transform: translateY(-2px);
+                    }
+
+                    .button-30:active {
+                        box-shadow: #3c4fe0 0 3px 7px inset;
+                        transform: translateY(2px);
+                    }
+
+                /*Shubham css start*/
+                .input-container {
+                    position: relative;
+                    display: inline-block;
+                    width: 100%;
+                }
+
+                    .input-container input {
+                        padding-right: 35px; /* Space for the icon */
+                    }
+
+                .calendar-icon {
+                    position: absolute;
+                    right: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: black;
+                    cursor: pointer; /* Change cursor to indicate click */
+                    pointer-events: auto; /* Allow interaction with the icon */
+                }
+
+                    .calendar-icon i {
+                        font-size: 16px; /* Icon size */
+                    }
+                /*Shubham css end*/
+                /*Pipeline Tab start*/
+
+                @media (min-width: 1900px) and (max-width: 2050px) {
+                    #freeze {
+                        width: 100% !important;
+                    }
+
+                    #ExportTo {
+                        width: 100% !important;
+                    }
+
+                    #btnrequest {
+                        width: 100% !important;
+                    }
+
+                    #btnReturn {
+                        width: 100% !important;
+                    }
+
+                    #btnDamage {
+                        width: 100% !important;
+                    }
+                }
+
+                @media only screen and (max-width: 600px) {
+
+                    #btnReturn {
+                        width: 107% !important;
+                    }
+
+                    #btnDamage {
+                        width: 107% !important;
+                    }
+                }
+
+                @media (min-width: 768px) and (max-width: 1024px) {
+
+                    #btnReturn {
+                        width: 107% !important;
+                    }
+
+                    #btnDamage {
+                        width: 107% !important;
+                    }
+                }
+
+                label {
+                    font-size: 12px;
+                }
+
+                .setWidth8 {
+                    min-width: 90px !important;
+                }
+
+                .setWidth9 {
+                    min-width: 180px !important;
+                }
+
+                .setWidth10 {
+                    min-width: 80px !important;
+                }
+
+                #tblRegisterInventoryList_processing {
+                    display: none;
+                }
+                /*Pipeline Tab end*/
+    </style>
+
+
+    <script>
+
+
+        //function deletecheck() {
+        //    var CheckRID;
+        //    var tempvalue = "";
+        //    db.transaction(function (tx) {
+        //        tx.executeSql("Select * from tblCurrentRID", [], function (tx, results) {
+        //            if (results.rows.length > 0) {
+        //                CheckRID = results.rows.item(0).RID;
+
+        //            }
+        //        });
+        //    });
+        //    setTimeout(function () {
+        //        if (CheckRID == "0") {
+        //            var img1 = document.getElementById("imga");
+        //            img1.src = "images/noimg.jpg";
+        //            $("#tempimg").val(tempvalue);
+        //            // $("#deleteimage").css("display", "none");
+
+        //        }
+        //        else {
+        //            $("#divdeleteimage").css("display", "block");
+        //        }
+        //        console.log(CheckRID);
+        //    }, 1000);
+        //}
+        //function deletecheck() {
+        //    // Reset the image source to default
+        //    document.getElementById("imga").src = "images/noimg.jpg";
+
+        //    // Clear the hidden input for temporary image
+        //    $("#tempimg").val("");
+        //    $('#radUpdogImg').val("");
+        //    $('#basetempimg').val("");
+
+        //    // Optionally hide the delete image button
+        //    $("#deleteimage").hide();
+
+        //    console.log("Image removed successfully.");
+        //}
+
+        function ImageRotate(angle) {
+            if (angle == 90 || angle == -90 || angle == 270 || angle == -270) {
+                $('#imga').addClass("rotatedimg");
+            }
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +angle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + angle + 'deg)' });
+            }
+        }
+        function newclickforward() {
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            var imgsrc = $('#imga').attr('src');
+
+            var angle = 90;
+            var newangle = $("#imgangle").val();
+
+            if (newangle == 0) {
+                newangle = 90;
+            } else {
+                newangle = parseInt(newangle) + angle;
+            }
+            if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+                $('#imga').addClass("rotatedimg");
+            } else {
+                $('#imga').removeClass("rotatedimg");
+            }
+
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +newangle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+            }
+
+            if (newangle > -360 && newangle < 360) {
+                $("#imgangle").val(newangle);
+            } else {
+                newangle = 0;
+                $("#imgangle").val(newangle);
+            }
+        }
+        function newclickbackward() {
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            var angle = -90;
+            var newangle = $("#imgangle").val();
+
+            if (newangle == 0) {
+                newangle = -90;
+            } else {
+                newangle = parseInt(newangle) + angle;
+            }
+
+            if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+                //alert("hello");
+                // $(".rotatedimgdiv").css("margin", "50px 0 0 0");
+                //$(".rotatedimg").css("margin", "0 0 0 25px").css("max-width", "260px").css("width", "100%");
+                $('#imga').addClass("rotatedimg");
+                // $("#removemargin").css("margin-top", "0");
+            } else {
+                // $(".rotatedimgdiv").css("margin", "0 0 0 0");
+                $('#imga').removeClass("rotatedimg");
+                //$(".rotatedimg").css("margin", "0 0 0 0").css("max-width", "auto").css("width", "100%");
+                // $("#removemargin").css("margin-top", "-32px");
+            }
+
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +newangle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+            }
+
+            if (newangle > -360 && newangle < 360) {
+                $("#imgangle").val(newangle);
+            } else {
+                newangle = 0;
+                $("#imgangle").val(newangle);
+
+            }
+        }
+
+
+        $(document).ready(function () {
+
+            var number = document.getElementById('txtplnstandDur');
+            let cameraStream = null;
+
+            // Handle File Upload
+            $(".mob_file_image").on("change", function () {
+                const file = this.files[0];
+                handleImageUpload(file);
+            });
+
+            // Handle Camera Open
+            $("#btnOpenCamera").on("click", function () {
+                $("#cameraContainer").show();
+
+                // Access the webcam
+                navigator.mediaDevices
+                    .getUserMedia({ video: true })
+                    .then(function (stream) {
+                        cameraStream = stream;
+                        const camera = document.getElementById("camera");
+                        camera.srcObject = stream;
+                    })
+                    .catch(function (error) {
+                        console.error("Unable to access camera: ", error);
+                        alert("Camera access is blocked or unavailable.");
+                    });
+            });
+
+            // Handle Taking Photo
+            $("#btnTakePhoto").on("click", function () {
+                const camera = document.getElementById("camera");
+                const canvas = document.createElement("canvas");
+                canvas.width = camera.videoWidth;
+                canvas.height = camera.videoHeight;
+
+                // Draw the current frame on the canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
+
+                // Get the image data as a base64 string
+                const base64mobImagedata = canvas.toDataURL("image/png");
+
+                // Stop the camera stream
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach((track) => track.stop());
+                }
+                $("#cameraContainer").hide();
+
+                // Set the image to the img tag and the hidden input
+                $("#imga").attr("src", base64mobImagedata);
+                $("#tempimg").val(base64mobImagedata);
+            });
+
+            // Function to Handle Image Upload
+            function handleImageUpload(file) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+
+                const name = file.name;
+                const extension = name.split(".").pop().toLowerCase();
+
+                if (["jpg", "jpeg", "png", "gif", "bmp"].includes(extension)) {
+                    reader.onloadend = function () {
+                        const base64mobImagedata = reader.result;
+                        $("#tempimg").val(base64mobImagedata);
+                        $("#imga").attr("src", base64mobImagedata);
+                    };
+                } else {
+                    alert("Invalid file type. Please upload an image file.");
+                }
+            }
+
+
+
+
+            //$(".mob_file_image").on("change", function (evt) {
+            //    var base64mobImagedata;
+            //    var reader = new FileReader();
+            //    reader.readAsDataURL(this.files[0]);
+            //    var name = this.files[0].name;
+            //    var getname = name.split(".");
+            //    var extensionname = getname[1];
+            //    if (extensionname.toLowerCase() == "xlsx" || extensionname.toLowerCase() == "csv" || extensionname.toLowerCase() == "doc" || extensionname.toLowerCase() == "docx" || extensionname.toLowerCase() == "pdf" || extensionname.toLowerCase() == "xls" || extensionname.toLowerCase() == "mov") {
+            //        var Res = { Result: "Failed", Message: "Failed to upload Image! Valid File Extensions Are jpg, jpeg, png, gif, bmp" };
+            //        CustomAlert(Res);
+            //    }
+            //    else {
+            //        reader.onloadend = function () {
+            //            base64mobImagedata = reader.result;
+            //            $("#tempimg").val(base64mobImagedata);
+            //            $("#imga").attr('src', base64mobImagedata);
+            //            $("#deleteimage").css("display", "block");
+            //            $("#btnSaveImage").css("display", "block");
+
+            //        }
+            //    }
+
+            //});
+
+            number.onkeydown = function (e) {
+                if (!((e.keyCode > 95 && e.keyCode < 106)
+                    || (e.keyCode > 47 && e.keyCode < 58)
+                    || e.keyCode == 8)) {
+                    return false;
+                }
+            }
+
+            document.getElementById("txtlength").addEventListener('input', restrictToInteger);
+            document.getElementById("txtwidth").addEventListener('input', restrictToInteger);
+            document.getElementById("txtheight").addEventListener('input', restrictToInteger);
+            document.getElementById("txtManhrserect").addEventListener('input', restrictToInteger);
+            document.getElementById("txtmanDisman").addEventListener('input', restrictToInteger);
+            document.getElementById("txtCrewSize").addEventListener('input', restrictToInteger);
+            function restrictToInteger() {
+                this.value = this.value.replace(/[^\d.]/g, '');
+            }
+            $("#btndeleteimageno").on("click", function () {
+                $("#divdeleteimage").css("display", "none");
+            });
+            $("#btndeleteimageyes").on("click", function () {
+                UpdateImageRID();
+
+
+            });
+            if ($("#tempimg").val() != "") {
+                $("#deleteimage").css("display", "block");
+                $("#btnSaveImage").css("display", "block");
+            }
+
+        });
+        $(function () {
+            $("#txtManhrserect").on('change', function () {
+                ManHrsRatioGet(ClientID);
+            });
+        });
+
+        //function Submit() {
+        //    //var ddl = document.getElementById("ddlscaffoldowner");
+        //    //var option = document.createElement("OPTION");
+        //    //option.innerHTML = document.getElementById("txtpopupowner").value;
+        //    //option.value = document.getElementById("txtpopupowner").value;
+
+        //    var ddlOwnerVal = $("#txtpopupowner").val();
+        //    //ddl.options.add(option);
+        //    $("#divpopupOwner").css("display", "none");
+        //    $("#ddlscaffoldowner").append($('<option></option>').attr("value", ddlOwnerVal).text(ddlOwnerVal));
+        //    $("#ddlscaffoldowner").val(ddlOwnerVal);
+
+        //}
+
+        function ManHrsRatioGet(ClientID) {
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/OfflineRegister.asmx/ClientErectRatio",
+                url: "/OfflineRegister/ClientErectRatio",
+                data: JSON.stringify({ id: ClientID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // var Ratio = response.d;
+                    var Ratio = response;
+                    var ManHrsRatio = Ratio["0"].ManHrsRatio;
+
+                    var ManHrsErect = $("#txtManhrserect").val();
+                    var ManHrsDismantle = $("#txtmanDisman").val();
+                    //if (ManHrsDismantle == "") {
+                    var ManDismantel = (ManHrsRatio) * (ManHrsErect);
+                    var ManHrsDismantel = ManDismantel.toFixed(2);
+
+
+                    $("#txtmanDisman").val(ManHrsDismantel);
+                    //}
+                }
+            });
+        }
+
+
+
+
+
+        //Shubham Add
+
+        function OfflineshowInspection() {
+            document.getElementById("offlineInpsectionddl").style.display = "block";
+            document.getElementById("OffineJobddl").style.display = "none";
+            document.getElementById("OfflineImages").style.display = "none";
+            document.getElementById("maindivCyclone").style.display = "none";
+            document.getElementById("PipelineTab").style.display = "none";
+        }
+
+        function OfflineJobtab() {
+            document.getElementById("OfflineImages").style.display = "none";
+            document.getElementById("offlineInpsectionddl").style.display = "none";
+            document.getElementById("OffineJobddl").style.display = "block";
+            document.getElementById("maindivCyclone").style.display = "none";
+            document.getElementById("PipelineTab").style.display = "none";
+        }
+
+        function OfflineImageAdd() {
+            document.getElementById("OfflineImages").style.display = "block";
+            document.getElementById("offlineInpsectionddl").style.display = "none";
+            document.getElementById("OffineJobddl").style.display = "none";
+            document.getElementById("maindivCyclone").style.display = "none";
+            document.getElementById("PipelineTab").style.display = "none";
+        }
+
+        function showCyclone() {
+            document.getElementById("maindivCyclone").style.display = "block";
+            document.getElementById("OfflineImages").style.display = "none";
+            document.getElementById("offlineInpsectionddl").style.display = "none";
+            document.getElementById("OffineJobddl").style.display = "none";
+            document.getElementById("PipelineTab").style.display = "none";
+        }
+        function showPipelineTab() {
+            document.getElementById("maindivCyclone").style.display = "none";
+            document.getElementById("OfflineImages").style.display = "none";
+            document.getElementById("offlineInpsectionddl").style.display = "none";
+            document.getElementById("OffineJobddl").style.display = "none";
+            document.getElementById("PipelineTab").style.display = "block";
+
+        }
+
+
+        function hide() {
+            $('#Adddocs').css('display', 'none');
+        }
+
+
+
+        function hide2() {
+            $('#divDeplank').css('display', 'none');
+        }
+
+
+
+        //Pooja Rai
+
+        //Cyclone Script Start
+
+        $(document).ready(function () {
+            //$('#liCyclone').removeClass('active').addClass('active');
+            //ShowJobInfoDetails();
+            setTimeout(function () {
+
+                CycAction();
+            }, 1500);
+            $('#ddlCycloneAction').change(function () {
+
+                CycAction();
+                $('#txtTotalDeBoardEdit').val("");
+                //$('#txtTotalReInstateEdit').val("");
+                //$('#txtDeBoardItemEdit').val("");
+                //$('#txtreInstateEdit').val("");
+            });
+        });
+        function CycAction() {
+            var CycloneAction = $('#ddlCycloneAction').val();
+
+            if (CycloneAction == "Full Strip") {
+                $('#divAlert').css('visibility', 'visible');
+                $('#chkuseentervalue').prop('disabled', true);
+                $('#chkuseentervalue').prop('checked', false);
+            }
+            else if (CycloneAction == "De-Plank Only" || CycloneAction == "Tie-Down") {
+                $('#divAlert').css('visibility', 'hidden');
+                $('#chkuseentervalue').prop('disabled', false);
+                $('#chkuseentervalue').prop('checked', true);
+
+            }
+            else {
+                $('#divAlert').css('visibility', 'hidden');
+                $('#chkuseentervalue').prop('disabled', true);
+                $('#chkuseentervalue').prop('checked', false);
+
+            }
+
+        }
+
+        function chkuseentervalue_CheckedChanged() {
+            $('#LoadingPanel1').show();
+            if ($('#chkuseentervalue').prop('checked') == false) {
+                $('#divConfirmation').css('display', 'block');
+            }
+            //if (chkuseentervalue.Checked == false) {
+            //    divConfirmation.Style.Add("display", "block");
+            //}
+            $('#LoadingPanel1').hide();
+        }
+        function btnConfirYes_Click() {
+            $('#txtTotalDeBoardEdit').val('');
+            //$('#txtTotalReInstateEdit').val('');
+            //$('#txtDeBoardItemEdit').val('');
+            //$('#txtreInstateEdit').val('');
+            $('#divConfirmation').css('display', 'none');
+        }
+
+        function btnConfirNo_Click() {
+            //chkuseentervalue.Checked = true;
+            $('#chkuseentervalue').prop('checked', true)
+            // divConfirmation.Style.Add("display", "none");
+            $('#divConfirmation').css('display', 'none');
+        }
+
+        function updateRiskRating() {
+            var cycloneAction = document.getElementById('ddlCycloneAction').value;
+            var riskRatingDropdown = document.getElementById('ddlPriorityRiskRating');
+            CycAction();
+            if (cycloneAction === 'No Action') {
+                riskRatingDropdown.value = 'None';
+            } else {
+                riskRatingDropdown.value = '';
+            }
+            $('#txtTotalDeBoardEdit').val("");
+        }
+
+        //Cyclone Script End
+
+        //Pooja Changes End
+
+
+
+    </script>
+    <style>
+        input:focus {
+            font-size: 16px;
+        }
+
+        #custDetails {
+            height: 1250px !important;
+        }
+
+        label {
+            font-size: 11px;
+        }
+
+        .panel_toolbox > li > a:hover {
+            background: none;
+        }
+
+        .upperRow {
+            margin: 15px 0 0 20px;
+        }
+
+        control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+            background-color: #eeeeee !important;
+        }
+
+        .form-control {
+            height: 28px !important;
+        }
+
+        .bootbox-body {
+            color: #666666;
+            font-size: 14px;
+        }
+
+        th {
+            color: #666666;
+        }
+
+        td {
+            color: #666666;
+        }
+
+        table.dataTable.no-footer {
+            border-bottom: none;
+        }
+
+        .dataTables_wrapper.no-footer .dataTables_scrollBody {
+            border-bottom: none;
+        }
+
+        img.fa_AddNew {
+            height: 9px;
+            width: 9px;
+            margin: -2px 1px 0 0px;
+        }
+
+        .btn_Add {
+            height: 9px;
+            width: 9px;
+            margin: -2px 1px 0 0px;
+        }
+
+        .rotatedimg {
+            /*margin: 0 0 50px 25px;*/
+            margin: 100px 0 50px 0;
+            max-width: 260px;
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+        }
+
+        /* shubham Add*/
+
+        table.dataTable thead th {
+            text-align: left; /* Align text properly */
+            white-space: nowrap; /* Prevent wrapping */
+            padding: 8px; /* Add padding for spacing */
+        }
+
+        table.dataTable tbody td {
+            padding: 8px; /* Match header padding */
+            white-space: nowrap; /* Prevent wrapping */
+        }
+
+
+
+        .setWidth1, .setWidth2, .setWidth3, .setWidth4, .setWidth5, .setWidth6, .setWidth7 {
+            min-width: 210px !important;
+        }
+
+        .setWidthI1, .setWidthI2, .setWidthI3, .setWidthI4, .setWidthI5, .setWidthI6 {
+            min-width: 240px !important;
+        }
+
+
+
+
+        /*shubham add end*/
+
+        @media (min-width:300px) and (max-width:736px) {
+
+            #btnShowOfflineList {
+                margin-left: 2px;
+                width: 35Px;
+            }
+
+            #btnSaveRegister {
+                margin-left: 2px;
+                width: 35Px;
+            }
+
+            #btnAddRegister {
+                margin-left: 2px;
+                width: 35Px;
+            }
+
+            #btnImage {
+                margin-left: 2px;
+                font-size: medium;
+            }
+        }
+
+        #AddNewImg {
+            margin-top: 20px;
+        }
+
+        #txtdesc {
+            margin-left: 10px;
+        }
+
+        #FileUpload1 {
+            margin-top: 6px;
+        }
+
+        .ui-datetimepicker {
+            font-size: 14px; /* Adjust font size for the picker */
+        }
+
+        #btnImage button {
+            font-size: 1.6rem; /* Default size */
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) { /* For tablets and smaller screens */
+            #btnImage button {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 576px) { /* For small devices like phones */
+            #btnImage button {
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+
+</head>
+<body onselectstart="return false" style="background: #F7F7F7;">
+
+    <div id="customLoader" style="display:none;position: fixed; z-index: 999; height: 100%; width: 100%; top: 0; left: 0; background-color: black; filter: alpha(opacity=60); opacity: 0.3; -moz-opacity: 0.8;">
+        <div style="z-index: 99999; margin: 16% 48%; padding: 10px; width: 150px; border-radius: 10px; filter: alpha(opacity=100); opacity: 1; -moz-opacity: 1;">
+            <img src="/Images/loading.gif" style="height: 128px; width: 128px;" />
+            <p class="w3-margin-left"><b>Please Wait.......</b></p>
+        </div>
+    </div>
+
+    <div style="display:none;top: 0px;" id="CustomAlert">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn"></span>
+        <span ID="alertMsg"></span>
+    </div>
+
+    <input type="hidden" id="hdnRID" />
+
+    <div class="row upperRow">
+        <div class="title_left col-lg-2 col-md-3 col-sm-2 col-xs-4">
+            <h4 class="heading" style="color: #0070ba; width: -webkit-fill-available;"><b><img src='/images/fonts/fa_book.png' class='img-responsive' style='height: 15px;width: 14px;margin-top: 5px;float: left;' />&nbsp;<label style="color: #0070ba !important;font-weight: 700;" ID="lblclient" Font-Size="16px" Font-Bold="true">Offline Job</label></b></h4>
+        </div>
+        <div class="col-lg-10 col-sm-10 col-md-12 col-xs-12">
+
+
+
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                <button type="button" id="btnSaveRegister" class="button-30 button-30-green" style="height: 33px; width: 100%;">
+                    <span class="icon">
+                        <img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px; width: 14px; padding-top: 1px;' />
+                    </span>
+                    <span class="respText text">&nbsp;Save</span>
+                </button>
+            </div>
+
+            <!--<div class="col-lg-2 col-md-2 col-sm-12 col-xs-12" style="display:none;">
+                <button ID="btnCAncel" Class="button-30 button-30-gray" OnClick="btnCAncel_Click()" style="width:-webkit-fill-available; height:33px;">
+                    <span class="icon"><i class="fa fa-backward"> </i></span>
+                    <span class="text">&nbsp;Back to Register </span>
+                </button>
+            </div>-->
+
+            <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                <button id="btnUploadtoCloud" class="button-30 button-30-teal d-flex justify-content-center align-items-center"
+                        style="width: 100%; height: 33px; text-align:center" onclick="uploadDataToServerbtn()">
+                    <i class="fa fa-cloud-upload" style="font-size: 16px;"></i>
+                    <span>Upload to Cloud</span>
+                </button>
+            </div>
+
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" id="btnImage">
+                <button id="onlineimg" style="display: block; width: 100%; text-align: center; height: 33px;" class="button-30 button-30-green">
+                    Connection Status: On-Line
+                </button>
+                <button id="offlineimg" style="display: none; width: 100%; text-align: center; height: 33px;" class="button-30 button-30-red">
+                    Connection Status: Off-Line
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <input type="hidden" id="hdnDecryptRID" />
+    <input type="hidden" id="hdnEncryptRID" />
+    <input type="hidden" ID="tempimg" Value="" />
+    <input type="hidden" ID="basetempimg" Value="" />
+    <input type="hidden" ID="getimage" Value="" />
+    <input type="hidden" ID="hdnClientID" />
+    <input type="hidden" ID="hdnSigntr" />
+    <input type="hidden" ID="hdnRID" />
+    <input type="hidden" ID="hdnXPosition" />
+    <input type="hidden" ID="hdnYPosition" />
+    <input type="hidden" ID="hdnmouseXPos" />
+    <input type="hidden" ID="hdnmouseYPos" />
+    <input type="hidden" ID="hdnFloorImage" />
+    <input type="hidden" id="hdnPrevFloorLebel" />
+    <input type="hidden" id="hdnimgname" />
+    <input type="hidden" id="hdnAddbtnAlert" />
+    <input type="hidden" id="hdnSaveIsOffline" />
+    <input type="hidden" id="hdnNoOfScafRefGenerate" />
+
+    <div class="row">
+       
+        <div class="col-xs-12 col-lg-12 col-sm-12 col-md-12 xsfieldset">
+            <fieldset>
+                <legend>Job Info</legend>
+                <div class="row w3-padding-0">
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4 sn">
+                        <label>Site Name</label>
+                        <input type="text" class="form-control" id="txtSiteName" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Site Location</label>
+                        <input type="text" class="form-control" id="txtSiteLocation" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Inspected By</label>
+                        <input type="text" class="form-control" id="txtInspectedBy" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Most Recent Insp. Date</label>
+                        <input type="text" class="form-control" id="txtRecentinspectiondate" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Days Since Last Insp.</label>
+                        <input type="text" class="form-control" id="txtDaylastinspetion" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2" id="statusinsp">
+                        <label>Job Status</label>
+                        <input type="text" id="txtstatus" class="form-control" style="width:100%; background: #eeeeee;" readonly="readonly"" />
+                        <br />
+                        <br />
+
+                        <img src="" id="imgstaus" style="margin-top: -14px;height:20px;" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                        <label>Plan Status</label>
+                        <input type="text" id="txtPlannedStatus" style="background: #eeeeee;" readonly="readonly" class="form-control" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Standing Days to Date</label>
+                        <input type="text" id="txtHireDays" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Total Standing Days</label>
+                        <input type="text" id="txtTotalhireday" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Date Built</label>
+                        <input type="text" id="txtdatetagged" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Date Dismantle</label>
+                        <input type="text" id="txtDatedismantle" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                        <label># of Items</label>
+                        <input type="text" id="txtNoOfItem" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                        <label>Tonnage</label>
+                        <input type="text" id="txttonnage" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-3 col-sm-2 col-lg-1 col-md-2">
+                        <label>Mat.Finalised</label><br />
+                        <input type="text" id="txtoptstatus" class="form-control" style="width:100%" readonly="readonly" />
+                        <br />
+                        <img src="" style="margin-top: -14px;height:20px;" id="imgopt" />
+                    </div>
+                    <div class="col-xs-3 col-sm-2 col-lg-1 col-md-2">
+                        <label>Scaf Ref # </label>
+                        <input type="text" id="txtscaffref" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+
+
+
+    <!--Form Section Starts Here-->
+
+    <div id="FormSection" class="row">
+        <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+            <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+                <li id="liCompany" class="active">
+                    <a id="AnchorRegister" data-toggle="tab" onclick="OfflineJobtab()">
+                        <span class="spancolorandsize"><img src='/images/fonts/fa_user.png' class='img-responsive' style='height: 12px;width: 15px;margin-top: 2px;float: left;' />&nbsp;Job</span>
+                    </a>
+                </li>
+                <li id="limaterialPhase2">
+                    <a id="AnchorScafpacphase2" style="cursor: pointer;" data-toggle="tab" onclick="showPipelineTab()" href="#PipelineTab">
+                        <span class="spancolorandsize"><i class="fa fa-tasks"></i>&nbsp;Job Inventory List</span>
+                    </a>
+                </li>
+
+
+
+                <!--<li id="liCompany" class="active">
+            <a id="AnchorRegister" data-toggle="tab">
+                <span class="spancolorandsize"><img src='/images/fonts/fa_user.png' class='img-responsive' style='height: 12px;width: 15px;margin-top: 2px;float: left;' />&nbsp;Inspection</span>
+            </a>
+        </li>-->
+
+                <li id="liInspection" >
+                    <a id="AnchorInspection" data-toggle="tab" onclick="OfflineshowInspection()" href="#offlineInpsectionddl">
+                        <span class="spancolorandsize">
+                            <img src='/images/fonts/fa_SearchImage.png' class='img-responsive' style='height: 15px;width: 15px;margin-top: 2px;float: left;' />&nbsp;Inspection
+                        </span>
+                    </a>
+                </li>
+
+                <li id="liImageGallery">
+                    <a id="AnchorImageGallery" data-toggle="tab" onclick="OfflineImageAdd()" href="#OfflineImages">
+                        <span class="spancolorandsize"><img src='/images/fonts/fa_ImageGallery.png' class='img-responsive' style='height: 15px;width: 15px;margin-top: 2px;float: left;' />&nbsp; Image Gallery</span>
+                    </a>
+                </li>
+
+                <li id="liCyclone">
+                    <a id="AnchorCyclone" data-toggle="tab" onclick="showCyclone();" href="#maindivCyclone">
+                        <span class="spancolorandsize"><img src='/images/fonts/fa_qrcode.png' class='img-responsive' style='height: 15px;width: 15px;margin-top: 2px;float: left;' />&nbsp;Cyclone</span>
+                    </a>
+                </li>
+
+
+            </ul>
+
+            <div class="tab-content" id="OffineJobddl">
+                <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+                    <div class="row w3-margin-top">
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-sx-12">
+
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <div style="height: 600px;" class="x_panel w3-padding-0 w3-card-4">
+                                    <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                        <h4 style="margin-top: 6px; font-size: 15px" id="lblVaccinations"><i class="fa fa-list"></i>&nbsp;Basic Information <span style="margin-left: 5px; display:block" id="VacCount"></span></h4>
+
+                                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+                                            <li>
+                                                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content" style="margin-bottom: 3px!important;">
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Site<span style="color: red">&nbsp*</span></label>
+                                                <select id="ddlsites" readonly onchange="ddlSitesChanged();" class="form-control">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Owner Name</label>
+                                                <input type="text" id="txtOwnername" readonly="readonly" class="form-control" />
+                                            </div>
+                                        </div>
+
+                                        <!--<div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>Address</label>
+                                        <input type="text" id="txtsiteAddress" readonly="readonly" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>City</label>
+                                        <input type="text" id="txtsiteCity" readonly="readonly" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>Postcode</label>
+                                        <input type="text" id="txtZip" readonly="readonly" class="form-control" />
+                                    </div>
+                                </div>-->
+
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Location<span style="color: red">&nbsp*</span></label>
+                                                <!--<button type="button" id="btnLocation" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>-->
+                                                <select id="ddlLocation" readonly onchange="ddlLocationChanged();" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Building / Module No.<span style="color: red"></span></label>
+                                            <!--<button type="button" id="btnBuilding" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>-->
+
+                                            <select id="ddbuilding" onchange="ddlBuildingChanged();" class="form-control">
+                                                <!--<option disabled value="">Select</option>-->
+                                                <option readonly value=""></option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Asset # / Func. Loc</label>
+                                            <button type="button" id="btnAsset" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                            <select id="ddassets" class="form-control">
+                                                <!--<option disabled value="">Select</option>-->
+                                                <option readonly value=""></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Floor Level<span style="color: red">&nbsp*</span></label>
+
+                                            <select id="DropDownList1" class="form-control">
+                                                <!--<option disabled value="">Select</option>-->
+                                                <option readonly value=""></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Bearing</label>
+                                            <input type="text" class="form-control" id="txtbearning" min="0" />
+                                        </div>
+
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Work Groups</label>
+                                                <!--<label ToolTip="Work Groups" onclick="addnewWorkGroups();return false;" id="btnWorkGroups" Style="float: right; color: #800000 !important; font-size: smaller !important"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller"></i>Add</label>-->
+                                                <!--<button type="button" id="btnWorkGroups" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>-->
+                                                <select id="ddlWorkGroups" Class="form-control">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Sub Groups</label>
+                                                <!--<label ToolTip="Sub Groups" onclick="addnewSubGroups();return false;" id="btnSubGroups" Style="float: right; color: #800000 !important; font-size: smaller"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>-->
+                                                <!--<button type="button" id="btnSubGroups" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>-->
+                                                <select id="ddlSubGroups" class="form-control">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Requested By</label>
+                                                <!--<input type="text" class="form-control" id="txtRequestedBy" />-->
+                                                <select id="txtRequestedBy" class="form-control">
+                                                    <option value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;display:none;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Maintain Inventory At Job</label>
+                                                <input type="checkbox" id="checkboxMaintainInventory" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <div style="height: 600px;" class="x_panel w3-padding-0 w3-card-4">
+                                    <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                        <h4 style="margin-top: 6px; font-size: 15px" id="H3"><i class="fa fa-list"></i>&nbsp;Details <span style="margin-left: 5px;" id="Span3"></span></h4>
+
+                                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                            <li>
+                                                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content">
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Date Built</label>
+                                                <!--<input type="text" class="form-control datepicker" id="rdpDateTagged" style="width:100%;"/>-->
+                                                <input type="text" class="form-control" id="rdpDateTagged" style="width:100%;" autocomplete="off" />
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Date Dismantle</label>
+                                                <input type="text" class="form-control" id="rdpdatedis" style="width:100%;"  autocomplete="off" />
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Design Type</label>
+
+                                                <!--<asp:LinkButton ID="btnDesign" ToolTip="Add Design" runat="server" OnClick="btnDesign_Click" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>-->
+                                                <!--<button type="button" id="btnDesign" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>-->
+
+                                                <select id="ddlScaffoldDesign" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Duty Rating</label>
+                                                <!--<button type="button" id="btnRating" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>-->
+                                                <select id="ddlDutyrating" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Material Type</label>
+                                                <!--<button type="button" id="btnMaterial" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>-->
+                                                <select id="ddlMaterialType" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Reason for Access. (Provide Detailed Description)</label>
+                                                <textarea id="txtdesc" Rows="5" class="form-control" style="height: 127px !important"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Inspection Time Frame</label>
+                                                <select id="ddlInspectionTimeFrame" class="form-control">
+                                                    <option disabled value="">Select</option>
+                                                    <option value="07 Days">07 Days</option>
+                                                    <option value="14 Days">14 Days</option>
+                                                    <option value="21 Days">21 Days</option>
+                                                    <option value="28 Days">28 Days</option>
+                                                    <option value="30 Days">30 Days</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-top: 10px;">
+                                            <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 maintainInventory" style="margin-top: 24px; display:inline-flex;display:none;">
+
+                                        @*<asp:CheckBox ID="checkboxMaintainInventory" runat="server" />*@
+                                        <input type="checkbox" ID="checkboxMaintainInventory" />
+                                        <label style="margin-left: 10px;">Maintain Inventory</label>
+                                    </div>-->
+                                            <!-- Commented on 3March2025 -->
+                                            <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xm-12 clsNoInventory" id="NoInventoryReq" style="margin-top: 1px; display:inline-flex;">
+                                                <input type="checkbox" ID="chkNoInventory" />
+                                                <label style="margin-left: 3px;"> No Inventory Required</label>
+                                            </div>-->
+
+
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+
+
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xm-12" style="margin-top:1px; display:inline-flex">
+                                                <input type="checkbox" id="checkLTStructure" />
+                                                <label style="margin-left: 3px;" for="checkLTStructure">Long Term Structure</label>
+                                            </div>
+
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+
+
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xm-12 clsNoInventory" id="ReqIsolation" style="margin-top: 1px; display:inline-flex;">
+                                                <input type="checkbox" ID="chkReqis" />
+                                                <label style="margin-left: 3px;"> Requires Isolation</label>
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                <!--More Info Section Starts-->
+
+                                <div style="min-height: 600px; height: auto; max-height: none;" class="x_panel w3-padding-0 w3-card-4 xshight">
+                                    <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                        <h4 style="margin-top: 6px; font-size: 15px" id="H1"><i class="fa fa-list"></i>&nbsp;More Information <span style="margin-left: 5px;" id="Span1"></span></h4>
+
+                                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+                                            <li>
+                                                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content" style="margin-bottom: 3px!important;">
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="row " style="margin-top: 10px;">
+
+                                                <div class="col-lg-3 col-md-6 col-sm-4 col-xs-12">
+                                                    <label>WO Number</label>
+                                                    <input type="text" id="txtWOnumb" class="form-control" />
+                                                </div>
+
+
+                                                <div class="col-lg-3 col-md-6 col-sm-4 col-xs-12">
+                                                    <label>Length(m)</label>
+                                                    <input type="text" class="form-control" id="txtlength" min="0" />
+                                                </div>
+                                                <div class="col-lg-3 col-md-6 col-sm-4 col-xs-12">
+                                                    <label>Width(m)</label>
+                                                    <input type="text" class="form-control" id="txtwidth" min="0" />
+                                                </div>
+                                                <div class="col-lg-3 col-md-6 col-sm-4 col-xs-12">
+                                                    <label>Height TWP(m)</label>
+                                                    <input type="text" class="form-control" id="txtheight" min="0" />
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="row">
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                                    <label>Working Decks #</label>
+                                                    <select id="DropDownList2" class="form-control">
+                                                        <option disabled value="">Select</option>
+                                                        <option Value="N/A">N/A</option>
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                        <option value="6">6</option>
+                                                        <option value="7">7</option>
+                                                        <option value="8">8</option>
+                                                        <option value="9">9</option>
+                                                        <option value="10">10</option>
+                                                        <option value="11">11</option>
+                                                        <option value="12">12</option>
+                                                        <option value="13">13</option>
+                                                        <option value="14">14</option>
+                                                        <option value="15">15</option>
+                                                        <option value="16">16</option>
+                                                        <option value="17">17</option>
+                                                        <option value="18">18</option>
+                                                        <option value="19">19</option>
+                                                        <option value="20">20</option>
+                                                        <option value="21">21</option>
+                                                        <option value="22">22</option>
+                                                        <option value="23">23</option>
+                                                        <option value="24">24</option>
+                                                        <option value="25">25</option>
+                                                        <option value="26">26</option>
+                                                        <option value="27">27</option>
+                                                        <option value="28">28</option>
+                                                        <option value="29">29</option>
+                                                        <option value="30">30</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6" id="rowmanHrsErect">
+                                                    <label id="lblManHrsErect">Man Hrs Erect</label>
+                                                    <input type="number" id="txtManhrserect" class="form-control" style="width:100%;" min="0" oninput="this.value = Math.abs(this.value)" />
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6" id="rowmanHrsDisman">
+                                                    <label id="Label8">Man Hrs Dismantle</label>
+                                                    <input type="number" id="txtmanDisman" class="form-control" style="width:100%;" min="0" oninput="this.value = Math.abs(this.value)" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                                    <label>Planned Standing Days<span style="color: red">&nbsp;*</span></label>
+                                                    <input type="text" id="txtplnstandDur" value="30" class="form-control" style="width:100%;" min="0" />
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                                                    <label id="lblplannStatus">Plan Status</label>
+                                                    <select id="ddlPlanningStatus" class="form-control">
+                                                        <option disabled value="">Select</option>
+                                                        <option Value="Break-In">Break-In</option>
+                                                        <option Value="Cancelled">Cancelled</option>
+                                                        <option Value="Opportunity">Opportunity</option>
+                                                        <option Value="Outage">Outage</option>
+                                                        <option value="Planned">Planned</option>
+                                                        <option value="Unplanned">Unplanned</option>
+                                                    </select>
+
+                                                </div>
+                                                <!--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+                                            <label>Shift Allocation</label>
+                                            <select ID="ddlShiftAllocation" Class="form-control">
+                                                <option value=""></option>
+                                                <option Value="Shift A">Shift A</option>
+                                                <option Value="Shift B">Shift B</option>
+                                            </select>
+                                        </div>-->
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                                                    <label id="lblEngineeredDesign">Engineered Design?</label>
+                                                    <select id="ddlEngineeredDesign" class="form-control">
+                                                        <option value="NO">NO</option>
+                                                        <option value="YES">YES</option>
+                                                        <option value="N/A">N/A</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                                    <label>Design Drawing No</label>
+                                                    <input id="txtDesignDrawingNo" type="text" class="form-control" />
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                                                    <label>Max # of Decks at a time</label>
+                                                    <input id="txtNoOfPlatform" type="number" class="form-control" min="0" />
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                                                    <label id="lblsupervisor">Supervisor</label>
+                                                    <select id="ddlsupervisor" class="form-control">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                                    <label>Crew Description</label>
+                                                    <input ID="txtCrew" type="text" Class="form-control" />
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                                                    <label>Permit #</label>
+                                                    <input ID="txtPermit" type="text" Class="form-control" />
+                                                </div>
+
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                                                    <label>Minimum Crew Size</label>
+                                                    <input type="number" id="txtCrewSize" class="form-control" style="width:100%;" min="0" />
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label>Comments</label>
+                                                    <textarea id="txtcomment" Rows="5" class="form-control" style="height: 75px !important"></textarea>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5">
+                                                    <img src="/images/LockedIn.png" style="height: 100px; float: right;display:none;" id="imgLocked" class="img-responsive" />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" style="display:none" id="divhideLockedtextbox">
+                                                    <label>Locked In Signed Off By</label>
+                                                    <input id="txtlockedsignby" type="text" readonly="readonly" class="form-control" />
+                                                </div>
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                                    <button type="button" id="txtsaveBottom" style="margin-top: 15px;width:100%;" class="w3-btn w3-small w3-green btnheight"><span class="icon"><img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' /></span><span class="respText text">&nbsp;Save</span></button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--More Info Section Ends-->
+                                <!--Removed GPS Section From Here-->
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="row w3-padding-top">
+                        <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                            <h4 style="margin-top: 6px; font-size: 15px" id="H5"><i class="fa fa-list"></i>&nbsp;Scaffold Image <span style="margin-left: 5px;" id="Span5"></span></h4>
+                        </div>
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="row">
+                                <div class="nonsafari" style="display: block;">
+                                    <div class="desktopApp" style="display: block;">
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-left: -3px">
+                                            <input type="file" style="width:90px" accept="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" id="radUpdogImg">
+                                            <input type="hidden" id="hdfield" value="" />
+                                        </div>
+                                        <!--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="Downloadimgdiv" style="margin-left: 3px">
+                                    <button type="button" id="downloadButton" onclick="downloadImage()" style="display: none; padding-bottom: 0px; padding-top: 0px;">Download Image</button>
+                                </div>-->
+                                    </div>
+
+                                    <div class="mobileApp" style="display: none;">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-left: -3px">
+                                            <input type="file" name="file" id="mobApp_file" class="custombtn" accept="image/*;capture=camera" />
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-left: 316px; opacity: 0">
+                                        <input type="text" id="txtpsudouserid" enabled="true" height="0" width="0" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 safari" style="display: none;">
+                                    <input type="file" id="mob_file_image" class="mob_file_image custombtn" accept="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" name="file">
+                                </div>
+
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 w3-padding-top" style="margin-top: -6px">
+                                    <img src="/images/forspinicon.png" style="height: 20px; cursor: pointer; border: none;" id="btnchngeimg" onclick="newclickforward();" />
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 w3-padding-top" style="margin-top: -6px">
+                                    <img src="/images/backspinicon.png" style="height: 20px; cursor: pointer; border: none;" id="btnchngg" onclick="newclickbackward();" />
+                                </div>
+                                <div class="col-lg-4 col-md-5 col-sm-2 col-xs-3" id="divBtnImgSave">
+                                    <button id="btnImageSave" style="display:none;" class="w3-btn w3-small w3-green btnheight">
+                                        <span class="icon"><i class="fa fa-save"></i></span><span class="respText text">&nbsp;Save</span>
+                                    </button>
+                                </div>
+                                <div id="divImgDeleteButton" class="col-lg-2 col-md-1 col-sm-2 col-xs-3">
+                                    <button id="deleteimage" onclick="deletecheck();return false;" style="background: none; margin-top: 6px; border: 0; float: left; display: none;">
+                                        <i class="glyphicon glyphicon-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="imgangle" value="0" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 xsimageframe">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <img id="imga" style="margin-top: 20px" class="img-thumbnail img-responsive changeimg" src="../images/noimg.jpg" />
+                                <div id="myModal" class="modal">
+                                    <img class="modal-content" id="img01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+                <!-- Locked Popup Modal Code Starts Here -->
+                <div id="PopLocked" class="w3-modal" style="display: none">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 305px; width: 365px; margin-top: 86px;">
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="h7"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation!</h4>
+                        </header>
+                        <div class="w3-container">
+                            <p class="w3-padding-top w3-text-grey">
+                                <label id="Label2">This should only be set to 'Yes' if the following are optimised?</label>
+                            </p>
+                            <p>
+                                <label id="Label3">1: Material Use</label>
+                            </p>
+                            <p>
+                                <label id="Label4">2: Man Hours</label>
+                            </p>
+                            <p>
+                                <label id="Label5">3: Design Type</label>
+                            </p>
+                            <p>
+                                <label id="Label6">4: Hierarchy of Access Choice</label>
+                            </p>
+                            <p>
+                                <label id="Label7">Do you want 'Lock In' this Job?</label>
+                            </p>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                <label id="lblLocksignedOffBy" style="margin-left: 5px">Signed Off By :</label>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <select id="ddlLocksignedOffBy" class="form-control">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-bottom: 20px">
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btnlockedyes"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                            </div>
+                            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btnlockedno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Locked Popup Modal Code Ends Here -->
+                <!-- Offline Modal Code Starts Here -->
+                <div id="OfflineModalList" class="w3-modal" style="display: none">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: fit-content; margin-top: 86px;">
+                        <span class="crossbtn" style="cursor:pointer;float: right;margin: 2px 10px 0 0;font-size: 15px;" onclick="document.getElementById('OfflineModalList').style.display = 'none'">x</span>
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="h7">&nbsp;Offline Register!</h4>
+                        </header>
+                        <div class="w3-container"></div>
+                        <div class="row" style="padding-bottom: 20px">
+                            <table id="example" class="display" style="width:100%;padding: 0px 18px 0 16px;">
+                                <thead>
+                                    <tr>
+                                        <th>Scaf Ref# </th>
+                                        <th>Site Name</th>
+                                        <!-- Commented on 14-09-2023 Renamed as Date Built -->
+                                        <!--<th>Date Tagged</th>-->
+                                        <th>Date Built</th>
+                                        <th>Date Dismantle</th>
+                                        <th>Design Type</th>
+                                        <th>Duty Rating</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="loadOfflineList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Locked Popup Modal Code Ends Here -->
+                <!-- List Items Add Code Starts Here -->
+                <div id="OfflineListAdd" class="w3-modal" style="display: none;">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+                        <span class="crossbtn" style="cursor:pointer;float: right;margin: 2px 10px 0 0;font-size: 15px;" onclick="document.getElementById('OfflineListAdd').style.display = 'none'">x</span>
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="AddlistHeader"></h4>
+                        </header>
+                        <div class="w3-container"></div>
+                        <div class="row" id="commonDiv" style="padding: 5px 10px 20px 10px;">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label for="customAddnew" class="customAddnew"></label>
+                                <input type="text" class="form-control" id="customAddnew" />
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="AssetDiv" style="display:none;">
+                                <label for="customAddnew" class="assetAddnew">Asset Description</label>
+                                <input type="text" class="form-control" id="assetAddnew" />
+                            </div>
+
+                            <input type="hidden" id="hdnNewCurrentId" />
+                            <input type="hidden" id="hdntblName" />
+                        </div>
+
+
+                        <!--<div class="row" id="siteList" style="padding: 5px 10px 20px 10px;display:none;">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label>Owner Name</label>
+                        <input type="text" id="popOwnerName" class="form-control"/>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label>Status</label>
+                        <select id="popStatus" class="form-control">
+                            <option value="Active">Active</option>
+                            <option value="InActive">InActive</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label>Address<span style="color: red">&nbsp;*</span></label>
+                        <input type="text" id="popAddress" class="form-control" />
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label>City<span style="color: red">&nbsp;*</span></label>
+                        <input type="text" id="popCity" class="form-control" />
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label>State/County</label>
+                        <select id="popStatus" class="form-control">
+                            <option disabled value="">Select</option>
+                        </select>
+                    </div>
+                </div>-->
+                        <div class="row" style="padding-bottom: 20px">
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btnsubmit"><i class="glyphicon glyphicon-ok-circle"></i> Submit</button>
+                            </div>
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" onclick="document.getElementById('OfflineListAdd').style.display = 'none'" id="btncancel"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- List Items Add Code Ends Here -->
+                <!----DeleteImage Popup start-->
+                <div id="divdeleteimage" class="w3-modal" style="display: none">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+                        </header>
+                        <div class="w3-container">
+                            <p class="w3-padding-top w3-text-grey">
+                                <label>Are you sure you want to Delete the Image?</label>
+                            </p>
+                        </div>
+                        <div class="row" style="padding-bottom: 20px">
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteimageyes"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                            </div>
+                            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteimageno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!----DeleteImage Popup End-->
+
+
+            </div>
+
+
+            <!--//MY CHANGES-->
+
+            <div class="tab-content" id="offlineInpsectionddl" style="display:none">
+                <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+                    <!--@*<div class="col-sm-6 col-md-8 col-lg-8"></div>*@-->
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-2">
+                        <!--<input type="checkbox" OnClick="GetInspectionListData()" id="HistInspList" />
+                <label style="margin-left: 3px;" for="HistInspection">Show All Historical Inspections</label>-->
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-2"></div>
+
+                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12" id="DivAddDePlanked">
+                        <!--@*<asp:LinkButton Width="150px" runat="server" ID="btnDeplank" CausesValidation="false" CssClass="w3-btn w3-teal w3-text-white" OnClick="btnDeplank_Click" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add De-Plank</asp:LinkButton>*@-->
+                        <button style="Width: 220px; display: block; " id="btnDeplank" Class="w3-btn w3-teal w3-text-white" OnClick="btnDeplank_Click()"><i class="fa fa-plus-circle"></i>&nbsp;Add 'De-Planked' / 'Tied-Down'</button>  &nbsp;&nbsp;&nbsp;
+                    </div>
+
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-2 " id="DivAddInspection">
+                        <!--@*<asp:LinkButton Width="150px" runat="server" ID="btnadddocs" CausesValidation="false" CssClass="w3-btn w3-teal w3-text-white" OnClick="btnadddocs_Click" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add Inspection</asp:LinkButton>*@-->
+                        <button style="Width:150px" id="btnadddocs" Class="w3-btn w3-teal w3-text-white" OnClick="btnAddInspection()"><i class="fa fa-plus-circle"></i>&nbsp;Add Inspection</button>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div id="InspectionList" style="color: black; width: 100%;margin-top:5px; ">
+                            <table id="tblInspectionList" class="table table-striped" style="width: 100%;">
+                                <thead style="background-color: #efefef; color: #716262;">
+                                    <tr>
+                                        <th class="setWidth0" style="display: none;"></th>
+                                        <th class="setWidth1">Inspection Status</th>
+                                        <th class="setWidth2">Insp. Offline</th>
+                                        <th class="setWidth3">Insp. OffSystem</th>
+                                        <th class="setWidth4">Scheduled/Acknowledge Date</th>
+                                        <th class="setWidth5">Inspected By</th>
+                                        <th class="setWidth6">Inspection Comments</th>
+                                        <th class="setWidth7">Inspection Record</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyInspectionList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="divDeplank" class="w3-modal" style="display:none;">
+                <div class="w3-modal-content w3-round-medium w3-animate-input" style="margin-top: 4%; width: 620px; color: black; height: auto;">
+                    <header class="w3-container nln-gray-bg">
+                        <div class="row">
+                            <div class="col-lg-9 col-sm-9 col-md-9 col-xs-9">
+                                <h5 class="w3-text-white">Add 'De-Planked' / 'Tied-Down'</h5>
+                            </div>
+                            <div class="col-lg-3 col-sm-3 col-md-3 col-xs-3">
+                                <button type="button" onclick="hide2()" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 40px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="w3-container">
+                        <div class="row w3-padding-top">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="text-align: center; padding: 5px">
+                                    <label id="cycloneactionStatus"> </label>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="numberofhours" style="display:none;text-align:center;justify-content:space-around;padding:15px">
+                                    <label style="color:white !important;background-color:red;font-size:15px !important">No. Of Hours Have Not Been Filled</label>
+                                </div>
+
+                                <div class="col-xs-6 col-sm-3 col-md-3 col-lg-3">
+                                    <label id="lblstatus">Status</label>
+                                    <!--@*<input type="text" id="txtdeplanl" value="De-Plank" disabled Style="width:100%;" Class="form-control" />*@-->
+                                    <!--@*<input type="text" id="txtdeplanl" value="De-Planked" disabled Style="width:100%;" Class="form-control" />*@-->
+                                    <select id="txtdeplanl" style="width: 100%;" class="form-control">
+                                        <option id="DePlank" value="De-Plank">De-Planked</option>
+                                        <option id="TieDown" value="Tie-Down">Tied-Down</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-md-4 col-xs-6 dateclass ">
+                                    <label class="listyle">Scheduled Inspection Date<span style="color: red">&nbsp*</span></label>
+                                    <!--@*<Telerik:RadDateTimePicker ID="dateInspection" Width="100%" DateInput-DateFormat="dd-MMM-yyyy hh:mm tt" runat="server" Height="22px"></Telerik:RadDateTimePicker>*@-->
+                                    <!--@*<input type="text" style="width: 100%;" class="form-control" id="dateInspection" readonly />
+                            <span class="calendar-icon">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                            </span>*@-->
+                                    <div class="input-container">
+                                        <input type="text" style="width: 100%" id="dateInspection" class="form-control" readonly />
+                                        <span class="calendar-icon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                                    <label class="listyle">Inspected By<span style="color: red">&nbsp*</span></label>
+
+                                    <!--@*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" Style="width: 100% !important; margin-top: 0px;" DataTextField="Name" DataSourceID="SqlDataSource1" DataValueField="UserId" EmptyMessage="Select---" CausesValidation="false" runat="server" ID="ddlInspecdeplank" MarkFirstMatch="true"></Telerik:RadComboBox>
+                            <asp:RequiredFieldValidator runat="server" ID="RequiredFieldValidator2" ValidationGroup="deplankSave" ControlToValidate="ddlInspecdeplank" ErrorMessage="* Required" CssClass="rdf-text rdf-initial"></asp:RequiredFieldValidator>*@-->
+                                    <select id="ddlInspecdeplank" style="width: 100%;" class="form-control"></select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <label class="listyle">Comments</label>
+                                    <textarea id="txtcomm" rows="2" style="width: 100%;"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+                                <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4">
+                                    <button id="btndeplanksave" OnClick="Offinebtndeplanksave_Click()" style="width: 100%;" Class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                                </div>
+                                <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="divdelete" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label id="c1">Are you sure you want to Delete the Record?</label>
+                        </p>
+                    </div>
+                    <div class="row" style="padding-bottom: 20px">
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                            @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                            <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+                        </div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                            @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                            <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div id="Adddocs" class="w3-modal" style="display:none;">
+                <div class="w3-modal-content w3-round-medium w3-animate-input" style="margin-top: 4%; width: 303px; color: black; height: 280px;">
+                    <header class="w3-container nln-gray-bg">
+                        <div class="row">
+                            <div class="col-lg-9 col-sm-9 col-md-9 col-xs-9">
+                                <h5 class="w3-text-white">Add Inspection</h5>
+                            </div>
+
+                            <div class="col-lg-3 col-sm-3 col-md-3 col-xs-3">
+                                <button type="button" onclick="hide()" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 40px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                            </div>
+                        </div>
+
+                    </header>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <label id="lblChecklist">Scaffold Inspection List</label>
+                            <select id="ddlChecklistInsp" class="form-control" style="width:100%"></select>
+                            <!--@*<asp:DropDownList ID="ddlChecklistInsp" runat="server" AppendDataBoundItems="true" CssClass="form-control">
+                    </asp:DropDownList>*@-->
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 dateclass ">
+                            <!--@*<%-- <label class="listyle">Inspection Date<span style="color: red">&nbsp*</span></label>--%>*@-->
+                            <label class="listyle">Scheduled Inspection Date<span style="color: red">&nbsp*</span></label>
+                            <!--@*<asp:RequiredFieldValidator ID="reqInspectiondate" runat="server" ControlToValidate="rdpInspectiondate" ValidationGroup="Save" ErrorMessage="* Required" CssClass="rdf-initial rdf-text"></asp:RequiredFieldValidator>*@-->
+                        </div>
+                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 dateclass ">
+                            <!--@*<%-- <Telerik:RadDatePicker ID="rdpInspectiondate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy" runat="server"></Telerik:RadDatePicker>--%>*@-->
+                            <!--@*<Telerik:RadDateTimePicker ID="rdpInspectiondate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy hh:mm tt" runat="server"></Telerik:RadDateTimePicker>*@-->
+                            <!--@*<input type="text" id="rdpInspectiondate" class="form-control input-wrapper" style="width:100%" readonly />
+                    <span class="calendar-icon">
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                    </span>*@-->
+                            <div class="input-container">
+                                <input type="text" id="rdpInspectiondate" class="form-control" readonly />
+                                <span class="calendar-icon">
+                                    <i class="fa fa-calendar"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <label class="listyle">Inspected By<span style="color: red">&nbsp*</span></label>
+                            <!--@*<asp:LinkButton ToolTip="Add Inspe" OnClick="btnAddInspection_Click" ID="btnAddInspection" runat="server" Style="color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000; font-size:smaller"></i>Add</asp:LinkButton>*@-->
+                            <!--<label ToolTip="Add Inspection" onclick="btnAddInspection_Click()" id="btnAddInspection" Style="color: #800000 !important; font-size: smaller !important;cursor:pointer;"><i class="fa fa-plus" style="color:#800000 !important; font-size:smaller !important"></i>Add</label>-->
+                            <!--@*<Telerik:RadComboBox Width="100%" DataTextField="Name" Skin="Simple" RenderMode="Lightweight" DataSourceID="SqlDataSource1" DataValueField="UserId" EmptyMessage="Select---" CausesValidation="false" runat="server" ID="ddlddlInspectedByadd" MarkFirstMatch="true"></Telerik:RadComboBox>*@-->
+                            <select id="ddlddlInspectedByadd" class="form-control input-wrapper" style="width:100%"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                            <label></label>
+                            <button style="Width:100%" id="btnsave" OnClick="Offlinebtnsave_Click()" Class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!--neeraj changes-->
+
+            <div class="tab-content" id="OfflineImages" style="display:none">
+                <div class="row">
+                    <!-- Left Column: Note -->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-top: 15px;">
+                        <span style="display: inline-block; margin-right: 10px; color: black;"><b>Note:</b></span>
+                        <span style="color: red; font-size: 14px;">
+                            You can upload a maximum of 2 images only.
+                        </span>
+                    </div>
+
+                    <!-- Right Column: Button -->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 text-right" id="AddNewImg" runat="server">
+                        <button id="btnNewImage" type="button" class="w3-btn w3-teal" style=" margin-right: 50px;" onclick="addnewimage();">
+                            Add New Image
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" id="hdncaptureimagegellery" Value="" />
+                <input type="hidden" id="hdncapture" Value="" />
+                <input type="hidden" id="hdnimagegallery" Value="" />
+                <input type="hidden" id="nameget" Value="" />
+                <input type="hidden" id="tempimg" name="tempimg" />
+                <input type="hidden" id="snapimage" value="" />
+                <div id="placeholderforimage" style="overflow-y: scroll;height:500px"></div>
+
+            </div>
+            <div id="popup" class="w3-modal" runat="server">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width:fit-content;">
+                    <span class="crossbtn" style="cursor: pointer; color: Black; font-weight: bold; margin-right: 5px; float: right; background: white" onclick="document.getElementById('popup').style.display='none'">
+                        <a id="btndeleteimagegallery"><i class="glyphicon glyphicon-trash"></i></a>&nbsp;&nbsp;X
+                    </span>
+                    <img id="ppdl" class="img-responsive" runat="server" src="" align="middle" style="min-height: 350px; min-width: 350px !important; height: auto; width: auto; max-width: 1000px; max-height: 450px; margin-top: -10px;" />
+                </div>
+            </div>
+
+            <div id="divCreatePop" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 435px; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h6" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Image<a id="close" class="close" style="float: right; color: white" onclick="btnclose();">X</a></h4>
+                    </header>
+                    <div class="row"></div>
+                    <div class="row">
+                        <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3">
+                            <label id="lbldescription" runat="server" style="font-size: 15px">Description<span style="color: red">&nbsp*</span></label>
+                        </div>
+                        <div class="col-xs-8 col-lg-8 col-md-8 col-sm-8">
+                            <input type="text" id="txtdescimage" class="form-control" required />
+                        </div>
+                        <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1" style="opacity:0">
+                            <input type="text" id="TextBox1" step="Height:0px; Width:0px;" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="row safariimagegallery" style="display: none;">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                <input type="file" name="file" id="mob_file_imagegallery" multiple="multiple" class="mob_file_image custombtn" accept="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" />
+                            </div>
+                        </div>
+                        <div class="nonsafariimagegellery" style="">
+                            <div class="desktopAppimagegallery" style="">
+                                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                                    <input type="file" id="FileUpload1" AllowMultiple="true" multiple="multiple" class="mob_file_imagegallery" />
+                                </div>
+                                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4 desktopAppimagegallery nonsafariimagegellery" style="">
+                                    <button type="button" id="getCameraimagegellery" style="width: 95%" class="btn w3-btn w3-ripple w3-blue-grey imagesize"><i class="fa fa-camera"></i> &nbsp;Capture</button>
+                                </div>
+                            </div>
+                            <div class="mobileAppimagegallery" style="display: none;">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                    <input type="file" name="file" id="mobApp_fileimagellery" multiple="multiple" class="custombtn" accept="image/*;capture=camera" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                            <button type="button" id="OfflinebtnSaveRegister" class="w3-btn w3-small w3-green btnheight"><span class="icon"><img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' /></span><span class="respText text">&nbsp;Save</span></button>
+                        </div>
+                        <div runat="server" id="Photoblock" class="hdnCamerabeforeimagegellery" style="display: none; width: 200px;">
+                            <canvas id="canvas" width="640" height="480" style="width: 336px; height: 180px; margin-left: 14px; margin-top: 10px;"></canvas>
+                        </div>
+                    </div>
+                    <div id="fileList" style="color: black; margin-left: 14px">
+                    </div>
+                </div>
+            </div>
+
+            <div id="btnOpenModel" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h4" runat="server">Capture Your Image</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <video id="video" style="width:100%; height:auto;" autoplay></video>
+                            <div class="row">
+                                <div class="col-lg-4 col-md-2 col-sm-4 col-xs-4">
+                                    <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+                                </div>
+                                <div class="col-lg-5 col-md-6 col-sm-3 col-xs-3"></div>
+                                <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                                    <button type="button" id="cancelsnapimagegellery" class="btn btn-danger" onclick="Cancel();">Cancel</button>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="divdeleteimagegellery" runat="server" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label runat="server" id="c1">Are you sure you want to Delete the Image?</label>
+                        </p>
+                    </div>
+                    <div class="row" style="padding-bottom: 20px">
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                            <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteyes" onclick="DeleteLocalRegisterImageData();"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                        </div>
+                        <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                            <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" onclick="deleteno();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="divdeleteimage" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i> Delete Image</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label>Are you sure you want to Delete the Image?</label>
+                        </p>
+                    </div>
+                    <div class="row" style="padding-bottom: 20px">
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                            <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteimageyes"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                        </div>
+                        <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                            <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteimageno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Neeaj Changes End-->
+            <!--Pooja Rai  -->
+            <!-- Added by Pooja Rai -->
+            <!-- Cyclone Tab Start -->
+            <div class="tab-content" id="maindivCyclone" style="display: none">
+                <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+                    <div class="row w3-margin-top">
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-sx-12">
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div style="height: auto" class="x_panel w3-padding-0 w3-card-4">
+                                    <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                        <h4 style="margin-top: 6px; font-size: 15px" id="lblVaccinations"><!--<img src='/images/fonts/fa_list.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' />-->&nbsp;Cyclone Details <span style="margin-left: 5px;" id="VacCount"></span></h4>
+
+                                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                            <li>
+                                                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content" style="margin-bottom: 3px!important;">
+                                        <div class="row">
+                                            <div class="col-lg-4 col-md-5 col-sm-7 col-xs-12" style="float: left; margin-top: 14px;">
+                                                <label id="lblRangeOfOutBoard" style="color: gray !important; font-size: 15px; font-weight: 500;">Within 10 metres of OutBoard or in the Open ?</label>
+                                            </div>
+                                            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-6" style="float: left; margin-top: 12px; padding-left: 0px;">
+                                                <select id="ddlRangeOfOutBoard" Class="form-control">
+                                                    <option value="0">NO</option>
+                                                    <option value="1">YES</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-5 col-md-5 col-sm-5" id="divAlert" style="visibility:hidden;text-align:center;justify-content:space-around;padding:15px">
+                                                <label style="color:white !important;background-color:red;font-size:18px !important">For Full Strip Preparation Hrs  are taken from 'Man Hrs Dismantle' Job Detail Page</label>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                                <!--<asp:LinkButton runat="server" ID="btnsave" Style="margin-top: 14px; float: right" CausesValidation="true" ValidationGroup="Save" CssClass="w3-btn w3-small w3-green btnheight" OnClick="btnsave_Click">
+                                            <span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span>
+                                        </asp:LinkButton>-->
+                                                <button id="btnCycloneSave" Style="margin-top: 14px; float: right" Class="w3-btn w3-small w3-green btnheight">
+                                                    <span class="icon"><img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' /></span><span class="respText text">&nbsp;Save</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                                <label>Cyclone Action<span style="color: red">&nbsp*</span></label>
+                                                <select id="ddlCycloneAction" class="form-control" onchange="updateRiskRating()">
+                                                    <option Value="">Select----</option>
+                                                    <option value="De-Plank Only">De-Plank Only</option>
+                                                    <option value="Full Strip">Full Strip</option>
+                                                    <option value="No Action">No Action</option>
+                                                    <option value="Tie-Down">Tie-Down</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                                <label>Risk Rating</label>
+                                                <select id="ddlPriorityRiskRating" class="form-control">
+                                                    <option value=""></option>
+                                                    <option value="High">High</option>
+                                                    <option value="Medium">Medium</option>
+                                                    <option value="Low">Low</option>
+                                                    <option value="None">None</option>
+                                                </select>
+                                                <!--<asp:DropDownList ID="ddlPriorityRiskRating" runat="server" CssClass="form-control">
+                                            <asp:ListItem Text="" Value=""></asp:ListItem>
+                                            <asp:ListItem Text="High" Value="High"></asp:ListItem>
+                                            <asp:ListItem Text="Medium" Value="Medium"></asp:ListItem>
+                                            <asp:ListItem Text="Low" Value="Low"></asp:ListItem>
+                                        </asp:DropDownList>-->
+                                            </div>
+                                            <!--<div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Man Hrs Erect</label>
+                                        <input type="text" id="txtManHrsErect" style="Width:100%" disabled Class="form-control" />
+                                    </div>-->
+                                            <!--<div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Man Hrs Dismantle</label>
+                                        <input type="text" id="txrManHrsDis" style="Width:100%" disabled Class="form-control" />
+                                    </div>-->
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" id="divchk" style="float: left; width: 1px;">
+                                                <!--<asp:CheckBox ID="chkuseentervalue" runat="server" Checked="true" AutoPostBack="true" OnCheckedChanged="chkuseentervalue_CheckedChanged" />-->
+                                                <input type="checkbox" id="chkuseentervalue" class='ChkValueID' checked onchange="chkuseentervalue_CheckedChanged()" />
+                                            </div>
+                                            <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11" style="float: left">
+                                                <label id="lbluseentervalue" style="color: gray !important; font-size: 11px; font-weight: 500;">Use Entered Value (For De-Plank Only / Tie-Down)</label>
+                                            </div>
+                                        </div>
+                                        <div class="row " id="Entervlue">
+                                            <fieldset class="Entervlue">
+                                                <legend>
+                                                    <label><span class="icon"><img src='/images/fonts/fa_edit.png' class='img-responsive' style='height: 16px;width: 15px;padding-top: 1px;' /></span>Entered Value</label>
+                                                </legend>
+                                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                                    <label>Preparation Hrs</label>
+                                                    <!--<Telerik:RadNumericTextBox ID="txtTotalDeBoardEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>-->
+                                                    <input type="number" min="0" id="txtTotalDeBoardEdit" class="form-control" />
+                                                </div>
+                                                <!--<div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Total Re-Instate Hrs</label>-->
+                                                <!--<Telerik:RadNumericTextBox ID="txtTotalReInstateEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>-->
+                                                <!--<input type="number" min="0" id="txtTotalReInstateEdit" class="form-control" />
+                                        </div>-->
+                                                <!--<div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>De-Board Item Count</label>-->
+                                                <!--<Telerik:RadNumericTextBox ID="txtDeBoardItemEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>-->
+                                                <!--<input type="number" min="0" id="txtDeBoardItemEdit" class="form-control" />
+                                        </div>-->
+                                                <!--<div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Re-Instate Item Count</label>-->
+                                                <!--<Telerik:RadNumericTextBox ID="txtreInstateEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>-->
+                                                <!--<input type="number" min="0" id="txtreInstateEdit" style="Width:100%" class="form-control" />
+                                        </div>-->
+                                            </fieldset>
+                                        </div>
+
+                                        <!--<div class="row" id="calculationValue" runat="server">
+
+                                <fieldset class="calculationValue">
+                                    <legend>
+                                        <label><i class="fa fa-calculator "></i>&nbsp;Calculated Value</label>
+                                    </legend>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Preparation Hrs</label>-->
+                                        <!--<Telerik:RadNumericTextBox ID="txtTotalDeboardTotal" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>-->
+                                        <!--<input type="number" id="txtTotalDeboardTotal" style="Width:100%" disabled class="form-control" />
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                    <label>Total Re-Instate Hrs</label>-->
+                                        <!--<Telerik:RadNumericTextBox ID="txtTotalreinstate" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>-->
+                                        <!--<input type="number" id="txtTotalreinstate" style="Width:100%" disabled class="form-control" />
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                    <label>De-Board Item Count</label>-->
+                                        <!--<Telerik:RadNumericTextBox ID="txtCountDeBoard" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>-->
+                                        <!--<input type="number" id="txtCountDeBoard" style="Width:100%" disabled class="form-control" />
+                                </div>
+
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                    <label>Re-Instate Item Count</label>-->
+                                        <!--<Telerik:RadNumericTextBox ID="txtCountReinstate" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>-->
+                                        <!--<input type="number" id="txtCountReinstate" style="Width:100%" disabled class="form-control" />
+                                        </div>
+                                    </fieldset>
+                                </div>-->
+                                        <!--<%-- start add comment textbox 06-mar-2019--%>-->
+                                        <!--<div class="row">
+                                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                                    <label>Comments</label>-->
+                                        <!--<asp:TextBox ID="txtcomments" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="10" Style="max-width: 576px; min-width: 100%; height: 100px !important"></asp:TextBox>-->
+                                        <!--<textarea id="txtcomments" Class="form-control" Rows="10" Style="max-width: 576px; min-width: 100%; height: 100px !important"></textarea>
+                                </div>-->
+                                        <!--<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019 Start--%>-->
+                                        <!--<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                </div>
+
+                                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="opacity: 0">-->
+                                        <!--<Telerik:RadNumericTextBox ID="RadNumericTextBox1" runat="server" Width="1%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>-->
+                                        <!--<input type="number" id="RadNumericTextBox1" Class="form-control" />
+                                </div>-->
+                                        <!--<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019  End--%>-->
+                                        <!--</div>-->
+                                        <!--<%-- //end comment textbox 06-mar-2019--%>-->
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="divConfirmation" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey ">
+                        <h4 class="w3-text-white" id="H1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label id="c1">Are you sure you do not need the Entered Value?</label>
+                        </p>
+                    </div>
+                    <div class="row" style="padding-bottom: 20px;">
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                            <!--<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btnConfirYes_Click" ID="btnConfirYes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>-->
+                            <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnConfirYes_Click()" id="btnConfirYes()"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+                        </div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                            <!--<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnConfirNo_Click" ID="btnConfirNo" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>-->
+                            <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnConfirNo_Click()" id="btnConfirNo"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Cyclone Tab End -->
+            <!-- Pipeline Tab Start -->
+            <div class="tab-content" id="PipelineTab" style="display: none">
+                <div class="row">
+                    <div class="col-lg-12"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12"></div>
+                </div>
+                <div class="row">
+
+
+                    <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                        <div class="col-lg-2 col-sm-4 col-md-2 col-xs-11" style="margin-top: -16px">
+                            <label style="font-size: 14px">Filter By</label>
+                            <!--<asp:DropDownList ID="ddlMaterialType" CssClass="form-control" runat="server" AutoPostBack="true" Style="height: 26px !important; padding-top: 4px !important; width: 107% !important"
+                                        OnSelectedIndexChanged="ddlMaterialType_SelectedIndexChanged" AppendDataBoundItems="true">
+                    </asp:DropDownList>-->
+                            <select id="ddlpipelineMaterialType" class="form-control" Style="height: 28px !important;" onchange="MaterialChange()"></select>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6" style="margin-top: 5px">
+                            <!--<asp:LinkButton ID="btnrequest" runat="server" Style="padding-left: 5px; width: 107%; height: 28px; padding-top: 6px; font-size: 12px;" CssClass="btn  btn-primary w3-btn w3-blue" OnClick="btnrequest_Click">Request Items</asp:LinkButton>-->
+                            <button id="btnrequest" Style="padding-left: 5px; width: 107%; height: 28px; padding-top: 6px; font-size: 12px;" Class="btn  btn-primary w3-btn w3-blue" OnClick="btnrequest_Click()">Request Items</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row"></div>
+                <div class="row" style="width:98%;display:none;" id="divTotalDailyHireCost">
+                    <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12"></div>
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-7">
+                        <label><b>Total Daily Job Hire Cost:</b></label>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" style="float:left;margin-left:-20px;width: 110px;">
+                        <!--<asp:TextBox ID="txtTotalDailyHireCost" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>-->
+                        <input type="text" id="txtTotalDailyHireCost" value="@ViewBag.TotalDailyHireCost" Class="form-control" disabled />
+                    </div>
+                </div>
+                <!--<%--
+        <div class="row">
+        </div>--%>-->
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div id="RegisterInventoryList" style="color: black; width: 100%; margin-top: 10px; ">
+                            <table id="tblRegisterInventoryList" class="table table-striped " style="width: 100%;">
+                                <thead style="background-color: #efefef; color: #716262;">
+                                    <tr>
+                                        <!--<th class="setWidth0" style="display:none;"></th>-->
+                                        <!--<th class="setWidth3">Material Type</th>
+                                        <th class="setWidth4">Item Code</th>
+                                        <th class="setWidth5">Item Desc</th>
+                                        <th class="setWidth6">Quantity</th>
+
+                                        <th class="setWidth7">Item Weight (kg)</th>
+                                        <th class="setWidth8">Total Weight (kg)</th>-->
+                                        <!--<th class="setWidthI0" style="display: none;"></th>-->
+                                        <th class="setWidthI1">Material Type</th>
+                                        <th class="setWidthI2">Item Code</th>
+                                        <th class="setWidthI3">Item Desc</th>
+                                        <th class="setWidthI4">Quantity</th>
+                                        <th class="setWidthI5">Item Weight (kg)</th>
+                                        <th class="setWidthI6">Total Weight (kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyRegisterInventoryList" style="width:100%"></tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 98%">
+                    <div class="clearfix"></div>
+
+                    <div class="double-scroll">
+                    </div>
+
+                </div>
+                <div id="freezepopup" class="w3-modal" style="display: none">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 158px; width: 400px; margin-top: 86px;">
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="h1">Alert!</h4>
+                        </header>
+                        <div class="w3-container">
+                            <p class="w3-padding-top w3-text-grey">
+                                <label runat="server" id="c1">Are you sure that you want to finalise the material list?</label>
+                                <!--<%-- <label runat="server" id="Label7">Do you wish to confirm?</label>--%>-->
+                            </p>
+                        </div>
+                        <div class="row" style="padding-bottom: 20px">
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                                <!--<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnoptimizeyes" runat="server" OnClick="btnoptimizeyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>-->
+                                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnoptimizeyes" OnClick="btnoptimizeyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                            </div>
+                            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                                <!--<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnoptimizeno" runat="server" OnClick="btnoptimizeno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>-->
+                                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnoptimizeno" OnClick="btnoptimizeno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipeline Tab End -->
+            <!--upoad to cloude model Start -->
+            <div id="Uploadtocloudmodel" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label id="Label1">Are you sure you want to upload data?</label>
+                        </p>
+                    </div>
+                    <div class="row" style="padding-bottom: 20px">
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                            <button class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" onclick="btnYes();">
+                                <i class="glyphicon glyphicon-ok-circle"></i> Yes
+                            </button>
+                        </div>
+                        <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                            <button class="w3-btn btn-danger w3-hover-dark-grey" id="btnofflinecancel" onclick="btnNo();">
+                                <i class="glyphicon glyphicon-remove-circle"></i> No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--upoad to cloude model End -->
+            <div id="ConfirmationModal" class="w3-modal" style="display: none;">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="modalTitle">
+                            <i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert
+                        </h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label id="modalMessage">Are you sure?</label>
+                        </p>
+                    </div>
+                    <div class="row" style="padding-bottom: 20px;">
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                        <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                            <button class="w3-btn w3-green w3-hover-dark-grey" id="btnYes">
+                                <i class="glyphicon glyphicon-ok-circle"></i> Yes
+                            </button>
+                        </div>
+                        <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                            <button class="w3-btn btn-danger w3-hover-dark-grey" id="btnNo">
+                                <i class="glyphicon glyphicon-remove-circle"></i> No
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+﻿
+@{
+    ViewBag.Title = "DeliveryInventory";
+}
+<script src="~/Content/js/DeliveryInventory.js?V1=17"></script>
+<div class="clearfix"></div>
+<div id="FormSection" class="row">
+
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liYard">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotInventory">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSiteInventory">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+            <li id="liJob">
+                <a id="AnchorJobInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory</span>
+                </a>
+            </li>
+            <li id="liSite" class="active" style="width: 161px">
+                <a id="AnchorDelInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Delivery Inventory</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</div>
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+
+
+            <div id="filtermattype" class="filter" runat="server" style="display: none;">
+                <div class="col-lg-1 col-sm-1 col-md-1 coll-xs-2">
+
+                    <label>Material</label>
+                </div>
+                <div class="col-lg-2 col-sm-3 col-md-4 col-xs-3">
+
+                    @*<Telerik:RadComboBox Style="width: 100%;" runat="server" ID="ddlMaterialType" MarkFirstMatch="true" OnClientSelectedIndexChanged="selectmattype" AppendDataBoundItems="true" Skin="Metro">
+                    <Items>
+                        <Telerik:RadComboBoxItem Text="All" />
+                    </Items>
+
+                </Telerik:RadComboBox>*@
+                    <select id="ddlMaterialType" class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="MaterialChange()"></select>
+
+                </div>
+            </div>
+            <input type="hidden" id="hdnfield" />
+            <input type="hidden" id="getgridcount" />
+
+
+            <div class="col-lg-7 col-md-7 col-sm-4 col-xs-12">
+                <label id="lbltab" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE BUTTON to save data</label>
+            </div>
+            <div id="setbutton" class="col-lg-5 col-md-5 col-sm-8 col-xs-12">
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6" style="display: none;">
+                    @*<asp:LinkButton CssClass="w3-btn  w3-cyan buttonBlue" CausesValidation="false" ID="btnAllocate" Visible="true" Style="width: 100%; color: white!important; font-size: 12px;  padding-left: 3px;" OnClientClick="SaveChangesInGrid(); return false;" runat="server">&nbsp;Allocate </asp:LinkButton>*@
+                    <button Class="w3-btn  w3-cyan buttonBlue" CausesValidation="false" id="btnAllocate" Visible="true" Style="width: 100%; color: white!important; font-size: 12px;  padding-left: 3px;" OnClientClick="SaveChangesInGrid(); return false;">&nbsp;Allocate </button>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" id="chkdisplay" style="display: none;">
+
+                    @*<asp:CheckBox ID="ckbox" runat="server" OnCheckedChanged="ckbox_CheckedChanged" AutoPostBack="true" Text="Return All" Style="font-size: 12px !important" />*@
+                    <input type="checkbox" id="ckbox" onchange="ckbox_CheckedChanged()" Style="font-size: 12px !important" />
+                    <label style="margin-left: 6px;">Deliver All</label>
+
+                </div>
+                <div class="col-lg-4 col-md-3 col-sm-3 col-xs-6" id="divRefresh" runat="server">
+                    <button id="btnRefresh" class="w3-btn  w3-green buttonBlue" Visible="true" OnClick="btnrefresh_Click()" Style="width: 100%; font-size: 12px; padding-left: 3px">Refresh</button>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6" id="divConfirmDelivery" runat="server">
+                    <button id="btnconfirmDelvry" class="w3-btn  w3-green buttonBlue" Visible="true" OnClick="btnconfirmDelvry_Click()" Style="width: 100%; font-size: 12px; padding-left: 3px">Confirm Delivery</button>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6">
+                    @*<asp:LinkButton CssClass="w3-btn  w3-blue-grey buttonBlue" Visible="true" CausesValidation="false" ID="btnback" Style="width: 100%; font-size: 12px; padding-left: 3px;" OnClick="Back_Click" runat="server"><i class="fa fa-backward"></i>&nbsp;Back </asp:LinkButton>*@
+                    <button Class="w3-btn  w3-blue-grey buttonBlue" Visible="true" CausesValidation="false" id="btnback" Style="width: 183%; font-size: 14px; padding-left: 8px;" OnClick="Back_Click()" runat="server"><i class="fa fa-backward"></i>&nbsp;&nbsp;Back </button>
+                </div>
+                <div id="lockimage" class="col-lg-2 col-md-2 col-sm-2 col-xs-6" runat="server" style="display: none; margin-left:50px;">
+                    <img src="/images/lock.png" class="img-responsive" id="imglock" title="red pin" style="float: right; height: 50px; object-fit: contain; background-color: white;" />
+                </div>
+
+            </div>
+            <div style="text-align:left;" class="col-lg-1 col-md-2 col-sm-3 col-xs-5" id="txtitemsHide">
+                <label># of Items</label>
+                <input type="text" id="txtitems" class="form-control" disabled="disabled" />
+            </div>
+            <div style="text-align:left;" class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="txttotaltonnageHide">
+                <label>Total Tonnage</label>
+                <input type="text" id="txttotaltonnage" class="form-control" disabled="disabled" />
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+                <label id="lblfrom" Class="labeltext">From:</label>
+                <input id="txtfrom" disabled="disabled" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6">
+                <label id="lblto" Class="labeltext">To:</label>
+                <input id="txtto" disabled="disabled" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+            </div>
+            <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+                <label id="lblComment" Class="labeltext" style="display:block">Request Comment</label>
+
+                <input id="txtReqComment" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+            </div>
+
+        </div>
+
+
+        <div class="row"></div>
+
+        @*<asp:HiddenField ID="hdnfromcheck" runat="server" />
+        <asp:HiddenField ID="hdncheckId" runat="server" />
+        <asp:HiddenField ID="hdnTo" runat="server" />
+        <asp:HiddenField ID="hdnToId" runat="server" />
+        <asp:HiddenField ID="hdnFrom" runat="server" />
+        <asp:HiddenField ID="hdnFromID" runat="server" />
+        <asp:HiddenField ID="hdnTransID" runat="server" />
+        <asp:HiddenField ID="hdnClientId" runat="server" />
+        <asp:HiddenField ID="hdnUId" runat="server" />
+        <asp:HiddenField ID="hdntextdisable" runat="server" />
+        <asp:HiddenField ID="hdnInvetory" runat="server" />*@
+
+        <input type="hidden" id="hdnfromcheck" />
+        <input type="hidden" id="hdncheckId"  />
+        <input type="hidden" id="hdnTo" />
+        <input type="hidden" id="hdnToId"  />
+        <input type="hidden" id="hdnFrom"  />
+        <input type="hidden" id="hdnFromID"  />
+        <input type="hidden" id="hdnTransID"  />
+        <input type="hidden" id="hdnClientId"  />
+        <input type="hidden" id="hdnUId"  />
+        <input type="hidden" id="hdntextdisable"  />
+        <input type="hidden" id="hdnInvetory" />
+
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div id="loaddata"></div>
+
+            @*<%--     <Telerik:RadGrid runat="server" ID="delivery" Style="display: none" EnableLinqExpressions="false" AllowFilteringByColumn="false" AutoGenerateColumns="false" Skin="Metro" AllowPaging="false" ClientSettings-EnableAlternatingItems="true"
+                                      PageSize="10" Enabled="true" OnNeedDataSource="delivery_NeedDataSource" MasterTableView-AllowFilteringByColumn="true" OnItemDataBound="delivery_ItemDataBound" ClientSettings-Scrolling-UseStaticHeaders="true"
+                                      OnItemCommand="delivery_ItemCommand" OnBatchEditCommand="delivery_BatchEditCommand" GroupingSettings-CaseSensitive="false" Visible="true" ClientSettings-Scrolling-AllowScroll="true"
+                                      ClientSettings-EnableRowHoverStyle="false" Height="450px" ClientSettings-AllowKeyboardNavigation="true">
+                <ClientSettings AllowRowsDragDrop="true">
+                    <Scrolling AllowScroll="true" />
+                </ClientSettings>
+                <MasterTableView CommandItemSettings-ShowExportToCsvButton="false" EditMode="Batch" DataKeyNames="InventoryID,TransId,TransReqId,FromId,ToId,TransDeliId,AllocatedQuantity">
+                    <Columns>
+
+                        <Telerik:GridBoundColumn DataField="TransId" FilterDelay="1000" FilterControlWidth="60px" ShowFilterIcon="false" HeaderStyle-Width="80px" ReadOnly="true" HeaderText="TransId" Visible="true"
+                                                 UniqueName="TransId">
+                        </Telerik:GridBoundColumn>
+                        <Telerik:GridBoundColumn DataField="MaterialType" FilterDelay="1000" FilterControlWidth="100px" AllowFiltering="true" ReadOnly="true" ShowFilterIcon="false" HeaderStyle-Width="120px" HeaderText="Item" SortExpression="Name" UniqueName="MaterialType">
+                        </Telerik:GridBoundColumn>
+                        <Telerik:GridBoundColumn DataField="ItemCode" FilterDelay="1000" FilterControlWidth="130px" AllowFiltering="true" ShowFilterIcon="false" ReadOnly="true" HeaderStyle-Width="150px" HeaderText="Item Code" SortExpression="ItemCode"
+                                                 UniqueName="ItemCode">
+                        </Telerik:GridBoundColumn>
+
+                        <Telerik:GridBoundColumn DataField="ItemDesc" FilterDelay="1000" FilterControlWidth="280px" AllowFiltering="true" ShowFilterIcon="false" ReadOnly="true" HeaderStyle-Width="300px" HeaderText="Item Desc" SortExpression="ItemDesc"
+                                                 UniqueName="ItemDesc">
+                        </Telerik:GridBoundColumn>
+
+                        <Telerik:GridTemplateColumn HeaderStyle-Width="100px" AllowFiltering="false" ShowFilterIcon="false" ReadOnly="true" DataField="AvailableQuantity" HeaderText="Available Quantity"
+                                                    UniqueName="OrgYardQuantity">
+                            <ItemTemplate>
+                                <asp:Label ID="lblAvlbleQntity" runat="server" Text='<%#string.Format("{0:n0}",Eval("AvailableQuantity"))%>' CssClass="AvailableQty"></asp:Label>
+                            </ItemTemplate>
+                        </Telerik:GridTemplateColumn>
+                        <Telerik:GridBoundColumn HeaderStyle-Width="100px" DataFormatString="{0:n0}" AllowFiltering="false" ShowFilterIcon="false" ReadOnly="true" DataField="Quantity" HeaderText="Requested Quantity"
+                                                 UniqueName="Quantity">
+                        </Telerik:GridBoundColumn>
+
+                        <Telerik:GridTemplateColumn ItemStyle-BackColor="LightCyan" AllowFiltering="false" ItemStyle-CssClass="currentRow" HeaderStyle-Width="100px" ShowFilterIcon="false" DataField="AllocatedQuantity" HeaderText="Allocated Quantity"
+                                                    UniqueName="AllocatedQuantity">
+                            <ItemTemplate>
+                                <asp:Label ID="lblQty" runat="server" Enabled="false" TabIndex="0" Text='<%#Eval("AllocatedQuantity","{0:n0}")%>'></asp:Label>
+                            </ItemTemplate>
+                            <EditItemTemplate>
+                                <Telerik:RadNumericTextBox TabIndex="1" CssClass="AllocateQty" ClientEvents-OnBlur="onclientblur1" Enabled="true" NumberFormat-DecimalDigits="0" ID="txtQty" Width="80%" Text='<%#Eval("AllocatedQuantity") %>' runat="server">
+                                </Telerik:RadNumericTextBox>
+                            </EditItemTemplate>
+                        </Telerik:GridTemplateColumn>
+
+                        <Telerik:GridBoundColumn ItemStyle-BackColor="LightCyan" AllowFiltering="false" Visible="false" HeaderStyle-Width="100px" ShowFilterIcon="false" DataField="AllocatedQuantity" HeaderText="Delivered Quantity"
+                                                 UniqueName="DeliveredQuantity">
+                        </Telerik:GridBoundColumn>
+
+
+
+                    </Columns>
+                </MasterTableView>
+            </Telerik:RadGrid>--%>*@
+        </div>
+
+
+    </div>
+</div>
+<div id="chkpopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h7" runat="server">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+
+
+                <label runat="server" id="Label1">Are you sure you want to Deliver all items?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="chkpopupyes" runat="server" OnClick="chkpopupyes_Click"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="chkpopupyes" runat="server" OnClick="chkpopupyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="chkpopupno" runat="server" OnClick="chkpopupno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="chkpopupno" OnClick="chkpopupno_Click()"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="confmodal"  class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" >Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label  id="Label5">Have You Loaded the material and verified the list.</label>
+                <label  id="c1">No changes can be made to this Delivery once confirmed..</label>
+                <label  id="Label7">Do you wish to confirm?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnconfirmyes" runat="server" OnClick="btnconfirmyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnconfirmyes"  OnClick="btnconfirmyes_Click()" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnconfirmno" runat="server" OnClick="btnconfirmno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnconfirmno"  OnClick="btnconfirmno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1050 @@
+﻿
+@{
+    ViewBag.Title = "InspectionDashboard";
+}
+
+    @*<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://rawgithub.com/laff/technical-indicators/master/technical-indicators.src.js"></script>
+    <script src="https://rawgithub.com/phpepe/highcharts-regression/master/highcharts-regression.js?8"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+    <script src="/Content/js/html2canvas.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>*@
+    <script type="text/javascript" src="/Content/js/jspdf.min.js"></script>
+    <script src="/Content/js/highcharts.js"></script>
+    <script src="/Content/js/highcharts-3d.js"></script>
+    <script src="/Content/js/exporting.js"></script>
+    <script src="/Content/js/technical-indicators.src.js"></script>
+    <script src="/Content/js/highcharts-regression.js"></script>   
+    <script src="/Content/js/export-data.js"></script>
+    <script src="/Content/js/canvasjs.min.js"></script>
+    <script src="/Content/js/no-data-to-display.js"></script>
+    <script src="/Content/js/html2canvas.js"></script>
+    <script src="/Content/js/highcharts-more.js"></script>
+    <script>
+        function ajaxload() {
+            $('#LoadingPanel1').css('display', 'block');
+        }
+        $(document)
+                    .ajaxStart(function () {
+                        ajaxload();
+                    })
+                  .ajaxStop(function () {
+                      $('#LoadingPanel1').css('display', 'none');
+                  });
+        $(document).ready(function () {
+
+            $("[id$=myButtonControlID]").click(function (e) {
+                //window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('div[id$=divTableDataHolder]').html()));
+                //e.preventDefault();
+                var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+                  base64 = function (s) {
+                      return window.btoa(unescape(encodeURIComponent(s)))
+                  },
+            format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            }
+             var Status=   $('#hdnInspectionStatus').val();
+             var toExcel = "Scaffold Inspection Status :  " + Status + "";
+                toExcel += document.getElementById("tbDetails").innerHTML;
+                var ctx = {
+                    worksheet: name || '',
+                    table: toExcel
+                };
+                var link = document.createElement("a");
+                link.download = "Scaffold Inspection Status.xls";
+                link.href = uri + base64(format(template, ctx))
+                link.click();
+            });
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+
+            var ClientID = $("#hdnClientID").val();
+            //var Siteid = $("#ddlsite").val();//Commented on 02-sptember-2021
+            SiteDropDownBind(ClientID);
+            var Siteid = $("#ddlsite").val();//Added on 02-sptember-2021
+            //InspectionStatus(ClientID, "All", "All");//Commented on 04-September-2021
+            InspectionStatus(ClientID, Siteid, "All");//Added on 04-September-2021
+            //LocationBySite(ClientID, "All", "All");
+            LocationBySite(ClientID, Siteid, "All")
+            ddlJobbind(ClientID, "All");
+            //SiteInspectionCount(ClientID, "All");//Commented on 02-september-2021
+            SiteInspectionCount(ClientID, Siteid);//Added on 02-sptember-2021
+            //LocationInspectionCount(ClientID, "All", "All");//Commented on 02-sptember-2021
+            LocationInspectionCount(ClientID, Siteid, "All");//Added on 02-sptember-2021
+        });
+
+
+        function Changesite() {
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            InspectionStatus(ClientID, Siteid, "All");
+            LocationBySite(ClientID, Siteid, "All")
+            ddlJobbind(ClientID, Siteid);
+            SiteInspectionCount(ClientID, Siteid);
+            LocationInspectionCount(ClientID, Siteid, "All");
+        }
+
+        function selectarea() {
+            var ClientID = $("#hdnClientID").val();
+            var ddlselectarea = $("#ddlarea").val();
+            var Siteid = $("#ddlsite").val();
+            InspectionStatus(ClientID, Siteid, ddlselectarea);
+            LocationBySite(ClientID, Siteid, ddlselectarea)
+            LocationInspectionCount(ClientID, Siteid, ddlselectarea);
+        }
+        function SiteDropDownBind(id) {
+            var UID = getParameterByName('UID');
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: "/InspectionDashboard/SiteDropDownBind",
+                data: JSON.stringify({ id: id, UID: UID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var getData = response;
+                    var SiteLocId = "";//Added on 02-September -2021
+                    $("#ddlsite").html("");
+                    ////$("#ddlsite").append('<option value="All">All</option>');
+                    //for (var i = 0; i < getData.length; i++) {
+                    //    //SiteLocId = getData[0].SiteLocID;
+                    //    SiteLocId = getData[i].SiteLocID;
+                    //    if (SiteLocId == 0) {
+                    //        SiteLocId = "All";
+                    //    }//Added on 02-September-2021
+                    //    //$("#ddlsite").append('<option value="' + getData[i].SiteLocID + '">' + getData[i].SiteLocation + '</option>');
+                    //    $("#ddlsite").append('<option value="' + SiteLocId + '">' + getData[i].SiteLocation + '</option>');
+
+                    //}
+                    $("#ddlsite").html("");
+
+                    if (getData.length === 1) {
+                        SiteLocId = getData[0].SiteLocID;
+                        $("#ddlsite").append('<option value="' + SiteLocId + '">' + getData[0].SiteLocation + '</option>');
+                    //    Changesite();
+                    } else {
+                        for (var i = 0; i < getData.length; i++) {
+                            SiteLocId = getData[i].SiteLocID;
+                            if (SiteLocId == 0) {
+                                SiteLocId = "All";
+                            }
+                            $("#ddlsite").append('<option value="' + SiteLocId + '">' + getData[i].SiteLocation + '</option>');
+
+                        }
+                    }
+
+                }
+            });
+        }
+        function ddlJobbind(id, SiteId) {
+            var UID = getParameterByName('UID');
+
+            $.ajax({
+                type: "POST",
+                //  url: "../WebApi/Dashboard.asmx/ddlJobDashboard",
+                url: "/InspectionDashboard/ddlJobDashboard",
+                data: JSON.stringify({ id: id, SiteId: SiteId, UID: UID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // var ddlJobdropdownbind = response.d;
+                    var ddlJobdropdownbind = response;
+                    //alert(ddllocationSitedropdownbind.length);
+
+                    //$("#ddlarea").html("");
+                    //$("#ddlarea").append('<option value="All">All</option>');
+                    //for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                    //    siteLocid = ddlJobdropdownbind[0].areaid;
+                    //    $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].areaid + '">' + ddlJobdropdownbind[i].area + '</option>');
+
+                    //}
+
+                    $("#ddlarea").html("");
+
+                    if (ddlJobdropdownbind.length === 1) {
+                        var singleArea = ddlJobdropdownbind[0];
+                        $("#ddlarea").append('<option value="' + singleArea.areaid + '" selected>' + singleArea.area + '</option>');
+                        selectarea();
+                    } else {
+                        $("#ddlarea").append('<option value="All">All</option>');
+                        for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                            $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].areaid + '">' + ddlJobdropdownbind[i].area + '</option>');
+                        }
+                    }
+                }
+            });
+        }
+
+        function SiteInspectionCount(ClientID, Siteid) {
+            //  $('.forRemoveDataAction').remove();
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/InspectionGetBySiteTotal",
+                url: "/InspectionDashboard/InspectionGetBySiteTotal",
+                data: JSON.stringify({ ClientID: ClientID, siteid: Siteid }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //var SiteData = response.d;
+                    var SiteData = response.SiteTotal;
+                    $('#txtSiteValues').val(SiteData);
+
+                }
+            });
+
+        }
+        function LocationInspectionCount(ClientID, Siteid, locationID) {
+            //  $('.forRemoveDataAction').remove();
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/InspectionGetByLocationTotal",
+                url: "/InspectionDashboard/InspectionGetByLocationTotal",
+                data: JSON.stringify({ ClientID: ClientID, siteid: Siteid, locationID: locationID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                   // var LocationData = response.d;
+                    var LocationData = response.LocationTotal;
+                    $('#txtLocationValues').val(LocationData);
+                }
+            });
+
+        }
+
+        function ByCategory(Status, ClientID, Siteid, locationID) {
+            var inspectionStatus = Status;
+            $('#hdnInspectionStatus').val(inspectionStatus);
+            $('.forRemoveDataAction').remove();
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/InspectionGetBystatus",
+                url: "/InspectionDashboard/InspectionGetBystatus",
+                data: JSON.stringify({ Status: Status, ClientID: ClientID, siteid: Siteid, locationID: locationID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // var Status = response.d;
+                    var Status = response;
+                    var CycloneData = [];
+                    if (Status.length > 0) {
+                        for (var i = 0; i < Status.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                CycloneData.push({ name: Status[i].ScaffRefAction, y: Status[i].DescriptionAction, z: Status[i].Location, s: Status[i].BuildingNo, r: Status[i].assetId, x: Status[i].FloorLevel, a: Status[i].DesignType, b: Status[i].MaterialType, c: Status[i].PreparationHrs, d: Status[i].RiskRating, sliced: true });
+
+                            }
+                        }
+                    }
+                    $('#btnOpenModelAllDetails').click();
+
+                    if (inspectionStatus == "Green") {
+                        $("#labelScaffoldInspectionstatus").css('display', 'none');
+                        $('#ScaffoldInspectionstatus').css('display', 'block');
+                        $('#ScaffoldInspectionstatus').attr('src', '/images/green.jpg');
+                    } else if (inspectionStatus == "Red") {
+                        $("#labelScaffoldInspectionstatus").css('display', 'none');
+                        $('#ScaffoldInspectionstatus').css('display', 'block');
+                        $('#ScaffoldInspectionstatus').attr('src', '/images/Red.jpg');
+                    } else if (inspectionStatus == "Yellow") {
+                        $("#labelScaffoldInspectionstatus").css('display', 'none');
+                        $('#ScaffoldInspectionstatus').css('display', 'block');
+                        $('#ScaffoldInspectionstatus').attr('src', '/images/yellow.jpg');
+                    } else {
+                        $('#ScaffoldInspectionstatus').css('display', 'none');
+                        $("#labelScaffoldInspectionstatus").css('display', 'block');
+                        $("#labelScaffoldInspectionstatus").text(inspectionStatus);
+                    }
+
+
+                    var row1 = '';
+
+
+                   // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var DateTagged = '';                                                  //Date Tagged
+                        if (obj.DateTagged != "" && obj.DateTagged != null && obj.DateTagged != '1900-01-01')
+                        {
+                            var date1 = new Date(obj.DateTagged);
+                            var erect = "" + date1 + "";
+                            var date1dd = erect.substring(8, 11);
+                            var date1mm = erect.substring(4, 7);
+                            var date1yyyy = erect.substring(11, 16);
+                            DateTagged = date1dd + '-' + date1mm + '-' + date1yyyy
+                        }
+                        // commented on  04-04-2025   no need to date formate 
+                        //var RecentInspDate = '';                                                  //Recent Insp Date
+                        //if (obj.RecentInspDate != "" && obj.RecentInspDate != null && obj.RecentInspDate != '1900-01-01')
+                        //{
+                        //    var daterecent = new Date(obj.RecentInspDate);
+                        //    var recentDate = "" + daterecent + "";
+                        //    var recentdatedd = recentDate.substring(8, 11);
+                        //    var recentdatemm = recentDate.substring(4, 7);
+                        //    var recentdateyyyy = recentDate.substring(11, 16);
+                        //    RecentInspDate = recentdatedd + '-' + recentdatemm + '-' + recentdateyyyy
+                        //}
+
+                        row1 += "<tr class='forRemoveDataAction'><td style='text-align: center;font-size: 12px;'>" + obj.ScaffRefAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DescriptionAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.SiteLocation + "</td><td style='text-align: center;font-size: 12px;'>" + obj.Location + "</td><td style='text-align: center;font-size: 12px;'>" + obj.BuildingNo + "</td><td style='text-align: center;font-size: 12px;'>" + obj.assetId + "</td><td style='text-align: center;font-size: 12px;'>" + obj.FloorLevel + "</td><td style='text-align: center;font-size: 12px;'>" + obj.WONumber + "</td><td style='text-align: center;font-size: 12px;'>" + obj.ClientScaffref + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DesignType + "</td><td style='text-align: center;font-size: 12px;'>" + obj.MaterialType + "</td><td style='text-align: center;font-size: 12px;'>" + DateTagged + "</td><td style='text-align: center;font-size: 12px;'>" + obj.RecentInspDate + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DaysSinceLastInsp + "</td><td style='text-align: center;font-size: 12px;'>" + obj.HireDaysToDate + "</td></tr>";
+
+                    });
+
+                    $("#tbDetails tbody").append(row1);
+                }
+            });
+
+        }
+
+
+        function InspectionStatus(ClientID, Siteid, locationID) {
+            $('.forRemoveData').remove();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/InspectionFirst",
+                url: "/InspectionDashboard/InspectionFirst",
+                data: JSON.stringify({ id: ClientID, siteid: Siteid, locationID: locationID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //  Cyclone = response.d;
+                    Cyclone = response;
+                    var Cton = [];
+                    var CycloneData = [];
+                    if (Cyclone.length > 0) {
+                        for (var i = 0; i < Cyclone.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                CycloneData.push({ name: Cyclone[i].CycloneAction, y: Cyclone[i].TotalCounts, sliced: true });
+                                Cton.push(Cyclone[i].CycloneAction);
+
+                            }
+
+
+                        }
+
+                    }
+
+                    var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                    theExportOptions.splice(0, 1);
+
+
+                    Highcharts.setOptions({
+                        colors: ['#4c9640', '#f9cb13', '#fc2828', '#FFFFFF', '#0000FF']
+                    });//Change line By 19 Nov 2018
+                    Highcharts.chart('container', {
+                        chart: {
+                            type: 'bar',
+                            backgroundColor: '#f2f2f2'
+                            //plotBackgroundImage: '~/images/green.jpg'
+                        },
+                        title: {
+                            align: 'left',
+                           // text: 'Inspection Status',  // Line Comment On 26 Nov 2019
+                            text: 'Inspection Status (No. of Jobs)',
+                            style: {
+                                fontSize: '16px',
+                            }
+                        },
+                        subtitle: {
+                            text: ''
+                        },
+                        xAxis: {
+                            categories: ['Green', 'Yellow', "Red", 'Out of Service', 'Restricted Access'],//Change line By 19 Nov 2018
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: '',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        tooltip: {
+                            formatter: function () {
+                                return this.x + ', ' + this.y + ' Qty';
+                            }
+                        },
+                        plotOptions: {
+                            series: {
+                                cursor: 'pointer',
+                                point: {
+                                    events: {
+                                        click: function (eve) {
+
+                                            ByCategory(this.category, ClientID, Siteid, locationID);
+                                        }
+                                    }
+                                }
+                            },
+                            bar: {
+                                borderColor: '#000000',
+                                borderWidth: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                    color: 'black'
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+
+                                exportButton: {
+                                    onclick: function () {
+                                        $('#btnOpenModel1').click();
+                                    },
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            showInLegend: false,
+                            colorByPoint: true,
+                            data: CycloneData
+                        }]
+                    });
+                    function redrawchart1() {
+                        var chart = $('#container').highcharts();
+
+                        var w = $('#container').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.2 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart1);
+                        redrawchart1();
+                    });
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                    var row = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        num = (obj.PctAllSite1 * 100);
+                        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.Status + "</td><td style='text-align: center;'>" + obj.TotalCounts + "</td></tr>";
+                    });
+                    $("#tbDetails1 tbody").append(row);
+
+                }
+            });
+        }
+
+
+        function LocationBySite(ClientID, Siteid, locationID) {
+            $(".BysitesPricelabel").css("display", "none");
+
+            $(".BysitesPricelabel").text("");
+            $('.forRemoveData1').remove();
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/GetByClientidcompliantDashboard",
+                url: "/InspectionDashboard/GetByClientidcompliantDashboard",
+                data: JSON.stringify({ ClientID: ClientID, siteid: Siteid, locationID: locationID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                   // CompliantByClientid = response.d;
+                    CompliantByClientid = response;
+                    var ScaffoldData2 = [];
+                    var percentlocked = [];
+                    var complince = [];
+                    var noncomplince = [];
+                    var complincePect = [];
+                    var noncomplincePect = [];
+                    var nooftimes = 20;
+                    if (CompliantByClientid.length > 0) {
+                        if (CompliantByClientid.length <= nooftimes) {
+                            nooftimes = CompliantByClientid.length;
+                        }
+                        for (var i = 0; i < CompliantByClientid.length; i++) {
+
+                            var TobePush = true;
+                            for (var k = 0; k < ScaffoldData2.length; k++) {
+                                if (ScaffoldData2[k].name == CompliantByClientid[i].TotalCompliance) {
+                                    TobePush = false;
+                                }
+                            }
+
+                            if (TobePush) {
+
+
+                                ScaffoldData2.push({ name: CompliantByClientid[i].TotalCompliance, y: CompliantByClientid[i].TotaNonCompliance, x: CompliantByClientid[i].InspectDashTotal, s: CompliantByClientid[i].CompliancePct, r: CompliantByClientid[i].NonCompliancePct, sliced: true });
+                                percentlocked.push(parseFloat(CompliantByClientid[0].InspectDashTotal));
+                                complince.push(parseFloat(CompliantByClientid[i].TotalCompliance));
+                                noncomplince.push(parseFloat(CompliantByClientid[i].TotaNonCompliance));
+                                complincePect.push(parseFloat(CompliantByClientid[i].CompliancePct));
+                                noncomplincePect.push(parseFloat(CompliantByClientid[i].NonCompliancePct));
+                                if (complincePect == "100") {
+                                    $('#iconCross').css("display", "none");
+                                    $('#iconChecked').css("display", "block");
+                                   //   $('#ContentPlaceHolder1_imgstatus').attr('src', 'images/siteInspectionCheckedImg.png');
+                                }
+                                else {
+                                    $('#iconChecked').css("display", "none");
+                                    $('#iconCross').css("display", "block");
+
+                                    //  $('#ContentPlaceHolder1_imgstatus').attr('src', 'images/siteInspectionCrossImg.png');
+                                }
+                                var j = i + 1;
+
+
+                            }
+                        }
+                    }
+
+
+                    Highcharts.chart('container2', {
+                        colors: ['red', 'green'],
+                        chart: {
+                            type: 'column',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+
+                            // align: 'left',
+                            // text: 'Compliance Gauge',
+                            // text: 'Site Inspection',
+                            text: '',
+                        },
+                        legend: {
+                            enabled: false
+                        },
+
+                        xAxis: {
+                            // visible : false
+                        },
+
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                // text: 'Total Compliance Gauge'
+                                text: '',
+
+                            },
+                            labels:
+                            {
+                                enabled: false
+                            }
+
+                            //// Changes On 29 Aug
+                            //plotBands: [{
+                            //    from: 0,
+                            //    to: 100,
+                            //    color: '#ADD8E6', // Light Blue
+                            //    pointWidth: 30,
+                            //}]
+                        },
+                        tooltip: {
+                            //pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',  // Change on 26 Feb 2020
+                            pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> %<br/>',
+                            shared: true
+                        },
+                        plotOptions: {
+                            column: {
+                                stacking: 'percent'
+                            }
+                        },
+                        // Comment On 29 Aug 2019
+                        exporting: {
+                            buttons: {
+
+                                contextButton: {
+                                    enabled: false,
+                                    x: 9,
+                                },
+
+                                //exportButton: {
+                                //    onclick: function () {
+                                //        $('#btnOpenModel2').click();
+                                //     },
+                                //    text: 'Show All'
+                                //}
+                            }
+                        },
+                        series: [
+                             {
+                                 pointWidth: 40,
+                                 name: '',
+                                 //  data: [noncomplince[0]],
+                                 data: [noncomplincePect[0]],
+                                 // data:da,
+                                 color: 'red',
+                                 dataLabels: {
+                                     enabled: true,
+                                     color: 'white',
+                                     formatter: function () {
+                                         //  return Math.round(noncomplincePect[0]) + '%';  // Change on 26 Feb 2020 Not Showing On Round Of Values Showing After 2 Desimal
+                                         return noncomplincePect[0] + '%';
+                                     },
+                                     //style: {
+                                     //    color: 'red'
+                                     //}
+                                 }
+                             },
+                          {
+                              pointWidth: 40,
+                              name: '',
+                              //  data: [complince[0]],
+                              data: [complincePect[0]],
+                              color: 'green',
+                              dataLabels: {
+                                  enabled: true,
+                                  color: 'white',
+                                  formatter: function () {
+                                      // return Math.round(complincePect[0]) + '%';  // Change on 26 Feb 2020 Not Showing On Round Of Values Showing After 2 Desimal
+                                      return complincePect[0] + '%';
+                                  },
+                                  //style: {
+                                  //    color: 'green'
+                                  //}
+                              }
+
+                          }
+                        ]
+                    }, function (chart) {
+                        // Draw the shape
+                        var series = chart.series[0],
+                            point = series.points[0],
+                            radius = 20;
+                        chart.renderer.circle(
+                            chart.plotLeft + point.shapeArgs.x + (point.shapeArgs.width / 2),
+                            chart.plotTop + series.yAxis.len + radius - 5,
+                            20
+                        )
+                        .attr({
+                            fill: 'green'
+                        })
+                        .add();
+
+                    });
+
+                    var row = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        num = (obj.PctAllSite1 * 100);
+                        row += "<tr class='forRemoveData1'><td style='text-align: center;'>" + obj.TotalCompliance + "</td><td style='text-align: center;'>" + obj.TotaNonCompliance + "</td><td style='text-align: center;'>" + obj.InspectDashTotal + "</td></tr>";
+                    });
+                    $("#tblDetails tbody").append(row);
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+        //end chart - 18-july-2018
+
+
+        function ExportAllCategories() {
+            //var id = ClientID;
+            //var siteID = Siteid;
+        /*    var ddlarea = locationID;*/
+            var id = $("#hdnClientID").val();
+            var siteID = $("#ddlsite").val();
+            var ddlarea = $("#ddlarea").val();
+
+
+            window.location.href = '/InspectionDashboard/ExportAllCategories?id=' + id + '&siteID=' + siteID + '&ddlarea=' + ddlarea;
+        }
+
+    </script>
+    <style>
+        .highcharts-credits {
+            display: none;
+        }
+
+        .container .DshbrdBack {
+            background-color: #ffffcc;
+            height: 1023px;
+        }
+
+
+         /*Window Size 67 %*/
+        @@media (min-width: 1900px) and (max-width: 2050px) {
+            #container2 {
+                height: 807px !important;
+            }
+             #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+        }
+         /*Window Size 75 %*/
+        @@media (min-width: 1800px) and (max-width: 1900px) {
+            #container2 {
+                 height: 702.7px !important;
+            }
+             /*#ContentPlaceHolder1_Label2{
+               margin-top: 11px !important;
+            }*/
+              #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+        }
+         /*Window Size 80 %*/
+        @@media (min-width: 1700px) and (max-width: 1800px) {
+            #container2 {
+                 height: 654.7px !important;
+            }
+             /*#ContentPlaceHolder1_Label2{
+               margin-top: 11px !important;
+            }*/
+              #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+        }
+         /*Window Size 90 %*/
+        @@media (min-width: 1500px) and (max-width: 1700px) {
+            #container2 {
+                 height: 568.7px !important;
+            }
+            /*#ContentPlaceHolder1_Label2{
+               margin-top: 11px !important;
+            }*/
+             #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+
+        }
+              /*
+  ##Device = Desktops
+  ##Screen = 1281px to higher resolution desktops
+*/
+
+        @@media (min-width: 1281px)and (max-width: 1499px) {
+
+            /*#ContentPlaceHolder1_Label2 {
+                // margin-top: 0px;
+                display: inline;
+                margin-top: 5px;
+            }*/
+
+            #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+
+            #container2 {
+                height: 500px !important;
+            }
+        }
+
+        /*
+  ##Device = Laptops, Desktops
+  ##Screen = B/w 1025px to 1280px
+*/
+
+        @@media (min-width: 1025px) and (max-width: 1280px) {
+
+            /*#ContentPlaceHolder1_Label2 {
+                margin-top: 0px;
+                display: inline;
+            }*/
+             #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+
+            #container2 {
+                height: 500px;
+            }
+        }
+
+        /*
+  ##Device = Tablets, Ipads (portrait)
+  ##Screen = B/w 768px to 1024px
+*/
+
+        @@media (min-width: 768px) and (max-width: 1024px) {
+
+            #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+
+            #txtSiteValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+
+            #txtLocationValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+        }
+
+        /*
+  ##Device = Tablets, Ipads (landscape)
+  ##Screen = B/w 768px to 1024px
+*/
+
+        @@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+
+            #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+
+            #txtSiteValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+
+            #txtLocationValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+        }
+
+        /*
+  ##Device = Low Resolution Tablets, Mobiles (Landscape)
+  ##Screen = B/w 481px to 767px
+*/
+
+        @@media (min-width: 481px) and (max-width: 767px) {
+            #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+
+            #txtSiteValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+
+            #txtLocationValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+        }
+
+        /*
+  ##Device = Most of the Smartphones Mobiles (Portrait)
+  ##Screen = B/w 320px to 479px
+*/
+
+        @@media (min-width: 320px) and (max-width: 480px) {
+
+            #Label2 {
+                margin-top: 12px;
+                display: inline-flex;
+            }
+
+            #txtSiteValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+
+            #txtLocationValues {
+                width: 40px;
+                margin-left: -20px;
+            }
+        }
+    </style>
+
+    <input type="hidden" id="hdnClientID"/>
+    <input type="hidden" id="hdnddlarea"/>
+    <input type="hidden" id="hdnInspectionStatus" />
+    <div class="container DshbrdBack">
+        <div class="row">
+            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12">
+                <div class="=row">
+                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4" style="margin-top: 6px">
+                        <label id="Label1" style="font-weight: 700; font-size: 17px; color: black; float: right">Site</label>
+                    </div>
+                    <div class="col-lg-9 col-md-8 col-sm-8 col-xs-7" style="margin-top: 6px">
+                        @*<asp:DropDownList ID="ddlsite" CssClass="form-control" onchange="Changesite()" Style="border: 1px solid;" runat="server" Width="90%" AppendDataBoundItems="true"></asp:DropDownList>*@
+                        <select id="ddlsite" Class="form-control" onchange="Changesite()" Style="border: 1px solid;" runat="server" Width="90%"></select>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="margin-top: 6px">
+                        @*<%--  <label style="width: 100%; margin-top: 0px; border: 1px solid;background: #f2f2f2; text-align: center;">50</label>--%>*@
+                        <input type="text" id="txtSiteValues" Class="form-control" runat="server" disabled Style="border: 1px solid; text-align: center;" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4" style="margin-top: 6px">
+                        <label id="loc" style="font-weight: 700; font-size: 17px; color: black; float: right">Location</label>
+                    </div>
+                    <div class="col-lg-9 col-md-8 col-sm-8 col-xs-7" style="margin-top: 6px">
+                        @*<asp:DropDownList ID="ddlarea" CssClass="form-control" runat="server" Style="border: 1px solid" Width="90%" AppendDataBoundItems="true" onchange="selectarea();"></asp:DropDownList>*@
+                        <select id="ddlarea" Class="form-control" Style="border: 1px solid" Width="90%" onchange="selectarea();"></select>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="margin-top: 6px">
+                        @*<%-- <label style="width: 100%; margin-top: 0px; border: 1px solid;background: #f2f2f2; text-align: center;">50</label>--%>*@
+                        @*<asp:TextBox ID="txtLocationValues" CssClass="form-control" ReadOnly="true" runat="server" Style="border: 1px solid; text-align: center;"></asp:TextBox>*@
+                        <input type="text" id="txtLocationValues" Class="form-control" disabled Style="border: 1px solid; text-align: center;" />
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-7 col-xs-11" id="ChkExportAllCategories"style="margin-left: 86%; padding-top: 3%;">
+                        <button style=" padding-left: 10px;" Class="btn w3-btn w3-teal " onclick="ExportAllCategories()">Export All To CSV</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+                @*<%-- Site Inspection Compliance--%>*@
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="border: 1px solid lightgrey; width: 100%; height: 55px; text-align: center; background: #f2f2f2; margin-top: 4px;">
+                        <label id="Label2" style="font-weight: 700; font-size: 17px; float: left; color: black; /*margin-top: 12px; display: inline-flex*/">Compliant:<span id="iconCross" runat="server" style="display:none"><i class="fa fa-times" style="font-size: 29px; color: red; margin-left: 7px; margin-top: 5px;" aria-hidden="true"></i></span><span id="iconChecked" runat="server" style="display:none"><i class="fa fa-check" style="font-size: 22px; color: green; margin-left: 7px; margin-top: 5px;"></i></span></label>
+                        @*<%--<img id="imgstatus" runat="server" src="" style="width: 50px;" />--%>*@
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                    <div id="container" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+                </div>
+
+                @*<%--//second chart clock chart-18-july-2019--%>*@
+
+                <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                    <div id="container2" style="width: 100%; /*height: 500px; */ margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Inspection Status</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 40%; text-align: center;"><b>Inspection Status</b></td>
+                                    <td style="width: 60%; text-align: center;"><b>Total Count</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#comModel">Open Modal</button>
+        <div class="modal fade" id="comModel" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Compliance Gauge</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tblDetails" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 40%; text-align: center;"><b>Fully- Compliant</b></td>
+                                    <td style="width: 60%; text-align: center;"><b>Non - Compliant</b></td>
+                                    <td style="width: 60%; text-align: center;"><b>Total - Compliant</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+        <div class="modal fade" id="myModals1" role="dialog">
+            <div class="row" style="padding-top: 90px;">
+                <div class="col-lg-1 col-md-1"></div>
+                <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+                    <div class="modal-content" style="width: 100%">
+                        <div class="modal-header row">
+                            <div class="col-lg-9 col-md-8 col-sm-12 col-xs-12" style="display: inline-flex">
+                                <h4 class="modal-title">Scaffold Inspection Status : </h4>
+                                <img id="ScaffoldInspectionstatus" runat="server" src="" style="width: 30px; margin-left: 5px;" />
+                                <label id="labelScaffoldInspectionstatus" runat="server" style="margin-top: 3px; margin-left: 5px; font-size: 18px"></label>
+                            </div>
+                            <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6">
+                                @*<asp:LinkButton ID="exporttopdf" runat="server" Style="height: 28px; padding-left: 5px; padding-top: 5px; display: none;" OnClick="exporttopdf_Click" CssClass="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                                <button id="exporttopdf" Style="height: 28px; padding-left: 5px; padding-top: 5px; display: none;" OnClick="exporttopdf_Click()" Class="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</button>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                                @*<asp:LinkButton ID="myButtonControlID" runat="server" Style="height: 28px; padding-top: 5px;" CssClass="btn btn-primary w3-btn w3-teal" Text="Export">Export</asp:LinkButton>*@
+                                <button id="myButtonControlID" Style="height: 28px; padding-top: 5px;" Class="btn btn-primary w3-btn w3-teal" Text="Export"><i class="fa fa-file-excel-o"></i>&nbsp;Export</button>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                        </div>
+
+                        <div class="modal-body" id="divTableDataHolder">
+                            <div style="overflow: auto">
+                                <table class="table table-bordered" id="tbDetails" style="width: 100%; color: black">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 5%; text-align: center; font-size: 12px;"><b>Scaf Ref #</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Reason for Access</b></td>
+                                            <td style="width: 8%; text-align: center; font-size: 12px;"><b>Site</b></td>
+                                            <td style="width: 8%; text-align: center; font-size: 12px;"><b>Location</b></td>
+                                            <td style="width: 8%; text-align: center; font-size: 12px;"><b>Building / Module No.</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Asset # / Func. Loc</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Floor Level</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>WO Number</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Client Scaff Ref</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Design Type</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                            @* Commented on 13-09-2023 the below label renamed it as Date Built *@
+                                            @*<td style="width: 7%; text-align: center; font-size: 12px;"><b>Date Tagged</b></td>*@
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Date Built</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Recent Insp Date</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Days Since Last Insp.</b></td>
+                                            <td style="width: 7%; text-align: center; font-size: 12px;"><b>Standing Days To Date.</b></td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-1 col-md-1">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+

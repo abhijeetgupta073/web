@@ -1,0 +1,464 @@
+﻿
+@{
+    ViewBag.Title = "SubCategories";
+}
+
+
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #dataforgrid_length {
+        margin-top: -16px;
+    }
+
+    .select-editable {
+        position: relative;
+        background-color: white;
+        border: solid grey 1px;
+        width: 140px;
+        height: 30px;
+        margin-top:16px;
+        margin-left:-50px;
+    }
+
+        .select-editable select {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            font-size: 14px;
+            border: none;
+            width: 120px;
+            margin: 0;
+        }
+
+        .select-editable input {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100px;
+            padding: 1px;
+            font-size: 12px;
+            border: none;
+        }
+
+            .select-editable select:focus, .select-editable input:focus {
+                outline: none;
+            }
+
+</style>
+
+<script>
+    $(function () {
+        GetSubCategories();
+
+
+    });
+
+
+
+    var Gobalcategory = "";
+    var GobalhireMeasurement = "";
+    function GetSubCategories() {
+
+        var str = "";
+
+        str += '<table id="dataforgrid" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+        str += "<th style='width:2%'>#</th>";
+        str += "<th  style='text-align:center;display:none'>SubCategoryID</th>";
+        str += "<th  style='text-align:center;width:25%'>Category</th>";
+        str += "<th  style='text-align:center;width:25%'>Sub Category</th>";
+        str += "<th  style='text-align:center;width:20%'>Hire Measurement</th>";
+        str += "<th  style='text-align:center;width:20%'>Weekly Hire Rate in $</th></tr></thead><tbody>";
+
+        var id = getParameterByName('id');
+
+        $.ajax({
+            url: '/SubCategories/GetSubCategoryData',
+            type: 'POST',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getdata = response;
+               
+                    str += "<tr id='row_9999' style='display:none'><td  style='width:2%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                    str += "<td  style='text-align:center;display:none'>0</td>";
+                    str += "<td  style='text-align:center;width:25%'></td>";
+                    str += "<td  style='text-align:center;width:25%'></td>";
+                    str += "<td  style='text-align:center;width:20%'></td>";
+                    str += "<td  style='text-align:center;width:20%'></td></tr>";
+                
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var SubCategoryID = getdata[i].SubCategoryID == null ? "" : getdata[i].SubCategoryID;
+                        var Category = getdata[i].Category == null ? "" : getdata[i].Category;
+                        var SubCategory = getdata[i].SubCategory == null ? "" : getdata[i].SubCategory;
+                        var HireMeasurement = getdata[i].HireMeasurement == null ? "" : getdata[i].HireMeasurement;
+                        var HireRate = getdata[i].HireRate == null ? "" : getdata[i].HireRate.toFixed(2);
+                        var HireRateWidthComma = '$' + numberWithCommas(HireRate);
+                        
+                         str += "<td  style='width:2%;display: inline-flex;'><a id='rowpencil' class='expand fa fa-pencil'></a>&nbsp;&nbsp;<a id='rowdelete' class='fa fa-trash'></a></td>";
+                        str += "<td  style='text-align:center;display:none'>" + SubCategoryID + "</td>";
+                        str += "<td  style='text-align:center;width:25%'>" + Category + "</td>";
+                        str += "<td  style='text-align:center; width:25%'>" + SubCategory + "</td>";
+                        str += "<td  style='text-align:center; width:20%'>" + HireMeasurement + "</td>";
+                        str += "<td  style='text-align:center;width:10%'>" + HireRateWidthComma + "</td></tr>";
+                    }
+                  
+                }
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+
+                $("#LoadingPanel1").css("display", "none");
+
+                $(".fa-trash").click(function () {
+                    var subCateId = $(this).parent().parent().children()[1].innerText;
+                    $("#hdnSubCategoryId").val(subCateId);
+                    $("#Deletemodal").css("display", "block");
+                });
+
+                $(".fa-pencil").click(function () {
+                    var visible = $(this).parent().parent().hasClass("Edit");
+                    var tr = $(this).closest('tr');
+                    var row = table.row(tr);
+                    if (visible == true) {
+                        $(this).parent().parent().next('tr').remove();
+                        $(this).parent().parent().removeClass('Edit');
+                    }
+                    else {
+                        row.child(Editing(row.data())).show();
+
+                        $('#ddlhireMeasurement').val(GobalhireMeasurement);
+                        row.child.show();
+                        tr.addClass('Edit');
+
+                    }
+
+                });
+
+                var table = $('#dataforgrid').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    info: false,
+                    "pageLength": 50,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    fixedHeader: true,
+                    fixedColumns: {
+                        leftColumns: 11,
+                    },
+
+                    dom: 'lBfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Sub Category',
+                            exportOptions: {
+                                columns: [2, 3, 4, 5]
+                            }
+                        }
+                    ],
+
+
+                    initComplete: function () {
+                        $(this.api().table().container()).find('input').parent().wrap('<form>').parent().attr('autocomplete', 'off'); // Auto Fill In Text box when ID Or Password Save on Crome Browser
+                        $("#dataforgrid_length").children().html('<div><button id="btnaddSubCategory"  type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:-43px;">&nbsp;Add New Sub Category</button></div> <div><button id="btnExport" type="button" class="w3-btn w3-teal Export" style="margin-left:185px;height:27px;padding-top:3px;"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button> </div>');
+
+                        $("#btnaddSubCategory").click(function () {
+
+                            var trow1 = $(this).parent().parent().parent().siblings();
+                            var trow = $(this).parent().parent().parent().siblings()[2].childNodes[0];
+                            // var trow = $(this).parent().parent().siblings()[2].children[1].children[0].children[1].childNodes[0];
+                            var row = table.row(trow);
+                            var c = 0;
+                            row.child(Editing(c)).show();
+
+                        });
+
+                        $(".Export").click(function () {
+                            $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+                        });
+                    },
+
+                    "columnDefs": [
+                        { "width": "100px", "targets": 'fullsize' }
+                    ],
+
+                    "drawCallback": function () {
+
+                        $('.fa-angle-right').click(function (eve) {
+                            eve.stopImmediatePropagation();
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+                            var visible = $(this).parent().parent().hasClass("shown");
+                            var anglechange = $(this).hasClass("fa-angle-right");
+                            if (anglechange == true) {
+                                var x = tr.children()[0];
+                                $(this).removeClass("fa-angle-right");
+                                $(this).addClass("fa-angle-down");
+                            }
+                            else {
+                                $(this).addClass("fa-angle-right");
+                                $(this).removeClass("fa-angle-down");
+                            }
+                            if (visible == true) {
+                                // This row is already open - close it
+                                $(this).parent().parent().next('tr').remove();
+                                $(this).parent().parent().removeClass('shown');
+                            }
+                            else {
+                                // Open this row
+                                row.child(format(row.data())).show();
+                                row.child.show();
+                                tr.addClass('shown');
+                            }
+                        });
+                    }
+
+                });
+
+                // scrolling Top when Click On Next Button
+
+                table.on('page.dt', function () {
+                    $('.dataTables_scrollBody').animate({
+                        scrollTop: 0
+                    }, 300);
+                });
+            }
+        });
+    }
+
+    function Editing(d) {
+
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/SubCategories/ddlSubCategory",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+
+                var category = response;
+                    let firstCategory = "";
+               
+                if (category.length > 0) {
+                    for (var m = 0; m < category.length; m++) {
+                        var SubCat = category[m];
+                        var rowmat = "";
+                        if (d == 0) {
+                            rowmat = "0";
+                        }
+                        else {
+                            rowmat = d[2];
+                        }
+
+                        if (SubCat != rowmat) {
+                            $("#ddlCategories").append("<option value='" + category[m] + "'>" + category[m] + "</option>");
+                            if (m == 0 && d == 0) {
+                                firstCategory = category[m];
+                            }
+                        }
+                    }
+                    if (d == 0) {
+                        $("#txtCategory").val(firstCategory);
+                    }
+                }
+            },
+            complete: function () {
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#savechange").click(function () {
+
+                    var subcategoryId = $(this).parent().parent().parent().parent().prev('tr').children()[1].innerText;
+                    var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+                    var firstrowNumber = $(this).parent().parent().prev('div').children().find('input[type=number]');
+                    var sropdownval = $(this).parent().parent().prev('div').children().find('select');
+
+                    var SubCategory = firstrow[1].value;
+                    var Category = firstrow[0].value;
+                    var HireMeasurement = sropdownval[1].value;
+                    var hireRate = firstrowNumber[0].value;
+
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+
+                    if (SubCategory != "" && Category != '' && hireRate != '') {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/SubCategories/SaveSubCategory",
+                            data: JSON.stringify({ "subcategoryId": subcategoryId, "Category": Category, "SubCategory": SubCategory, "HireMeasurement": HireMeasurement, "hireRate": hireRate, "id": id, "UID": UID }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response;
+                                if (result.Result == 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    GetSubCategories();
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                                // $('#hdnOldQty').val("");
+                            }
+                        })
+                    } else {
+                        var Response = { Result: "Failed", Message: "Please Enter All Mandatory Field." };
+                        CustomAlert(Response);
+                        $("#LoadingPanel1").css("display", "none");
+                        $("#btnsubmit").click();
+                    }
+                });
+            }
+        });
+        if (d == 0) {
+
+            return '<div class="col-lg-12">'
+                + '<label style="float:left; font-size:12px; margin-left:12px;">Category</label>'
+                + '<div class="col-lg-3 select-editable">'
+                + '<a style="color:red">*</a><select onchange="this.nextElementSibling.value=this.value" id="ddlCategories" style="width:100%; border: none;" class="form-control" required></select><input type="text" id="txtCategory" name="format" value="" style="padding-top: 7px;" />'
+                + '</div><div class="col-lg-3">'
+                + 'Sub Category<a style="color:red">*</a><input type="text" class="form-control" style="width:100%" id="txtSubCategory" required>'
+                + '</div><div class="col-lg-3">'
+                + 'Hire Measurement<select id="ddlhireMeasurement" style="width:100%" class="form-control" required><option value="Tonnage">Tonnage</option><option value="Each">Each</option></select>'
+                + '</div><div class="col-lg-3">'
+                + 'Hire Rate in $ <a style="color:red">*</a><input type="number" class="form-control" style="width:100%" id="txtHireRate" required>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-2">'
+                + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-2">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+                + '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />'
+                + '</div></div>'
+
+        }
+        else {
+
+            let hireRateValue = parseFloat(d[5].substr(1));
+            GobalhireMeasurement = d[4];
+            var data = d[2];
+
+            return '<div class="col-lg-12">'
+                + '<label style="float:left; font-size:12px; margin-left:12px;">Category</label>'
+                + '<div class="col-lg-3 select-editable">'
+                + 'Category <a style="color:red">*</a><select onchange="this.nextElementSibling.value=this.value" id="ddlCategories" style="width:100%; border: none;" class="form-control" required><option id="1" value="' + d[2] + '">' + d[2] + '</option></select><input type="text" id="txtCategory" name="format" value="' + d[2] + '" style="padding-top: 7px;" />'
+                + '</div><div class="col-lg-3">'
+                + 'Sub Category<a style="color:red">*</a><input type="text" class="form-control" style="width:100%" id="txtSubCategory" value="' + d[3] + '" required>'
+                + '</div><div class="col-lg-3">'
+                + 'Hire Measurement<select id="ddlhireMeasurement" style="width:100%" class="form-control" required><option value="Tonnage">Tonnage</option><option value="Each">Each</option></select>'
+                + '</div><div class="col-lg-3">'
+                + 'Hire Rate in $ <a style="color:red">*</a><input type="number" class="form-control" style="width:100%" id="txtHireRate" value="' + hireRateValue + '" required>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-2">'
+                + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-2">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+                + '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />'
+                + '</div></div>'
+            
+        }
+
+    }
+
+    function removeFirstAndLastQuotes(str) {
+        var firstChar = str.charAt(0);
+        var lastChar = str[str.length - 1];
+        //double quotes
+        if (firstChar && lastChar === String.fromCharCode(34)) {
+            str = str.slice(1, -1);
+        }
+        //single quotes
+        if (firstChar && lastChar === String.fromCharCode(39)) {
+            str = str.slice(1, -1);
+        }
+        return str;
+    }
+
+    function btnyes_Click() {
+
+        let SubCategoryId = $('#hdnSubCategoryId').val();
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/SubCategories/DeleteDocument',
+            type: 'post',
+            data: { SubCategoryId: SubCategoryId, id: id },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response.Result == 'Success') {
+                    CustomAlert(response);
+                    GetSubCategories();
+                } else {
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+
+
+
+
+</script>
+<input type="hidden" id="hdnTableData" />
+<input type="hidden" id="hdnSubCategoryId" />
+<div class="row">
+    <div class=" col-lg-12 col-md-12 col-sm-12">
+        <h4 class="heading" style="color: #0070ba;font-size:15px;"><b><i class="fa fa-shopping-cart"></i>&nbsp;Sub Category List</b></h4>
+    </div>
+</div>
+
+<div class="row">
+    <div id="divbuttonID"></div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+

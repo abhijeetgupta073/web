@@ -1,0 +1,421 @@
+﻿
+@{
+    ViewBag.Title = "DayDocket";
+}
+
+<script>
+ $(document).ready(function () {
+
+  GetDayDocketData();
+
+  });
+
+ function GetDayDocketData() {
+    $('#LoadingPanel1').show();
+    var id = getParameterByName('id');   
+
+  $.ajax({
+        type: "POST",
+        url: "/DayDocket/ShowDayDocketData",
+        data: JSON.stringify({ id: id }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: true,
+        success: function (response) {
+            var str = "";
+            var GetData = response;
+            $('#tblDayDocket').DataTable().clear();
+            $('#tblDayDocket').DataTable().destroy();
+
+            if (GetData.length > 0) {
+
+                for (var i = 0; i < GetData.length; i++) {
+
+                    var DayDocketID = GetData[i].DayDocketID == null ? "" : GetData[i].DayDocketID;
+                    var comments1 = GetData[i].comments == null ? "" : GetData[i].comments;
+                    var comments = (comments1.length > 70) ? comments1.substring(0, 70) + '.....' : comments1;
+
+                    var SiteRef = GetData[i].SiteRef == null ? "" : GetData[i].SiteRef;
+                    var ClientSign = GetData[i].ClientSign == null ? "" : GetData[i].ClientSign;
+                    var EntryDate = GetData[i].EntryDate == null ? "" : DateFormat(GetData[i].EntryDate);
+                    var SiteLocID = GetData[i].SiteLocID == null ? "" : GetData[i].SiteLocID;
+                    var sitelocation = GetData[i].sitelocation == null ? "" : GetData[i].sitelocation;
+                    var NoOfHrs = GetData[i].NoOfHrs == null ? "" : GetData[i].NoOfHrs.toFixed(2);
+
+
+                    str += "<tr>"
+                    str += "<td class='setWidth0' style='display:none'></td>"
+                    
+                    str += "<td class='setWidth1'>" + EntryDate + "</td>"
+                    str += "<td class='setWidth2'>" + sitelocation + "</td>"
+                    str += "<td class='setWidth3'>" + NoOfHrs + "</td>"
+                    str += "<td class='setWidth4'>" + SiteRef + "</td>"
+                    str += "<td class='setWidth5'>" + comments + "</td>"
+
+                    if(ClientSign==""){
+                    str += "<td title='click here to open Day Docket Form.' style='cursor:pointer;'><a type='button' id='tbnOpen' class='btnOpen' ChkDayDocketID_='" + DayDocketID + "' onclick=OpenDayDocketForm('" + DayDocketID +"','" + SiteLocID +"','" + NoOfHrs +"','" + EntryDate + "') ><i class='fa fa-link'></i>&nbsp;Open</a></td>";
+                      }else{
+                       str += "<td title='click here to view Pdf Report.' style='cursor:pointer;'><button type='button' Class='w3-btn w3-teal' onclick=ViewPdfDocument('" + DayDocketID +"','" + SiteLocID +"','" + EntryDate + "') ><i class='fa fa-search'></i>&nbsp;View</button></td>"
+                       }
+                         if(SiteRef != ""){
+                            str += "<td title='click here to email Day Docket.' style='cursor:pointer;'><button type='button' Class='btn btn-danger' onclick=btnEmailClick('" + DayDocketID +"','" + SiteLocID +"','" + EntryDate + "','" + ClientSign + "') ><i class='fa fa-envelope'></i>&nbsp;Email</button></td>"
+                         }else{
+                          // str += "<td title='click here to email Day Docket.' style='cursor:pointer;display:none'><button type='button' Class='btn btn-success' onclick=btnEmailClick('" + DayDocketID +"','" + SiteLocID +"','" + EntryDate + "','" + ClientSign + "')><i class='fa fa-envelope'></i>&nbsp;Email</button></td>"
+                            str += "<td></td>"
+                         }
+
+                    //str += "<td class='setWidth10'>" + DateFormat(LastEmailSentOn) + "</td>";
+
+                }
+
+                $('#tbodyDayDocket').append(str);
+                
+            }
+
+            var table = $('#tblDayDocket').DataTable({
+                "bSort": false,
+                "processing": true,
+                searching: true,
+                "bLengthChange": true,
+                "bInfo": false,
+                autoWidth: false,
+                scrollX: true,
+                scrollY: true,
+                scrollCollapse: true,
+                scrollY: "60vh",
+                "lengthMenu": [10, 25, 50],
+                "pageLength": 50,
+
+            });
+            //var UserRole = getParameterByName("UserRole");
+            //var DecriptValues = Decrypt([UserRole]);
+            //UserRole = DecriptValues[0];
+            //if (UserRole != 10) {
+            //    table.column(1).visible(false);
+               
+            //}
+        }
+    })
+    $('#LoadingPanel1').hide();
+}  
+
+function OpenDayDocketForm(DayDocketID,SiteLocID,NoOfHrs,EntryDate){
+
+    $.ajax({
+        type: "POST",
+        url: "/DayDocket/DayDocketEntryRedirect",
+        data: JSON.stringify({ DayDocketID:DayDocketID, SiteLocID:SiteLocID, NoOfHrs:NoOfHrs, EntryDate:EntryDate}),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: true,
+        success: function (response) {
+
+                var DayDocketInst= response.DayDocketInst;
+                var id = getParameterByName('id');
+                var UID = getParameterByName('UID');
+                var UserRole = getParameterByName('UserRole');
+
+                if (DayDocketInst != "0") {
+                    //Response.Redirect("DayDocketForm?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&DayDock=" + databaseCon.Encrypt(DayDocketInst.ToString()) + "&SiteID=" + databaseCon.Encrypt(SiteLocID) + "&EntryDate=" + databaseCon.Encrypt(Convert.ToDateTime(EntryDate).ToString()));
+                    window.location.href = '/DayDocketForm/DayDocketForm?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&DayDock=' + DayDocketInst + '&SiteID=' + SiteLocID + '&EntryDate=' + EntryDate;
+                }
+                else {
+              //Response.Redirect("DayDocketForm?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&DayDock=" + databaseCon.Encrypt(DayDocketID) + "&SiteID=" + databaseCon.Encrypt(SiteLocID) + "&EntryDate=" + databaseCon.Encrypt(Convert.ToDateTime(EntryDate).ToString()));
+              window.location.href = '/DayDocketForm/DayDocketForm?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&DayDock=' + DayDocketID + '&SiteID=' + SiteLocID + '&EntryDate= '+ EntryDate;
+
+            }
+        }
+    })
+}   
+
+function ViewPdfDocument(DayDocketID,SiteLocID,EntryDate) {
+
+$('#LoadingPanel1').show();
+var id=getParameterByName('id');
+
+$.ajax({
+    type: "POST",
+    url: "/DayDocket/ViewPdfDocument",
+    data: JSON.stringify({ id:id, DayDocketID:DayDocketID, SiteLocID:SiteLocID, EntryDate:EntryDate}),
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    async: true,
+    success: function (response) {
+        if (response.Result == "Success") {
+                var PdfPath = response.Message;
+                if (PdfPath != "") {
+                    window.open(PdfPath);
+                    $('#LoadingPanel1').hide();
+                } else {
+                    var Response = { Result: "Failed", Message: "Pdf document not found." }
+                    CustomAlert(Response);
+                }
+            }
+        }
+    });
+
+}
+
+
+function btnEmailClick(DayDocketID,SiteLocID,EntryDate,ClientSign) {
+
+    $('#LoadingPanel1').show();
+
+    var id = getParameterByName('id');
+    var UID = getParameterByName('UID');
+    var UserRole = getParameterByName('UserRole');
+    var DomainName = window.location.origin;
+    if(ClientSign!="")
+    {
+    $.ajax({
+        type: "POST",
+        url: "/DayDocket/btnEmailClick",
+        data: JSON.stringify({ id: id, UID: UID, UserRole: UserRole, DayDocketID: DayDocketID, SiteLocID:SiteLocID, EntryDate:EntryDate,  DomainName:DomainName, ClientSign:ClientSign }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: true,
+        success: function (response) {
+            if (response.Result == "Success") {
+                var txtFile = response.txtFile;
+                var txttempfile = response.txttempfile;
+                var txtcc = response.txtcc;
+                var txtClientEmail = response.txtClientEmail;
+                var txtsubject = response.txtsubject;
+                var txtEmailMSg = response.txtEmailMSg;
+                $('#txtFile').val(txtFile);
+                $('#txttempfile').val(txttempfile);
+                $('#txtcc').val(txtcc);
+                $('#txtClientEmail').val(txtClientEmail);
+                $('#txtsubject').val(txtsubject);
+                $('#txtEmailMSg').text(txtEmailMSg);
+                $('#hdnDayDocketID').val(DayDocketID);
+                $('#emailConfirm').css('display', 'block');
+
+                $('#LoadingPanel1').hide();
+
+            } else {
+                var Response = { Result: "Failed", Message: "Please Sand Email again. " };
+                CustomAlert(Response);
+                $('#LoadingPanel1').hide();
+            }
+        }
+    });
+
+    }else {
+                var Response = { Result: "Failed", Message: "DayDocket not yet signed by Client." };
+                CustomAlert(Response);
+                $('#LoadingPanel1').hide();
+            }
+}
+
+function btnSend_Click() {
+    $('#LoadingPanel1').show();
+
+    var txtClientEmail = $('#txtClientEmail').val();
+    var txtcc = $('#txtcc').val();
+    var txtsubject = $('#txtsubject').val();
+    var txtEmailMSg = $('#txtEmailMSg').text();
+    var txtFile = $('#txtFile').val();
+    var hdnDayDocketID = $('#hdnDayDocketID').val();
+    var txttempfile= $('#txttempfile').val();
+    $.ajax({
+        type: "POST",
+        url: "/DayDocket/btnSend_Click",
+        data: JSON.stringify({ txtClientEmail: txtClientEmail, txtcc: txtcc, txtsubject: txtsubject, txtEmailMSg: txtEmailMSg, txtFile: txtFile, DayDocketID: hdnDayDocketID, txttempfile: txttempfile }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: true,
+        success: function (response) {
+            if (response.Result == "Success") {
+                CustomAlert(response);
+                $('#LoadingPanel1').hide();
+                $('#emailConfirm').css('display', 'none');
+
+            } else {
+                CustomAlert(response);
+                $('#LoadingPanel1').hide();
+                $('#emailConfirm').css('display', 'none');
+            }
+        }
+    });
+}
+
+function btnCancel_Click() {
+    var txttempfile = $('#txttempfile').val();
+    var txtFile = $('#txtFile').val();
+    $.ajax({
+        type: "POST",
+        url: "/DayDocket/btnCancel_Click",
+        data: JSON.stringify({ txttempfile: txttempfile,txtFile:txtFile }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: true,
+        success: function (response) {
+
+        }
+    });
+   
+    $('#emailConfirm').css('display', 'none');
+}
+
+</script>
+<style>
+        #txtEmailMSg {
+            border-radius: 4px !important;
+            border-color: #e5e5e5 !important;
+        }
+        .myclass
+      {
+          width: 100px;
+      }
+</style>
+
+    <input type="hidden" id="hdnDayDocketID" />
+
+    @*<div runat="server" style="display: none" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <asp:Label ID="alertlabel" runat="server"></asp:Label>
+    </div>*@
+    <div class="row">
+        <div class="title_left col-lg-5 col-md-5 col-sm-5">
+            <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-file"></i>&nbsp;<span ID="lblclient" Font-Size="16px" Font-Bold="true">Day Docket</span></b></h4>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2">
+        </div>
+
+    </div>
+
+    <div class="clearfix"></div>
+    <div class="tab-content">
+        <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12 xsgridwidth" style="width:98%">
+                  <div id="DayDocket" style="color: black; width: 100%;margin-top:5px;">
+                   <table id="tblDayDocket" class="table table-striped ">
+                    <thead style="background-color: #efefef; color: #716262;">
+                        <tr>
+                            <th class="setWidth0" style="display:none;"></th>
+                            <th class="setWidth1">Entry Date</th>
+                            <th class="setWidth2">Site Location</th>
+                            <th class="setWidth3">No of Hours</th>
+                            <th class="setWidth3">Docket No</th>
+                            <th class="setWidth4">Comments</th>
+                            <th class="setWidth5">Day Docket Record</th>
+                            <th class="setWidth6">Email</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyDayDocket" style="width:100%"></tbody>
+                </table>
+
+              </div>
+                     
+          </div>
+       </div>
+    </div>
+  </div>
+
+
+    <div id="Adddocs" class="w3-modal" >
+    </div>
+
+    <div id="divdelete"  class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h1" ><i class="fa fa-exclamation-circle w3-text-yellow"></i>Delete Record</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label  id="c1">Are you sure you want to Delete the Record?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                    <button id="btndeleteyes" Class="w3-btn w3-green w3-hover-dark-grey" onclick="btndeleteyes_Click()"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button id="btndeleteno" Class="w3-btn nln-bg w3-hover-dark-grey" onclick="btndeleteno_Click()"><i class="glyphicon glyphicon-remove-circle "></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <div id="emailConfirm" class="w3-modal" >
+        <div class="w3-modal-content w3-round-medium w3-animate-zoom" style="margin-top: -86px; width: 750px; color: black;">
+            <header class="w3-container nln-gray-bg">
+
+                <h5 class="w3-text-white">Email Form</h5>
+            </header>
+            <div class="w3-container">
+                <fieldset>
+                    <legend>
+                        <label><b>Email Client</b></label></legend>
+
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-1">
+                            <label>To </label>
+                        </div>
+                        <div class="col-lg-7 col-md-7 col-sm-7">
+                            @*<asp:TextBox runat="server" ID="txtClientEmail" CssClass="form-control"></asp:TextBox>
+                            <asp:TextBox runat="server" ID="txtcc" Style="display: none" CssClass="form-control"></asp:TextBox>
+                            <asp:RequiredFieldValidator runat="server" ID="rdftxtClientEmail" ControlToValidate="txtClientEmail" CssClass="rdf-initial" ErrorMessage="<i class='fa fa-exclamation-triangle'></i>" ValidationGroup="emailValidate"></asp:RequiredFieldValidator>*@
+                            <input type="text" id="txtClientEmail" Class="form-control" />
+                            <input type="text" id="txtcc" Style="display: none" Class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-1">
+                            <label>Subject </label>
+                        </div>
+                        <div class="col-lg-11 col-md-11 col-sm-11">
+                            @*<asp:TextBox runat="server" ID="txtsubject" CssClass="form-control"></asp:TextBox>
+                            <asp:RequiredFieldValidator runat="server" ID="rdftxtsubject" ControlToValidate="txtsubject" CssClass="rdf-initial" ErrorMessage="<i class='fa fa-exclamation-triangle'></i>" ValidationGroup="emailValidate"></asp:RequiredFieldValidator>*@
+                            <input type="text" id="txtsubject" Class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-1">
+                            <label>File </label>
+                        </div>
+                        <div class="col-lg-11 col-md-11 col-sm-11">
+                            @*<asp:TextBox runat="server" ID="txttempfile" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                            <asp:TextBox runat="server" ID="txtFile" Style="display: none;" CssClass="form-control" ReadOnly="true"></asp:TextBox>*@
+                            <input type="text" id="txttempfile" Class="form-control" disabled>
+                            <input type="text" id="txtFile" Style="display: none;" Class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12">
+                            @*<asp:TextBox runat="server" ID="txtEmailMSg" TextMode="MultiLine" Rows="18" Width="100%" CssClass="w3-padding-small">
+                          </asp:TextBox>*@
+                           <textarea rows="18" id="txtEmailMSg" style="width:100%" class="w3-padding-small"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                        </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2">
+                        @*<asp:LinkButton runat="server" ID="btnSend" CssClass="w3-btn w3-green w3-small w3-padding-small" Width="100%" ValidationGroup="emailValidate" OnClientClick="validate()" OnClick="btnSend_Click"> <i class="fa fa-share"></i> Send</asp:LinkButton>*@
+                        <button id="btnSend" Class="w3-btn w3-green w3-small w3-padding-small" style="Width:100%"  OnClientClick="validate()" OnClick="btnSend_Click()"> <i class="fa fa-share"></i> Send</button>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2">
+                        @*<asp:LinkButton runat="server" ID="btnCancel" CausesValidation="false" CssClass="w3-btn w3-red w3-small w3-padding-small" Style="width: 100%" OnClick="btnCancel_Click"><i class="fa fa-recycle"></i>&nbsp;Cancel</asp:LinkButton>*@
+                        <button id="btnCancel" Class="w3-btn w3-red w3-small w3-padding-small" Style="width: 100%" OnClick="btnCancel_Click()"><i class="fa fa-recycle"></i>&nbsp;Cancel</button>
+                    </div>
+
+                    </div>
+                </fieldset>
+                <br />
+            </div>
+
+        </div>
+    </div>

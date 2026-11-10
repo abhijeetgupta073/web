@@ -1,0 +1,2735 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>SCAFFOLD</title>
+    @*<link rel="icon" href="~/images/TopLogofavicon.png?v=2" />*@
+    @*<link rel="icon" type="image/x-icon" href="/images/TopLogofavicon.png?v=@DateTime.Now.Ticks" />*@
+    <link rel="icon" href="~/images/TopLogofavicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="/Content/css/w3.css" rel="stylesheet" />
+    <link href="/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+
+    <link href="/Content/css/signature-pad.css" rel="stylesheet" />
+    <link href="/Content/css/SecStyle.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery.datetimepicker.min.css" rel="stylesheet" />
+    <link href="/Content/Css/CustomAlert.css" rel="stylesheet" />
+
+    <!-- jQuery library -->
+    <script src="/Content/js/jquery.min.js"></script>
+    <script src="/Content/js/bootstrap.min.js"></script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=@(Session["googlemapapi"])&libraries=places" type="text/javascript"></script>
+    <script src="/Content/js/Audiojs/audiodisplay.js"></script>
+    <script src="/Content/js/Audiojs/recorderjs/recorder.js"></script>
+    <script src="/Content/js/signature_pad.js"></script>
+    <script src="/Content/js/html2canvas.js"></script>
+    <script src="/Content/js/jquery.datetimepicker.js"></script>
+    <script src="/Content/js/CustomAlert.js"></script>
+    <script src="~/Content/js/Layout.js"></script>
+    <script src="~/Content/js/HandOverForm.js?V1=11"></script>
+    <script>
+
+        $(document).ready(function () {
+            // $('#imgLogo').val('@ViewBag.ClientImage');
+
+            var image = '@ViewBag.imgLogo';
+            $('#imgLogo').attr('src', image);
+            $('#CompanyAdd').text('@ViewBag.CompanyAdd');
+           var FormPage = getParameterByName('FormPage');
+        var ClientLogin = '@ViewBag.IsLogin';
+            if (ClientLogin != "") {
+           if (FormPage != null) {
+                $('#Button2').css("display", "block");
+               $('#Buttonclose').css("display", "block");
+            } else {
+                $('#Button2').css("display", "block");
+               $('#Buttonclose').css("display", "none");
+           }
+            }
+            else {
+                if (FormPage != null) {
+                    $('#Button2').css("display", "none");
+                    $('#Buttonclose').css("display", "block");
+                } else {
+                    $('#Button2').css("display", "block");
+                    $('#Buttonclose').css("display", "none");
+                }
+
+            }
+
+            var today = new Date();
+
+            $('#rdpInspectiondate').datetimepicker({
+                // datepicker: false,
+                format: 'd-M-Y H:i A',
+                maxDate: today,
+
+            });
+        });
+
+        function hideAlert() {
+            //alert();
+            setTimeout(function () {
+                $(".fadeOut").fadeOut(3000);
+            }, 4000);
+        }
+        function checkMandatryField() {
+            var planstanding = $("#lbllicence").text();
+            if (planstanding == "") {
+                $('#art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                $('#art1').css("display", "block");
+                $('#alertlabel').html('<strong>Alert ! </strong>Please fill all required field then click on save.');
+                hideAlert();
+            }
+        }
+        $(document).ready(function () {
+
+            var GetisSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && !navigator.userAgent.match('CriOS');
+            if (GetisSafari == false) {
+                var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (isMobile) {
+                    $(".mobileApp").css("display", "block");
+                    $(".desktopApp").css("display", "none");
+                    $(".hideAudioMob").css("display", "none");
+                } else {
+                    $(".mobileApp").css("display", "None");
+                    $(".desktopApp").css("display", "block");
+                }
+            } else {
+                $(".hideAudioMob").css("display", "none");
+            }
+
+
+            SafariCheck(null, null, null);
+        });
+
+
+        function RemoveSignatureBlock() {
+            $(".signature-pad").css("display", "none");
+        }
+        //Get Image Orientation From Exif Data
+        function getOrientation(file, callback) {
+            var reader = new FileReader();
+
+            reader.onload = function (event) {
+                var view = new DataView(event.target.result);
+
+                if (view.getUint16(0, false) != 0xFFD8) return callback(-2);
+
+                var length = view.byteLength,
+                    offset = 2;
+
+                while (offset < length) {
+                    var marker = view.getUint16(offset, false);
+                    offset += 2;
+
+                    if (marker == 0xFFE1) {
+                        if (view.getUint32(offset += 2, false) != 0x45786966) {
+                            return callback(-1);
+                        }
+                        var little = view.getUint16(offset += 6, false) == 0x4949;
+                        offset += view.getUint32(offset + 4, little);
+                        var tags = view.getUint16(offset, little);
+                        offset += 2;
+
+                        for (var i = 0; i < tags; i++)
+                            if (view.getUint16(offset + (i * 12), little) == 0x0112)
+                                return callback(view.getUint16(offset + (i * 12) + 8, little));
+                    }
+                    else if ((marker & 0xFF00) != 0xFF00) break;
+                    else offset += view.getUint16(offset, false);
+                }
+                return callback(-1);
+            };
+            reader.readAsArrayBuffer(file.slice(0, 64 * 1024));
+        };
+
+        function SafariCheck(image, video, audio) {
+            if (image != null) {
+                $("#safariImageBlock").css("display", "block");
+            }
+            if (video != null) {
+                $("#safariVideoBlock").css("display", "block");
+
+                var myVideo = $('#Video1')[0];
+                myVideo.src = "https://scaffolddocuments.blob.core.windows.net/siteimage/" + $('#hdnvideoUrl').val();
+                var Videourl = "https://scaffolddocuments.blob.core.windows.net/siteimage/" + $('#hdnvideoUrl').val();
+                myVideo.load();
+            }
+            if (audio != null) {
+                // $("#safariAudioBlock").css("display", "block");
+                //var $Audiosource1 = $('#safariaudioSource');
+                //var myAudiourl = "https://scaffolddocuments.blob.core.windows.net/siteimage/" + $('#hdnAudioUrl').val();
+                // $Audiosource1[0].src = myAudiourl;
+                //$Audiosource1.parent()[0].load();
+            }
+
+            $("#selectvideo").css("display", "none");
+            $("#selectphoto").css("display", "none");
+            $("#selectaudio").css("display", "none");
+            $(".nonsafari").css("display", "none");
+
+            var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && !navigator.userAgent.match('CriOS');
+            if (isSafari == true) {
+                $(".nonsafari").css("display", "none");
+                $(".safari").css("display", "block");
+            } else {
+                $(".nonsafari").css("display", "block");
+                $(".safari").css("display", "none");
+            }
+        }
+
+        $(document).on("change", ".file_audio", function () {
+            $("#safariAudioBlock").css("display", "none");
+            var $Audiosource = $('#selectedaudiosource');
+
+            var base64Audiodata;
+            var $Audiosource = $('#selectedaudiosource');
+            var AudioUrl = URL.createObjectURL(this.files[0]);
+            $Audiosource[0].src = AudioUrl;
+            $Audiosource.parent()[0].load();
+
+            $("#selectaudio").css("display", "block");
+
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64Audiodata = reader.result;
+
+                $("#tempAud").val(base64Audiodata);
+            }
+        });
+
+
+        $(document).on("change", ".file_video", function (evt) {
+            $("#safariImageBlock").css("display", "none");
+            var $Imagesource = $('#Image2');
+            var base64Imagedata;
+            var ImageUrl = URL.createObjectURL(this.files[0]);
+            $Imagesource[0].src = URL.createObjectURL(this.files[0]);
+
+            $("#selectphoto").css("display", "block");
+
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64Imagedata = reader.result;
+                $("#tempimg").val(base64Imagedata);
+            }
+        });
+
+        $(document).on("change", ".mob_file_image", function (evt) {
+            $("#Imageblock").css("display", "none");
+            var $mobImagesource = $('#mobImage');
+            var base64mobImagedata;
+            var mobImageUrl = URL.createObjectURL(this.files[0]);
+            $mobImagesource[0].src = URL.createObjectURL(this.files[0]);
+
+            $("#mob_ImageBlock").css("display", "block");
+            $("#btnchngeimg").css("display", "block");
+            $("#btnchngg").css("display", "block");
+            getOrientation(this.files[0], function (orientation) {
+                //alert(orientation);
+            });
+
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64mobImagedata = reader.result;
+                context.drawImage(video, 0, 0, 300, 300);
+                var image = document.getElementById("canvas").toDataURL("image/png");
+                $("#tempimg").val(base64mobImagedata);
+                if (base64mobImagedata != null || base64mobImagedata != '') {
+
+                    //Added on 14-03-2023 to disable this button if client use Upload Buttonand add image.
+                    $("#getCamera").prop('disabled', true);
+                }
+            }
+        });
+
+        //Added (14-03-2023)
+        $(document).on("change", ".mob_file_image1", function (evt) {
+            $("#Imageblock").css("display", "none");
+            var $mobImagesource = $('#mobImage1');
+            var base64mobImagedata;
+            var mobImageUrl = URL.createObjectURL(this.files[0]);
+            $mobImagesource[0].src = URL.createObjectURL(this.files[0]);
+
+            $("#mob_ImageBlock1").css("display", "block");
+            $("#btnchngeimg").css("display", "block");
+            $("#btnchngg").css("display", "block");
+            getOrientation(this.files[0], function (orientation) {
+                //alert(orientation);
+            });
+
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64mobImagedata = reader.result;
+                context.drawImage(video, 0, 0, 300, 300);
+                var image = document.getElementById("canvas").toDataURL("image/png");
+                $("#tempimg").val(base64mobImagedata);
+                if (base64mobImagedata != null || base64mobImagedata != '') {
+
+                    //Added on 14-03-2023 to disable this button if client use Upload Buttonand add image.
+                    $("#getCamera").prop('disabled', true);
+                }
+            }
+        });
+        //End
+
+        $(document).on("change", ".file_multi_video", function (evt) {
+            $("#safariVideoBlock").css("display", "none");
+            var base64Videodata;
+            var $source = $('#video_here');
+            var VideoUrl = URL.createObjectURL(this.files[0]);
+            $source[0].src = URL.createObjectURL(this.files[0]);
+            $source.parent()[0].load();
+
+            $("#selectvideo").css("display", "block");
+
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64Videodata = reader.result;
+
+                $("#tempVideo").val(base64Videodata);
+            }
+        });
+
+        $(document).on("change", ".mob_file_video", function (evt) {
+            $("#VideoBlock").css("display", "none");
+            var base64mobVideodata;
+            var $mobsource = $('#selectmobileSource');
+            var MObVideoUrl = URL.createObjectURL(this.files[0]);
+            $mobsource[0].src = URL.createObjectURL(this.files[0]);
+            $mobsource.parent()[0].load();
+
+            $("#selectmobilevideo").css("display", "block");
+
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64mobVideodata = reader.result;
+
+                $("#tempVideo").val(base64mobVideodata);
+            }
+        });
+
+
+        $(document).ready(function () {
+            //Making Acknowlege Section Green On load
+            if ($("#confirmcheck").prop("checked") == true) {
+                $("#selected").css("background-color", "rgba(176, 255, 175, 0.88)");
+            } else {
+                $("#selected").css("background-color", "#fff");
+            }
+
+            //Code to make one checkbox checked at a Time starts
+            $('.encapsulatecheck').on("change", function () {
+                $('.encapsulatecheck').not(this).prop("checked", false);
+            });
+            $('.EngineeredDesign').on("change", function () {
+                $('.EngineeredDesign').not(this).prop("checked", false);
+            });
+            //Code to make one checkbox checked at a Time Ends
+
+            $("#confirmcheck").on("change", function () {
+
+                if ($("#confirmcheck").prop("checked") == true) {
+                    $("#selected").css("background-color", "rgba(176, 255, 175, 0.88)");
+                } else {
+                    $("#selected").css("background-color", "#fff");
+                }
+            });
+
+        });
+    </script>
+
+    <style>
+        .disablelabel {
+            cursor: not-allowed;
+            background-color: #E0E0E0 !important
+        }
+
+        #rdpInspectiondate_dateInput {
+            border-color: #e5e5e5 !important;
+            border-radius: 4px !important;
+        }
+
+        .RadComboBoxDropDown_Simple .rcbHovered {
+            background-color: #e5e5e5 !important;
+        }
+
+        .RadComboBox_Metro .rcbActionButton {
+            border-color: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+
+        .RadComboBox_Simple .rcbInner {
+            border-color: #e5e5e5 !important;
+        }
+
+        .RadComboBox_Metro .rcbFocused .rcbActionButton {
+            border-color: #ffffff !important;
+            color: #0a0a0a !important;
+            background-color: #ffffff !important;
+        }
+
+        .RadComboBox_Simple .rcbActionButton {
+            border-color: #ffffff !important;
+            background-color: #ffffff !important;
+            /*height: 24px !important;*/
+        }
+
+        html .RadComboBox .rcbInner, html .RadComboBox .rcbActionButton {
+            border-radius: 4px;
+            /*height: 27px;*/
+        }
+
+        .RadCalendar .rcWeek th {
+            width: auto;
+        }
+
+        /*css stop change styling of input type File btns*/
+        .custombtn {
+            display: none !important;
+        }
+
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            color: #fff !important;
+            background-color: #607d8b !important;
+        }
+
+        /*css stop change styling of input type File btns*/
+
+        #lockimg {
+            height: 40px;
+            float: right;
+            margin: 5px;
+        }
+
+        .InspectionheadTitle {
+            color: #187dc0;
+            font-size: 30px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        a#save {
+            display: none;
+        }
+
+        .headinfo {
+            text-align: right;
+        }
+
+        @@media (min-width: 992px) and (max-width: 1199px) {
+            .headinfo label {
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .headinfo span {
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .InspectionheadTitle {
+                font-size: 24px;
+            }
+        }
+
+        @@media (min-width: 1200px) {
+            .headinfo label {
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .headinfo span {
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .responsiveSign {
+                height: 70vh;
+            }
+
+            #canvas {
+                height: 300px !important;
+                width: 300px !important;
+            }
+        }
+
+        @@media (max-width: 767px) {
+
+            div#rdpInspectiondate_wrapper {
+                width: 100% !important;
+                /* display: inline-block; */
+            }
+
+            input#txtsiteManager {
+                width: 100% !important;
+            }
+
+            div#ddlsiteManager {
+                width: 100% !important;
+            }
+
+            #handovrDesc {
+                width: 100% !important;
+            }
+
+            span.icon {
+                display: block !important;
+            }
+
+            span.text {
+                display: none;
+            }
+
+            .responsiveSign {
+                height: 35vh;
+            }
+
+            #audio {
+                width: 60%;
+            }
+
+            #Button3 {
+                float: right;
+                display: block !important;
+            }
+
+            #Button2 {
+                display: none !important;
+            }
+
+            #Button4 {
+                float: right;
+                display: block !important;
+            }
+
+            #Button1 {
+                display: none !important;
+            }
+
+            #map_canvas {
+                width: 90% !important;
+            }
+
+            .btn {
+                font-size: 11px;
+                padding: 6px 6px;
+            }
+
+            .InspectionheadTitle {
+                font-size: 16px;
+            }
+
+            .hdnCamerabefore {
+                width: 85% !important;
+            }
+
+            #mobImage {
+                height: 100px !important;
+            }
+
+            #mobImage1 {
+                height: 100px !important;
+            }
+
+            #imga {
+                height: 167px !important;
+            }
+
+            #ddlInspectedBy {
+                width: 100% !important;
+            }
+
+            .MainContainer {
+                width: 100%;
+            }
+
+            #save, #save img {
+                height: 6vh;
+            }
+
+            .headinfo label {
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .headinfo span {
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+
+            span.InspectionListTitle {
+                font-size: 14px;
+                color: #0091d6;
+                font-weight: 600;
+            }
+
+            th {
+                padding: 5px;
+                font-size: 13px;
+                font-weight: 600;
+                text-align: left;
+                color: grey;
+                background-color: #eeeeee;
+                border: 1px solid lightgrey;
+                border-collapse: collapse;
+            }
+
+            td {
+                padding: 5px;
+                font-size: 13px;
+                text-align: left;
+                color: grey;
+                border: 1px solid lightgrey;
+                border-collapse: collapse;
+            }
+        }
+
+        @@media (min-width: 992px) and (max-width: 1199px) {
+            .responsiveSign {
+                height: 60vh;
+            }
+        }
+
+        @@media (min-width: 1024px) and (max-width: 1366px) {
+            #mobImage {
+                height: 277px;
+            }
+
+            #mobImage1 {
+                height: 277px;
+            }
+
+            #imga {
+                width: 300px !important;
+                height: 300px !important;
+            }
+        }
+
+        @@media (min-width: 768px) and (max-width: 991px) {
+
+            .responsiveSign {
+                height: 50vh;
+            }
+
+            .InspectionheadTitle {
+                font-size: 18px;
+            }
+
+            button#Button2 {
+                font-size: 12px;
+            }
+
+            .headinfo label {
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .headinfo span {
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            span.InspectionListTitle {
+                font-size: 16px;
+                color: #0091d6;
+                font-weight: 600;
+            }
+
+            th {
+                padding: 5px;
+                text-align: left;
+                color: grey;
+                font-size: 15px;
+                font-weight: 600;
+                background-color: #eeeeee;
+                border: 1px solid lightgrey;
+                border-collapse: collapse;
+            }
+
+            td {
+                padding: 5px;
+                text-align: left;
+                color: grey;
+                font-size: 14px;
+                border: 1px solid lightgrey;
+                border-collapse: collapse;
+            }
+        }
+    </style>
+    <style>
+        /*camera recording css*/
+        video {
+            border: 1px solid #ccc;
+            display: block;
+            margin: 0 0 20px 0;
+        }
+
+        #canvas {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            display: block;
+        }
+
+
+
+        /*Video recording css*/
+        video#recorded {
+            margin: 0 0 10px 0;
+            max-height: 300px;
+        }
+
+        video#dbrecorded {
+            margin: 0 0 10px 0;
+        }
+
+        /*Video recording css*/
+    </style>
+
+    <style>
+        /*audio recording css*/
+        canvas {
+            display: inline-block;
+            background: #202020;
+            /*width: 95%;*/
+            width: 100%;
+            /*height: 45%;*/
+            height: 40%;
+            box-shadow: 0px 0px 10px blue;
+        }
+
+        #controls {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-around;
+            height: 20%;
+            width: 100%;
+        }
+
+        #record {
+            height: 15vh;
+        }
+
+            #record.recording {
+                background: red;
+                background: -webkit-radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+                background: -moz-radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+                background: radial-gradient(center, ellipse cover, #ff0000 0%,lightgrey 75%,lightgrey 100%,#7db9e8 100%);
+            }
+
+        #save, #save img {
+            height: 10vh;
+        }
+
+        #save {
+            opacity: 0.25;
+        }
+
+            #save[download] {
+                opacity: 1;
+            }
+
+        #viz {
+            height: 80%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+
+
+        .hdnAudiobefore {
+            margin: 20px 0 0 0;
+        }
+
+        td.audioWave {
+            width: 60%;
+        }
+
+
+        .hdnVideobefore {
+            margin: 10px 0 0 0;
+        }
+    </style>
+
+    <script>
+        //Line Add on 7 Aug 2019 For Rotate Image Start
+        function ImageRotate(angle) {
+            if (angle == 90 || angle == -90 || angle == 270 || angle == -270) {
+                $('#imga').addClass("rotatedimg");
+            }
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +angle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + angle + 'deg)' });
+            }
+        }
+
+        function newclickforward() {
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            var imgsrc = $('#imga').attr('src');
+
+            var angle = 90;
+            var newangle = $("#imgangle").val();
+
+            if (newangle == 0) {
+                newangle = 90;
+            } else {
+                newangle = parseInt(newangle) + angle;
+            }
+            if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+                $('#imga').addClass("rotatedimg");
+            } else {
+                $('#imga').removeClass("rotatedimg");
+            }
+
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +newangle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+            }
+
+            if (newangle > -360 && newangle < 360) {
+                $("#imgangle").val(newangle);
+            } else {
+                newangle = 0;
+                $("#imgangle").val(newangle);
+            }
+        }
+        function newclickbackward() {
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            var angle = -90;
+            var newangle = $("#imgangle").val();
+
+            if (newangle == 0) {
+                newangle = -90;
+            } else {
+                newangle = parseInt(newangle) + angle;
+            }
+
+            if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+                //alert("hello");
+                // $(".rotatedimgdiv").css("margin", "50px 0 0 0");
+                //$(".rotatedimg").css("margin", "0 0 0 25px").css("max-width", "260px").css("width", "100%");
+                $('#imga').addClass("rotatedimg");
+                // $("#removemargin").css("margin-top", "0");
+            } else {
+                // $(".rotatedimgdiv").css("margin", "0 0 0 0");
+                $('#imga').removeClass("rotatedimg");
+                //$(".rotatedimg").css("margin", "0 0 0 0").css("max-width", "auto").css("width", "100%");
+                // $("#removemargin").css("margin-top", "-32px");
+            }
+
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +newangle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+            }
+
+            if (newangle > -360 && newangle < 360) {
+                $("#imgangle").val(newangle);
+            } else {
+                newangle = 0;
+                $("#imgangle").val(newangle);
+
+            }
+        }
+
+        //Line Add on 7 Aug 2019 For Rotate Image End
+
+        //Audio Code Starts Here
+        function GetAudiofromblob(blobUrls) {
+            // alert("hello");
+            if (blobUrls == 0) {
+                var newbloburl = $("#getAudioBlob").val();
+            } else {
+                newbloburl = blobUrls;
+            }
+
+            $("#source").attr("src", newbloburl);
+            $("#audio")[0].pause();
+            $("#audio")[0].load();//suspends and restores all audio element
+            //$("#audio")[0].oncanplaythrough = $("#audio")[0].play();
+        }
+
+        $(document).ready(function () {
+            $("#getAudio").on("click", function () {
+
+                $(".hdnAudiobefore").css("display", "none");
+                //$("#btnAudioModal").click();
+                $("#btnAudioModal").css("display", "block");
+                $("#cancelaud").on("click", function () {
+                    $("#btnAudioModal").css("display", "none");
+                });
+                initAudio();
+                //window.addEventListener('load', initAudio);
+            });
+        });
+
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+        var audioContext = new AudioContext();
+        var audioInput = null,
+            realAudioInput = null,
+            inputPoint = null,
+            audioRecorder = null;
+        var rafID = null;
+        var analyserContext = null;
+        var canvasWidth, canvasHeight;
+        var recIndex = 0;
+
+        var AudioStream = null;
+
+        /* TODO:
+
+        - offer mono option
+        - "Monitor input" switch
+        */
+
+
+
+
+        function saveAudio() {
+
+            audioRecorder.exportWAV(doneEncoding);
+            // could get mono instead by saying
+            // audioRecorder.exportMonoWAV( doneEncoding );
+        }
+
+        function gotBuffers(buffers) {
+            var canvas = document.getElementById("wavedisplay");
+
+            drawBuffer(canvas.width, canvas.height, canvas.getContext('2d'), buffers[0]);
+
+            // the ONLY time gotBuffers is called is right after a new recording is completed -
+            // so here's where we should set up the download.
+            audioRecorder.exportWAV(doneEncoding);
+        }
+
+        function doneEncoding(blob) {
+            //alert(window.URL.createObjectURL(blob));
+            var blobUrls = URL.createObjectURL(blob);
+            GetAudiofromblob(blobUrls);
+
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = function () {
+                base64data = reader.result;
+
+                //base64data = base64data.replace('data:audio/wav;base64,', '');
+                console.log(base64data);
+                $("#tempAud").val(base64data);
+            }
+
+            Recorder.setupDownload(blob, "myRecording" + ((recIndex < 10) ? "0" : "") + recIndex + ".wav");
+            recIndex++;
+        }
+
+        function toggleRecording(e) {
+            if (e.classList.contains("recording")) {
+                // stop recording
+                audioRecorder.stop();
+                e.classList.remove("recording");
+                //alert(gotBuffers);
+                audioRecorder.getBuffers(gotBuffers);
+
+                //Audio Recorder Streaming Stop Code Starts here
+
+                //var AudiomediaStream = window.stream;
+
+                // AudioStream.getAudioTracks()[0].stop();
+
+                var mediaStream = window.AudioStream;
+
+                //Media Stream Stop Code starts here
+
+                mediaStream.getAudioTracks()[0].stop();
+
+                //Audio Recorder Streaming Stop Code Ends Here
+
+                $(".hdnAudiobefore").css("display", "block");
+                //$("#audioModal .modal-header .close").click();
+                $("#btnAudioModal").css("display", "none");
+            } else {
+
+                // start recording
+                if (!audioRecorder)
+                    return;
+                e.classList.add("recording");
+                $("#cancelaud").css("display", "none");
+                audioRecorder.clear();
+                audioRecorder.record();
+            }
+        }
+
+        function convertToMono(input) {
+            var splitter = audioContext.createChannelSplitter(2);
+            var merger = audioContext.createChannelMerger(2);
+
+            input.connect(splitter);
+            splitter.connect(merger, 0, 0);
+            splitter.connect(merger, 0, 1);
+            return merger;
+        }
+
+        function cancelAnalyserUpdates() {
+            window.cancelAnimationFrame(rafID);
+            rafID = null;
+        }
+
+        function updateAnalysers(time) {
+            if (!analyserContext) {
+                var canvas = document.getElementById("analyser");
+                canvasWidth = canvas.width;
+                canvasHeight = canvas.height;
+                analyserContext = canvas.getContext('2d');
+            }
+
+            // analyzer draw code here
+            {
+                var SPACING = 3;
+                var BAR_WIDTH = 1;
+                var numBars = Math.round(canvasWidth / SPACING);
+                var freqByteData = new Uint8Array(analyserNode.frequencyBinCount);
+
+                analyserNode.getByteFrequencyData(freqByteData);
+
+                analyserContext.clearRect(0, 0, canvasWidth, canvasHeight);
+                analyserContext.fillStyle = '#F6D565';
+                analyserContext.lineCap = 'round';
+                var multiplier = analyserNode.frequencyBinCount / numBars;
+
+                // Draw rectangle for each frequency bin.
+                for (var i = 0; i < numBars; ++i) {
+                    var magnitude = 0;
+                    var offset = Math.floor(i * multiplier);
+                    // gotta sum/average the block, or we miss narrow-bandwidth spikes
+                    for (var j = 0; j < multiplier; j++)
+                        magnitude += freqByteData[offset + j];
+                    magnitude = magnitude / multiplier;
+                    var magnitude2 = freqByteData[i * multiplier];
+                    analyserContext.fillStyle = "hsl( " + Math.round((i * 360) / numBars) + ", 100%, 50%)";
+                    analyserContext.fillRect(i * SPACING, canvasHeight, BAR_WIDTH, -magnitude);
+                }
+            }
+
+            rafID = window.requestAnimationFrame(updateAnalysers);
+        }
+
+        function toggleMono() {
+            if (audioInput != realAudioInput) {
+                audioInput.disconnect();
+                realAudioInput.disconnect();
+                audioInput = realAudioInput;
+            } else {
+                realAudioInput.disconnect();
+                audioInput = convertToMono(realAudioInput);
+            }
+
+            audioInput.connect(inputPoint);
+        }
+
+        function gotStream(stream) {
+
+
+            inputPoint = audioContext.createGain();
+
+            // Create an AudioNode from the stream.
+            realAudioInput = audioContext.createMediaStreamSource(stream);
+            audioInput = realAudioInput;
+            audioInput.connect(inputPoint);
+
+            AudioStream = stream;
+
+            //    audioInput = convertToMono( input );
+
+            analyserNode = audioContext.createAnalyser();
+            analyserNode.fftSize = 2048;
+            inputPoint.connect(analyserNode);
+
+            audioRecorder = new Recorder(inputPoint);
+
+            zeroGain = audioContext.createGain();
+            zeroGain.gain.value = 0.0;
+            inputPoint.connect(zeroGain);
+            zeroGain.connect(audioContext.destination);
+            updateAnalysers();
+        }
+
+        function initAudio() {
+            if (!navigator.getUserMedia)
+                navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            if (!navigator.cancelAnimationFrame)
+                navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
+            if (!navigator.requestAnimationFrame)
+                navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
+
+            navigator.getUserMedia(
+                {
+                    "audio": {
+                        "mandatory": {
+                            "googEchoCancellation": "false",
+                            "googAutoGainControl": "false",
+                            "googNoiseSuppression": "false",
+                            "googHighpassFilter": "false"
+                        },
+                        "optional": []
+                    },
+                }, gotStream, function (e) {
+                    alert('Error getting audio');
+                    console.log(e);
+                });
+        }
+        //Audio Code Ends Here
+    </script>
+
+    <script>
+
+        //Location Code Starts Here
+        $(document).ready(function () {
+            $("#getNavi").on("click", function () {
+                setTimeout(function () {
+                    getLocationImage();
+                }, 5000);
+            });
+        });
+
+        function getLocationImage() {
+            html2canvas(document.getElementById("map_canvas"), {
+                useCORS: true,
+                onrendered: function (canvas) {
+                    var img = canvas.toDataURL("image/jpeg");
+                    $("#map_image").val(img);
+                }
+            });
+        }
+
+        //function GetcurrentLocation(currentlat, currentlng)
+        function GetcurrentLocation(currentlat, currentlng) {
+            var currentdate = new Date();
+            var datetime = currentdate.getDate() + "/" + (currentdate.getMonth() + 1) + "/" + currentdate.getFullYear() + " " + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds();
+
+            $("#Label1").text(datetime);
+
+            $(".hdnmapbefore").css("display", "block");
+            $(".hdnmapafter").css("display", "none");
+
+            //var newLat = 28.4972308;
+            //var newLng = 77.02032;
+
+            var newLat = currentlat;
+            var newLng = currentlng;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success);
+
+            } else {
+                alert("Geo Location is not supported on your current browser!");
+            }
+
+            function success(position) {
+
+                if (newLat != null && newLng != null) {
+
+                    var lat = newLat;
+                    var long = currentlng;
+
+                } else {
+                    var lat = position.coords.latitude;
+                    var long = position.coords.longitude;
+
+                    if (lat == null) {
+                        alert("GPS not activated!");
+                    }
+
+                }
+                //var lat = 28.4972308;
+                //var long = 77.02032;
+
+
+                //alert(long);
+                //var city = position.coords.locality;
+
+
+                var myLatlng = new google.maps.LatLng(lat, long);
+                var myOptions = {
+                    center: myLatlng,
+                    zoom: 12,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+                var marker = new google.maps.Marker({
+                    position: myLatlng,
+                    title: "lat: " + lat + " long: " + long
+                });
+
+                //alert(+lat);
+                document.getElementById("txtLat").innerHTML = +lat;
+                document.getElementById("TxtLong").innerHTML = +long;
+
+                document.getElementById("hdnlatitude").value = +lat;
+                document.getElementById("hdnlongitude").value = +long;
+
+
+                //$("#txtLat").text(+lat);
+                //$("#TxtLong").text(+long);
+
+                //$("#hdnlatitude").val(+lat);
+                //$("#hdnlongitude").val(+long);
+
+                //document.getElementById("txtLat").value = +lat ;
+                //document.getElementById("TxtLong").value = +long;
+
+                var latlng = new google.maps.LatLng(lat, long);
+                var geocoder = geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        //alert("Location: " + results[1].formatted_address);
+                        //document.getElementById("TxtAddress").value = results[1].formatted_address;
+                        document.getElementById("TxtAddress").innerHTML = results[1].formatted_address;
+                        document.getElementById("hdnAddress").value = results[1].formatted_address;
+                        //$("#TxtAddress").text(results[1].formatted_address);
+
+                        //$("#hdnAddress").val(results[1].formatted_address);
+                    }
+                });
+
+                marker.setMap(map);
+
+
+                var infowindow = new google.maps.InfoWindow({ content: "<b>User Address</b><br/> Latitude:" + lat + "<br /> Longitude:" + long + "" });
+                infowindow.open(map, marker);
+            }
+
+        }
+        //Location Code Ends Here
+
+    </script>
+
+    <style>
+        table {
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+            border-top: 2px solid lightgrey;
+        }
+
+        th {
+            padding: 5px;
+            text-align: left;
+            color: grey;
+            background-color: #eeeeee;
+            border: 1px solid lightgrey;
+            width: 40%;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            text-align: left;
+            color: grey;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+
+        .InspecBox1 {
+            color: #000;
+        }
+
+        body .container.body .right_col {
+            background: #fff;
+        }
+
+        span.InspectionListTitle {
+            font-size: 18px;
+            color: #0091d6;
+            font-weight: 600;
+        }
+
+
+        .modal-body {
+            position: relative;
+            padding: 15px 30px;
+        }
+
+        /*baans change 7mar*/
+        .row.chckListHeader {
+            background-color: gainsboro;
+            font-size: 16px;
+            font-weight: 600;
+            color: grey;
+            width: 100%;
+            margin: 30px 0 20px 0;
+            border: 1px solid darkgray;
+        }
+    </style>
+</head>
+<body onselectstart="return false">
+
+    <div style="display: none; width: 50%;" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <label id="alertlabel" ></label>
+    </div>
+
+    <div style="display: none; width: 50%;" id="art2">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <label id="alertlabel2" />
+    </div>
+
+    <div id="LoadingPanel1" style="display:none; position: fixed; z-index: 1100; height: 100%; width: 100%; top: 0; left: 0; background-color: darkgrey; filter: alpha(opacity=60); opacity: 0.3; -moz-opacity: 0.8;">
+        <div style="z-index: 99999; margin: 16% 43%; padding: 10px; width: 175px; border-radius: 10px; filter: alpha(opacity=100); opacity: 1; -moz-opacity: 5;">
+            <img src="~/Content/images/loading.gif" style="height: 128px; width: 128px;" />
+            <p style="color:black;"><b>Please Wait.......</b></p>
+        </div>
+    </div>
+
+    <div style="display:none" id="CustomAlert">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn" style="float:right">×</span>
+        <span id="alertMsg"></span>
+    </div>
+
+    <input type="hidden" id="getAddress" />
+    <input type="hidden" id="getAudioBlob"/>
+
+    <div class="container MainContainer" style="border: 1px solid gainsboro;">
+        <form id="form1">
+
+            <input type="hidden" id="hdnTimeOffSet" value="0" />
+            <input type="hidden" id="lblInspectionLicence" />
+            <input type="hidden" id="imgangle" Value="0" />
+            <input type="hidden" id="hdnInspectId" name="InspectId" />
+            <input type="hidden" id="hdnvideoUrl" name="hdnvideoUrl" />
+            <input type="hidden" id="hdnAudioUrl" name="hdnAudioUrl" />
+            <input type="hidden" id="map_image" name="map_image" />
+            <input type="hidden" id="hdnlatitude" name="hdnlatitude" />
+            <input type="hidden" id="hdnlongitude" name="hdnlongitude" />
+            <input type="hidden" id="hdnAddress" name="hdnAddress" />
+            <input type="hidden" id="sketch_data" name="sketch_data" />
+            <input type="hidden" id="sketch_data2" name="sketch_data2" />
+            <input type="hidden" id="tempimg" name="tempimg" />
+            <input type="hidden" id="tempAud" name="tempAud" />
+            <input type="hidden" id="tempVideo" name="tempVideo" />
+
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+                    <div class="InspectionLogo">
+                        @*<img src="~/img/logo1.png" id="imgLogo" style="height: 90px; margin: 5px 0 0 0;" class="img-responsive" />*@
+                        <img src="~/img/logo1.png" id="imgLogo" style="height: 90px; margin: 5px 0 0 0;" class="img-responsive"/>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-5" style="margin: 40px 0 0 0; text-align: center;">
+                    <span class="InspectionheadTitle">Scaffold Hand Over</span>
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 headinfo" style="margin: 6px 0 0 0;">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <img src="~/images/lock.png" class="img-responsive" id="lockimg" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="backbuttonhandover">
+                            <a id="Button2" onclick="btnBacktoInspection_Click()" class="btn w3-btn w3-ripple w3-red" style="margin: 0 0 15px 0; float: right;" title="Back">
+                                <i class="fa fa-backward" aria-hidden="true"></i>&nbsp;Back to Hand Over List
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <a id="Buttonclose" onclick="closeCurrentTab()" class="btn w3-btn w3-ripple w3-red" style="margin: 0 0 15px 0; float: right;" title="Close">
+                                <i class="fa fa-close" aria-hidden="true"></i>&nbsp;Close
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            @*<button runat="server" id="Button3" onserverclick="btnBacktoInspection_Click" class="btn w3-btn w3-ripple w3-red" style="margin: 0 0 15px 0; display: none;" title="Back">
+                    <i class="fa fa-backward" aria-hidden="true"></i>&nbsp;Back
+                </button>*@
+                            <a runat="server" id="Button3" onclick="btnBacktoInspection_Click()" class="btn w3-btn w3-ripple w3-red" style="margin: 0 0 15px 0; display: none;" title="Back">
+                                <i class="fa fa-backward" aria-hidden="true"></i>&nbsp;Back
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-right: 3px; display:none">
+                        <label><b>Date:</b></label>
+                        <label id="Label2"></label>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <br />
+
+            @*<%--<div class="row">
+                <div class="col-lg-3 col-md-4 col-sm-4 col-xs-6">
+                    <span class="InspectionListTitle">Scaffold Hand Over</span>
+                </div>
+            </div>--%>*@
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <table style="width: 100%">
+                        <tr>
+                            <th class="auto-style1">Company Address:-</th>
+                            <td id="CompanyAdd"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="InspecBox1">
+                        <table style="width: 100%">
+                            <tr>
+                                <th class="auto-style1">Scaffold Hand Over Date</th>
+                                <td style="display: inline-flex">
+                                    @*<Telerik:RadDateTimePicker ID="rdpInspectiondate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy hh:mm tt" DateInput-DisplayDateFormat="dd-MMM-yyyy hh:mm tt" runat="server"></Telerik:RadDateTimePicker>
+                                    <Telerik:RadDateTimePicker ID="rdpInspectiondate1" Width="100%" Visible="false" DateInput-DateFormat="dd-MMM-yyyy" DateInput-DisplayDateFormat="dd-MMM-yyyy" runat="server"></Telerik:RadDateTimePicker>*@
+                                    <input type="text" class="form-control ddldisableinput allHandoverDisableInput" id="rdpInspectiondate" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Scaffold Hand Over Certificate #</th>
+                                <td>
+                                    <label id="lblCertificateNo"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Scaffold Owner (Client Name)</th>
+                                <td>
+                                    <label id="lblOwnerName"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Site</th>
+                                <td>
+                                    <label id="sitelbl"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Building No.</th>
+                                <td>
+                                    <label id="BuildingNolbl"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Location</th>
+                                <td>
+                                    <label id="Locationlbl"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Floor Level</th>
+                                <td>
+                                    <label id="lblfloor"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Scaffold Tag #</th>
+                                <td>
+                                    <label id="scaffreflbl"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Scaffold / Section being Handed Over. Description.</th>
+                                <td>
+                                    @*<%--<asp:TextBox runat="server" ID="handovrDesc" placeholder="Enter Your Desc" Width="100%" style="border: none;"></asp:TextBox>--%>*@
+                                    <textarea id="handovrDesc" class="ddldisableinput allHandoverDisableInput" name="handovrDesc" placeholder="Enter Description" style="margin: 0px; height: 45px; width: 100%; resize: none; border: none;"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Photo of Scaffold / Section to be handed over</th>
+                                <td>
+                                    <div class="nonsafari">
+                                        <div class="desktopApp" style="display: none;">
+                                            <button type="button" id="getCamera" class="btn w3-btn w3-ripple w3-indigo ddldisableinput allHandoverDisableInput"><i class="fa fa-camera-retro" aria-hidden="true"></i>&nbsp; Capture Photo</button>
+
+                                            @* Added On 14-03-2023 to display both the button for Desktop View *@
+                                            <label style="height:33px;" for="mob_file_image1" class="btn w3-indigo w3-btn photoupload allHandoverDisableInput">
+                                                <i class="fa fa-folder-open w3-indigo w3-btn w3-ripple iphotoupload" aria-hidden="true" style="float: left !important; padding-top: 4px;margin-left: -18px;width:38px;"></i>Upload Photo
+                                            </label>
+                                            <div id="mob_ImageBlock1" style="display: none; width: 50%;">
+                                                <img src="" id="mobImage1" Class="img-responsive img-thumbnail changeimg" />
+                                            </div>
+                                            <input type="file" name="file" id="mob_file_image1" class="mob_file_image1 custombtn ddldisableinput allHandoverDisableInput" accept="image/*;capture=camera">
+                                            @* End Here *@
+                                            <div id="Photoblock" class="hdnCamerabefore ddldisableinput" style="display: none; width: 50%;">
+                                                <canvas class="changeimg" id="canvas" width="300" height="300"></canvas>
+                                            </div>
+                                            @*<%--<canvas id="canvas" width="535" height="400"></canvas>--%>*@
+                                        </div>
+
+                                        <div class="mobileApp" style="display: none;">
+                                            <label for="mob_file_image" class="custom-file-upload allHandoverDisableInput">
+                                                <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                                            </label>
+                                            <div id="mob_ImageBlock" style="display: none; width: 50%;">
+                                                <img src="" id="mobImage" Class="img-responsive img-thumbnail changeimg ddldisableinput" />
+                                            </div>
+                                            <input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn allHandoverDisableInput" accept="image/*;capture=camera">
+                                        </div>
+
+                                        <div runat="server" id="Imageblock" class="hdnCamerabefore" style="display: none; width: 50%;">
+                                            @*<%--<asp:Image runat="server" src="" ID="imga" CssClass="img-responsive img-thumbnail chngeimg" />--%>*@
+                                            <img id="imga" Class="img-thumbnail img-responsive changeimg ddldisableinput " src="~/images/noimg.jpg" />
+                                        </div>
+                                    </div>
+
+                                    <div class="safari">
+                                        <div id="selectphoto" style="display: none;width: 50%;">
+                                            <img id="Image2" Class="img-thumbnail img-responsive changeimg" src="~/images/noimg.jpg" ClientIDMode="Static" />
+                                        </div>
+                                        <div id="safariImageBlock" style="display: none; width: 50%;">
+                                            <img src="" id="Image3" Class="img-responsive img-thumbnail changeimg" />
+                                        </div>
+                                        @*<%--<input type="file" name="file" class="file_video" accept="image/*">--%>*@
+                                        <label for="file_video" class="custom-file-upload">
+                                            <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                                        </label>
+                                        <input type="file" name="file" id="file_video" class="file_video custombtn ddldisableinput" accept="image/*;capture=camera">
+                                    </div>
+                                    @*<%-- Line Add on 7 Aug 2019 For Rotate Image --%>*@
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3   w3-padding-top" style="margin-top: -6px">
+                                        <img src="~/images/forspinicon.png" style="height: 20px; cursor: pointer; display:none; border: none;" id="btnchngeimg" onclick="newclickforward();" />
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-3   w3-padding-top" style="margin-top: -6px">
+                                        <img src="~/images/backspinicon.png" style="height: 20px; display:none; cursor: pointer; border: none;" id="btnchngg" onclick="newclickbackward();" />
+                                    </div>
+
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Scaffold Duty Rating</th>
+                                <td>
+                                    <label id="lblDutyRating"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Number of Working Decks</th>
+                                <td>
+                                    <label id="lblWrokingDeck"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Max Number of Decks loaded at one time</th>
+                                <td>
+                                    <label id="lblNumberOfPlatform"></label>
+                                </td>
+                            </tr>
+                            @*<%--
+                            <tr>
+                                <th class="auto-style1">Height to Top Working Platform (Metres).</th>
+                                <td>
+                                    <asp:Label runat="server" ID="lblworkingplatform"></asp:Label>
+                                </td>
+                            </tr>--%>*@
+
+                            <tr>
+                                <th class="auto-style1">Has this Scaffold been designed to be Encapsulated?</th>
+                                <td>
+                                    <input type="checkbox" class="encapsulatecheck ddldisableinput allHandoverDisableInput" name="checkEncapsulate" id="checkEncapsulateY" value="YES" />
+                                    YES&nbsp;&nbsp;<input type="checkbox" class="encapsulatecheck ddldisableinput allHandoverDisableInput" name="checkEncapsulate" id="checkEncapsulateN" value="NO" />
+                                    NO&nbsp;&nbsp;<input type="checkbox" class="encapsulatecheck ddldisableinput allHandoverDisableInput" name="checkEncapsulate" id="checkEncapsulateNA" value="NA" />
+                                    NA
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Does this scaffold have an Engineered Design?</th>
+                                <td>
+                                    <input type="checkbox" disabled="disabled" class="EngineeredDesign allHandoverDisableInput" name="checkEncapsulate" id="checkBoxDesignY" value="YES" />
+                                    YES&nbsp;&nbsp;<input type="checkbox" disabled="disabled" class="EngineeredDesign allHandoverDisableInput" name="checkEncapsulate" id="checkBoxDesignN" value="NO" />
+                                    NO&nbsp;&nbsp;<input type="checkbox" disabled="disabled" class="EngineeredDesign allHandoverDisableInput" name="checkEncapsulate" id="checkBoxDesignNA" value="NA" />
+                                    NA
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Design Drawing No</th>
+                                <td>
+                                    <label id="lbldesigndNo"></label>
+                                </td>
+                            </tr>
+                            <tr style="display: none;">
+                                <th class="auto-style1">Hand Over Location</th>
+                                <td>
+                                    <div class="hdnmapbefore" style="display: none;">
+                                        <div id="map_canvas" style="width: 100%; height: 290px;"></div>
+                                        <br />
+                                        <label><b>Lat:</b></label>
+                                        <label id="txtLat"></label>&nbsp;&nbsp;<label><b>Long:</b></label>
+                                        <label id="TxtLong"></label>
+                                        <br />
+                                        <br />
+                                        <label><b>Date:</b></label>
+                                        <label id="Label1"></label>
+                                        <br />
+                                        <br />
+                                        <label><b>Address:</b></label>
+                                        <label id="TxtAddress"></label>
+                                    </div>
+
+                                    <div>
+                                        <button type="button" id="getNavi" onclick="GetcurrentLocation(currentlat = null, currentlng = null);" class="btn w3-btn w3-ripple w3-light-green">Get Navigation</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr style="display: none;" class="hideAudioMob">
+                                <th>Audio Notes</th>
+                                <td class="audioWave">
+                                    <div class="nonsafari">
+                                        <button type="button" id="getAudio" onclick="initAudio();" class="btn w3-btn w3-ripple w3-deep-orange">Capture Audio</button>
+                                        <div class="hdnAudiobefore" style="display: none;">
+                                            <canvas id="wavedisplay" width="1024" height="500"></canvas>
+                                            <a id="save" href="#">
+                                                <img src="~/img/save.svg">
+                                            </a>
+                                            <br />
+                                            <br />
+                                            @*<%--<audio id="audio" controls>
+                                                <source id="source" src="" type="audio/ogg" />
+                                            </audio>--%>*@
+                                        </div>
+                                        <div id="AudioBlock" class="hdnAudiobefore" style="display: none;">
+                                            <audio id="audio" controls>
+                                                <source id="source" src="" type="audio/ogg" />
+                                            </audio>
+                                        </div>
+                                    </div>
+
+                                    @*<%--<div class="safari">
+                                        <div id="selectaudio" style="display:none;">
+                                            <audio id="selectedaudio" controls>
+                                                <source id="selectedaudiosource" src="" type="audio/mp4" />
+                                            </audio>
+                                        </div>
+
+                                        <div runat="server" id="safariAudioBlock" style="display:none;">
+                                            <audio id="safariAudio" controls>
+                                                <source id="safariaudioSource" src="" type="audio/mp4" />
+                                            </audio>
+                                        </div>
+                                        <input type="file" name="file[]" class="file_audio" accept="video/*">
+                                    </div>--%>*@
+                                </td>
+                            </tr>
+
+                            <tr style="display: none;">
+                                <th class="auto-style1">Video</th>
+                                <td>
+                                    <div class="nonsafari">
+                                        <div class="desktopApp" style="display: none;">
+                                            <button type="button" id="getVideo" runat="server" class="btn w3-btn w3-ripple w3-blue-grey">Capture Video</button>
+                                            <div class="hdnVideobefore" style="display: none;">
+                                                <video id="recorded" style="width:60%; height:auto"></video>
+                                            </div>
+                                        </div>
+
+                                        <div class="mobileApp" style="display: none;">
+                                            <div id="selectmobilevideo" style="display: none;">
+                                                <video style="width:60%; height:auto" controls>
+                                                    <source runat="server" src="" id="selectmobileSource">
+                                                </video>
+                                            </div>
+                                            <label for="mob_file_video" class="custom-file-upload">
+                                                <i class="fa fa-video-camera" aria-hidden="true"></i>Capture/Upload Video
+                                            </label>
+                                            <input type="file" name="file[]" id="mob_file_video" class="mob_file_video custombtn" accept="video/*">
+                                        </div>
+
+                                        <div id="VideoBlock" class="hdnVideobefore" style="display: none;">
+                                            <video id="dbrecorded" controls="controls" style="width:60%; height:auto;max-height: 350px; max-width: 263px;"></video>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="safari">
+                                        <div id="selectvideo" style="display: none;">
+                                            <video style="width:60%; height:auto" controls>
+                                                <source src="" id="video_here">
+                                            </video>
+                                        </div>
+
+                                        <div id="safariVideoBlock" style="display: none;">
+                                            @*<%--<video controls="controls" runat="server" width="60%" height="auto">
+                                                <source id="Video1" src="mov_bbb.mp4" controls="controls" runat="server">
+                                            </video>--%>
+                                            <%--<video width="60%" height="auto" controls>
+                                                <source runat="server" src="mov_bbb.mp4" id="Video1">
+                                            </video>--%>*@
+                                            <video id="Video1" style="width:60%; height:auto" controls
+                                                   src=""></video>
+
+                                            @*<%--<video id="Video2" controls
+                                                       src=""></video>--%>
+                                            <%--<video loop id="Video1" controls="true" runat="server" width="60%" src='' type='video/webm'></video>--%>*@
+                                        </div>
+                                        <label for="file_multi_video" class="custom-file-upload">
+                                            <i class="fa fa-video-camera" aria-hidden="true"></i>Capture/Upload Video
+                                        </label>
+                                        <input type="file" name="file[]" id="file_multi_video" class="file_multi_video custombtn" accept="video/*">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Reason for Access</th>
+                                <td>
+                                    <label id="lblReasonforAccess"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Length (m)</th>
+                                <td>
+                                    <label id="lblLength"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Width (m)</th>
+                                <td>
+                                    <label id="lblWidth"></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="auto-style1">Height TWP (m)</th>
+                                <td>
+                                    <label id="lblHeight"></label>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" style='margin-top: 20px;'>
+                <div class="col-lg-3 col-md-4 col-sm-4 col-xs-6">
+                    <span class="InspectionListTitle">Hand Over & Sign Off</span>
+                </div>
+            </div>
+
+            <table style="width: 100%">
+                <tbody>
+                    <tr>
+                        <th class="auto-style1">Comments</th>
+                        <td id="selectedupper">
+                            <textarea id="comment" class="ddldisableinput allHandoverDisableInput" name="comment" placeholder="Enter Your Comments..." style="margin: 0px; height: 78px; width: 100%; resize: none; border: none;"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th id="selectedleft" class="auto-style1">Acknowledgement </th>
+                        <td id="selected">
+                            @*<%-- <p>
+                                Scaffolding, as described above, has now been completed and complies with the following Standards AS/NZ 1576:1 to 6 and Scaffold Guidelines AS/NZ 4576:1995 .
+                                It is structurally sound and should only be used and loaded in accordance with the Duty Rating.
+                                (The rating is for a load evenly distributed across a single bay).
+                            </p>--%>*@
+                            <p>The structure as described above, has now been completed and complies with Standards AS/NZS 1576 ALL PARTS, Scaffold Guidelines AS/NZS 4576 and any other applicable standards, guidelines or regulations.  It is structurally sound and ready for use.</p>
+                            <p>The detailed requirements of the regulations with regard to guard-rails, working platforms, toe-boards, bracing and ties have been complied with.</p>
+                            <p>
+                                This structure has been inspected and tagged on completion of build. It must be inspected at minimum intervals of 30 days or at site interval requirements,
+                                whichever is the least number of days, since last inspection. It must also be inspected after any event likely to jeopardise the structures integrity ,
+                                after part dismantle or any modification. Particulars of future inspections to be recorded in the inspection report.
+                            </p>
+                            <h5>NO UNAUTHORIZED MODIFICATIONS OR ALTERATIONS ARE TO BE MADE TO THE STRUCTURE.</h5>
+                            <h5>
+                                <input type="checkbox" class="ddldisableinput allHandoverDisableInput" id="confirmcheck" name="confirmcheck" />
+                                I Agree
+                            </h5>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="auto-style1">Scaffold Contractor Representative<span style="color: red;">&nbsp;*</span></th>
+                        <td>
+
+                            @*<%-- // changes on 02-Aug-2019--%>*@
+                            @*<%--<asp:Label runat="server" ID="lblcontractrepresent"></asp:Label>
+                            </td>--%>*@
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6">
+                                    @*<Telerik:RadComboBox Width="100%" DataTextField="firstName" Skin="Simple" RenderMode="Lightweight" DataValueField="UserId" EmptyMessage="Select---" CausesValidation="false" OnSelectedIndexChanged="ddlContractorRepresentative_SelectedIndexChanged" runat="server" ID="ddlContractorRepresentative" MarkFirstMatch="true" AutoPostBack="true">
+                                    </Telerik:RadComboBox>*@
+                                    <select id="ddlContractorRepresentative" class="ddldisableinput allHandoverDisableInput" style="width:100%;height:26px;" onchange="ddlContractorRepresentative_SelectedIndexChanged()"></select>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-6">
+                                    @*<asp:RequiredFieldValidator runat="server" ControlToValidate="ddlContractorRepresentative"
+                                    ValidationGroup="Save" ErrorMessage="* Required" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="auto-style1">Licence to Perform High Risk Work #</th>
+                        <td>
+                            <label id="lbllicence"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="auto-style1">Scaffold Contractor Representative Position</th>
+                        <td>
+                            <label id="lblrepresentPost"></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Scaffold Contractor Representative Signature</th>
+                        <td>
+                            @*<%--<button type="button" id="getSignature" class="btn w3-btn w3-ripple w3-blue-grey">Capture Signature</button>--%>*@
+                            <div class="hdnSignaturebefore" style="display: none;">
+                                <canvas id="canvas1234" style="border: 1px solid; background-color: #fff; width: 400px; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            </div>
+
+                            <div id="signature-pad" class="signature-pad" style="height: 303px">
+                                <div class="signature-pad--body abcd">
+                                    <canvas id="drawcanvas" style="background: none; width: 100%; height: 195px;"></canvas>
+                                </div>
+                                <br />
+                                <div class="signature-pad--footer">
+                                    <div class="signature-pad--actions">
+                                        <div>
+                                            <button type="button" id="clearbtn" class="btn w3-btn w3-ripple w3-blue-grey button clear ddldisableinput allHandoverDisableInput" data-action="clear"><span class="icon" style="display: none;"><i class="fa fa-refresh" aria-hidden="true"></i></span><span class="text">Clear</span></button>
+                                            <button type="button" id="colorbtn" class="button allHandoverDisableInput" style="display: none;" data-action="change-color">Change color</button>
+                                            <button type="button" id="undobtn" class="btn w3-btn w3-ripple w3-blue-grey button ddldisableinput allHandoverDisableInput" data-action="undo"><span class="icon" style="display: none;"><i class="fa fa-undo" aria-hidden="true"></i></span><span class="text">Undo</span></button>
+                                        </div>
+                                        <div>
+
+                                            <button type="button" onclick="GetSign();" class="btn w3-btn w3-ripple w3-blue-grey ddldisableinput allHandoverDisableInput" id="getContext"><span class="icon" style="display: none;"><i class="fa fa-check-circle-o" aria-hidden="true"></i></span><span class="text">Confirm Signature</span></button>
+                                            <button type="button" id="pngbtn" class="button save allHandoverDisableInput" style="display: none;" data-action="save-png">Save as PNG</button>
+                                            <button type="button" id="jpgbtn" class="button save allHandoverDisableInput" style="display: none;" data-action="save-jpg">Save as JPG</button>
+                                            <button type="button" id="svgbtn" class="button save allHandoverDisableInput" style="display: none;" data-action="save-svg">Save as SVG</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <canvas id="printcanvas" runat="server" style="display: none; border: 1px solid; background-color: #fff; width: 100%; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            <br />
+                            <div id="hdnSignImageBlock2" class="hdnSignImageBlock2" style="display: none; width: 60%;">
+                                <img src="" id="signimga" Class="img-responsive img-thumbnail chngeimg" />
+                            </div>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Scaffold Owner (Client) Representative</th>
+                        <td>
+                            <input type="text" id="txtsiteManager" placeholder="Enter Name" style="Width:50%" Class="form-control" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Scaffold Owner (Client) Representative Position</th>
+                        <td>
+                            @*<%--<Telerik:RadComboBox runat="server" DataTextField="Position" DataValueField="CRId" Width="50%" ID="ddlsiteManager"></Telerik:RadComboBox>--%>*@
+                            @*<Telerik:RadComboBox runat="server" ID="ddlsiteManager" MarkFirstMatch="true" Style="width: 40%;" DataValueField="CRId" DataTextField="Position" RenderMode="Lightweight" AppendDataBoundItems="true" Skin="Metro">
+                            </Telerik:RadComboBox>*@
+                            <select id="ddlsiteManager" class="ddldisableinput" style="width:50%;height:26px;"></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Scaffold Owner (Client) Rep To Sign Here</th>
+                        <td>
+                            @*<%--<button type="button" id="getSignature" class="btn w3-btn w3-ripple w3-blue-grey">Capture Signature</button>--%>*@
+                            <div class="hdnSignaturebefore" style="display: none;">
+                                <canvas id="canvas1234" style="border: 1px solid; background-color: #fff; width: 400px; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            </div>
+
+                            <div id="signature-pad1" class="signature-pad" style="height: 303px">
+                                <div class="signature-pad--body abcd">
+                                    <canvas id="drawcanvas1" style="background: none; width: 100%; height: 195px;"></canvas>
+                                </div>
+                                <br />
+                                <div class="signature-pad--footer">
+                                    <div class="signature-pad--actions">
+                                        <div>
+                                            <button type="button" id="clearbtn1" class="btn w3-btn w3-ripple w3-blue-grey button clear" data-action="clear1"><span class="icon" style="display: none;"><i class="fa fa-refresh" aria-hidden="true"></i></span><span class="text">Clear</span></button>
+                                            <button type="button" id="colorbtn1" class="button" style="display: none;" data-action="change-color1">Change color</button>
+                                            <button type="button" id="undobtn1" class="btn w3-btn w3-ripple w3-blue-grey button" data-action="undo1"><span class="icon" style="display: none;"><i class="fa fa-undo" aria-hidden="true"></i></span><span class="text">Undo</span></button>
+                                        </div>
+                                        <div>
+
+                                            <button type="button" onclick="GetSignature();" class="btn w3-btn w3-ripple w3-blue-grey" id="getContext1"><span class="icon" style="display: none;"><i class="fa fa-check-circle-o" aria-hidden="true"></i></span><span class="text">Confirm Signature</span></button>
+                                            <button type="button" id="pngbtn1" class="button save" style="display: none;" data-action="save-png1">Save as PNG</button>
+                                            <button type="button" id="jpgbtn1" class="button save" style="display: none;" data-action="save-jpg1">Save as JPG</button>
+                                            <button type="button" id="svgbtn1" class="button save" style="display: none;" data-action="save-svg1">Save as SVG</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <canvas id="printcanvas1" runat="server" style="display: none; border: 1px solid; background-color: #fff; width: 100%; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            <br />
+                            <div runat="server" id="hdnSignImageBlock" class="hdnSignImageBlock" style="display: none; width: 60%;">
+                                <img src="" id="Image1" Class="img-responsive img-thumbnail chngeimg" />
+                            </div>
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+
+            <div class="row" style="margin-bottom: 15px;">
+                <div class="col-lg-6 col-md-6 col-sm-3 col-xs-3">
+                    @*<%--<button type="button" runat="server" id="printbtn" class="btn w3-btn w3-ripple w3-red" title="Search">
+                        <i class="fa fa-downward" aria-hidden="true"></i> Download Pdf
+                    </button>--%>*@
+                </div>
+
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-3">
+                    @*<%--<asp:LinkButton ID="btndownload" runat="server" OnClick="btndownload_Click" Text="Download" Width="100%" CssClass="btn btn-primary"></asp:LinkButton>--%>
+
+                    <%-- <button runat="server" id="Button1" onserverclick="btnBacktoInspection_Click" class="btn w3-btn w3-ripple w3-red" title="Search">
+                        <i class="fa fa-backward" aria-hidden="true"></i> Back to Inspection List
+                    </button>--%>
+
+                    <%-- <button runat="server" id="Button4" onserverclick="btnBacktoInspection_Click" class="btn w3-btn w3-ripple w3-red" style="margin: 0 0 15px 0;display:none;" title="Search">
+                        <i class="fa fa-backward" aria-hidden="true"></i> Back
+                    </button>--%>*@
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    @*<asp:Button Text="Save" ID="btnSave" ValidationGroup="Save" runat="server" CssClass="btn w3-btn w3-ripple w3-green pull-right" OnClick="HandOverUpload" OnClientClick="checkMandatryField();" />*@
+                    <input type="button" value="Save" id="btnSave" Class="btn w3-btn w3-ripple w3-green pull-right" OnClick="btnSave_Click()" />
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                    @*<asp:Button Text="Confirm" ID="btnConfirm" ValidationGroup="Save" runat="server" CssClass="btn w3-btn w3-ripple w3-grey" Style="margin-right: 48px;" OnClick="btnConfirm_Click" OnClientClick="checkMandatryField();" />*@
+                    <input type="button" value="Confirm" id="btnConfirm" Class="btn w3-btn w3-ripple w3-grey" Style="margin-right: 48px;" OnClick="btnConfirm_Click()" OnClientClick="checkMandatryField();" />
+                </div>
+            </div>
+
+
+            <div id="div2" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h2">Alert</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label id="Label4">The Acknowledgement has to be accepted</label>
+                        </p>
+                    </div>
+                    <div class="row" style="margin-top: 21px; padding-bottom: 20px;">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <input type="button" value="Ok" id="ok" OnClick="ok_Click()" Class="btn w3-btn w3-ripple w3-red" />
+                            @*<%--<asp:LinkButton Text="ok" ID="ok" OnClick="ok_Click" runat="server" CssClass="btn w3-btn w3-ripple w3-red"></asp:LinkButton>--%>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            @*<%--Modal to show Data Success Message Starts--%>*@
+            <div id="saveContinueModal" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h6">Success!</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label id="Label3">Your Data is successfully uploaded</label><br />
+                            <label id="Label5">Press OK to continue</label>
+                        </p>
+
+                        <div class="row" style="margin-top: 21px; padding-bottom: 20px;">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>
+
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                @*<asp:Button Text="Ok" ID="btnsavecontinue" OnClick="btnsavecontinue_Click" runat="server" CssClass="btn w3-btn w3-ripple w3-red" />*@
+                                <input type="button" value="Ok" id="btnsavecontinue" OnClick="btnsavecontinue_Click()" Class="btn w3-btn w3-ripple w3-red" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            @*<%--Modal to show Data Success Message Ends--%>*@
+
+            @*<%--Modal to show Confirm Message Starts--%>*@
+            <div id="confirmModal" class="w3-modal" style="display: none">
+                <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+                    <header class="w3-container w3-dark-grey">
+                        <h4 class="w3-text-white" id="h4">Alert!</h4>
+                    </header>
+                    <div class="w3-container">
+                        <p class="w3-padding-top w3-text-grey">
+                            <label id="Label6">No changes can be made to this Hand Over Certificate once confirmed.</label><br />
+                            <label id="Label7">Do you wish to confirm?</label>
+                        </p>
+
+                        <div class="row" style="margin-top: 21px; padding-bottom: 20px;">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                @*<asp:Button Text="Ok" ID="btnConfirmok" OnClick="btnConfirm_ClickOk" runat="server" CssClass="btn w3-btn w3-ripple w3-green" />*@
+                                <input type="button" value="Ok" id="btnConfirmok" OnClick="btnConfirm_ClickOk()" Class="btn w3-btn w3-ripple w3-green" />
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                @*<asp:Button Text="Cancel" ID="btnConfirmCancel" OnClick="btnConfirmCancel_Click" runat="server" CssClass="btn w3-btn w3-ripple w3-red" />*@
+                                <input type="button" value="Cancel" id="btnConfirmCancel" OnClick="btnConfirmCancel_Click()" Class="btn w3-btn w3-ripple w3-red" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            @*<%--Modal to show Confirm Message Ends--%>*@
+        </form>
+    </div>
+
+        <script>
+
+
+            //Video Code Starts Here
+
+            $(document).ready(function () {
+                $("#getVideo").on("click", function () {
+                    $(".hdnVideobefore").css("display", "none");
+                    // $("#btnVideoModal").click();
+                    $("#btnVideoModal").css("display", "block");
+                    $("#cancelvideo").css("display", "block");
+
+                    $("#cancelvideo").on("click", function () {
+                        $("#btnVideoModal").css("display", "none");
+                        $("#tempVideo").val("");
+
+                        var mediaStream = window.stream;
+
+                        //Media Stream Stop Code starts here
+
+                        mediaStream.getAudioTracks()[0].stop();
+                        mediaStream.getVideoTracks()[0].stop();
+                    });
+
+                    var mediaSource = new MediaSource();
+                    mediaSource.addEventListener('sourceopen', handleSourceOpen, false);
+                    var mediaRecorder;
+                    var recordedBlobs;
+                    var sourceBuffer;
+
+                    //var imga = document.getElementById('myvideo');
+
+                    var gumVideo = document.querySelector('video#gum');
+                    var recordedVideo = document.querySelector('video#recorded');
+
+                    var recordButton = document.querySelector('button#record1');
+                    var playButton = document.querySelector('button#play');
+                    var downloadButton = document.querySelector('button#download');
+                    recordButton.onclick = toggleRecording;
+                    playButton.onclick = play;
+                    downloadButton.onclick = download;
+
+                    // Use old-style gUM to avoid requirement to enable the
+                    // Enable experimental Web Platform features flag in Chrome 49
+
+                    navigator.getUserMedia = navigator.getUserMedia ||
+                      navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+                    var constraints = {
+                        audio: true,
+                        video: true
+                    };
+
+                    navigator.getUserMedia(constraints, successCallback, errorCallback);
+
+                    function successCallback(stream) {
+                        console.log('getUserMedia() got stream: ', stream);
+                        window.stream = stream;
+                        if (window.URL) {
+                            gumVideo.src = window.URL.createObjectURL(stream);
+                        } else {
+                            gumVideo.src = stream;
+                        }
+                    }
+
+                    function errorCallback(error) {
+                        console.log('navigator.getUserMedia error: ', error);
+                    }
+
+                    function handleSourceOpen(event) {
+                        console.log('MediaSource opened');
+                        sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+                        console.log('Source buffer: ', sourceBuffer);
+                    }
+
+                    function handleDataAvailable(event) {
+                        if (event.data && event.data.size > 0) {
+                            recordedBlobs.push(event.data);
+                        }
+                    }
+
+                    function handleStop(event) {
+                        console.log('Recorder stopped: ', event);
+                    }
+
+                    function toggleRecording() {
+                        if (recordButton.textContent === 'Start Recording') {
+                            $("#cancelvideo").css("display", "none");
+                            startRecording();
+                        } else {
+                            stopRecording();
+                            recordButton.textContent = 'Start Recording';
+                            playButton.disabled = false;
+                            downloadButton.disabled = false;
+                            $("#cancelvideo").css("display", "none");
+                            //$("#videoModal .modal-header .close").click();
+                            $("#btnVideoModal").css("display", "none");
+                            $(".hdnVideobefore").css("display", "block");
+                            $("#VideoBlock").css("display", "none");
+                            play();
+                        }
+                    }
+
+                    // The nested try blocks will be simplified when Chrome 47 moves to Stable
+                    function startRecording() {
+                        var options = { mimeType: 'video/webm', bitsPerSecond: 100000 };
+                        recordedBlobs = [];
+                        try {
+                            mediaRecorder = new MediaRecorder(window.stream, options);
+                        } catch (e0) {
+                            console.log('Unable to create MediaRecorder with options Object: ', e0);
+                            try {
+                                options = { mimeType: 'video/webm,codecs=vp9', bitsPerSecond: 100000 };
+                                mediaRecorder = new MediaRecorder(window.stream, options);
+                            } catch (e1) {
+                                console.log('Unable to create MediaRecorder with options Object: ', e1);
+                                try {
+                                    options = 'video/vp8'; // Chrome 47
+                                    mediaRecorder = new MediaRecorder(window.stream, options);
+                                } catch (e2) {
+                                    alert('MediaRecorder is not supported by this browser.\n\n' +
+                                        'Try Firefox 29 or later, or Chrome 47 or later, with Enable experimental Web Platform features enabled from chrome://flags.');
+                                    console.error('Exception while creating MediaRecorder:', e2);
+                                    return;
+                                }
+                            }
+                        }
+                        console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
+                        recordButton.textContent = 'Stop Recording';
+                        playButton.disabled = true;
+                        downloadButton.disabled = true;
+                        mediaRecorder.onstop = handleStop;
+                        mediaRecorder.ondataavailable = handleDataAvailable;
+                        mediaRecorder.start(10); // collect 10ms of data
+                        console.log('MediaRecorder started', mediaRecorder);
+                    }
+
+                    function stopRecording() {
+
+                        mediaRecorder.stop();
+                        console.log('Recorded Blobs: ', recordedBlobs);
+
+                        var mediaStream = window.stream;
+
+                        //Media Stream Stop Code starts here
+
+                        mediaStream.getAudioTracks()[0].stop();
+                        mediaStream.getVideoTracks()[0].stop();
+
+                        //Media Stream Stop Code Ends Here
+
+
+
+                        recordedVideo.controls = true;
+                        var base64data;
+                        var superBuffer = new Blob(recordedBlobs, { type: 'video/webm' });
+
+                        var as = window.URL.createObjectURL(superBuffer);
+                        //alert(as);
+                        var reader = new window.FileReader();
+                        reader.readAsDataURL(superBuffer);
+
+                        var reader = new FileReader();
+                        reader.readAsDataURL(superBuffer);
+                        reader.onloadend = function () {
+                            base64data = reader.result;
+
+                            //base64data = base64data.replace('data:video/webm;base64,', '');
+                            console.log(base64data);
+                            // alert(base64data);
+                            // imga.setAttribute('src', "data:video/webm;base64," + baseStr64);
+                            //$("#tempimg").val('src'+','+ '"data:image/jpg;base64,"' + baseStr64);
+
+                            $("#tempVideo").val(base64data);
+                        }
+
+                    }
+
+                    function play() {
+                        var superBuffer = new Blob(recordedBlobs, { type: 'video/webm' });
+                        recordedVideo.src = window.URL.createObjectURL(superBuffer);
+                        //gumVideo.src = window.URL.createObjectURL(superBuffer);
+                    }
+
+                    function download() {
+                        var blob = new Blob(recordedBlobs, { type: 'video/webm' });
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.style.display = 'block';
+                        a.href = url;
+
+                        a.download = 'test.webm';
+                        document.body.appendChild(a);
+                        a.click();
+
+                        setTimeout(function () {
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                        }, 100);
+                    }
+                });
+            });
+
+            //Video Code Ends Here
+        </script>
+
+        <script>
+            $(document).ready(function () {
+                $("#getCamera").on("click", function () {
+                    $("#cancelsnap").on("click", function () {
+                        $("#btnOpenModel4").css("display", "none");
+                        cameraStream.stop();
+                    });
+                    $("#btnOpenModel4").css("display", "block");
+
+                    $(".hdnCamerabefore").css("display", "none");
+                    // Grab elements, create settings, etc.
+                    var canvas = document.getElementById('canvas');
+                    var context = canvas.getContext('2d');
+                    var video = document.getElementById('video');
+
+                    var cameraStream = null;
+
+                    var mediaConfig = { video: true };
+                    var errBack = function (e) {
+                        console.log('An error has occurred!', e)
+                    };
+
+                    // Put video listeners into place
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        navigator.mediaDevices.getUserMedia(mediaConfig).then(function (stream) {
+                            //    video.src = window.URL.createObjectURL(stream);  //Comment On 2 July 2019
+                            self.video.srcObject = stream;
+                            video.play();
+                            cameraStream = stream.getTracks()[0];
+                        });
+                    }
+
+                        /* Legacy code below! */
+                    else if (navigator.getUserMedia) { // Standard
+                        navigator.getUserMedia(mediaConfig, function (stream) {
+                            video.src = stream;
+                            video.play();
+
+                            cameraStream = stream.getTracks()[0];
+
+                        }, errBack);
+                    } else if (navigator.webkitGetUserMedia) { // WebKit-prefixed
+                        navigator.webkitGetUserMedia(mediaConfig, function (stream) {
+                            video.src = window.webkitURL.createObjectURL(stream);
+                            video.play();
+
+                            cameraStream = stream.getTracks()[0];
+
+                        }, errBack);
+                    } else if (navigator.mozGetUserMedia) { // Mozilla-prefixed
+                        navigator.mozGetUserMedia(mediaConfig, function (stream) {
+                            video.src = window.URL.createObjectURL(stream);
+                            video.play();
+
+                            cameraStream = stream.getTracks()[0];
+
+                        }, errBack);
+                    }
+
+                    // Trigger photo take
+                    document.getElementById('snap').addEventListener('click', function () {
+                        //$("#myModal4 .modal-header .close").click();
+                        $("#btnOpenModel4").css("display", "none");
+                        $(".hdnCamerabefore").css("display", "block");
+                        $("#Imageblock").css("display", "none");
+                        $("#btnchngeimg").css("display", "block");
+                        $("#btnchngg").css("display", "block");
+                        // context.drawImage(video, 0, 0, 640, 480);
+                        context.drawImage(video, 0, 0, 300, 300);
+
+                        var image = document.getElementById("canvas").toDataURL("image/png");
+                        $("#tempimg").val(image);
+
+                        //Added on 14-03-2023 to disable this button if client use Capture Button add image.
+                        if (image != null || image != '')
+                        {
+                            $(".photoupload").addClass('disablelabel');
+                            $(".iphotoupload").addClass('disablelabel');
+                            $("#mob_file_image").prop('disabled', true);
+                        }
+                        cameraStream.stop();
+
+                        //navigator.getUserMedia({ audio: false, video: true },
+                        //function (stream) {
+                        //    // can also use getAudioTracks() or getVideoTracks()
+                        //    var track = stream.getTracks()[0];  // if only one media track
+                        //    // ...
+                        //    track.stop();
+                        //},
+                        //function (error) {
+                        //    console.log('getUserMedia() error', error);
+                        //});
+
+                    });
+                });
+            });
+        </script>
+
+
+    <div id="btnOpenModel4" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h3" >Capture Your Image</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <video id="video" style="width:100%; height:auto" autoplay></video>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="cancelsnap" class="btn btn-danger">Cancel</button>
+                        </div>
+                    </div>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    @*<%--Model to Show Camera code Starts--%>*@
+    @*<%--<div class="container">
+        <button style="display: none;" id="btnOpenModel4" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal4">Open Modal</button>
+        <div class="modal fade" id="myModal4" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Capture Your Image</h4>
+                    </div>
+                    <div class="modal-body">
+                        <video id="video" style="width:100%; height:auto" autoplay></video>
+
+                        <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>--%>*@
+    @*<%--Model to Show Camera code Ends--%>*@
+
+    @*<%--Model to Show Audio code Starts--%>*@
+    <div id="btnAudioModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h5">Capture Your Audio</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <canvas id="analyser" style="width:1024px; height:500px"></canvas>
+                    @*<%--<div id="controls">
+
+                    </div>--%>*@
+
+                    <div class="row">
+                        <div id="controls" class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <img id="record" src="~/img/mic128.png" onclick="toggleRecording(this);">
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="cancelaud" class="btn btn-danger">Cancel</button>
+                        </div>
+                    </div>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    @*<%--Model to Show Audio code Ends--%>*@
+
+    @*<%--Model to Show Audio code Ends--%>*@
+
+    @*<%--Model to Show Video code Starts--%>*@
+    <div id="btnVideoModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h1">Capture Your Image</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <video id="gum" style="width:100%; height:auto" autoplay muted></video>
+                    <button id="play" style="display: none;" disabled>Play</button>
+                    <button id="download" style="display: none;" disabled>Download</button>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button id="record1" class="btn w3-btn w3-ripple w3-blue-grey">Start Recording</button>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" style="display: none;" id="cancelvideo" class="btn btn-danger">Cancel</button>
+                        </div>
+                    </div>
+                </p>
+            </div>
+
+        </div>
+    </div>
+    @*<%--Model to Show Video code Ends--%>*@
+    <script>
+        //Signature Code Starts Here
+        var wrapper = document.getElementById("signature-pad");
+        var clearButton = wrapper.querySelector("[data-action=clear]");
+        var changeColorButton = wrapper.querySelector("[data-action=change-color]");
+        var undoButton = wrapper.querySelector("[data-action=undo]");
+        var savePNGButton = wrapper.querySelector("[data-action=save-png]");
+        var saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
+        var saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
+        var canvas = document.getElementById("drawcanvas");
+
+        var mycanvas = document.getElementById("printcanvas");
+        var context = mycanvas.getContext('2d');
+        var signaturePad = new SignaturePad(canvas, {
+            // It's Necessary to use an opaque color when saving image as JPEG;
+            // this option can be omitted if only saving as PNG or SVG
+            backgroundColor: 'rgb(255, 255, 255)'
+        });
+
+        // Adjust canvas coordinate space taking into account pixel ratio,
+        // to make it look crisp on mobile devices.
+        // This also causes canvas to be cleared.
+        function resizeCanvas() {
+            //alert("hello");
+            // When zoomed out to less than 100%, for some very strange reason,
+            // some browsers report devicePixelRatio as less than 1
+            // and only part of the canvas is cleared then.
+            var ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+            //This part causes the canvas to be cleared
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            //canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+
+            // This library does not listen for canvas changes, so after the canvas is automatically
+            // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+            // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+            // that the state of this library is consistent with visual state of the canvas, you
+            // have to clear it manually.
+            signaturePad.clear();
+        }
+
+        // On mobile devices it might make more sense to listen to orientation change,
+        // rather than window resize events.
+        window.onresize = resizeCanvas;
+        resizeCanvas();
+
+        function download(dataURL, filename) {
+            var blob = dataURLToBlob(dataURL);
+            var url = window.URL.createObjectURL(blob);
+
+            var a = document.createElement("a");
+            a.style = "display: none";
+            a.href = url;
+            a.download = filename;
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        }
+
+        function GetSign() {
+            //alert("hello");
+            if (signaturePad.isEmpty()) {
+                var Response = { Result: "Failed", Message: "Please provide a signature first." };
+                CustomAlert(Response);
+            } else {
+                if ($('#confirmcheck').prop('checked') !== true) {
+                    $('#div2').css('display', 'block');
+                    $('#LoadingPanel1').hide();
+                    return;
+                }
+                $('#confirmcheck').prop('disabled', true);
+                $(".hdnSignImageBlock2").css("display", "none");
+                $("#printcanvas").css("display", "block");
+                $("#signature-pad").css("display", "none");
+                context.drawImage(canvas, 0, 0, 640, 480);
+                var dataURL = signaturePad.toDataURL();
+
+                $("#sketch_data").val(dataURL);
+                //alert(dataURL);
+                // download(dataURL, "signature.png");
+            }
+        }
+
+        // One could simply use Canvas#toBlob method instead, but it's just to show
+        // that it can be done using result of SignaturePad#toDataURL.
+        function dataURLToBlob(dataURL) {
+            // Code taken from https://github.com/ebidel/filer.js
+            var parts = dataURL.split(';base64,');
+            var contentType = parts[0].split(":")[1];
+            var raw = window.atob(parts[1]);
+            var rawLength = raw.length;
+            var uInt8Array = new Uint8Array(rawLength);
+
+            for (var i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+
+            return new Blob([uInt8Array], { type: contentType });
+        }
+
+        clearButton.addEventListener("click", function (event) {
+            signaturePad.clear();
+            $("#printcanvas").css("display", "none");
+            $(".hdnSignImageBlock").css("display", "none");
+        });
+
+        undoButton.addEventListener("click", function (event) {
+            var data = signaturePad.toData();
+
+            if (data) {
+                data.pop(); // remove the last dot or line
+                signaturePad.fromData(data);
+            }
+        });
+
+        changeColorButton.addEventListener("click", function (event) {
+            var r = Math.round(Math.random() * 255);
+            var g = Math.round(Math.random() * 255);
+            var b = Math.round(Math.random() * 255);
+            var color = "rgb(" + r + "," + g + "," + b + ")";
+
+            signaturePad.penColor = color;
+        });
+
+        savePNGButton.addEventListener("click", function (event) {
+            if (signaturePad.isEmpty()) {
+                alert("Please provide a signature first.");
+            } else {
+                var dataURL = signaturePad.toDataURL();
+                download(dataURL, "signature.png");
+            }
+        });
+
+        saveJPGButton.addEventListener("click", function (event) {
+            if (signaturePad.isEmpty()) {
+                alert("Please provide a signature first.");
+            } else {
+                var dataURL = signaturePad.toDataURL("image/jpeg");
+                download(dataURL, "signature.jpg");
+            }
+        });
+
+        saveSVGButton.addEventListener("click", function (event) {
+            if (signaturePad.isEmpty()) {
+                alert("Please provide a signature first.");
+            } else {
+                var dataURL = signaturePad.toDataURL('image/svg+xml');
+                download(dataURL, "signature.svg");
+            }
+        });
+        //Signature Code Ends Here
+    </script>
+
+
+
+
+
+    <script>
+
+        $(window).resize(function (e) {
+            resizeCanvas1();
+            resizeCanvas();
+        });
+
+        //Signature Code 2 Starts Here
+        var wrapper1 = document.getElementById("signature-pad1");
+        var clearButton1 = wrapper1.querySelector("[data-action=clear1]");
+        var changeColorButton1 = wrapper1.querySelector("[data-action=change-color1]");
+        var undoButton1 = wrapper1.querySelector("[data-action=undo1]");
+        var savePNGButton1 = wrapper1.querySelector("[data-action=save-png1]");
+        var saveJPGButton1 = wrapper1.querySelector("[data-action=save-jpg1]");
+        var saveSVGButton1 = wrapper1.querySelector("[data-action=save-svg1]");
+        var canvas1 = document.getElementById("drawcanvas1");
+
+        var mycanvas1 = document.getElementById("printcanvas1");
+        var context1 = mycanvas1.getContext('2d');
+        var signaturePad1 = new SignaturePad(canvas1, {
+            // It's Necessary to use an opaque color when saving image as JPEG;
+            // this option can be omitted if only saving as PNG or SVG
+            backgroundColor: 'rgb(255, 255, 255)'
+        });
+
+        // Adjust canvas coordinate space taking into account pixel ratio,
+        // to make it look crisp on mobile devices.
+        // This also causes canvas to be cleared.
+        function resizeCanvas1() {
+
+            //alert("bye");
+
+            // When zoomed out to less than 100%, for some very strange reason,
+            // some browsers report devicePixelRatio as less than 1
+            // and only part of the canvas is cleared then.
+            var ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+            //This part causes the canvas to be cleared
+            canvas1.width = canvas1.offsetWidth * ratio;
+            canvas1.height = canvas1.offsetHeight * ratio;
+            //canvas.height = canvas.offsetHeight * ratio;
+            canvas1.getContext("2d").scale(ratio, ratio);
+
+            // This library does not listen for canvas changes, so after the canvas is automatically
+            // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+            // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+            // that the state of this library is consistent with visual state of the canvas, you
+            // have to clear it manually.
+            signaturePad1.clear();
+        }
+
+        // On mobile devices it might make more sense to listen to orientation change,
+        // rather than window resize events.
+        window.onresize = resizeCanvas1;
+        resizeCanvas1();
+
+
+        function download(dataURL, filename) {
+            var blob = dataURLToBlob(dataURL);
+            var url = window.URL.createObjectURL(blob);
+
+            var a = document.createElement("a");
+            a.style = "display: none";
+            a.href = url;
+            a.download = filename;
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        }
+
+        function GetSignature() {
+            //alert("hello");
+            if (signaturePad1.isEmpty()) {
+                var Response = { Result: "Failed", Message: "Please provide a signature first." };
+                CustomAlert(Response);
+            } else {
+                $(".hdnSignImageBlock").css("display", "none");
+                $("#printcanvas1").css("display", "block");
+                $("#signature-pad1").css("display", "none");
+                context1.drawImage(canvas1, 0, 0, 640, 480);
+                var dataURL1 = signaturePad1.toDataURL();
+
+                $("#sketch_data2").val(dataURL1);
+                //alert(dataURL);
+                // download(dataURL, "signature.png");
+            }
+        }
+
+        // One could simply use Canvas#toBlob method instead, but it's just to show
+        // that it can be done using result of SignaturePad#toDataURL.
+        function dataURLToBlob(dataURL) {
+            // Code taken from https://github.com/ebidel/filer.js
+            var parts = dataURL.split(';base64,');
+            var contentType = parts[0].split(":")[1];
+            var raw = window.atob(parts[1]);
+            var rawLength = raw.length;
+            var uInt8Array = new Uint8Array(rawLength);
+
+            for (var i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+
+            return new Blob([uInt8Array], { type: contentType });
+        }
+
+        clearButton1.addEventListener("click", function (event) {
+            signaturePad1.clear();
+            $("#printcanvas1").css("display", "none");
+            $(".hdnSignImageBlock2").css("display", "none");
+        });
+
+        undoButton1.addEventListener("click", function (event) {
+            var data = signaturePad1.toData();
+
+            if (data) {
+                data.pop(); // remove the last dot or line
+                signaturePad1.fromData(data);
+            }
+        });
+
+        changeColorButton1.addEventListener("click", function (event) {
+            var r = Math.round(Math.random() * 255);
+            var g = Math.round(Math.random() * 255);
+            var b = Math.round(Math.random() * 255);
+            var color = "rgb(" + r + "," + g + "," + b + ")";
+
+            signaturePad.penColor = color;
+        });
+
+        savePNGButton1.addEventListener("click", function (event) {
+            if (signaturePad1.isEmpty()) {
+                alert("Please provide a signature first.");
+            } else {
+                var dataURL = signaturePad1.toDataURL();
+                download(dataURL, "signature.png");
+            }
+        });
+
+        saveJPGButton1.addEventListener("click", function (event) {
+            if (signaturePad1.isEmpty()) {
+                alert("Please provide a signature first.");
+            } else {
+                var dataURL = signaturePad1.toDataURL("image/jpeg");
+                download(dataURL, "signature.jpg");
+            }
+        });
+
+        saveSVGButton1.addEventListener("click", function (event) {
+            if (signaturePad1.isEmpty()) {
+                alert("Please provide a signature first.");
+            } else {
+                var dataURL = signaturePad1.toDataURL('image/svg+xml');
+                download(dataURL, "signature.svg");
+            }
+        });
+        //Signature Code 2 Ends Here
+
+    </script>
+</body>
+</html>
+

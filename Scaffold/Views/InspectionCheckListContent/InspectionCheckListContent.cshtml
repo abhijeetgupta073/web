@@ -1,0 +1,841 @@
+﻿
+@{
+    ViewBag.Title = "InspectionCheckListContent";
+}
+@*<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>*@
+<script src="~/Content/js/InspectionCheckListContent.js?V1=5"></script>
+<script>
+        $(document).ready(function () {
+            $('.double-scroll').doubleScroll();
+
+            if ('@ViewBag.InspectionCheckListColor' == 'True') {
+                $('#RadioBtnColorBlack').prop('checked', true);
+                $('#RadioBtnColorGreenRed').prop('checked', false);
+                //RadioBtnColorGreenRed.Checked = false;
+            } else {
+                $('#RadioBtnColorBlack').prop('checked', false);
+                $('#RadioBtnColorGreenRed').prop('checked', true);
+            }
+            DropdownBind();
+            //RadioButtonBind();
+
+            if (getParameterByName('RID') == null) {
+                $('#btnCAncel').css('display', 'none');
+                $('#btnsetasdefaultjob').css('display', 'none');
+            } else {
+               $('#btnsetdefault').css('display', 'none');
+            }
+
+            if('@ViewBag.ddlCheckListSelectedValues'!="" && '@ViewBag.ddlCheckListSelectedValues'!="0")
+            {
+                $('#ddlCheckList').val('@ViewBag.ddlCheckListSelectedValues');
+            }
+            RadioButtonBind();
+             setTimeout(function () {
+                GetInspectionCheckListData();
+
+            }, 500);
+        });
+
+
+
+        $(document).ready(function () {
+            //    $("#ulalwaysactive").css("display", "none");
+            var screensize = $(window).width();
+            if (screensize < 1150 && screensize > 650) {
+                ($BODY.hasClass('nav-md'))
+                $('#CreateNewDropDown').css("margin-top", "2px");
+                $BODY.removeClass('nav-md').addClass('nav-sm');
+                $LEFT_COL.removeClass('scroll-view');
+                //$('#BlackSection').css('display', 'block');
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "38px");
+                $('#leftbarsection').css('margin-top', '0px');
+
+
+            }
+
+
+            else {
+                if (screensize < (650)) {
+                    $BODY.removeClass('nav-sm')
+                    $('#imgLogo').parent().css('display', 'none');
+                    $('#imgLogo1').css('display', 'block').css("height", "52px");
+                }
+                else {
+                    $('#CreateNewDropDown').css("margin-top", "6px");
+                    $BODY.removeClass('nav-sm').addClass('nav-md');
+                    //$('#BlackSection').css('display', 'none');
+                    $('#imgLogo').parent().css('display', 'block');
+                    $('#imgLogo1').css('display', 'none');
+                    $('#leftbarsection').css('margin-top', '40px');
+                }
+
+            }
+        });
+
+        function ButtonClient() {
+            $('#LoadingPanel1').css('display', 'block');
+        }
+</script>
+<style>
+    /*.setWidth0,.setWidth1,.setWidth2,.setWidth3,.setWidth4{*/
+    .setWidth0 {
+        /*min-width:2px;*/
+        min-width: 50px;
+    }
+
+    .setWidth5 {
+        min-width: 320px;
+    }
+
+    .setWidth6 {
+        min-width: 50px;
+    }
+
+    .RadComboBoxDropDown_Simple .rcbHovered {
+        background-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbInner {
+        border-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbActionButton {
+        border-color: #ffffff !important;
+        background-color: #ffffff !important;
+    }
+
+    html .RadComboBox .rcbInner, html .RadComboBox .rcbActionButton {
+        border-radius: 4px;
+    }
+
+
+    #ddlCheckList table {
+        height: 30px !important;
+    }
+
+    #ddlCheckList_Input {
+        height: 26px;
+    }
+
+    .rgCommandTable td:nth-child(1) {
+        display: block !important;
+    }
+
+    .RadGrid_Default .rgCommandRow {
+        color: #000000;
+        float: right !important;
+        margin-left: 1145px !important;
+        position: absolute;
+        top: 13px;
+        text-decoration: none;
+    }
+
+    .rgCommandRow .rgAdd {
+        position: absolute;
+        float: right !important;
+        left: 450px !important;
+    }
+
+    .rgCommandRow .rgSave {
+        position: absolute;
+        float: right !important;
+        left: 460px !important;
+    }
+
+    .rgCommandRow .rgCancel {
+        position: absolute;
+        float: right !important;
+        left: 480px !important;
+    }
+
+    @@media(min-width:766px) and (max-width:1500px) {
+        #btnsetasdefaultjob {
+            margin-top: 0px !important;
+        }
+
+        #btnsetdefault {
+            margin-top: 0px !important;
+        }
+    }
+
+    @@media(min-width:300px) and (max-width:766px) {
+        #btnCAncel {
+            margin-top: 8px !important;
+        }
+
+        #btnsetdefault {
+            margin-top: 8px !important;
+        }
+
+        #btnsetasdefaultjob {
+            margin-top: 8px !important;
+        }
+    }
+
+    @@media(max-width:534px) {
+        .xshight {
+            height: 217px !important;
+            width: 374px !important;
+        }
+
+        #FileUploadSelectfile {
+            /*width:117px !important;*/
+            /*margin-top:12px !important;*/
+        }
+
+        #btnLoad {
+            width: 66px;
+            /*margin-top:12px !important;*/
+            font-size: 11px;
+        }
+
+        #lblselectfile {
+            /*width: 57px !important;
+                    margin-top:12px !important;*/
+            font-size: 11px;
+        }
+
+        #btnSave {
+            /*margin-top: 15px;*/
+            width: 52% !important;
+        }
+
+        #FileUploadSelectfile {
+            /*width: 150px !important;
+    margin-top: 16px !important;*/
+            font-size: 11px !important;
+        }
+    }
+
+    @@media (min-width:362px) and (max-width:532px) {
+        #btnoption {
+            width: 335px !important;
+        }
+
+        #btndownload {
+            font-size: 9px !important;
+            padding-left: 2px !important;
+        }
+
+        #lblLoad {
+            font-size: 12px !important;
+        }
+
+        #lblDeleteList {
+            font-size: 12px !important;
+        }
+    }
+
+    #lblcopy {
+        font-size: 10px !important;
+    }
+
+    #lblCheckListCopy {
+        font-size: 10px !important;
+    }
+
+    #lblChecklistName {
+        font-size: 10px !important;
+    }
+
+    #btnSave {
+        width: 70px !important;
+    }
+
+    #txtCheckList, #txtcopy, #txtFileChecklist {
+        border-radius: 4px;
+        border-color: #e5e5e5 !important;
+    }
+
+    #lblChecklistDis {
+        text-decoration: underline;
+        font-weight: bold;
+    }
+
+    .requiredColumn {
+        border-color: red !important;
+    }
+</style>
+<input type="hidden" id="hdnDeleteFlag" />
+<input type="hidden" id="hdnContentID" />
+<input type="hidden" id="hdnChildContentID" />
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-industry"></i>&nbsp;<span ID="lblclient" Font-Size="16px" Font-Bold="true">Inspection CheckList</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="row" id="rowActive">
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="width: 0px;">
+                @*<asp:RadioButton ID="RadioButtonActive" runat="server" Style="margin-right: 2px !important;" GroupName="Radiobtn1" OnCheckedChanged="RadioButtonActive_CheckedChanged" AutoPostBack="true" />*@
+                <input type="radio" id="RadioButtonActive" Style="margin-right: 2px !important;" name="Radiobtn1" onchange="RadioButtonActive_CheckedChanged()" />
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-5 col-xs-4">
+                <label>Active</label>
+            </div>
+
+            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-1" style="width: 0px;">
+                @*<asp:RadioButton ID="RadioButtonInActive" runat="server" Style="margin-right: 2px !important;" GroupName="Radiobtn1" OnCheckedChanged="RadioButtonInActive_CheckedChanged" AutoPostBack="true" />*@
+                <input type="radio" id="RadioButtonInActive" Style="margin-right: 2px !important;" name="Radiobtn1" onchange="RadioButtonInActive_CheckedChanged()" />
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4">
+                <label>InActive</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="row">
+
+            <div class="col-lg-3 col-md-5 col-sm-5 col-xs-5">
+                <label>Tick Colour:</label>
+            </div>
+
+            <div class="col-lg-2 col-md-1 col-sm-1 col-xs-1" style="width: 0px;">
+                @*<asp:RadioButton ID="RadioBtnColorGreenRed" runat="server" Style="margin-right: 2px !important;" GroupName="Radiobtncolor" OnCheckedChanged="RadioBtnColorGreenRed_CheckedChanged" AutoPostBack="true" />*@
+                <input type="radio" id="RadioBtnColorGreenRed" Style="margin-right: 2px !important;" name="Radiobtncolor" onchange="RadioBtnColorGreenRed_CheckedChanged()" />
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4">
+                <label>Green/Red</label>
+            </div>
+
+            <div class="col-lg-2 col-md-1 col-sm-1 col-xs-1" style="width: 0px;">
+                @*<asp:RadioButton ID="RadioBtnColorBlack" runat="server" Style="margin-right: 2px !important;" GroupName="Radiobtncolor" OnCheckedChanged="RadioBtnColorBlack_CheckedChanged" AutoPostBack="true" />*@
+                <input type="radio" id="RadioBtnColorBlack" Style="margin-right: 2px !important;" name="Radiobtncolor" onchange="RadioBtnColorBlack_CheckedChanged()" />
+            </div>
+            <div class="col-lg-3 col-md-1 col-sm-1 col-xs-1">
+                <label>Black</label>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-sm-3 col-md-2 col-xs-4">
+        <label>Select Checklist</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-3 col-md-3 col-sm-5 col-xs-9">
+        @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlCheckList" Width="100%" AutoPostBack="true" OnSelectedIndexChanged="ddlCheckList_SelectedIndexChanged" DataValueField="checklistID" DataTextField="checklistdescription" runat="server" MarkFirstMatch="true">
+            </Telerik:RadComboBox>*@
+        <select id="ddlCheckList" style="width:100%" class="form-control" onchange="ddlCheckList_SelectedIndexChanged()"></select>
+    </div>
+    <div class="col-lg-7 col-md-7 col-sm-4 col-xs-8">
+        @*<asp:LinkButton ID="btnsetdefault" runat="server" OnClick="btnsetdefault_Click" Style="height: 30px; padding-top: 6px; margin-top: 0px;" CssClass="btn btn-success"><i class="fa fa-cube"> </i>&nbsp;&nbsp;Set as Default for client</asp:LinkButton>
+
+
+            <asp:LinkButton ID="btnsetasdefaultjob" runat="server" OnClick="btnsetdefault_Click" Style="height: 30px; padding-top: 6px;" CssClass="btn btn-success"><i class="fa fa-cube"> </i>&nbsp;&nbsp;Set as default for job</asp:LinkButton>*@
+
+        <button id="btnsetdefault" OnClick="btnsetdefault_Click()" Style="height: 30px; padding-top: 6px; margin-top: 0px;" Class="btn btn-success"><i class="fa fa-cube"> </i>&nbsp;&nbsp;Set as Default for client</button>
+        <button id="btnsetasdefaultjob" OnClick="btnsetdefault_Click()" Style="height: 30px; padding-top: 6px;" Class="btn btn-success"><i class="fa fa-cube"> </i>&nbsp;&nbsp;Set as default for job</button>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 ">
+        @*<asp:LinkButton ID="btnCAncel" runat="server" OnClick="btnCAncel_Click" Style="height: 30px; padding-top: 6px;" CssClass="w3-btn w3-small  nln-bg w3-text-white"><i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</asp:LinkButton>
+            <asp:LinkButton ID="btnback" runat="server" OnClick="btnCAncel_Click" Style="height: 30px; display: none; padding-top: 6px;" CssClass="w3-btn w3-small  nln-bg w3-text-white"><i class="fa fa-backward"> </i>&nbsp;&nbsp;Back</asp:LinkButton>*@
+
+        <button id="btnCAncel" OnClick="btnCAncel_Click()" Style="height: 30px; padding-top: 6px;" Class="w3-btn w3-small  nln-bg w3-text-white"><i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</button>
+        <button id="btnback" OnClick="btnCAncel_Click()" Style="height: 30px; display: none; padding-top: 6px;" Class="w3-btn w3-small  nln-bg w3-text-white"><i class="fa fa-backward"> </i>&nbsp;&nbsp;Back</button>
+    </div>
+</div>
+<div class="row ">
+</div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-7 col-sm-10 col-xs-12">
+        <div id="InspectionCheckList" style="color: black; width: 100%;margin-top:5px;background-color: #CCFFFF;">
+            <table id="tblInspectionCheckList" class="table table-striped " style="width:100%!important;">
+                <thead>
+                    <tr>
+                        <th style="display:none"></th>
+                        <th style="display:none"></th>
+                        <th style="display:none"></th>
+                        <th class='setWidth0'></th>
+                        @*<th class='setWidth1'></th>
+                            <th class='setWidth2'></th>
+                            <th class='setWidth3'></th>
+                            <th class='setWidth4'></th>*@
+                        <th class='setWidth5'>Level 1</th>
+                        <th class='setWidth6'></th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyInspectionCheckList"></tbody>
+            </table>
+        </div>
+
+        @*<Telerik:RadGrid runat="server" ID="GridInspectionCheckList" OnDetailTableDataBind="GridInspectionCheckList_DetailTableDataBind" OnItemDataBound="GridInspectionCheckList_ItemDataBound" OnItemCommand="GridInspectionCheckList_ItemCommand" Width="100%"
+                             AllowPaging="false" AutoGenerateColumns="false" AllowFilteringByColumn="false" AllowSorting="false" GroupingSettings-CaseSensitive="false" OnNeedDataSource="GridInspectionCheckList_NeedDataSource" OnBatchEditCommand="GridInspectionCheckList_BatchEditCommand" ClientSettings-EnableRowHoverStyle="true" Skin="Metro">
+                <ClientSettings EnableAlternatingItems="false" ClientEvents-OnRowDblClick="RowDblClick">
+                    <Selecting />
+                </ClientSettings>
+                <PagerStyle AlwaysVisible="true" />
+                <MasterTableView Name="ViewLevel1" EnableHierarchyExpandAll="true" BackColor="#ccffff" CommandItemSettings-AddNewRecordText="" CommandItemSettings-SaveChangesText="" CommandItemSettings-CancelChangesText="" DataKeyNames="ContentID,itemOrder,checklistItem, CheckListID" CommandItemDisplay="Top" EditMode="Batch" CommandItemSettings-ShowRefreshButton="false" CommandItemSettings-ShowAddNewRecordButton="true" CommandItemSettings-ShowSaveChangesButton="true" CommandItemSettings-ShowCancelChangesButton="true">
+
+                    <BatchEditingSettings EditType="row" />
+                    <Columns>
+                        <Telerik:GridTemplateColumn>
+                            <ItemTemplate>
+                                <Telerik:RadButton runat="server" ID="RadButton1" CommandName="ExportDetailTable" Text="Export first detail table"></Telerik:RadButton>
+                            </ItemTemplate>
+                        </Telerik:GridTemplateColumn>
+                        <Telerik:GridTemplateColumn HeaderStyle-Width="25px" AllowFiltering="false" ItemStyle-Width="10px">
+                            <ItemTemplate>
+                                <asp:LinkButton ID="lnkorderupLevel1" runat="server" CausesValidation="false" CommandName="OrderUpLevel1"> <i style="color:grey" class="fa fa-arrow-up"></i> </asp:LinkButton>
+                            </ItemTemplate>
+                        </Telerik:GridTemplateColumn>
+                        <Telerik:GridTemplateColumn HeaderStyle-Width="25px" AllowFiltering="false" ItemStyle-Width="10px">
+                            <ItemTemplate>
+                                <asp:LinkButton ID="lnkorderdownLevel1" runat="server" CausesValidation="false" CommandName="OrderDownLevel1"> <i style="color:grey" class="fa fa-arrow-down"></i> </asp:LinkButton>
+                            </ItemTemplate>
+                        </Telerik:GridTemplateColumn>
+                        <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-Width="30px" AllowFiltering="false" UniqueName="UniqueDelete">
+                            <ItemTemplate>
+                                <asp:LinkButton ID="btndelete" runat="server" ToolTip="delete" Text="delete" CommandName="Delete"><i class="fa fa-trash"></i></asp:LinkButton>
+                            </ItemTemplate>
+                        </Telerik:GridTemplateColumn>
+
+                        <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-Width="30px" AllowFiltering="false" UniqueName="UniqueEdit">
+                            <ItemTemplate>
+                                <a title="Edit" style="cursor: pointer;"><i class="fa fa-pencil"></i></a>
+                            </ItemTemplate>
+                        </Telerik:GridTemplateColumn>
+                        <Telerik:GridTemplateColumn FilterControlWidth=" 90%" ItemStyle-Width="90%" HeaderStyle-Width="90%" HeaderText="Level 1" DataField="CheckListContent" DataType="System.String">
+                            <ItemTemplate>
+                                <asp:Label ID="lblInspcheckContent" Width="100%" runat="server" Text='<%#Eval("CheckListContent")%>'></asp:Label>
+                            </ItemTemplate>
+                            <EditItemTemplate>
+                                <Telerik:RadTextBox ID="txtInspcheckContent" Width="100%" Text='<%#Eval("CheckListContent") %>' runat="server"></Telerik:RadTextBox>
+
+                                <asp:RequiredFieldValidator ValidationGroup="ContentSave" ID="rfvtxtInspcheckContente" Style="position: relative; margin-top: -24px" CssClass="rdf-text" runat="server" ControlToValidate="txtInspcheckContent" ErrorMessage="* Required" ForeColor="Red"></asp:RequiredFieldValidator>
+                            </EditItemTemplate>
+                        </Telerik:GridTemplateColumn>
+                        <Telerik:GridTemplateColumn FilterControlWidth=" 20px" ItemStyle-Width="10px" HeaderStyle-Width="55px" DataField="IsNA" UniqueName="IsNA" DataType="System.String">
+                            <ItemTemplate>
+
+                                <asp:CheckBox ID="chklevelNA" Enabled="false" runat="server" Text="NA" Checked='<%# Eval("IsNA").Equals(true)?true:false %>' />
+                            </ItemTemplate>
+                            <EditItemTemplate>
+                                <asp:CheckBox ID="chklevelNAEdit" runat="server" Text="NA" Checked='<%# Eval("IsNA").Equals(true)?true:false %>' />
+                            </EditItemTemplate>
+                        </Telerik:GridTemplateColumn>
+
+                    </Columns>
+                    <DetailTables>
+                        <Telerik:GridTableView Name="ViewLevel2" BackColor="#ffd7ae" EnableHierarchyExpandAll="true" CommandItemSettings-AddNewRecordText="" CommandItemSettings-ShowAddNewRecordButton="true" CommandItemSettings-CancelChangesText="" CommandItemSettings-SaveChangesText="" CommandItemSettings-ShowSaveChangesButton="true" CommandItemSettings-ShowCancelChangesButton="true"
+                                               CommandItemDisplay="Top" BatchEditingSettings-EditType="Row" CommandItemSettings-ShowRefreshButton="false" EditMode="Batch" AutoGenerateColumns="false" DataKeyNames="ContentID,checklistItem,itemOrder,CheckListID" Width="100%">
+                            <Columns>
+                                <Telerik:GridTemplateColumn HeaderStyle-Width="25px" AllowFiltering="false" ItemStyle-Width="10px">
+                                    <ItemTemplate>
+                                        <asp:LinkButton ID="lnkorderupLevel2" runat="server" CausesValidation="false" CommandName="OrderUpLevel2"> <i style="color:grey" class="fa fa-arrow-up"></i> </asp:LinkButton>
+                                    </ItemTemplate>
+                                </Telerik:GridTemplateColumn>
+                                <Telerik:GridTemplateColumn HeaderStyle-Width="25px" AllowFiltering="false" ItemStyle-Width="10px">
+                                    <ItemTemplate>
+                                        <asp:LinkButton ID="lnkorderdownLevel2" runat="server" CausesValidation="false" CommandName="OrderDownLevel2"> <i style="color:grey" class="fa fa-arrow-down"></i> </asp:LinkButton>
+                                    </ItemTemplate>
+                                </Telerik:GridTemplateColumn>
+                                <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-Width="30px" AllowFiltering="false">
+                                    <ItemTemplate>
+                                        <asp:LinkButton ID="btndelete" runat="server" ToolTip="delete" Text="delete" CommandName="Delete"><i class="fa fa-trash"></i></asp:LinkButton>
+                                    </ItemTemplate>
+                                </Telerik:GridTemplateColumn>
+                                <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-Width="30px" AllowFiltering="false">
+                                    <ItemTemplate>
+                                        <a title="Edit" style="cursor: pointer;"><i class="fa fa-pencil"></i></a>
+                                    </ItemTemplate>
+                                </Telerik:GridTemplateColumn>
+                                <Telerik:GridTemplateColumn FilterControlWidth=" 90%" ItemStyle-Width="90%" HeaderStyle-Width="90%" HeaderText="Level 2" DataField="CheckListContent" DataType="System.String">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lblInspcheckContentDetailedLevel2" runat="server" Text='<%#Eval("CheckListContent")%>'></asp:Label>
+                                    </ItemTemplate>
+                                    <EditItemTemplate>
+                                        <Telerik:RadTextBox ID="txtInspcheckContentDetailedLevel2" Width="90%" Text='<%#Eval("CheckListContent") %>' runat="server"></Telerik:RadTextBox>
+
+                                        <asp:RequiredFieldValidator ID="rfvtxtInspcheckContentDetailedeLevel2" Style="position: relative; margin-top: -24px" CssClass="rdf-text" runat="server" ControlToValidate="txtInspcheckContentDetailedLevel2" ErrorMessage="* Required"
+                                                                    ForeColor="Red"></asp:RequiredFieldValidator>
+                                    </EditItemTemplate>
+                                </Telerik:GridTemplateColumn>
+                                <Telerik:GridTemplateColumn FilterControlWidth=" 20px" ItemStyle-Width="10px" HeaderStyle-Width="55px" DataField="IsNA" UniqueName="IsNA" DataType="System.String">
+                                    <ItemTemplate>
+                                        <asp:CheckBox ID="chklevelNA" Enabled="false" runat="server" Text="NA" Checked='<%#Eval("IsNA").Equals(true)?true:false %>' />
+                                    </ItemTemplate>
+
+                                    <EditItemTemplate>
+                                        <asp:CheckBox ID="chklevelNAEdit" runat="server" Text="NA" Checked='<%#Eval("IsNA").Equals(true)?true:false %>' />
+                                    </EditItemTemplate>
+                                </Telerik:GridTemplateColumn>
+                            </Columns>
+                            <%--<DetailTables>
+                                <Telerik:GridTableView Name="ViewLevel3" BackColor="#80ff80" CssClass="Level3" EnableHierarchyExpandAll="true" CommandItemSettings-AddNewRecordText="" CommandItemSettings-ShowAddNewRecordButton="true" CommandItemSettings-SaveChangesText=""
+                                                       CommandItemSettings-CancelChangesText="" CommandItemSettings-ShowSaveChangesButton="true" CommandItemSettings-ShowCancelChangesButton="true" BatchEditingSettings-EditType="Row"
+                                                       CommandItemDisplay="Top" CommandItemSettings-ShowRefreshButton="false" EditMode="Batch" AutoGenerateColumns="false" DataKeyNames="ContentID,itemOrder" Width="100%">
+                                    <Columns>
+                                        <Telerik:GridTemplateColumn HeaderStyle-Width="25px" AllowFiltering="false" ItemStyle-Width="10px">
+                                            <ItemTemplate>
+                                                <asp:LinkButton ID="lnkorderupLevel3" runat="server" CausesValidation="false" CommandName="OrderUpLevel3"> <i style="color:grey" class="fa fa-arrow-up"></i> </asp:LinkButton>
+                                            </ItemTemplate>
+                                        </Telerik:GridTemplateColumn>
+                                        <Telerik:GridTemplateColumn HeaderStyle-Width="25px" AllowFiltering="false" ItemStyle-Width="10px">
+                                            <ItemTemplate>
+                                                <asp:LinkButton ID="lnkorderdownLevel3" runat="server" CausesValidation="false" CommandName="OrderDownLevel3"> <i style="color:grey" class="fa fa-arrow-down"></i> </asp:LinkButton>
+                                            </ItemTemplate>
+                                        </Telerik:GridTemplateColumn>
+                                        <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-Width="30px" AllowFiltering="false">
+                                            <ItemTemplate>
+                                                <asp:LinkButton ID="btndelete" runat="server" ToolTip="delete" Text="delete" CommandName="Delete"><i class="fa fa-trash"></i></asp:LinkButton>
+                                            </ItemTemplate>
+                                        </Telerik:GridTemplateColumn>
+                                        <Telerik:GridTemplateColumn FilterControlWidth=" 97%" ItemStyle-Width="100%" HeaderStyle-Width="100%" HeaderText="Level 3" DataField="CheckListContent" DataType="System.String">
+                                            <ItemTemplate>
+                                                <asp:Label ID="lblInspcheckContentDetailedLevel3" runat="server" Text='<%#Eval("CheckListContent")%>'></asp:Label>
+                                            </ItemTemplate>
+                                            <EditItemTemplate>
+                                                <Telerik:RadTextBox ID="txtInspcheckContentDetailedLevel3" Width="90%" Text='<%#Eval("CheckListContent") %>' runat="server"></Telerik:RadTextBox>
+
+                                                <asp:RequiredFieldValidator ID="rfvtxtInspcheckContentDetailedeLevel3" Style="position: relative; margin-top: -24px" CssClass="rdf-text" runat="server" ControlToValidate="txtInspcheckContentDetailedLevel3" ErrorMessage="* Required" ForeColor="Red"></asp:RequiredFieldValidator>
+                                            </EditItemTemplate>
+                                        </Telerik:GridTemplateColumn>
+                                        <Telerik:GridTemplateColumn FilterControlWidth=" 20px" ItemStyle-Width="10px" HeaderStyle-Width="55px" UniqueName="IsNA" DataField="IsNA" DataType="System.String">
+                                            <ItemTemplate>
+
+                                                <asp:CheckBox ID="chklevelNA" Enabled="true" runat="server" Text="NA" Checked='<%#Eval("IsNA").Equals(true)?true:false %>' />
+                                            </ItemTemplate>
+                                            <EditItemTemplate>
+                                                <asp:CheckBox ID="chklevelNAEdit" runat="server" Text="NA" Checked='<%#Eval("IsNA").Equals(true)?true:false %>' />
+                                            </EditItemTemplate>
+                                        </Telerik:GridTemplateColumn>
+                                    </Columns>
+                                </Telerik:GridTableView>
+                            </DetailTables>--%>
+                        </Telerik:GridTableView>
+                    </DetailTables>
+                </MasterTableView>
+            </Telerik:RadGrid>*@
+    </div>
+
+    <div class="col-lg-6 col-md-7 col-sm-12 col-xs-12 xsheight" id="hidediv">
+        <div style="height: 189px; width: 530px" class="x_panel w3-padding-0 w3-card-4 xshight" id="btnoption">
+            <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                <h4 style="margin-top: 6px; font-size: 15px" id="H4"><i class="fa fa-list"></i>&nbsp;Option <span style="margin-left: 5px;" id="Span1" runat="server"></span></h4>
+
+                <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;"></ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content" style="margin-bottom: 3px!important;">
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                        @*<asp:RadioButton ID="RadiobtnCreateNew" runat="server" Style="margin-left: 5px;" GroupName="Radiobtn" OnCheckedChanged="RadiobtnCreateNew_CheckedChanged" AutoPostBack="true" />*@
+                        <input type="radio" id="RadiobtnCreateNew" Style="margin-left: 5px;" name="Radiobtn" onchange="RadiobtnCreateNew_CheckedChanged()" />
+                        <label>Create New</label>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                        @*<asp:RadioButton ID="RadiobtnCopy" runat="server" Style="margin-left: 5px;" GroupName="Radiobtn" OnCheckedChanged="RadiobtnCopy_CheckedChanged" AutoPostBack="true" />*@
+                        <input type="radio" id="RadiobtnCopy" Style="margin-left: 5px;" name="Radiobtn" onchange="RadiobtnCopy_CheckedChanged()" />
+                        <label>Copy</label>
+                    </div>
+
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                        @*<asp:RadioButton ID="RadiobtnLoad" runat="server" Style="margin-left: 5px;" GroupName="Radiobtn" OnCheckedChanged="RadiobtnLoad_CheckedChanged" AutoPostBack="true" />*@
+                        <input type="radio" id="RadiobtnLoad" Style="margin-left: 5px;" name="Radiobtn" onchange="RadiobtnLoad_CheckedChanged()" />
+                        <label>Load</label>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                        @*<asp:RadioButton OnCheckedChanged="RadiobtnDelete_CheckedChanged" ID="RadiobtnDelete" runat="server" Style="margin-left: 5px;" GroupName="Radiobtn" AutoPostBack="true" />
+                        *@
+                        <input type="radio" onchange="RadiobtnDelete_CheckedChanged()" id="RadiobtnDelete" Style="margin-left: 5px;" name="Radiobtn" />
+                        <label>Delete</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="rowChecklistNew" style="display: none;">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+                    @*<asp:Label ID="lblChecklistName" runat="server" Style="display: none; color: gray">CheckList Name <span style="color: red">&nbsp*</span></asp:Label>*@
+                    <label id="lblChecklistName" Style="display: none; color: gray">CheckList Name<span style="color: red">&nbsp*</span></label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <input type="text" id="txtCheckList" class="form-control" Skin="Metro" Style="display: none;width:100%;height:30px;" required />
+                    @*<asp:RequiredFieldValidator ID="rfvtxtCheckList" ValidationGroup="Save" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="txtCheckList" ErrorMessage="* Required" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+                    @*<asp:LinkButton runat="server" ID="btnSave" ValidationGroup="Save" CssClass="w3-btn w3-small w3-green btnheight" OnClick="btnSave_Click" Style="display: none"><i class="fa fa-plus"> </i>&nbsp;Add</asp:LinkButton>*@
+                    <button id="btnSave" Class="w3-btn w3-small w3-green btnheight" OnClick="btnSave_Click()" Style="display: none"><i class="fa fa-plus"> </i>&nbsp;Add</button>
+                </div>
+
+            </div>
+
+            @*<%--Copy Radio Button Combobox opening --%>*@
+
+            <div class="row" id="rowCheckListCopy" style="display: none;">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    @*<asp:Label ID="lblcopy" runat="server" Style="display: none; color: gray">Select Existing Checklist<span style="color: red">&nbsp*</span></asp:Label>*@
+                    <label id="lblcopy" Style="display: none; color: gray">Select Existing Checklist<span style="color: red">&nbsp*</span></label>
+                </div>
+                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                    @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlCheckListFrom" Width="100%" AutoPostBack="true" Style="display: none;" DataValueField="checklistID" DataSourceID="dsddlCheckList" CssClass="dropdown" DataTextField="checklistdescription" runat="server" MarkFirstMatch="true" EmptyMessage="Select---">
+                        </Telerik:RadComboBox>
+                        <asp:RequiredFieldValidator ID="rdfChecklistCopy" runat="server" ControlToValidate="ddlCheckListFrom" ValidationGroup="Copy" ErrorMessage="* Required" CssClass="rdf-initial rdf-text" ForeColor="Red"></asp:RequiredFieldValidator>*@
+
+                    <select id="ddlCheckListFrom" Width="100%" Style="display: none;" Class="dropdown form-control"> </select>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                    @*<asp:LinkButton runat="server" ID="btncopy" Width="100%" ValidationGroup="Copy" CssClass="w3-btn w3-small w3-blue" OnClick="btncopy_Click" Style="display: none;"><i class="fa fa-copy"> </i>&nbsp;Copy</asp:LinkButton>*@
+                    <button id="btncopy" style="Width:100%" Class="w3-btn w3-small w3-blue" OnClick="btncopy_Click()" Style="display: none;"><i class="fa fa-copy"> </i>&nbsp;Copy</button>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        @*<asp:Label ID="lblCheckListCopy" runat="server" Style="display: none; color: gray">CheckList Name<span style="color: red">&nbsp*</span></asp:Label>*@
+                        <label id="lblCheckListCopy" Style="display: none; color: gray">CheckList Name<span style="color: red">&nbsp*</span></label>
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <input type="text" id="txtcopy" class="form-control" Style="display: none;width:100%;height:30px" />
+                        @*<Telerik:RadTextBox ID="txtcopy" Height="30px" runat="server" Skin="Metro" Width="100%" Style="display: none;"></Telerik:RadTextBox>
+                            <asp:RequiredFieldValidator ID="rqdCopy" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ValidationGroup="Copy" ControlToValidate="txtcopy" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+                    </div>
+                </div>
+            </div>
+
+            @*<%--      Copy Radio Button Combobox closing --%>
+
+                <%--      Delete Radio Button Combobox --%>*@
+
+            <div class="row" id="RowCheckListDelete" style="display: none;">
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    @*<asp:Label ID="lblDeleteList" runat="server" Style="display: none; color: gray">CheckList Name<span style="color: red">&nbsp*</span></asp:Label>*@
+                    <label id="lblDeleteList" Style="display: none; color: gray">CheckList Name<span style="color: red">&nbsp*</span></label>
+                </div>
+                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                    @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlDeleteList" Width="100%" AutoPostBack="true" Style="display: none;" DataValueField="checklistID" DataSourceID="dsddlCheckList" CssClass="dropdown" DataTextField="checklistdescription" runat="server" MarkFirstMatch="true" EmptyMessage="Select---" Height="250px">
+                        </Telerik:RadComboBox>*@
+                    @*<asp:RequiredFieldValidator ID="RequiredDelete" runat="server" ControlToValidate="ddlDeleteList" ValidationGroup="Delete" ErrorMessage="* Required" CssClass="rdf-initial rdf-text" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                    <select id="ddlDeleteList" Style="display: none;width:100%" Class="dropdown form-control"></select>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                    @*<asp:LinkButton runat="server" ID="btnDeleteList" Width="100%" Height="30px" OnClick="btnDeleteList_Click" ValidationGroup="Delete" CssClass="btn btn-primary"><i class="fa fa-delete"> </i>&nbsp;Delete</asp:LinkButton>*@
+                    <button id="btnDeleteList" style="Width:100%; Height:30px" OnClick="btnDeleteList_Click()" Class="btn btn-primary"><i class="fa fa-delete"> </i>&nbsp;Delete</button>
+                </div>
+            </div>
+
+            @*<%-- delete radio button combobox --%>*@
+
+            <div class="row" id="rowCheckload" style="display: none;">
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-3 col-xs-4">
+                        <label id="lblLoad" Style="display: none; color: gray">CheckList Name</label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-5">
+                        @*<Telerik:RadTextBox ID="txtFileChecklist" runat="server" Width="100%" Style="display: none;"></Telerik:RadTextBox>*@
+                        <input type="text" id="txtFileChecklist" class="form-control" style="Width:100%" Style="display: none;" />
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 xsload">
+                        @*<asp:LinkButton ID="btnLoad" ValidationGroup="Load" OnClientClick="ButtonClient();" runat="server" Width="100%" OnClick="btnLoad_Click1" CssClass="btn btn-primary" Style="display: none;"><i class="fa fa-spinner"></i> Load</asp:LinkButton>*@
+
+                        <button id="btnLoad" style="width:100%" OnClick="btnLoad_Click1()" class="btn btn-primary" Style="display: none;"><i class="fa fa-spinner"></i> Load</button>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-lg-4 col-md-4 col-sm-3 col-xs-4">
+                        @*<asp:Label ID="lblselectfile" runat="server" Style="display: none" Text="Select file for Load" Width="100%" CssClass="blue"></asp:Label>*@
+                        <label id="lblselectfile" Style="display: none" style="width:100%" Class="blue">Select file for Load</label>
+                    </div>
+
+                    <div class="col-lg-5 col-md-5 col-sm-6 col-xs-5 xsupload">
+                        <input type="hidden" id="hdnFileName" />
+                        <input type="file" id="FileUploadSelectfile" Style="display: none;" style="width:100%" Class="blue" />
+                        @*<asp:FileUpload ID="FileUploadSelectfile" onchange="OnClientChange(this,event)" Style="display: none;" runat="server" Width="100%" CssClass="blue" />*@
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                        @*<asp:LinkButton ID="btndownload" runat="server" Style="display: none;" CssClass="btn btn-dark" OnClick="btndownload_Click"> <i class="fa fa-download"></i> Download</asp:LinkButton>*@
+                        <button id="btndownload" Style="display: none;" Class="btn btn-dark" onclick="btndownload_Click()"> <i class="fa fa-download"></i> Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*<asp:SqlDataSource runat="server" ID="dsddlCheckList" ConnectionString='<%$ ConnectionStrings:connectionstring %>'></asp:SqlDataSource>*@
+
+
+<div id="divCopy" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 169px; width: 397px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="c1"><span style="color: red!important" id="spnddl"></span><span style="color: red !important" id="spntext"></span></label>
+                <label id="labelconfirm">Do you wish to Continue?</label>
+
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnCopyyes" runat="server" OnClick="btnCopyyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnCopyyes" OnClick="btnCopyyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnCopyno" runat="server" OnClick="btnCopyno_Click"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnCopyno" OnClick="btnCopyno_Click()"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divdelete" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 380px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h3"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="lbldelete">There are sub question are you sure you want to Delete the complete Section?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divChild" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h5"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label1">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btnDeleteChildYes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btnDeleteChildYes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btnDeleteChildNo" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btnDeleteChildNo"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divdeletechild" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h2"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="lblchild">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btnDeleteYesLast_Click" ID="btnDeleteYesLast" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnDeleteYesLast_Click()" id="btnDeleteYesLast"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnDeleteNoLast_Click" ID="btnDeleteNoLast" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnDeleteNoLast_Click()" id="btnDeleteNoLast"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divActive" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Alert !</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label2">This checklist is set as default for following jobs :</label>
+                @*<asp:PlaceHolder ID="PlaceHolder1" runat="server"></asp:PlaceHolder>*@
+                <div id="PlaceHolder1"></div>
+            </p>
+        </div>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>
+                    If you make this Inactive the default will be reset as per client default checklist to
+                    <label id="lblChecklistDis"></label>
+                </label>
+                <label>Do you want to continue ? </label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btnActiveYes_Click" ID="btnActiveYes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnActiveYes_Click()" id="btnActiveYes"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnInActiveNo_Click" ID="btnInActiveNo" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnInActiveNo_Click()" id="btnInActiveNo"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="divActivePopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h7"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert !</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>This checklist is set as default for following jobs :</label>
+                @*<asp:PlaceHolder ID="PlaceHolder2" runat="server"></asp:PlaceHolder>*@
+                <div id="PlaceHolder2"></div>
+            </p>
+        </div>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>The above jobs will no more have a default checklist as no checklist has been set up at the client level as default. </label>
+                <label>Do you want to continue ? </label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="divActivePopupYes_Click" ID="divActivePopupYes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="divActivePopupYes_Click()" id="divActivePopupYes"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="divActivePopupNo_Click" ID="divActivePopupNo" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="divActivePopupNo_Click()" ID="divActivePopupNo"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

@@ -1,0 +1,1908 @@
+﻿
+@{
+    ViewBag.Title = "ManHrsDashboard";
+}
+
+ <script src="https://code.highcharts.com/highcharts.js"></script>
+ <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+ <script src="https://code.highcharts.com/modules/exporting.js"></script>
+ <script src="https://code.highcharts.com/modules/export-data.js"></script>
+ <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+ <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+ <script src="/Content/js/html2canvas.js"></script>
+
+ <script>
+        $(document)
+                           .ajaxStart(function () {
+                               $('#LoadingPanel1').css('display', 'block');
+                           })
+                         .ajaxStop(function () {
+                             $('#LoadingPanel1').css('display', 'none');
+                         });
+        $(document).ready(function () {
+
+
+            var CurrentData = new Date();
+           
+           // $('#txtDatePickerFrom').val(CurrentData.DateMonthFormat());
+
+            $("#txtDatePickerFrom").datepicker({
+                dateFormat: 'dd-M-yy',
+                // maxDate: 0,
+                closeText: 'Close',
+
+            });
+
+            //$('#txtDatePickerTo').val(CurrentData.DateMonthFormat());
+
+            $("#txtDatePickerTo").datepicker({
+                dateFormat: 'dd-M-yy',
+                // maxDate: 0,
+                closeText: 'Close',
+
+            });
+
+
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+
+            var ClientID = $("#hdnClientID").val();
+
+            SiteDropDownBind(ClientID);
+            ddlJobbind(ClientID);
+            ddlCategoryBind(ClientID);
+
+            var txtfrom = $('#txtDatePickerFrom').val();
+            var txtfilter = $('#ddlFilterDate').val();
+            var fromdate, todate;
+            fromdate = $("#txtDatePickerFrom").val();
+            todate = $("#txtDatePickerTo").val();
+            if (txtfrom == "") {
+                $('#ddlFilterDate').val("This_Week");
+                var today = new Date();
+                var dd = today.getDate();
+                var mm = today.getMonth() + 1;
+                var mmm = today.getMonth() + 2;//January is 0!
+                var yyyy = today.getFullYear();
+                if (dd < 10) {
+                    dd = '0' + dd;
+                }
+                if (mm < 10) {
+                    mm = '0' + mm;
+                }
+                if (mmm < 10) {
+                    mmm = '0' + mmm;
+                }
+                var firstDay = yyyy + '-' + mm + '-' + dd;
+                var lastDay = yyyy + '-' + mmm + '-' + dd;
+                fromdate = $("#txtDatePickerFrom").val(firstDay);
+                todate = $("#txtDatePickerTo").val(lastDay);
+            }
+            fromdate = $("#txtDatePickerFrom").val();
+            todate = $("#txtDatePickerTo").val();
+            var ClientID = $("#hdnClientID").val();
+            //alert(fromdate);
+            manhrsbysite("All", ClientID, fromdate, todate);
+            manhrsbyjob("All", ClientID, fromdate, todate);
+            manhrsbycategory("All", ClientID, fromdate, todate);
+            manhrsbyline(ClientID, fromdate, todate);
+            manhrsall(ClientID, fromdate, todate);
+        });
+        $(document).ready(function () {
+            $("#hdnweekday").val('@ViewBag.hdnweekday');
+            var logo = '@ViewBag.ClientImage';
+            $("#imgLogoManHrsDahsboard").attr('src', '@ViewBag.ClientImage');
+            $("#imgLogo1ManHrsDahsboard").attr('src', '@ViewBag.ClientImage1');
+
+            $('#RbtnWeekly ,#rblMonyhly').change(function () {
+                if ($('#RbtnWeekly').is(':checked')) {
+                    $('#CharSectionMonthly').css('display', 'none');
+                    $('#CharSectionWeekly').css('display', 'block');
+                }
+                else {
+                    document.getElementById("rblMonyhly1").checked = true;
+                    $('#CharSectionWeekly').css('display', 'none');
+                    $('#CharSectionMonthly').css('display', 'block');
+                }
+            });
+
+            $("#manhrSelectjob").on("change", function () {
+                //var combo1 = $find("<%= manhrSelectjob.ClientID %>");
+                //var itemByText1 = combo1.findItemByText($(this).val());
+                //var value1 = itemByText1.get_value();
+                var value1 = $('#manhrSelectjob').val();
+                var ClientID = $("#hdnClientID").val();
+                fromdate = $('#txtDatePickerFrom').val();
+                todate = $('#txtDatePickerTo').val();
+                manhrsbyjob(value1, ClientID, fromdate, todate);
+            });
+
+            $("#manhrsselectSite").on("change", function () {
+                // var combo1 = $find("<%= manhrsselectSite.ClientID %>");
+                // var itemByText1 = combo1.findItemByText($(this).val());
+                //var value1 = itemByText1.get_value();
+                var value1 = $('#manhrsselectSite').val();
+                var ClientID = $("#hdnClientID").val();
+                fromdate = $('#txtDatePickerFrom').val();
+                todate = $('#txtDatePickerTo').val();
+                manhrsbysite(value1, ClientID, fromdate, todate);
+            });
+
+            $("#manhrsSelectcat").on("change", function () {
+                //var combo1 = $find("<%= manhrsSelectcat.ClientID %>");
+                //var itemByText1 = combo1.findItemByText($(this).val());
+                //var value1 = itemByText1.get_value();
+                var value1 = $('#manhrsSelectcat').val();
+                var ClientID = $("#hdnClientID").val();
+                fromdate = $('#txtDatePickerFrom').val();
+                todate = $('#txtDatePickerTo').val();
+                manhrsbycategory(value1, ClientID, fromdate, todate);
+            });
+
+            setTimeout(function () {
+                OnDdlFilterChangeWeekly();
+                //OnDdlFilterChangeWeekly(ClientID);
+            }, 200);
+        });
+
+        function refreshbydate() {
+            var fromdate, todate;
+            var ClientID = $("#hdnClientID").val();
+            fromdate = $('#txtDatePickerFrom').val();
+            todate = $('#txtDatePickerTo').val();
+            //alert(fromdate);
+            manhrsbysite("All", ClientID, fromdate, todate);
+            manhrsbyjob("All", ClientID, fromdate, todate);
+            manhrsbycategory("All", ClientID, fromdate, todate);
+            manhrsall(ClientID, fromdate, todate);
+            manhrsbyline(ClientID, fromdate, todate);
+            OnDdlFilterChangeWeekly();
+            //OnDdlFilterChangeWeekly(ClientID);
+
+        }
+
+        function refreshbydate1() {
+            var fromdate, todate;
+            var ClientID = $("#hdnClientID").val();
+            fromdate = $('#txtDatePickerFrom1').val();
+            todate = $('#txtDatePickerTo1').val();
+            //alert(fromdate);
+            manhrsbysite("All", ClientID, fromdate, todate);
+            manhrsbyjob("All", ClientID, fromdate, todate);
+            manhrsbycategory("All", ClientID, fromdate, todate);
+            manhrsall(ClientID, fromdate, todate);
+            manhrsbyline(ClientID, fromdate, todate);
+            OnDdlFilterChange();
+        }
+
+        $(function () {
+
+            //$('#btnRefreshChart').click(function () {
+            //    OnDdlFilterChangeWeekly();
+            //});
+
+
+
+
+            $('#ddlFilterDate').change(function () {
+                OnDdlFilterChangeWeekly();
+                //OnDdlFilterChangeWeekly(ClientID);
+
+            });
+
+        });
+        function OnDdlFilterChangeWeekly() {
+            //$.ajax({
+            //    type: "POST",
+            //        url: "/ManHrsDashboard.aspx/getsummaryData",
+            //        data: JSON.stringify({ ClientID: ClientID }),
+            //        contentType: "application/json; charset=utf-8",
+            //        dataType: "json",
+            //        success: function (result) {
+            //            alert(hello);
+            //        },
+
+
+            //    });
+
+
+            var ddldatetime = $('#ddlFilterDate').val();
+            //alert(ddldatetime);
+            if (ddldatetime == "This_Week") {
+                var date = new Date();
+                var startDay = 0;
+                var week = $("#hdnweekday").val();
+                var firstDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay() + parseInt(week));
+                var lastDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay() + parseInt(week) + 6);
+               // var datepicker = $find("<%=txtDatePickerFrom.ClientID %>");
+               // var datepicker2 = $find("<%=txtDatePickerTo.ClientID %>");
+                //datepicker.set_selectedDate(firstDay);
+                //datepicker2.set_selectedDate(lastDay);
+                $('#txtDatePickerFrom').val(firstDay.DateMonthFormat());
+                $('#txtDatePickerTo').val(lastDay.DateMonthFormat());
+            }
+            if (ddldatetime == "Last_Week") {
+                var now = new Date();
+                var prevMonthFirstDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() - 6);
+                var prevMonthLastDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+                //var datepicker = $find("<%=txtDatePickerFrom.ClientID %>");
+                //var datepicker2 = $find("<%=txtDatePickerTo.ClientID %>");
+                //datepicker.set_selectedDate(prevMonthFirstDate);
+                //datepicker2.set_selectedDate(prevMonthLastDate);
+                $('#txtDatePickerFrom').val(prevMonthFirstDate.DateMonthFormat());
+                $('#txtDatePickerTo').val(prevMonthLastDate.DateMonthFormat());
+            }
+
+        }
+
+
+        $(document).ready(function () {
+            setTimeout(function () {
+                OnDdlFilterChange();
+            }, 200);
+
+        });
+        $(function () {
+
+            $('#RbtnWeekly1 ,#rblMonyhly1').change(function () {
+                if ($('#rblMonyhly1').is(':checked')) {
+                    $('#CharSectionMonthly').css('display', 'block');
+                    $('#CharSectionWeekly').css('display', 'none');
+                }
+                else {
+                    document.getElementById("RbtnWeekly").checked = true;
+                    $('#CharSectionWeekly').css('display', 'block');
+                    $('#CharSectionMonthly').css('display', 'none');
+                }
+            });
+            $('#btnRefreshChart1').click(function () {
+                OnDdlFilterChange();
+            });
+            $('#txtDatePickerFrom1,#txtDatePickerTo1').datepicker();
+
+            $('#ddlFilterDateMonthly').val("This_Month");
+            $('#ddlFilterDateMonthly').change(function () {
+                OnDdlFilterChange();
+
+            });
+        });
+
+        function OnDdlFilterChange() {
+
+            var ddldatetime = $('#ddlFilterDateMonthly').val();
+
+            if (ddldatetime == "This_Month") {
+                var date = new Date();
+                var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+
+                var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                //var datepicker = $find("<%=txtDatePickerFrom1.ClientID %>");
+                //var datepicker2 = $find("<%=txtDatePickerTo1.ClientID %>");
+                //datepicker.set_selectedDate(firstDay);
+               // datepicker2.set_selectedDate(lastDay);
+
+                $('#txtDatePickerFrom1').val(firstDay.DateMonthFormat());
+                $('#txtDatePickerTo1').val(lastDay.DateMonthFormat());
+            }
+            if (ddldatetime == "Last_Month") {
+                var now = new Date();
+                var prevMonthLastDate = new Date(now.getFullYear(), now.getMonth(), 0);
+                var prevMonthFirstDate = new Date(now.getFullYear() - (now.getMonth() > 0 ? 0 : 1), (now.getMonth() - 1 + 12) % 12, 1);
+
+               // var datepicker = $find("<%=txtDatePickerFrom1.ClientID %>");
+               // var datepicker2 = $find("<%=txtDatePickerTo1.ClientID %>");
+               // datepicker.set_selectedDate(prevMonthFirstDate);
+               // datepicker2.set_selectedDate(prevMonthLastDate);
+
+                $('#txtDatePickerFrom1').val(prevMonthFirstDate.DateMonthFormat());
+                $('#txtDatePickerTo1').val(prevMonthLastDate.DateMonthFormat());
+            }
+
+        }
+         function RadiobuttonChange() {
+       //     $.ajax({
+        //        url: "/ManHrsDashboard.asx/getquery",
+        //        async: false,
+         //       success: function (result) {
+         //           alert(hello);
+          //      },
+          //      type: 'get',
+
+           // });
+        }
+
+
+        $("#manhrsselectSite_Input").on("change", function () {
+
+            var combo1 = $find("<%= manhrsselectSite.ClientID %>");
+            var itemByText1 = combo1.findItemByText($(this).val());
+            var value1 = itemByText1.get_value();
+            manhrsbysite(value1, ClientID);
+
+        });
+
+        function SiteDropDownBind(id) {
+
+            $.ajax({
+                type: "POST",
+                url: "/ManHrsDashboard/SiteDropDownBind",
+                data: JSON.stringify({ id: id}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var getData = response;
+                    $("#manhrsselectSite").html("");
+                    $("#manhrsselectSite").append('<option value="All">All</option>');
+                    for (var i = 0; i < getData.length; i++) {
+                        $("#manhrsselectSite").append('<option value="' + getData[i].SiteLocID + '">' + getData[i].SiteLocation + '</option>');
+
+                    }
+                }
+            });
+
+        }
+        function ddlJobbind(id) {
+
+            $.ajax({
+                type: "POST",
+                url: "/ManHrsDashboard/ddlJobDashboard",
+                data: JSON.stringify({ id: id }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var ddlJobdropdownbind = response;
+                    $("#manhrSelectjob").html("");
+                    $("#manhrSelectjob").append('<option value="All">All</option>');
+                    for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                        $("#manhrSelectjob").append('<option value="' + ddlJobdropdownbind[i].Scaffref + '">' + ddlJobdropdownbind[i].Description + '</option>');
+                       
+                    }
+                }
+            });
+
+        }
+        function ddlCategoryBind(id) {
+
+            $.ajax({
+                type: "POST",
+                url: "/ManHrsDashboard/ddlCategoryBind",
+                data: JSON.stringify({ id: id }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var ddlCategorydropdownbind = response;
+                    $("#manhrsSelectcat").html("");
+                    $("#manhrsSelectcat").append('<option value="All">All</option>');
+                    for (var i = 0; i < ddlCategorydropdownbind.length; i++) {
+                        $("#manhrsSelectcat").append('<option value="' + ddlCategorydropdownbind[i].TypeofVariation + '">' + ddlCategorydropdownbind[i].TypeofVariation + '</option>');
+                       
+                    }
+                }
+            });
+
+        }
+
+
+        /// textbox fill up 4 Textbox
+        function manhrsall(ClientID, fromdate, todate) {
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/GetAllManHrs",
+                url: "/ManHrsDashboard/GetAllManHrs",
+                data: JSON.stringify({ ClientID: ClientID, fromdate: fromdate, todate: todate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                   // ManHrsAll = response.d;
+                    ManHrsAll = response;
+
+                    var ManHrsData = [];
+                    for (var i = 0; i < ManHrsAll.length; i++) {
+                        var TobePush = true;
+                        for (var k = 0; k < ManHrsData.length; k++) {
+                            if (ManHrsData[k].name == ManHrsBySite[i].SiteLocation) {
+                                TobePush = false;
+                            }
+                        }
+
+                        if (TobePush) {
+                            $('#txtErectionhrs').val(ManHrsAll[i].AllErectionHrs);
+                            $('#txtAdditionalhrs').val(ManHrsAll[i].AllAdditionalHrs);
+                            $('#txtModificationhrs').val(ManHrsAll[i].AllModificationHrs);
+                            $('#txtDismantlehrs').val(ManHrsAll[i].AllDismantleHrs);
+                            $('#txtTotalhrs').val(ManHrsAll[i].total);
+                        }
+                    }
+                }
+            })
+        }
+
+        /// Chart 1 Man Hrs By Sites 
+        function manhrsbysite(id, ClientID, fromdate, todate) {
+            $.ajax({
+                type: "POST",
+               // url: "../WebApi/Dashboard.asmx/GetBySitesManHrs",
+                url: "/ManHrsDashboard/GetBySitesManHrs",
+                data: JSON.stringify({ id: id, ClientID: ClientID, fromdate: fromdate, todate: todate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                   // ManHrsBySite = response.d;
+                    ManHrsBySite = response;
+
+                    var ManErectionHrs = [];
+                    var ManHrsDataLabels = [];
+                    var scaffref = [];
+                    var total = 0;
+                    var ManAdditionalHrs = [];
+                    var ManDismantleHrs = [];
+                    var ManHrsData = [];
+                    var ManModificationHrs = [];
+                    var TotalHrs1 = 0;
+                    for (var i = 0; i < ManHrsBySite.length; i++) {
+                        var TobePush = true;
+                        for (var k = 0; k < ManHrsData.length; k++) {
+                            if (ManHrsData[k].name == ManHrsBySite[i].SiteLocation) {
+                                TobePush = false;
+                            }
+                        }
+
+                        if (TobePush) {
+                            ManErectionHrs.push({ name: ManHrsBySite[i].SiteLocation, y: ManHrsBySite[i].ErectionHrs, sliced: true });
+                            ManAdditionalHrs.push({ name: ManHrsBySite[i].SiteLocation, y: ManHrsBySite[i].AdditionalHrs, sliced: true });
+                            ManDismantleHrs.push({ name: ManHrsBySite[i].SiteLocation, y: ManHrsBySite[i].DismantleHrs, sliced: true });
+                            ManModificationHrs.push({ name: ManHrsBySite[i].SiteLocation, y: ManHrsBySite[i].ModificationHrs, sliced: true });
+
+                            //total = (total + ManHrsBySite[i].ErectionHrs);
+                            scaffref.push(ManHrsBySite[i].SiteLocation);
+                            var TotalHrs1 = TotalHrs1 + ManHrsBySite[i].ErectionHrs + ManHrsBySite[i].AdditionalHrs + ManHrsBySite[i].DismantleHrs + ManHrsBySite[i].ModificationHrs;
+                            var totalSum = TotalHrs1;
+                            //var abc = [];
+                            //abc.push(ManHrsBySite[i].ErectionHrs);
+                            //alert(abc);
+                            //var totalPrice5 = parseFloat(total / ManHrsBySite.length).toFixed();
+                        }
+
+                    }
+
+                    $("#lblTotalHrs1").text(totalSum);
+                    $("#totalhrsbysite").val();
+                    Highcharts.chart('newcontainer1', {
+                        chart: {
+                            type: 'column',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+                            text: ''
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: false
+                                },
+                            }
+                        },
+                        xAxis: {
+                            categories: scaffref,
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            max: 1000,
+                            title: {
+                                text: 'Total Hours'
+                            }
+                        },
+
+                        tooltip: {
+                            //pointFormat: '<span style="color:{series.color}">{series.name}</span>: {point.percentage:.0f} hrs<br/>',
+                            shared: true
+                        },
+                        plotOptions: {
+                            column: {
+                                stacking: 'hours'
+                            }
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        series: [{
+                            name: 'Erection',
+                            data: ManErectionHrs
+                        }, {
+                            name: 'Dismantle',
+                            data: ManDismantleHrs
+                        }, {
+                            name: 'Modification',
+                            data: ManModificationHrs
+                        }, {
+                            name: 'Additional',
+                            data: ManAdditionalHrs
+                        }
+                        ]
+                    });
+
+                    function redrawchart1() {
+                        var chart = $('#newcontainer1').highcharts();
+
+                        var w = $('#newcontainer2').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.3 / 4), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                },
+            });
+        }
+
+        /// Chart 2 Man Hrs By Job
+        function manhrsbyjob(id, ClientID, fromdate, todate) {
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/GetByJobManHrs",
+                url: "/ManHrsDashboard/GetByJobManHrs",
+                data: JSON.stringify({ id: id, ClientID: ClientID, fromdate: fromdate, todate: todate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                   // ManHrsByJob = response.d;
+                    ManHrsByJob = response;
+
+                    var ManErectionHrs = [];
+                    var ManHrsDataLabels = [];
+                    var scaffref = [];
+                    var total = 0;
+                    var ManAdditionalHrs = [];
+                    var ManDismantleHrs = [];
+                    var ManHrsData = [];
+                    var ManModificationHrs = [];
+                    var TotalHrs2 = 0;
+                    for (var i = 0; i < ManHrsByJob.length; i++) {
+                        var TobePush = true;
+                        for (var k = 0; k < ManHrsData.length; k++) {
+                            if (ManHrsData[k].name == ManHrsByJob[i].Scaffref) {
+                                TobePush = false;
+                            }
+                            //if (ManHrsData[k].y == ManHrsBySite[i].AdditionalHrs) {
+                            //    TobePush = false;
+                            //}
+                        }
+
+                        if (TobePush) {
+                            ManErectionHrs.push({ name: ManHrsByJob[i].Scaffref, y: ManHrsByJob[i].ErectionHrs, sliced: true });
+                            ManAdditionalHrs.push({ name: ManHrsByJob[i].Scaffref, y: ManHrsByJob[i].AdditionalHrs, sliced: true });
+                            ManDismantleHrs.push({ name: ManHrsByJob[i].Scaffref, y: ManHrsByJob[i].DismantleHrs, sliced: true });
+                            ManModificationHrs.push({ name: ManHrsByJob[i].Scaffref, y: ManHrsByJob[i].ModificationHrs, sliced: true });
+                            //total = (total + ManHrsBySite[i].ErectionHrs);
+                            scaffref.push(ManHrsByJob[i].Scaffref);
+                            var TotalHrs2 = TotalHrs2 + ManHrsByJob[i].ErectionHrs + ManHrsByJob[i].AdditionalHrs + ManHrsByJob[i].DismantleHrs + ManHrsByJob[i].ModificationHrs;
+                            var totalhrs = TotalHrs2;
+
+                        }
+
+                    }
+                    $("#lblTotalHrs2").text(totalhrs);
+                    //alert(ManHrsData);
+
+                    Highcharts.chart('newcontainer2', {
+                        chart: {
+                            type: 'column',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+                            text: ''
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: false
+                                },
+                            }
+                        },
+                        xAxis: {
+                            categories: scaffref
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: 'Total Hours'
+                            }
+                        },
+                        tooltip: {
+                            //pointFormat: '<span style="color:{series.color}">{series.name}</span>: {point.percentage:.0f} hrs<br/>',
+                            shared: true
+                        },
+                        plotOptions: {
+                            column: {
+                                stacking: 'hours'
+                            }
+                        },
+                        legend: {
+                            enabled: false
+                        },
+                        series: [{
+                            name: 'Erection',
+                            data: ManErectionHrs
+                        }, {
+                            name: 'Dismantle',
+                            data: ManDismantleHrs
+                        }, {
+                            name: 'Modification',
+                            data: ManModificationHrs
+                        }, {
+                            name: 'Additional',
+                            data: ManAdditionalHrs
+                        }
+                        ]
+                    });
+
+                    function redrawchart() {
+                        var chart = $('#newcontainer2').highcharts();
+
+                        var w = $('#newcontainer2').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.3 / 4), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                },
+            });
+        }
+
+        /// Chart 3 Man Hrs BY Category
+        function manhrsbycategory(id, ClientID, fromdate, todate) {
+
+            $.ajax({
+                type: "POST",
+               // url: "../WebApi/Dashboard.asmx/GetByCategoryManHrs",
+                url: "/ManHrsDashboard/GetByCategoryManHrs",
+                data: JSON.stringify({ id: id, ClientID: ClientID, fromdate: fromdate, todate: todate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                   // ManHrsByCategory = response.d;
+                    ManHrsByCategory = response;
+
+                    var ManErectionHrs = [];
+                    var ManHrsDataLabels = [];
+                    var Category = [];
+                    var ManDelayHrs = [];
+                    var ManHrsData = [];
+                    var TotalHrs3 = 0;
+                    for (var i = 0; i < ManHrsByCategory.length; i++) {
+                        var TobePush = true;
+                        for (var k = 0; k < ManHrsData.length; k++) {
+                            if (ManHrsData[k].name == ManHrsByCategory[i].TypeofVariation) {
+                                TobePush = false;
+                            }
+                        }
+
+                        if (TobePush) {
+
+                            ManDelayHrs.push({ name: ManHrsByCategory[i].TypeofVariation, y: ManHrsByCategory[i].AdditionalHrs, sliced: true });
+                            var TotalHrs3 = TotalHrs3 + ManHrsByCategory[i].AdditionalHrs;
+                            var TotalSum = TotalHrs3;
+                            //alert(ManDelayHrs);
+                        }
+
+                    }
+                    $("#lblTotalHrs3").text(TotalSum);
+                    Highcharts.chart('newcontainer3', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            type: 'line',
+                            backgroundColor: '#f2f2f2',
+                            // height: 190,
+                            type: 'pie',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+                        title: {
+                            text: ''
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: false
+                                },
+                            }
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                //size: 100,
+                                slicedOffset: 25,
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.y}',
+                                    style: {
+                                        fontWeight: 'Normal'
+                                    }
+                                }
+                            }
+                        },
+                        //exporting: {
+                        //    buttons: {
+                        //        customButton: {
+                        //            x: -28,
+                        //            onclick: function () {
+                        //                $('#btnOpenModel').click();
+                        //            },
+                        //            //symbol: 'circle'
+                        //            text: 'Show All',
+
+                        //        }
+                        //    }
+
+
+                        //},
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: 'Additional Hrs',
+                            data: ManDelayHrs,
+                            showInLegend: true
+                        }]
+                    });
+
+                    function redrawchart3() {
+                        var chart3 = $('#newcontainer3').highcharts();
+
+                        var w3 = $('#newcontainer2').closest(".wrapper").width()
+                        chart3.setSize(
+                           // w3, w3 * (2.3 / 4), false
+                           w3, w3 * (2.3 / 4), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart3);
+                    redrawchart3();
+                },
+            });
+        }
+
+        /// Chart 4 Line Spent Vs Earned
+        function manhrsbyline(ClientID, fromdate, todate) {
+            $.ajax({
+                type: "POST",
+               // url: "../WebApi/Dashboard.asmx/GetByLineManHrs",
+                url: "/ManHrsDashboard/GetByLineManHrs",
+                data: JSON.stringify({ ClientID: ClientID, fromdate: fromdate, todate: todate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //ManHrsByLine = response.d;
+                      ManHrsByLine = response;
+
+                    var ManDelayHrs = [];
+                    var ManDelayHrs1 = [];
+                    var ManHrsData = [];
+                    var abc = [];
+                    for (var i = 0; i < ManHrsByLine.length; i++) {
+                        var TobePush = true;
+                        for (var k = 0; k < ManHrsData.length; k++) {
+                            //if (ManHrsData[k].name == ManHrsByLine[i].EntryDate) {
+                            //    TobePush = false;
+                            //}
+                        }
+
+                        if (TobePush) {
+                            abc.push(ManHrsByLine[i].EntryDate);
+                            ManDelayHrs.push({ name: ManHrsByLine[i].EntryDate, y: ManHrsByLine[i].SpentHours, sliced: true });
+                            ManDelayHrs1.push({ name: ManHrsByLine[i].EntryDate, y: ManHrsByLine[i].NoOfHrs, sliced: true });
+
+
+                        }
+
+                    }
+                    Highcharts.chart('newcontainer4', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            type: 'line',
+                            backgroundColor: '#f2f2f2',
+                            //height: 190,
+
+                        },
+                        title: {
+                            text: 'Spent Vs Earned'
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: false
+                                },
+                            }
+                        },
+                        xAxis: {
+                            categories: abc
+                        },
+
+                        yAxis: {
+                            title: {
+                                text: 'Spent/Earned'
+                            },
+                            // categories: ['','0', '80', '160', '240', '320','400']
+                        },
+                        legend: {
+                            layout: 'vertical',
+                            align: 'right',
+                            verticalAlign: 'middle'
+                        },
+
+                        plotOptions: {
+                            series: {
+                                label: {
+                                    connectorAllowed: false
+                                },
+                                pointStart: 0
+
+                            }
+                        },
+                        series: [{
+                            name: 'Spent',
+                            data: ManDelayHrs
+                        }, {
+                            name: 'Earned',
+                            color: 'orange',
+                            data: ManDelayHrs1
+                        }],
+
+                        responsive: {
+                            rules: [{
+                                condition: {
+                                    maxWidth: 400
+                                },
+                                chartOptions: {
+                                    legend: {
+                                        layout: 'horizontal',
+                                        align: 'center',
+                                        verticalAlign: 'bottom'
+                                    }
+                                }
+                            }]
+                        }
+                    });
+
+
+                    function redrawchart4() {
+                        var chart4 = $('#newcontainer4').highcharts();
+
+                        var w4 = $('#newcontainer4').closest(".wrapper").width()
+                        chart4.setSize(
+                            //695, 300, false
+                            w4, w4 * (1.1 / 3.2), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart4);
+                    redrawchart4();
+
+                },
+            });
+        }
+
+
+      
+ </script>
+    <style>
+        #txtDatePickerFrom, #txtDatePickerTo {
+            border-color: #e5e5e5 !important;
+            border-radius: 4px !important;
+        }
+
+        #ddlFilterDate {
+            border-radius: 4px;
+            background-color: white;
+            border-color: #e5e5e5;
+        }
+
+        .RadInput_Metro .riHover, html body .RadInputMgr_Metro {
+            border-color: #e5e5e5 !important;
+        }
+
+        .rgFilterRow .riSingle .riTextBox {
+            border-radius: 4px;
+        }
+
+        .rgFilterBox {
+            border-radius: 4px;
+        }
+
+        .RadComboBoxDropDown_Simple .rcbHovered {
+            background-color: #e5e5e5 !important;
+        }
+
+        .RadComboBox_Simple .rcbInner {
+            border-color: #e5e5e5 !important;
+        }
+
+        .RadComboBox_Simple .rcbActionButton {
+            border-color: #ffffff !important;
+            background-color: #ffffff !important;
+            /*height: 24px !important;*/
+        }
+
+        html .RadComboBox .rcbInner, html .RadComboBox .rcbActionButton {
+            border-radius: 4px;
+            /*height: 27px;*/
+        }
+
+        .canvasjs-chart-canvas {
+            height: 310px;
+            width: 538px;
+        }
+
+        /*#newcontainer4 {
+            width: 500px !important;
+        }*/
+
+        .txtbxsummaryData {
+            border: 1px solid #D3D3D3 !important;
+            background-color: #ddecee;
+            float: right;
+            width: 60%;
+            margin-bottom: 14px;
+        }
+
+        .row {
+            margin-bottom: 0px !important;
+        }
+
+        label.lblchart {
+            margin-top: 2px;
+        }
+
+        .summaryData p {
+            margin: 0 0 18px 0;
+        }
+
+        .summaryData {
+            color: #000;
+            margin: 18px 0 0 0;
+        }
+
+
+        @@media (max-width:991px) {
+            hr.pageDivi {
+                display: none;
+            }
+        }
+    </style>
+
+
+    <style>
+        @@media (max-width:1300px) {
+            #bysitetop {
+                margin-top: 5px !important;
+            }
+
+            #byjobtop {
+                margin-top: 5px !important;
+            }
+
+            #summarytop {
+                margin-top: 5px !important;
+            }
+        }
+
+
+        /*Main Page Height*/
+
+        @@media(max-width:770px) {
+            #txtDatePickerFrom_wrapper {
+                margin-top: 5px !important;
+            }
+
+            #txtDatePickerTo_wrapper {
+                margin-top: 5px !important;
+            }
+
+            #btnRefreshChart {
+                margin-left: 1px !important;
+                margin-top: 7px !important;
+            }
+        }
+
+
+
+        .right_col {
+            min-height: 700px;
+            height: auto;
+        }
+
+        #tbDetails tr td {
+            color: #808080;
+        }
+
+        #tbDetails1 tr td {
+            color: #808080;
+        }
+
+
+        .page-title {
+            width: 100%;
+            height: auto;
+            padding: 10px 0;
+        }
+        /*.row chartfrstrow{
+            margin-top:-17px;
+        }*/
+
+
+
+
+
+
+
+
+
+
+        td#sitenamemodal {
+            width: 25%;
+            border-right: none;
+            text-align: center;
+            word-wrap: unset;
+        }
+
+        body .container.body .right_col {
+            background: #ffffcc;
+        }
+
+        .page-title {
+            width: 100%;
+            height: auto;
+            padding: 0px 0;
+        }
+
+        hr.mainHeadhr {
+            margin: 0 0;
+            border: 1px solid grey !important;
+        }
+
+        text.highcharts-credits {
+            display: none;
+        }
+
+
+        /*Chart 3 starts*/
+
+        #tbDetails2 tr td {
+            color: #808080;
+        }
+
+        span#Label6 {
+            margin: 0 0 0 250px;
+        }
+        /*Chart 3 Ends*/
+
+        /*Chart 4 Starts*/
+
+        #tbDetails4 tr td {
+            color: #808080;
+        }
+
+        /*chart 4 Ends*/
+
+        /*Chart 5 Starts*/
+        #tbDetails5 tr td {
+            color: #808080;
+        }
+
+
+
+        /*Chart 5 Ends*/
+        /************************Dashboard css starts****************/
+        .siteInfo {
+            margin: 0 0 10px;
+            font-size: 14px;
+        }
+
+
+
+        hr.pageDivi {
+            border: 2px dotted #000;
+            border-style: none none dotted;
+            color: #fff;
+            background-color: #fff;
+            margin: 0 0 0 0;
+        }
+
+        .row.chartfrstrow {
+            margin: 0px 0 0px 0 !important;
+        }
+
+        .container.DshbrdBack {
+            background-color: #ffffcc;
+        }
+
+
+
+        div#container1, div#container2 {
+            margin: 3px 0 0 0;
+        }
+
+
+
+        h3.summaryHead {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 15px 0 6px 0px;
+            color: #000000;
+        }
+
+
+
+        .txtsummaryData {
+            width: 20%;
+            border: 1px solid #D3D3D3 !important;
+            background-color: #ddecee;
+            float: right;
+            margin-bottom: 14px;
+        }
+        /*Chart 1 starts*/
+
+
+
+        .siteList1 {
+            height: 70px;
+        }
+
+        .AllsitesPricelabel1 {
+            margin-top: -10px;
+        }
+
+        span#Label1 {
+            font-size: 15px;
+            font-weight: 400;
+            float: right;
+            margin: 4px 0 0 0;
+        }
+
+        /*Chart 1 Ends*/
+
+        /*Chart 2 starts*/
+        /*.siteList2 {
+            height: 64px;
+        }*/
+
+        .BysitesPricelabel {
+            margin-top: -10px;
+        }
+
+        @@media (min-width:200px) and (max-width:600px) {
+            .smshow {
+                margin-top: -177px !important;
+            }
+
+            .smhireshow {
+                margin-top: -207px !important;
+            }
+        }
+
+        span#Label2 {
+            font-size: 15px;
+            font-weight: 400;
+            float: right;
+            margin: 4px 0 0 0;
+        }
+
+        /*Chart 2 Ends*/
+
+
+        /*Chart 3 starts*/
+        #tonnageAllstandinglbl {
+            font-size: 14px;
+            font-weight: 400;
+            float: right;
+            margin: 7px 0 0 0;
+        }
+
+        .siteList3 {
+            height: 160px;
+            margin: 10px 0 0 0;
+        }
+
+        span#grandTotal3Price {
+            float: right;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .TonnageAllsitesPricelabel {
+            margin-top: -16px;
+            float: right;
+            display: block;
+        }
+
+        div#container3 {
+            margin: 20px 0 10px 0;
+        }
+
+        /*Chart 3 Ends*/
+
+
+        /*Chart 4 starts*/
+        span#Label7 {
+            font-size: 14px;
+            font-weight: 400;
+            float: right;
+            margin: 5px 0 0 0;
+        }
+
+        .TonnageByjobPricelabel {
+            margin-top: -16px;
+            float: right;
+            display: block;
+        }
+
+        span#grandTotal4Price {
+            float: right;
+        }
+
+
+        .siteList4 {
+            height: 190px;
+        }
+
+
+        /*div#container4 {
+            margin: 20px 0 10px 0;
+        }*/
+        /*Chart 4 Ends*/
+
+        /*Chart 5 starts*/
+
+        .siteList5 {
+            height: 188px;
+        }
+
+
+
+        .HirePerjobPriceLabel {
+            margin: -16px 0px;
+            float: right;
+            display: block;
+        }
+
+        span#Label6 {
+            margin: 1px;
+            float: right;
+        }
+
+        }
+
+        span#Label9 {
+            font-size: 14px;
+            font-weight: 400;
+            float: right;
+            margin: 5px 0 0 0;
+        }
+
+        div#container5 {
+            margin: 20px 0 10px 0;
+        }
+        /*Chart 5 Ends*/
+    </style>
+
+    <div class="container DshbrdBack">
+        <input type="hidden" id="hdnClientID"/>
+        <input type="hidden" id="hdnweekday"/>
+        <div id="CharSectionWeekly" style="color: #000;">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+
+                          <div class="dashLogo scafLogo">
+                        @*<img src="/images/logo.png" runat="server" id="imgLogo" class="img-responsive " />*@
+                        @*<img src="/images/logo.png"  runat="server" id="imgLogoManHrsDahsboard" class="img-responsive " />*@
+                        <img src="/images/logo.png"  runat="server" id="imgLogoManHrsDahsboard" class="img-responsive "/>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-10 col-sm-8 col-xs-12 topFilters">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <label>View by :</label>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <input id="RbtnWeekly" name="abc" style="height: 20px; width: 20px;" type="radio" checked="checked" onclick="RadiobuttonChange()" />
+                            <span style="margin-top: 3px; font-size: 15px; margin-left: 2px; position: absolute;">Weekly</span>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <input id="rblMonyhly" name="abc" style="height: 20px; width: 20px;" type="radio" onclick="RadiobuttonChange()" />
+                            <span style="margin-top: 3px; font-size: 15px; margin-left: 2px; position: absolute;">Monthly</span>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="hdnfldfromdate" runat="server" />
+                <input type="hidden" id="hdnfldtodate" runat="server" />
+                <div class="col-lg-7 col-md-10 col-sm-8 col-xs-12 topFilters">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                            <span>Filter</span>
+                            <select style="height: 25px; width: 70%; margin-left: 5px;" id="ddlFilterDate">
+                                <option value="All_Time">All Time</option>
+                                <option value="This_Week">This Week</option>
+                                <option value="Last_Week">Last Week</option>
+                                <option value="Custom">Custom</option>
+                                @*<%--<option value="This_Quater">This Quarter</option>
+                                                <option value="Curr_Year">Current Year</option>
+                                                <option value="Prev_Year">Previous Year</option>--%>*@
+                            </select>
+                        </div>
+
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                            @*<Telerik:RadDatePicker placeholder="From" CssClass="checkdate" Style="text-align: center; width: 100%; margin-left: 5px;" ID="txtDatePickerFrom" runat="server" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                            <input type="text" id="txtDatePickerFrom" Class="checkdate" Style="text-align: center; width: 100%; margin-left: 5px;"/>
+                        </div>
+
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                            @*<Telerik:RadDatePicker placeholder="To" Style="text-align: center; width: 100%; margin-left: 5px;" ID="txtDatePickerTo" runat="server" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                            <input type="text" id="txtDatePickerTo" Style="text-align: center; width: 100%; margin-left: 5px;"/>
+                        </div>
+
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 ">
+                            <a style="padding-top: 2px; padding-bottom: 2px; font-size: 14px; margin-top: 1px;" id="btnRefreshChart" class="btn btn-primary" onclick="refreshbydate()"><i class="fa fa-refresh"></i>&nbsp;Refresh</a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+        </div>
+        <div id="CharSectionMonthly" style="color: #000; display: none">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                    <div class="dashLogo scafLogo">
+                        @*<img src="/images/logo.png" runat="server" id="imgLogo1ManHrsDahsboard" class="img-responsive" />*@
+                        <img src="/images/logo.png" runat="server" id="imgLogo1ManHrsDahsboard" class="img-responsive" />
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-10 col-sm-8 col-xs-12 topFilters">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <label>View by :</label>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <input id="RbtnWeekly1" name="abc" style="height: 20px; width: 20px;" type="radio" onclick="RadiobuttonChange()" />
+                            <span style="margin-top: 3px; font-size: 15px; margin-left: 2px; position: absolute;">Weekly</span>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                            <input id="rblMonyhly1" name="abc" style="height: 20px; width: 20px;" type="radio" onclick="RadiobuttonChange()" />
+                            <span style="margin-top: 3px; font-size: 15px; margin-left: 2px; position: absolute;">Monthly</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7  col-md-10 col-sm-8 col-xs-12 topFilters">
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                            <span>Filter</span>
+                            <select style="height: 25px; width: 65%; margin-left: 5px;" id="ddlFilterDateMonthly">
+                                <option value="All_Time">All Time</option>
+                                <option value="This_Month">This Month</option>
+                                <option value="Last_Month">Last Month</option>
+                                <option value="Custom">Custom</option>
+                                @*<%--<option value="This_Quater">This Quarter</option>
+                                                <option value="Curr_Year">Current Year</option>
+                                                <option value="Prev_Year">Previous Year</option>--%>*@
+                            </select>
+                        </div>
+
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                            @*<Telerik:RadDatePicker Style="text-align: center; width: 100%; margin-left: 5px;" ID="txtDatePickerFrom1" runat="server" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                              <input type="text" id="txtDatePickerFrom1" Class="checkdate" Style="text-align: center; width: 100%; margin-left: 5px;"/>
+                        </div>
+
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                            @*<Telerik:RadDatePicker Style="text-align: center; width: 100%; margin-left: 5px;" ID="txtDatePickerTo1" runat="server" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                              <input type="text" id="txtDatePickerTo1" Class="checkdate" Style="text-align: center; width: 100%; margin-left: 5px;"/>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-22 col-xs-12">
+                            <a style="padding-top: 2px; padding-bottom: 2px; margin-top: 1px;" id="btnRefreshChart1" class="btn btn-primary" onclick="refreshbydate1()"><i class="fa fa-refresh"></i>&nbsp;Refresh</a>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+        </div>
+        <div class="row">
+            <div id="summarytop" class="col-lg-4 col-md-12 col-sm-12 col-xs-12" style="margin-top: -15px">
+                <div class="row summaryData">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <p>Erection Hours:</p>
+
+                        <p>Dismantle Hours:</p>
+
+                        <p>Modification Hours:</p>
+
+                        <p>Additional Hours:</p>
+
+                        <p>Total Hours:</p>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        @*<asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtbxsummaryData" runat="server"
+                            ID="txtErectionhrs"></asp:TextBox>
+
+                        <asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtbxsummaryData" runat="server" ID="txtDismantlehrs"></asp:TextBox>
+
+                        <asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtbxsummaryData" runat="server" ID="txtModificationhrs"></asp:TextBox>
+
+                        <asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtbxsummaryData" runat="server" ID="txtAdditionalhrs"></asp:TextBox>
+
+                        <asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtbxsummaryData" runat="server" ID="txtTotalhrs"></asp:TextBox>*@
+                         
+                        <input type="text" Style="text-align: center;" Class="txtbxsummaryData" disabled id="txtErectionhrs" />
+                        <input type="text" Style="text-align: center;" Class="txtbxsummaryData" disabled id="txtDismantlehrs" />
+                        <input type="text" Style="text-align: center;" Class="txtbxsummaryData" disabled id="txtModificationhrs" />
+                        <input type="text" Style="text-align: center;" Class="txtbxsummaryData" disabled id="txtAdditionalhrs" />
+                        <input type="text" Style="text-align: center;" Class="txtbxsummaryData" disabled id="txtTotalhrs" />
+                    </div>
+                </div>
+            </div>
+
+            <div id="bysitetop" class="col-lg-4 col-md-12 col-sm-12 col-xs-12" style="margin-top: -70px">
+                <div class="row">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <label class="lblchart">Man Hours - By Site</label>
+                    </div>
+
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="manhrsselectSite" runat="server"
+                            DataTextField="SiteLocation" DataValueField="SiteLocId" Width="100%" MarkFirstMatch="true"
+                            AppendDataBoundItems="true">
+                            <Items>
+                                <Telerik:RadComboBoxItem Text="All" Value="All" />
+                            </Items>
+                        </Telerik:RadComboBox>*@
+                        <select id="manhrsselectSite" Class="form-control" style="width: 100%;"></select>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm  -12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: -11px;">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label class="lblchart">Total Hours</label>
+                        @*<asp:Label ID="lblTotalHrs1" runat="server" Text="0" Style="color: #80a2ae; padding-left: 215px"></asp:Label>*@
+                        <span id="lblTotalHrs1" Style="color: #80a2ae; padding-left: 215px">0</span>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        @*<asp:Label ID="totalhrsbysite" runat="server"></asp:Label>*@
+                         <span id="totalhrsbysite"></span>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>
+
+                <div class="wrapper">
+                    <div id="newcontainer1" style="width: 100%; margin-left: 7px"></div>
+                </div>
+            </div>
+
+            <div id="byjobtop" class="col-lg-4 col-md-12 col-sm-12 col-xs-12" style="margin-top: -70px">
+                <div class="row">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <label class="lblchart">Man Hours - By Job</label>
+                    </div>
+
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="manhrSelectjob" runat="server"
+                            Width="100%" MarkFirstMatch="true"
+                            AppendDataBoundItems="true">
+                            <Items>
+                                <Telerik:RadComboBoxItem Text="All" Value="All" />
+                            </Items>
+
+                        </Telerik:RadComboBox>*@
+                        <select id="manhrSelectjob" Class="form-control" style="width: 100%;"></select>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: -11px;">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label class="lblchart">Total Hours</label>
+                        @*<asp:Label ID="lblTotalHrs2" runat="server" Text="0" Style="color: #80a2ae; padding-left: 215px"></asp:Label>*@
+                        <label id="lblTotalHrs2" Style="color: #80a2ae; padding-left: 215px" Text="0">0</label>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper">
+                        <div id="newcontainer2" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="pageDivi" />
+
+        <div class="row" style="margin-top: 1px;">
+            <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        <label class="lblchart">Man Hours - By Category</label>
+                    </div>
+
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="manhrsSelectcat" runat="server"
+                            Width="100%" MarkFirstMatch="true" DataTextField="TypeofVariation"
+                            AppendDataBoundItems="true">
+                            <Items>
+                                <Telerik:RadComboBoxItem Text="All" Value="All" />
+                            </Items>
+                        </Telerik:RadComboBox>*@
+                        <select id="manhrsSelectcat" Class="form-control" style="width: 100%;"></select>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: -11px;">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label class="lblchart">Total Hours</label>
+                        @*<asp:Label ID="lblTotalHrs3" runat="server" Text="0" Style="color: #80a2ae; padding-left: 215px"></asp:Label>*@
+                        <label id="lblTotalHrs3" Style="color: #80a2ae; padding-left: 215px" Text="0">0</label>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper">
+                        <div id="newcontainer3" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 11px">
+                <div class="row">
+                    <div id="newcontainer4">
+                    </div>
+                </div>
+
+                @*<%-- <div class="row">
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        <label class="lblchart">Man Hours - By Category</label>
+                    </div>
+
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <Telerik:RadComboBox ID="RadComboBox1" runat="server"
+                            DataTextField="SiteLocation" DataValueField="SiteLocID" Width="100%" MarkFirstMatch="true"
+                            AppendDataBoundItems="true">
+                            <Items>
+                                <Telerik:RadComboBoxItem Text="All" Value="all" />
+                            </Items>
+                        </Telerik:RadComboBox>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>--%>*@
+
+                @*<%--<div class="row" style="margin-top: -11px;">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <label class="lblchart">Total Hours</label>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee; margin: 5px 0" />
+                    </div>
+                </div>--%>*@
+            </div>
+
+            @*<%-- <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <label class="lblchart">Man Hours - By Site</label>
+                    </div>
+
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        <Telerik:RadComboBox ID="RadComboBox2" runat="server"
+                        DataTextField="SiteLocation" DataValueField="SiteLocID" Width="100%" MarkFirstMatch="true"
+                        AppendDataBoundItems="true">
+                        <Items>
+                            <Telerik:RadComboBoxItem Text="All" Value="all" />
+                        </Items>
+                    </Telerik:RadComboBox>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee;margin:5px 0" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: -11px;">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                         <label class="lblchart">Total Hours</label>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee;margin:5px 0" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper">
+                         <div id="container4" style="width:100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <label class="lblchart">Man Hours - By Site</label>
+                    </div>
+
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        <Telerik:RadComboBox ID="RadComboBox3" runat="server"
+                        DataTextField="SiteLocation" DataValueField="SiteLocID" Width="100%" MarkFirstMatch="true"
+                        AppendDataBoundItems="true">
+                        <Items>
+                            <Telerik:RadComboBoxItem Text="All" Value="all" />
+                        </Items>
+                    </Telerik:RadComboBox>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee;margin:5px 0" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top: -11px;">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                         <label class="lblchart">Total Hours</label>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <hr style="border-top: 2px solid #eee;margin:5px 0" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper">
+                         <div id="container5" style="width:100%;"></div>
+                    </div>
+                </div>
+            </div>--%>*@
+        </div>
+
+
+    </div>
+   
+
+    @*<%--Model to Show Scaffold Mat'l Standing - All Sites--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Scaffold Material Standing - All Sites</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>Tonnage Standing</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>% Of Tonnage Standing</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Scaffold Mat'l Standing - All Sites--%>*@
+
+    @*<%--Model to Show Scaffold Mat'l Standing - By Sites--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+        <div class="modal fade" id="myModal1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Scaffold Material Standing - By Site </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails1" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    @*<%--<td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                    <td class="bysitecolumnmodal" style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 33%; text-align: center;"><b>Tonnage Standing</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 33%; text-align: center;"><b>% Of Tonnage Standing</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Scaffold Mat'l Standing - BY Sites--%>*@
+
+
+    @*<%--Model to Show Scaffold Mat'l Standing - By Sites--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+        <div class="modal fade" id="myModal2" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Tonnage Standing - All Sites </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails2" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    @*<%--<td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%;display:none;"><b>Site Name</b></td>--%>*@
+                                    <td style="width: 33%; text-align: center;"><b>All Sites</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>Tonnage Standing</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>% Of Tonnage Standing</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Scaffold Mat'l Standing - BY Sites--%>*@
+
+
+
+    @*<%--Model to Show Scaffold Mat'l Standing - By Sites--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+        <div class="modal fade" id="myModal3" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Tonnage Standing - By Job </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails4" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td class="tonnagebyjobcolumnmodal" id="bytonnagejobcolumnmodal" style="display: none;"><b>Site Name</b></td>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 16%; text-align: center;"><b>Scaf Ref #</b></td>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 33%; text-align: center;"><b>Tonnage Standing</b></td>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 33%; text-align: center;"><b>% Of Tonnage Standing</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Scaffold Mat'l Standing - BY Sites--%>*@
+
+
+
+    @*<%--Model to Show Scaffold Mat'l Standing - By Hire job--%>*@
+    @*<%--<div class="container">
+        <button style="display: none;" id="btnOpenModel4" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal4">Open Modal</button>
+        <div class="modal fade" id="myModal4" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Tonnage Standing - By Hire days </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails5" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td class="HirePerjobcolumnmodal" id="byHirePerjobcolumnmodal" style="width: 33%; display: none;"><b>Site Name</b></td>
+                                    <td class="HirePerjobcolumnmodal" style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td class="HirePerjobcolumnmodal" style="width: 33%; text-align: center;"><b>HireDays</b></td>
+                                    <td class="HirePerjobcolumnmodal" style="width: 33%; text-align: center;"><b>Percentage</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>--%>*@
+
+
+
+
+    @*<%--Model to Show Scaffold Mat'l Standing - By Sites--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel4" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal4">Open Modal</button>
+        <div class="modal fade" id="myModal4" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Hire Days - By Scaf Ref # </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails5" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <%--<td class="HirePerjobcolumnmodal" id="byHirePerjobcolumnmodal" style="width: 33%;display:none;"><b>Site Name</b></td>--%>
+                                    <td class="HirePerjobcolumnmodal" style="width: 50%; text-align: center;"><b>Scaf Ref #</b></td>
+                                    <td class="HirePerjobcolumnmodal" style="width: 50%; text-align: center;"><b>Days Standing</b></td>
+                                    <%--<td class="HirePerjobcolumnmodal" style="width: 33%; text-align: center;"><b>Percentage</b></td>--%>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Scaffold Mat'l Standing - BY Sites--%>*@

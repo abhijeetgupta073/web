@@ -1,0 +1,304 @@
+﻿
+@{
+    ViewBag.Title = "MainDepotInventory";
+}
+
+<script src="~/Content/js/MainDepotInventory.js?V1=7"></script>
+
+<script>
+    $(document).ready(function () {
+    var ClientID = getParameterByName('id');
+        GetDepotInventoryData(ClientID,"All");
+
+    $("#rdpReportStartDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            // maxDate: 0,
+            closeText: 'Close',
+
+    });
+
+    var HireInventory = '@ViewBag.HireInventory';
+        $('#hdnHireInventory').val(HireInventory);
+        if (HireInventory == "False") {
+            //$('#divWeeklyReport').css('display', 'none');
+            //$('#divInvoiceCost').css('display', 'none');
+            //$('#divSAP').css('display', 'none');
+        }
+
+    });
+</script>
+
+<style>
+    .setWidth1 {
+        min-width: 80px !important;
+    }
+
+    .setWidth2 {
+        min-width: 70px !important;
+    }
+
+    .setWidth3 {
+        min-width: 200px !important;
+    }
+
+    .setWidth4 {
+        min-width: 60px !important;
+    }
+
+    .setWidth5 {
+        min-width: 60px !important;
+    }
+
+    .setWidth6 {
+        min-width: 60px !important;
+    }
+
+    .setWidth7 {
+        min-width: 60px !important;
+    }
+
+    .setWidth8 {
+        min-width: 60px !important;
+    }
+
+    .setWidth9 {
+        min-width: 60px !important;
+    }
+
+    .setWidth10 {
+        min-width: 60px !important;
+    }
+
+    .setWidth11 {
+        min-width: 60px !important;
+    }
+
+    .setWidth12 {
+        min-width: 60px !important;
+    }
+
+    .setWidth13 {
+        min-width: 60px !important;
+    }
+
+    .setWidth14 {
+        min-width: 60px !important;
+    }
+
+    .setWidth15 {
+        min-width: 60px !important;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+</style>
+<div class="clearfix"></div>
+<input type="hidden" id="hdnHireInventory" />
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liThirdParty" runat="server" style="width: 191px">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li class="active">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSiteInventory" style="width: 161px">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+
+            <li id="liJob">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            <li id="LiSacafpac" runat="server">
+                <a id="AnchorReturnInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                </a>
+            </li>
+            <li id="LiDamaged" runat="server">
+                <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                </a>
+            </li>
+            <li id="PipeLineInventory">
+                <a id="AnchorPipeLineInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;PipeLine Inventory</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial; height: auto !important">
+
+        <div class="row">
+            @*<div class="col-lg-2 col-md-2 col-sm-5  col-xs-7">
+                    <label id="lblmaterial">Site:</label>
+                    <select id="ddlSite" class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="GetSiteInventoryData()"></select>
+                </div>*@
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-6">
+                <label id="lblmaterial">Filter By Material Type  </label>
+                <select id="ddlMaterialType" class="form-control" ; onchange="ddlMaterialType_SelectedIndexChanged()">
+                </select>
+            </div>
+            <div class="col-lg-1 col-md-2 col-sm-3 col-xs-5">
+                <label># of Items</label>
+                <input type="text" id="txtitems" class="form-control" disabled="disabled" />
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                <label>Total Tonnage</label>
+                <input type="text" id="txttotaltonnage" class="form-control" disabled="disabled" />
+
+            </div>
+            <div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+
+                <button type="button" Class="btn w3-btn w3-teal" id="ExportToCsvButton" Style="margin-top: 15px; color:white;    width: 100%;" onclick="ExportToCsvButton_Click()"><i class="fa fa-file-excel-o"></i> Export To CSV</button>
+            </div>
+            <div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+
+                <button type="button" Class="w3-btn w3-blue" id="btnprint" Style="margin-top: 15px; color:white; width:100%;" onclick="btnprint_Click()"><i class="fa fa-print"></i>&nbsp;Print</button>
+            </div>
+
+        </div>
+
+        <div class="row"></div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="divSiteInventory">
+                <div id="SiteInventoryGrid" style="color: black;">
+                    <table id="tblSiteInventory" class="table;" style="width:100% !important;display:none">
+                        <thead style="background-color: #efefef; color: #716262;">
+                            <tr>
+                                @*<td style="display:none">Site Id</td>*@
+                                <th style="display:none" class="setWidth0"></th>
+                                <th class="setWidth1">Material Type</th>
+                                <th class="setWidth2">Item Code</th>
+                                <th class="setWidth3">Item Description</th>
+                                <th class="setWidth4">Delivered To Depot</th>
+                                <th class="setWidth5">Delivered To Site</th>
+                                <th class="setWidth6">Returned From Site</th>
+                                <th class="setWidth7">Available Quantity</th>
+                                <th class="setWidth8">Total Damaged Quantity</th>
+                                <th class="setWidth9">Item Weight (kg)</th>
+                                <th class="setWidth10">Total Weight (kg)</th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTblSiteInventory"></tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@*<%-- Popup Open Code start Here --%>*@
+<div id="divInvoicePopup" runat="server" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 200px; width: 430px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h11" runat="server">Invoice Cost Report <a id="btnclose" class="close" style="float: right; color: white" onclick="btnreportClose();">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                <label class="listyle">Report Start Date<span style="color: red">&nbsp*</span></label>
+                @*<asp:RequiredFieldValidator ID="reqReportStart" runat="server" ControlToValidate="rdpReportStartDate" ValidationGroup="btnInvoicePrint" ErrorMessage="* Required" CssClass="rdf-initial rdf-text"></asp:RequiredFieldValidator>*@
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6 " style="margin-top:10px">
+                @*<Telerik:RadDatePicker ID="rdpReportStartDate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy" runat="server"></Telerik:RadDatePicker>*@
+                <input type="text" id="rdpReportStartDate" class="form-control" required />
+
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6 " style="margin-top:10px">
+                <label class="listyle">Report End Date<span style="color: red">&nbsp*</span></label>
+                @*<asp:RequiredFieldValidator ID="reqReportEnd" runat="server" ControlToValidate="rdpReportEndDate" ValidationGroup="btnInvoicePrint" ErrorMessage="* Required" CssClass="rdf-initial rdf-text"></asp:RequiredFieldValidator>*@
+
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6 " style="margin-top:10px">
+                @*<Telerik:RadDatePicker ID="rdpReportEndDate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy" runat="server"></Telerik:RadDatePicker>*@
+                <input type="text" id="rdpReportEndDate" class="form-control" required />
+
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ID="btnInvoiceReportExportToCsv" OnClick="btnInvoiceReportExportToCsv_Click" CssClass=" w3-btn w3-green"><i class="fa fa-save"></i>&nbsp;Export To Csv</asp:LinkButton>*@
+                <button type="button" Class="w3-btn w3-green" id="btnInvoiceReportExportToCsv" Style="margin-top: 15px; color:white; width: 100%;" onclick="btnInvoiceReportExportToCsv_Click()">&nbsp;Export To CSV</button>
+
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ValidationGroup="btnPrint" ID="btnInvoicePrint" OnClick="btnInvoicePrint_Click" CssClass="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                <button type="button" Class="w3-btn w3-blue" id="btnInvoicePrint" Style="margin-top: 15px; color:white; width: 100%;" onclick="btnInvoicePrint_Click()"><i class="fa fa-print"></i>&nbsp;Print</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<%-- Popup Open Code End Here --%>*@
+
+@*<%-- Popup Open Code start Here --%>*@
+<div id="divWeeklyPopup" runat="server" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 430px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h12" runat="server">Weekly Hire Report <a id="btnclose" class="close" style="float: right; color: white" onclick="btnreportClose();">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="row"> </div>
+            <div class="row"> </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ID="btnWeeklyReportExportToCsv" OnClick="btnWeeklyReportExportToCsv_Click" CssClass=" w3-btn w3-green"><i class="fa fa-save"></i>&nbsp;Export To Csv</asp:LinkButton>*@
+                <button type="button" Class="w3-btn w3-green" id="btnWeeklyReportExportToCsv" Style="margin-top: 15px; color:white; width: 100%;" onclick="btnWeeklyReportExportToCsv_Click()">&nbsp;Export To CSV</button>
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ValidationGroup="btnPrint1" ID="btnWeeklyPrint" OnClick="btnWeelkyReport_Click" CssClass="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                <button type="button" Class="w3-btn w3-blue" id="btnWeeklyPrint" Style="margin-top: 15px; color:white;width: 100%;" onclick="btnWeelkyReport_Click()"><i class="fa fa-print"></i>&nbsp;Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<%-- Popup Open Code End Here --%>*@
+
+<div id="divSAPCSVPopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 200px; width: 430px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h13">SAP CSV Report <a id="btnclose" class="close" style="float: right; color: white" onclick="btnreportClose();">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                <label class="listyle">Report Start Date<span style="color: red">&nbsp*</span></label>
+                @*<asp:RequiredFieldValidator ID="reqReportStart1" runat="server" ControlToValidate="rdpReportStartDate1" ValidationGroup="btnSAPCSVPrint" ErrorMessage="* Required" CssClass="rdf-initial rdf-text"></asp:RequiredFieldValidator>*@
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6 " style="margin-top:10px">
+                @*<Telerik:RadDatePicker ID="rdpReportStartDate1" Width="100%" DateInput-DateFormat="dd-MMM-yyyy" runat="server"></Telerik:RadDatePicker>*@
+                <input type="text" id="rdpReportStartDate1" class="form-control" />
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6 " style="margin-top:10px">
+                <label class="listyle">Report End Date<span style="color: red">&nbsp*</span></label>
+                @*<asp:RequiredFieldValidator ID="reqReportEnd1" runat="server" ControlToValidate="rdpReportEndDate1" ValidationGroup="btnSAPCSVPrint" ErrorMessage="* Required" CssClass="rdf-initial rdf-text"></asp:RequiredFieldValidator>*@
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6 " style="margin-top:10px">
+                @*<Telerik:RadDatePicker ID="rdpReportEndDate1" Width="100%" DateInput-DateFormat="dd-MMM-yyyy" runat="server"></Telerik:RadDatePicker>*@
+                <input type="text" id="rdpReportEndDate1" class="form-control" />
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ID="btnSAPCSVReportExportToCsv" OnClick="btnSAPCSVReportExportToCsv_Click" CssClass=" w3-btn w3-green"><i class="fa fa-save"></i>&nbsp;Export To CSV</asp:LinkButton>*@
+                <button id="btnSAPCSVReportExportToCsv" OnClick="btnSAPCSVReportExportToCsv_Click()" style="width:100%" Class="w3-btn w3-green"><i class="fa fa-save"></i>&nbsp;Export To CSV</button>
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6" style="margin-top:10px">
+                @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ValidationGroup="btnPrint2" ID="btnSAPCSVPrint" OnClick="btnSAPCSVPrint_Click" CssClass="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                <button id="btnSAPCSVPrint" OnClick="btnSAPCSVPrint_Click()" style="width:100%" Class="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,692 @@
+﻿
+<!DOCTYPE html>
+<html xmlns="https://www.w3.org/1999/xhtml">
+
+<head>
+    <title>SCAFPAC</title>
+    <link rel="icon" href="images/TopLogo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="/Content/css/w3.css" rel="stylesheet" />
+    <link href="/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/css/SecStyle.css" rel="stylesheet" />
+    <link href="/Content/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="Content/Css/jquery-ui.css" rel="stylesheet" />
+    <link href="Content/Css/jquery.datetimepicker.min.css" rel="stylesheet" />
+
+    <script src="/Content/js/jquery.min.js"></script>
+    <script src="/Content/js/jquery-ui.min.js"></script>
+    <script src="/Content/js/bootstrap.min.js"></script>
+    <script src="Content/js/bootstrap-datetimepicker.min.js"></script>
+
+    <script src="/Content/js/jquery.dataTables.min.js"></script>
+    <script src="Content/js/select2.min.js"></script>
+    <script src="Content/js/jquery.datetimepicker.js"></script>
+    <script src="Content/js/jszip.min.js"></script>
+    <script src="Content/js/dataTables.buttons.min.js"></script>
+    <script src="Content/js/html5.min.js"></script>
+    <script src="/Content/js/OfflineRegisterList.js?V=55.0"></script>
+    <script src="Content/js/Layout.js"></script>
+    <link href="/Content/css/CustomAlert.css" rel="stylesheet" />
+    <script src="/Content/js/CustomAlert.js?V=20"></script>
+    <script src="/Content/js/OfflineCustomeAlert.js"></script>
+    <script src="/Content/js/crypto-js.min.js"></script>
+    <script src="Content/js/OfflineEncryptDecript.js"></script>
+</head>
+
+
+<style>
+
+    .calendar-icon {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        cursor: pointer; /* Indicate that the icon is clickable */
+        color: #333;
+    }
+
+    #rdpInspDate {
+        padding-right: 30px;
+    }
+
+    #btnprint {
+        font-size: 15px;
+    }
+
+    .respText {
+        font-size: 15px;
+    }
+
+    #siteddl {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    #lblInspDate {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblBuilding {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblFloorLevel {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblComment {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblInspectedby {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #ddlLocations {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lbldisciplines {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+
+    td {
+        text-align: left;
+    }
+
+    .double-scroll {
+        width: auto;
+    }
+
+    .setWidth1, .setWidth2 {
+        min-width: 24px !important;
+    }
+
+    .setWidth6, .setWidth9 {
+        min-width: 60px !important;
+    }
+
+    .setWidth3, .setWidth4, .setWidth5, .setWidth7, .setWidth8, .setWidth10 {
+        min-width: 80px !important;
+    }
+
+    .setWidth12 {
+        min-width: 100px !important;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #tblOffSystemInspectionList_filter {
+        margin-right: 11px;
+    }
+
+    @@media (min-width:820px) and (max-width:1180px) {
+        #hiddendiv {
+            display: none
+        }
+    }
+</style>
+
+
+<style>
+    /*css stop change styling of input type File btns*/
+    .custombtn {
+        display: none !important;
+    }
+
+    .custom-file-upload {
+        border: 1px solid #ccc;
+        display: inline-block;
+        padding: 6px 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        color: #fff !important;
+        background-color: #607d8b !important;
+    }
+
+    /*css stop change styling of input type File btns*/
+
+    #lockimg {
+        height: 40px;
+        float: right;
+        margin: 5px;
+    }
+
+    .InspectionheadTitle {
+        color: #187dc0;
+        font-size: 30px;
+        font-family: inherit;
+        font-weight: 600;
+    }
+
+    a#save {
+        display: none;
+    }
+
+    .headinfo {
+        text-align: right;
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .headinfo label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .InspectionheadTitle {
+            color: #187dc0;
+            font-size: 25px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .headinfo label {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .responsiveSign {
+            height: 70vh;
+        }
+    }
+
+    @media (min-width: 211px) and (max-width: 767px) {
+
+        span.icon {
+            display: block !important;
+        }
+
+        span.text {
+            display: none;
+        }
+
+        .responsiveSign {
+            height: 35vh;
+        }
+
+        #audio {
+            width: 60%;
+        }
+
+        #Button3 {
+            float: right;
+            display: block !important;
+        }
+
+        #Button2 {
+            display: none;
+        }
+
+        #Button4 {
+            float: right;
+            display: block !important;
+        }
+
+        #Button1 {
+            display: none;
+        }
+
+        #map_canvas {
+            width: 90% !important;
+        }
+
+        .btn {
+            font-size: 11px;
+            padding: 6px 6px;
+        }
+
+        .InspectionheadTitle {
+            color: #187dc0;
+            font-size: 16px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .hdnCamerabefore {
+            width: 85% !important;
+        }
+
+        #ddlInspectedBy {
+            width: 100% !important;
+        }
+
+        .MainContainer {
+            width: 100%;
+        }
+
+        #save, #save img {
+            height: 6vh;
+        }
+
+        .headinfo label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+
+        span.InspectionListTitle {
+            font-size: 14px;
+            color: #0091d6;
+            font-weight: 600;
+        }
+
+        th {
+            padding: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: left;
+            color: grey;
+            background-color: #eeeeee;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            font-size: 13px;
+            text-align: left;
+            color: grey;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .responsiveSign {
+            height: 60vh;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+
+        .responsiveSign {
+            height: 50vh;
+        }
+
+        .InspectionheadTitle {
+            color: #187dc0;
+            font-size: 21px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .headinfo label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        span.InspectionListTitle {
+            font-size: 16px;
+            color: #0091d6;
+            font-weight: 600;
+        }
+
+        th {
+            padding: 5px;
+            text-align: left;
+            color: grey;
+            font-size: 15px;
+            font-weight: 600;
+            background-color: #eeeeee;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            text-align: left;
+            color: grey;
+            font-size: 14px;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+    }
+</style>
+<style>
+        .button-30-blue {
+            background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+        }
+
+        .button-30-current {
+            background-image: radial-gradient(100% 100% at 100% 0, #a1abe0 0%, #303F9F 100%);
+        }
+
+        .button-30-purple {
+            background-image: radial-gradient(100% 100% at 100% 0, #cabbcc 0%, #7B1FA2 100%);
+        }
+
+        .button-30-green {
+            background-image: radial-gradient(100% 100% at 100% 0, #95a87b 0%, #388E3C 100%);
+        }
+
+        .button-30-orange {
+            background-image: radial-gradient(100% 100% at 100% 0, #581661 0%, #90921e 100%);
+        }
+
+        .button-30-teal {
+            background-image: radial-gradient(100% 100% at 100% 0, #337ab7 0%, #00796B 100%);
+        }
+
+        .button-30-gray {
+            background-image: radial-gradient(100% 100% at 100% 0, #607d8b 0%, #757575 100%);
+        }
+
+        .button-30-cyan {
+            background-image: radial-gradient(100% 100% at 100% 0, #607d8b 0%, #A39480 100%);
+        }
+
+        .button-30-red {
+            background-image: radial-gradient(100% 100% at 100% 0, #b70606 0%, #a60606 100%);
+        }
+
+        .button-30 {
+            align-items: center;
+            appearance: none;
+            /*        background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+    */ border: 2px;
+            border-radius: 3px;
+            box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            font-family: "JetBrains Mono",monospace;
+            height: 26px;
+            justify-content: center;
+            line-height: 1;
+            list-style: none;
+            overflow: hidden;
+            padding-left: 16px;
+            padding-right: 16px;
+            position: relative;
+            text-align: left;
+            text-decoration: none;
+            transition: box-shadow .15s,transform .15s;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            white-space: nowrap;
+            will-change: box-shadow,transform;
+            font-size: 14px;
+        }
+
+            .button-30:focus {
+                box-shadow: #006400 0 0 0 5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #006400 0 -3px 0 inset;
+            }
+
+            .button-30:hover {
+               /* box-shadow: #006400 0 0 0 2px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 2px 8px -3px, #006400 0 -3px 0 inset;*/
+                transform: translateY(-2px);
+            }
+
+            .button-30:active {
+                box-shadow: #3c4fe0 0 3px 7px inset;
+                transform: translateY(2px);
+            }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function getParameterByName(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        var Id = getParameterByName("ClientId");
+        var UserId = getParameterByName("UserId");
+
+        var DecriptValuesId = Decrypt([Id]);
+        var DecriptValuesUserId = Decrypt([UserId]);
+
+        var Clientid = DecriptValuesId[0];
+        var UserId = DecriptValuesUserId[0];
+
+        document.getElementById('clientid').value = Clientid;
+        document.getElementById('Userid').value = UserId;
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('rdpInspDate');
+
+        if (dateInput) {
+            // Set today's date as the default value
+            dateInput.value = today;
+
+            // Restrict future dates
+            dateInput.setAttribute('max', today);
+
+            // Uncomment to enable calendar icon to open date picker
+            // document.querySelector('.calendar-icon').addEventListener('click', function () {
+            //     dateInput.focus();
+            // });
+        }
+    });
+
+</script>
+
+
+<body style="padding:50px 30px 50px 30px ">
+
+
+    <div class="row align-items-center col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-3 col-md-2 col-sm-12 col-xs-12">
+            <h4 class="heading" style="color: #0070ba; font-size: 16px;"><b><i class="fa fa-power-off"></i>&nbsp;<span id="lblOffSystemInspection">Offline Register List</span></b></h4>
+        </div>
+
+
+
+        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+            <button id="btnUploadtoCloud" class="button-30 button-30-teal" style="Width: -webkit-fill-available; height: 33px; display: none;" onclick="uploadDataToServerbtn()"><i class="fa fa-cloud-upload"></i>&nbsp;Upload to Cloud</button>
+
+        </div>
+
+        <!--<div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+            <button id="btnSaveInspect" OnClick="btnSaveInspect_Click()" style="width:75%;" Class="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></button>
+        </div>-->
+
+        <div class="col-lg-5 col-md-5 col-sm-6 col-xs-6">
+
+            <button id="onlineimg" style="display: block;width: -webkit-fill-available;text-align: center;height: 33px;font-size: x-large;" class="button-30 button-30-green">Connection Status: On-Line</button>
+            <button id="offlineimg" style="display: none;width: -webkit-fill-available;text-align: center;height: 33px;font-size: x-large;" class="button-30 button-30-red">Connection Status: Off-Line</button>
+        </div>
+
+
+
+
+    </div>
+
+    <br />
+    <hr />
+
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div id="Offlineregisterlist" style="height: 60vh; overflow: auto;" ;">
+                <table id="tblOfflineregisterlist" class="display nowrap" style="width:100%">
+                    <thead style="background-color: #efefef; color: #716262;width: 100%;">
+                        <tr>
+                            <th class="setWidth0" style="display:none;"></th>
+                            <th class="setWidth2" style='text-align: center;'>Edit</th>
+                            <th class="setWidth3" style='text-align: center;'>Job Status</th>
+                            <th class="setWidth3" style="display:none;">
+                            <th class="setWidth4" style='text-align: center;'>Scaf Ref #</th>
+                            <th class="setWidth5" style='text-align: center;'>Client Scaf Ref</th>
+                            <th class="setWidth6" style='text-align: center;'>WO No.</th>
+                            <th class="setWidth7">Location</th>
+                            <th class="setWidth8">Building /<br> Module No.</th>
+                            <th class="setWidth9">Floor Level</th>
+                            <th class="setWidth10">Bearing</th>
+                            <th class="setWidth11">Reason for Access. (Provide Detailed Description)</th>
+                            <th class="setWidth11" style="display:none;">Reason for Access. (Provide Detailed Description)</th>
+                            <th class="setWidth12">Asset # / Func. Loc</th>
+                            <th class="setWidth13">Date Built</th>
+                            <th class="setWidth14" style='text-align: center;'>Days Since </br>Last Insp.</th>
+                            <th class="setWidth15">Tonnage</th>
+                            <th class="setWidth16">Design Type</th>
+                            <th class="setWidth17" style='text-align: center;'>Material Type</th>
+                            <th class="setWidth18" style='text-align: center;'>Duty Rating</th>
+                            <th class="setWidth19" style='text-align: center;'>Date of Dismantle</th>
+                            <th class="setWidth20">Inspected By</th>
+                            <th class="setWidth21">Standing Days to Date</th>
+                            <th class="setWidth22">Total Standing Days</th>
+                            <th class="setWidth23">SAP Number</th>
+                            <th class="setWidth24">Project Type</th>
+                            <th class="setWidth25">Owner Ref</th>
+                            <th class="setWidth26">Owner Name</th>
+                            <th class="setWidth27">Site</th>
+                            <th class="setWidth42" id="UniqueLongTermStructure">Long Term Structure</th>
+                            <th class="setWidth28" id="UniqueDiscipline">Sub Owner</th>
+                            <th class="setWidth29" id="UniqueDisciplineRep">Sub Owner Rep</th>
+                            <th class="setWidth29" id="UniqueWorkGroup">Work Group</th>
+                            <th class="setWidth29" id="UniqueSubGroup">Sub Group</th>
+                            <th class="setWidth30">Man Hrs Erect</th>
+                            <th class="setWidth31">Man Hrs Dismantle</th>
+                            <th class="setWidth32">Shift Allocation</th>
+                            <th class="setWidth33" id="CreatedBy">Created By</th>
+                            <th class="setWidth34" id="CreatedOn">Created On</th>
+                            <th class="setWidth35" id="UpdatedBy">Updated By</th>
+                            <th class="setWidth36" id="UpdatedOn">Updated On</th>
+                            <th class="setWidth37">Length</th>
+                            <th class="setWidth38">Width</th>
+                            <th class="setWidth39">Height(TWP)</th>
+                            <th class="setWidth40" id="SiteLocationStatus">Site Status</th>
+                            <!--<th class="setWidth40" id="LockedIn">Locked In</th>-->
+                            <th class="setWidth26" id="UniqueRequiresisolation">Long Term Structure</th>
+                            <th class="setWidth26" id="UniqueRequiresisolation">Requires Isolation</th>
+                            <th class="setWidth41" id="btndelete" style="display:none;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyRegisterList" style="width:100%"></tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="divSave" class="w3-modal" runat="server" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 148px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey ">
+                <h4 class="w3-text-white" id="save"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label2">Please clear the SEARCH  and then click on Save Button ?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px;">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                    <a class="w3-btn w3-green w3-hover-dark-grey" onclick="btnsaveyes()"
+                       id="btnsaveYes"><i class="glyphicon glyphicon-ok-circle "></i>&nbsp;OK</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="clientid" />
+    <input type="hidden" id="Userid" />
+
+    <div id="CustomAlert" class="j-alertBox" style="display: none;">
+        <span id="alertMsg"></span>
+    </div>
+
+    <div id="Uploadtocloudmodel" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label1">Are you sure you want to upload data?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <button class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" onclick="btnYes();">
+                        <i class="glyphicon glyphicon-ok-circle"></i> Yes
+                    </button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <button class="w3-btn btn-danger w3-hover-dark-grey" id="btnofflinecancel" onclick="btnNo();">
+                        <i class="glyphicon glyphicon-remove-circle"></i> No
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="customLoader" style="display:none;position: fixed; z-index: 999; height: 100%; width: 100%; top: 0; left: 0; background-color: black; filter: alpha(opacity=60); opacity: 0.3; -moz-opacity: 0.8;">
+        <div style="z-index: 99999; margin: 16% 48%; padding: 10px; width: 150px; border-radius: 10px; filter: alpha(opacity=100); opacity: 1; -moz-opacity: 1;">
+            <img src="/Images/loading.gif" style="height: 128px; width: 128px;" />
+            <p class="w3-margin-left"><b>Please Wait.......</b></p>
+        </div>
+    </div>
+
+    <div id="clearLocalDataModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 537px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Would you like to clear local job data?</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label1">
+                        There is already data in your local database.<br /><br /> 1. Click <b>Yes</b> to clear the local data & load new job data.<br />2. Click <b>No</b> to continue on previous data.
+                    </label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" OnClick="BtnClearLocalDataClickyes()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnofflinecancel" OnClick="BtnClearLocalDataClickno()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

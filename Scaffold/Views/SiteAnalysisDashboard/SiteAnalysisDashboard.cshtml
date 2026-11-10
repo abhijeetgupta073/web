@@ -1,0 +1,904 @@
+﻿
+@{
+    ViewBag.Title = "SiteAnalysisDashboard";
+}
+
+@*<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/highcharts-3d.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>*@
+
+<script src="~/Content/js/highcharts.js"></script>
+<script src="~/Content/js/highcharts-more.js"></script>
+<script src="~/Content/js/highcharts-3d.js"></script>
+<script src="~/Content/js/exporting.js"></script>
+<script src="~/Content/js/export-data.js"></script>
+<script src="~/Content/js/no-data-to-display.js"></script>
+<style>
+    .highcharts-credits {
+        display: none;
+    }
+
+    .right_col {
+        background-color: #ffffcc !important;
+    }
+</style>
+<script>
+    $(document).ajaxStart(function () {
+        $('#LoadingPanel1').css('display', 'block');
+    }).ajaxComplete(function () {
+        $('#LoadingPanel1').css('display', 'none');
+    });
+    $(document).ready(function () {
+
+        var id = getParameterByName('id');
+        var DecriptData = Decrypt([id]);
+        $("#hdnclientid").val(DecriptData[0]);
+
+        var ClientID = $("#hdnclientid").val();
+
+        BindallDropdown();
+        ByDesigntype(ClientID, "All", "All");
+        ByHeight(ClientID, "All", "All");
+        ByDRating(ClientID, "All", "All");
+        ByDRatingbar(ClientID, "All", "All");
+        ddlJobbind(ClientID, "All", "All");
+        //var a = $('rect.highcharts-label-box.highcharts-data-label-box').parent().attr();
+        Changesite();
+    });
+
+    function Changesite() {
+        var site = $("#ddlSite").val();
+        var ClientID = $("#hdnclientid").val();
+        ByDesigntype(ClientID, "All", site);
+        ByHeight(ClientID, "All", site);
+        ByDRating(ClientID, "All", site);
+        ByDRatingbar(ClientID, "All", site);
+        ddlJobbind(ClientID, site);
+    }
+
+    function selectarea() {
+        var ClientID = $("#hdnclientid").val();
+        var ddlselectarea = $("#ddlarea").val();
+        var site = $("#ddlSite").val();
+        ByDesigntype(ClientID, ddlselectarea, site);
+        ByHeight(ClientID, ddlselectarea, site);
+        ByDRating(ClientID, ddlselectarea, site);
+        ByDRatingbar(ClientID, ddlselectarea, site);
+    }
+
+    function BindallDropdown() {
+        var id = $("#hdnclientid").val();
+        var UID = getParameterByName('UID');
+        $.ajax({
+            type: "POST",
+            url: "/SiteAnalysisDashboard/BindallDropdown",
+            data: JSON.stringify({ id: id, UID: UID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                var SiteData = response;
+                var SiteLocId = "";
+                $("#ddlSite").html("");
+
+                // $("#ddlSite").append('<option value="All">All</option>');
+                // $.each(response, function (idx, obj) {
+
+                // if (obj != null) {
+                for (var i = 0; i < SiteData.length; i++) {
+                    SiteLocId = SiteData[i].SiteLocID;
+                    if (SiteLocId == 0) {
+                        SiteLocId = "All";
+                    }
+                    // $("#ddlSite").append('<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>');
+
+                    $("#ddlSite").append("<option value='" + SiteLocId + "'>" + SiteData[i].SiteLocation + "</option>");
+                }
+                // }
+                // });
+
+            }
+        });
+    }
+
+    function ddlJobbind(id, SiteId) {
+        //var ddlsite = ("#ddlSite").val();
+
+        $.ajax({
+            type: "POST",
+            //url: "../WebApi/Dashboard.asmx/ddlJobDashboard",
+            url: "/SiteAnalysisDashboard/ddlJobDashboard",
+            data: JSON.stringify({ id: id, SiteId: SiteId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // var ddlJobdropdownbind = response.d;
+                var ddlJobdropdownbind = response;
+                //alert(ddllocationSitedropdownbind.length);
+
+                $("#ddlarea").html("");
+                $("#ddlarea").append('<option value="All">All</option>');
+                for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                    siteLocid = ddlJobdropdownbind[0].areaid;
+                    $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].areaid + '">' + ddlJobdropdownbind[i].area + '</option>');
+
+                }
+            }
+        });
+
+    }
+
+    /// Chart 1
+    function ByDesigntype(ID, Job, Site) {
+        $('.forRemoveData1').remove();
+        $.ajax({
+            type: "POST",
+            // url: "../WebApi/Dashboard.asmx/SiteAnalysisByDType",
+            url: "/SiteAnalysisDashboard/SiteAnalysisByDType",
+            data: JSON.stringify({ id: ID, site: Site, jobid: Job }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // SiteStructure = response.d;
+                SiteStructure = response;
+                var Design = [];
+                var SiteAnalysis = [];
+                var TotalCount = [];
+                var noofrow = 20;
+                if (SiteStructure.length < 20) {
+                    noofrow = SiteStructure.length;
+                }
+                if (SiteStructure.length > 0) {
+                    for (var i = 0; i < noofrow; i++) {
+                        var TobePush = true;
+
+
+                        if (TobePush) {
+                            SiteAnalysis.push({ name: SiteStructure[i].designtype, y: SiteStructure[i].rquantity, sliced: true });
+
+                            Design.push(SiteStructure[i].designtype);
+                            TotalCount.push(SiteStructure[i].rquantity);
+                        }
+
+                    }
+                }
+
+                var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                theExportOptions.splice(0, 1);
+                theExportOptions.splice(5, 10);
+
+
+                Highcharts.chart('container1', {
+                    chart: {
+                        type: 'bar',
+                        backgroundColor: '#f2f2f2'
+                    },
+                    title: {
+                        align: 'left',
+                        text: 'Standing Scaffold by Design Type'
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    xAxis: {
+                        categories: Design,
+                        title: {
+                            text: null
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '',
+                            align: 'high'
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        formatter: function () {
+                            return this.x + ', ' + this.y;
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true,
+                                color: 'black'
+                            }
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                                //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                            },
+
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#Model1').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+
+
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        showInLegend: false,
+                        data: SiteAnalysis
+                    }]
+                });
+                function redrawchart1() {
+                    var chart = $('#container1').highcharts();
+
+                    var w = $('#container1').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (4 / 4), false
+                    );
+                }
+                $(window).resize(redrawchart1);
+                redrawchart1();
+                var row = '';
+                // $.each(response.d, function (index, obj) {
+                $.each(response, function (index, obj) {
+                    var num;
+                    // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                    num = (obj.PctAllSite1 * 100);
+
+                    var Chart1difficultyrating = obj.Chart1difficultyrating == null ? 0 : obj.Chart1difficultyrating;
+
+                    row += "<tr class='forRemoveData1'><td style='text-align: center;'>" + obj.designtype + "</td><td style='text-align: center;'>" + Chart1difficultyrating + "</td><td style='text-align: center;'>" + obj.rquantity + "</td></tr>";
+                });
+                $("#tbDetails1 tbody").append(row);
+            },
+        });
+    }
+
+    /// Chart 2 By Height
+    function ByHeight(ID, Job, Site) {
+        $('.forRemoveData2').remove();
+        $.ajax({
+            type: "POST",
+            // url: "../WebApi/Dashboard.asmx/SiteAnalysisByHeight",
+            url: "/SiteAnalysisDashboard/SiteAnalysisByHeight",
+            data: JSON.stringify({ id: ID, site: Site, jobid: Job }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // SiteStructureHeight = response.d;
+                SiteStructureHeight = response;
+                var SHeight = [];
+                var SiteAnalysisHeight = [];
+                var TotalHeightCount = [];
+                var noofrow = 20;
+                if (SiteStructureHeight.length < 20) {
+                    noofrow = SiteStructureHeight.length;
+                }
+
+                if (SiteStructureHeight.length > 0) {
+                    for (var i = 0; i < noofrow; i++) {
+                        var TobePush = true;
+
+
+                        if (TobePush) {
+                            SiteAnalysisHeight.push({ name: SiteStructureHeight[i].Height, y: SiteStructureHeight[i].RCount, sliced: true });
+
+                            SHeight.push(SiteStructureHeight[i].Height);
+                            TotalHeightCount.push(SiteStructureHeight[i].RCount);
+                        }
+
+                    }
+                }
+
+                var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                theExportOptions.splice(0, 1);
+                theExportOptions.splice(5, 10);
+
+
+                Highcharts.chart('container2', {
+                    chart: {
+                        type: 'bar',
+                        backgroundColor: '#f2f2f2'
+                    },
+                    title: {
+                        align: 'left',
+                        text: 'Standing Scaffold by Height'
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    xAxis: {
+                        categories: SHeight,
+                        title: {
+                            text: null
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '',
+                            align: 'high'
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        formatter: function () {
+                            return this.x + ', ' + this.y;
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true,
+                                color: 'black'
+                            }
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                                //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                            },
+
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#Model2').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+
+
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        showInLegend: false,
+                        data: SiteAnalysisHeight
+                    }]
+                });
+                function redrawchart1() {
+                    var chart = $('#container2').highcharts();
+
+                    var w = $('#container2').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (2 / 4), false
+                    );
+                }
+                $(window).resize(redrawchart1);
+                redrawchart1();
+                var row = '';
+                // $.each(response.d, function (index, obj) {
+                $.each(response, function (index, obj) {
+                    row += "<tr class='forRemoveData2'><td style='text-align: center;'>" + obj.Height + "</td><td style='text-align: center;'>" + obj.RCount + "</td></tr>";
+                });
+                $("#tbDetails2 tbody").append(row);
+            },
+        });
+    }
+
+    /// Chart 3 Difficulty Rating
+    function ByDRating(ID, Job, Site) {
+        $('.forRemoveData3').remove();
+        $.ajax({
+            type: "POST",
+            // url: "../WebApi/Dashboard.asmx/SiteAnalysisByDRating",
+            url: "/SiteAnalysisDashboard/SiteAnalysisByDRating",
+            data: JSON.stringify({ id: ID, site: Site, jobid: Job }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // SiteStructureDRating = response.d;
+                SiteStructureDRating = response;
+                var SDRating = [];
+                var SiteAnalysisDRating = [];
+                var TotalRCount = [];
+                var noofrow = 20;
+                var totaldrate = 0;
+                var registercount = 0;
+                var gaugeval = 0;
+                if (SiteStructureDRating.length < 20) {
+                    noofrow = SiteStructureDRating.length;
+                }
+
+                if (SiteStructureDRating.length > 0) {
+                    for (var i = 0; i < noofrow; i++) {
+                        var TobePush = true;
+
+
+                        if (TobePush) {
+                            SiteAnalysisDRating.push({ name: SiteStructureDRating[i].DRating, y: SiteStructureDRating[i].DRCount, sliced: true });
+
+                            SDRating.push(SiteStructureDRating[i].DRating);
+                            TotalRCount.push(SiteStructureDRating[i].DRCount);
+                            registercount += SiteStructureDRating[i].DRCount;
+                            totaldrate += SiteStructureDRating[i].DRating * SiteStructureDRating[i].DRCount;
+                            //gauge.push(totaldrate += totaldrate);
+                        }
+
+                    }
+                }
+                if (registercount > 0) {
+                    gaugeval = totaldrate / registercount;
+                    gaugeval = parseFloat(gaugeval.toFixed(2));
+                }
+
+                var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                theExportOptions.splice(0, 1);
+                theExportOptions.splice(5, 10);
+
+
+
+                Highcharts.chart('container3', {
+                    chart: {
+                        borderWidth: 0,
+
+                        backgroundColor: '#f2f2f2',
+                        type: 'gauge',
+                        plotBorderWidth: 0,
+                        plotShadow: false
+                    },
+                    title: {
+                        align: 'left',
+                        text: 'Scaffolds by Design Type Difficulty Rating'
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                                //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                            },
+
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#Model3').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+                    },
+                    pane: {
+                        startAngle: -90,
+                        endAngle: 90,
+                        size: 260,
+                        center: ['50%', '70%'],
+                        background: [],
+
+                    },
+
+                    // the value axis
+                    yAxis: {
+                        min: 0,
+                        max: 5,
+                        //width:600,
+                        lineWidth: 0,
+                        minorTickInterval: 0,
+                        //minorTickWidth: 1,
+                        minorTickLength: 5,
+                        minorTickPosition: 'inside',
+
+                        tickInterval: 0.5,
+                        tickWidth: 2,
+
+                        tickLength: 0,
+                        //tickColor: '#4C941D',
+
+                        tickPosition: 'outside',
+                        //tickpositions: [-10, 0, 20, 40, 60, 80, 100, 110],
+
+                        labels: {
+                            //step: 2,
+                            //rotation: 'auto'
+                            formatter: function () {
+                                //position3d: 'offset',
+                                if (this.value == 2) return '';
+                                if (this.value == 3) return '';
+                                if (this.value == 0) return '0';
+                                if (this.value == 5) return '5';
+                                if (this.value == 1) return 'Low Difficulty';
+                                if (this.value == 4) return 'High Difficulty';
+                                if (this.value % 3 == 0) return this.value;
+                                return '';
+                            },
+                            distance: 35
+                            // y: 10,
+                            //align:'right',
+
+                        },
+
+                        title: {
+                            text: ''
+                        },
+
+                        plotBands: [{
+                            from: 0,
+                            to: 0.5,
+                            color: '#4C941D',
+                            thickness: '40%'
+                        }, {
+                            from: 0.5,
+                            to: 1,
+                            color: '#6CC72E',
+                            thickness: '40%'
+                        },
+                        {
+                            from: 1,
+                            to: 1.5,
+                            color: '#6EE91B', // green
+                            thickness: '40%'
+                        },
+                        {
+                            from: 1.5,
+                            to: 2,
+                            color: '#BDFD3C', // yellow
+                            thickness: '40%'
+                        }, {
+                            from: 2,
+                            to: 2.5,
+                            color: '#E5FF77', // green
+                            thickness: '40%'
+                        },
+                        {
+                            from: 2.5,
+                            to: 3,
+                            color: '#F8FF0D',// red
+                            thickness: '40%'
+                        }, {
+                            from: 3,
+                            to: 3.5,
+                            color: '#FFA70D', // green
+                            thickness: '40%'
+                        },
+                        {
+                            from: 3.5,
+                            to: 4,
+                            color: '#F97A25', // yellow
+                            thickness: '40%'
+                        }, {
+                            from: 4,
+                            to: 4.5,
+                            color: '#F25222', // green
+                            thickness: '40%'
+                        }, {
+                            from: 4.5,
+                            to: 5,
+                            color: '#F93E1B',
+                            thickness: '40%'
+                        }]
+                    },
+
+                    series: [{
+                        name: 'Rating ',
+                        data: [gaugeval],
+                        options: {
+                            dial: {
+                                radius: Math.random() * 2000
+                            },
+                        },
+                    }]
+
+                });
+                function redrawchart1() {
+                    var chart = $('#container3').highcharts();
+
+                    var w = $('#container3').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (2 / 4), false
+                    );
+                }
+                $(window).resize(redrawchart1);
+                redrawchart1();
+
+            },
+        });
+    }
+
+    function ByDRatingbar(ID, Job, Site) {
+        $('.forRemoveData3').remove();
+        $.ajax({
+            type: "POST",
+            // url: "../WebApi/Dashboard.asmx/SiteAnalysisByDRating",
+            url: "/SiteAnalysisDashboard/SiteAnalysisByDRating",
+            data: JSON.stringify({ id: ID, site: Site, jobid: Job }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // SiteStructureDRating = response.d;
+                SiteStructureDRating = response;
+                var SDRating = [];
+                var SiteAnalysisDRating = [];
+                var TotalRCount = [];
+                var noofrow = 20;
+                if (SiteStructureDRating.length < 20) {
+                    noofrow = SiteStructureDRating.length;
+                }
+
+                if (SiteStructureDRating.length > 0) {
+                    for (var i = 0; i < noofrow; i++) {
+                        var TobePush = true;
+
+
+                        if (TobePush) {
+                            SiteAnalysisDRating.push({ name: SiteStructureDRating[i].DRating, y: SiteStructureDRating[i].DRCount, sliced: true });
+
+                            SDRating.push(SiteStructureDRating[i].DRating);
+                            TotalRCount.push(SiteStructureDRating[i].DRCount);
+                        }
+
+                    }
+                }
+
+                var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                theExportOptions.splice(0, 1);
+                theExportOptions.splice(5, 10);
+
+
+                Highcharts.chart('container4', {
+                    chart: {
+                        type: 'bar',
+                        backgroundColor: '#f2f2f2'
+                    },
+                    title: {
+                        text: 'Standing Scaffold by Difficulty Rating'
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    xAxis: {
+                        categories: SDRating,
+                        title: {
+                            text: null
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '',
+                            align: 'high'
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        formatter: function () {
+                            return this.x + ', ' + this.y;
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true,
+                                color: 'black'
+                            }
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                                //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                            },
+
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#Model3').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+
+
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        showInLegend: false,
+                        data: SiteAnalysisDRating
+                    }]
+                });
+                function redrawchart1() {
+                    var chart = $('#container4').highcharts();
+
+                    var w = $('#container4').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (2 / 4), false
+                    );
+                }
+                $(window).resize(redrawchart1);
+                redrawchart1();
+                var row = '';
+                //$.each(response.d, function (index, obj) {
+                $.each(response, function (index, obj) {
+                    var DRating = obj.DRating == null ? 0 : obj.DRating;
+                    row += "<tr class='forRemoveData3'><td style='text-align: center;'>" + DRating + "</td><td style='text-align: center;'>" + obj.DRCount + "</td></tr>";
+                });
+                $("#tbDetails3 tbody").append(row);
+            },
+        });
+    }
+</script>
+<style>
+    .highcharts-data-label {
+        transform: translate(231,160);
+    }
+
+    .highcharts-dial {
+    }
+</style>
+
+<input type="hidden" id="hdnclientid" />
+<div class="container DshbrdBack">
+    <div class="row">
+        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3" style="margin-top: 6px">
+            <label id="lblsite" Style="font-size: 16px; color: #808080; float:right; font-weight: bold;" Text="Site">Site</label>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-8" style="margin-top: 6px">
+            @*<asp:DropDownList ID="ddlSite" runat="server" style="width: 100%; font-size: 14px;border-radius:4px; height: 21px; color: #8a8787;" CssClass="form-control" AppendDataBoundItems="true" onchange="Changesite()"></asp:DropDownList>*@
+            <select id="ddlSite" style="width: 100%; font-size: 14px;border-radius:4px; height: 21px; color: #8a8787;" Class="form-control" AppendDataBoundItems="true" onchange="Changesite()"></select>
+        </div>
+        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="margin-top: 6px">
+            <label id="loc" style="font-weight: 700; font-size: 16px; color: black; float: right">Location</label>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-8" style="margin-top: 6px">
+            @*<asp:DropDownList ID="ddlarea" CssClass="form-control" runat="server" style="width: 100%; font-size: 14px;border-radius:4px; height: 21px; color: #8a8787;" AppendDataBoundItems="true" onchange="selectarea();"></asp:DropDownList>*@
+            <select id="ddlarea" Class="form-control" style="width: 100%; font-size: 14px;border-radius:4px; height: 21px; color: #8a8787;" onchange="selectarea();"></select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 wrapper">
+            <div id="container1" style="margin-top:11px"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 wrapper">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper"> <div id="container2" style="margin-top:11px"></div></div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper">  <div id="container3" style="margin-top:18px"></div></div>
+
+        </div>
+    </div>
+    <div class="row" style="display:none">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 wrapper">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper">  <div id="container4" style="margin-top:14px"></div></div>
+        </div>
+    </div>
+
+</div>
+
+@*<%--Model to Show Scaffold By DesignType--%>*@
+<div class="container">
+    <button style="display: none;" id="Model1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+    <div class="modal fade" id="myModal1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Scaffold By DesignType </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td style="width: 50%; text-align: center;"><b>Design Type</b></td>
+                                <td style="width: 30%; text-align: center;"><b>Difficulty Rating</b></td>
+                                <td style="width: 20%; text-align: center;"><b>Job Counts</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Scaffold By DesignType--%>*@
+
+
+
+@*<%--Model to Show Scaffold By Height--%>*@
+<div class="container">
+    <button style="display:none;" id="Model2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+    <div class="modal fade" id="myModal2" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Scaffold By Height </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails2" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 60%; text-align: center;"><b>Height</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Job Counts</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Scaffold By Height--%>*@
+
+@*<%--Model to Show Scaffold By Difficulty Rating--%>*@
+<div class="container">
+    <button style="display:none;" id="Model3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+    <div class="modal fade" id="myModal3" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Scaffold By Difficulty Rating </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 60%; text-align: center;"><b>Difficulty Rating</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Job Counts</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Scaffold By Difficulty Rating--%>*@
+

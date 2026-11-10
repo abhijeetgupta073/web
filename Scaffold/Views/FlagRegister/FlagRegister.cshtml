@@ -1,0 +1,256 @@
+﻿
+@{
+    ViewBag.Title = "FlagRegister";
+}
+
+<style>
+    .setWidth6, .setWidth7 {
+        min-width: 70px !important;
+    }
+
+    .setWidth3, .setWidth18, .setWidth19 {
+        min-width: 80px !important;
+    }
+
+    .setWidth4, .setWidth5 {
+        min-width: 130px !important;
+    }
+
+    .setWidth8 {
+        min-width: 200px !important;
+    }
+
+    .setWidth2, .setWidth9, .setWidth10, .setWidth11, .setWidth12, .setWidth13, .setWidth14, .setWidth15, .setWidth16, .setWidth17, .setWidth20, .setWidth21, .setWidth22, .setWidth23, .setWidth24,.setWidth25,.setWidth26,.setWidth27 {
+        min-width: 60px;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+</style>
+
+
+<script>
+
+    $(function () {
+
+        GetFinalRegister();
+      
+        var TrueOrFalse = 0;
+        const checkbox = document.getElementById('checkbox')
+        checkbox.addEventListener('change', (event) => {
+            let chk = $('#checkbox').is(':checked');
+            if (chk == true) {
+                TrueOrFalse = 1
+                GetFinalRegister(TrueOrFalse);
+            } else {
+                TrueOrFalse = 0;
+                GetFinalRegister(TrueOrFalse)
+            }
+        })
+
+    });
+
+
+    function GetFinalRegister(TrueOrFalse) {
+        var id = getParameterByName('id');
+        $('#LoadingPanel1').show();
+        $.ajax({
+            url: '/FlagRegister/GetFlagRegisterData',
+            type: 'POST',
+            data: JSON.stringify({ id: id, TrueOrFalse: TrueOrFalse}),
+            // data: JSON.stringify({ id: id}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var data = response;
+                $('#tblFinalRegister').DataTable().clear();
+                $('#tblFinalRegister').DataTable().destroy();
+
+                if (data.length != 0) {
+                    var str = '';
+                    $.each(data, function (index, obj) {
+                        var RegisterId = obj.RegisterId == null ? "" : obj.RegisterId;
+                        var Scaffref = obj.Scaffref == null ? "" : obj.Scaffref;
+                        var WorkGroup = obj.WorkGroup == null ? "" : obj.WorkGroup;
+                        var Location = obj.Location == null ? "" : obj.Location;
+                        var BuildingNo = obj.BuildingNo == null ? "" : obj.BuildingNo;
+                        var AssetNo = obj.AssetNo == null ? "" : obj.AssetNo;
+                        var FloorLevel = obj.FloorLevel == null ? "" : obj.FloorLevel;
+                        var Description1 = obj.Description == null ? "" : obj.Description;
+                        var Description = (Description1.length > 40) ? Description1.substring(0, 40) + '.....' : Description1;
+                        var Bearing = obj.Bearing == null ? "" : obj.Bearing;
+                        var Photo = obj.Photo == null ? "" : obj.Photo;
+                        var ManHrsErect = obj.ManHrsErect == null ? "" : obj.ManHrsErect;
+                        var ManHrsDismantle = obj.ManHrsDismantle == null ? "" : obj.ManHrsDismantle;
+                        var JobInventoryList = obj.JobInventoryList == null ? "" : obj.JobInventoryList;
+                        var FinalMaterialList = obj.FinalMaterialList == null ? "" : obj.FinalMaterialList;
+                        var Length = obj.Length == null ? "" : obj.Length;
+                        var Width = obj.Width == null ? "" : obj.Width;
+                        var Height = obj.Height == null ? "" : obj.Height;
+                        var CycloneAction = obj.CycloneAction == null ? "" : obj.CycloneAction;
+                        var TotalDeBoardHrs = obj.TotalDeBoardHrs == null ? "" : obj.TotalDeBoardHrs;
+                        var TotalReinstateHrs = obj.TotalReinstateHrs == null ? "" : obj.TotalReinstateHrs;
+                        var datetagged = obj.datetagged == null ? "" : DateFormat(obj.datetagged);
+                        var DateOfDismantle = obj.DateOfDismantle == null ? "" : DateFormat(obj.DateOfDismantle);
+                        var discipline = obj.discipline == null ? "" : obj.discipline;
+                        var EngineeredDesign = obj.EngineeredDesign == null ? "" : obj.EngineeredDesign;
+                        var ClientRef = obj.ClientRef == null ? "" : obj.ClientRef;
+                        var RegisterPin = obj.RegisterPin == null ? "" : obj.RegisterPin;
+                        var SitePin = obj.SitePin == null ? "" : obj.SitePin;
+                        var SiteLocation = obj.SiteLocation == null ? "" : obj.SiteLocation;
+                        
+
+
+                        str += "<tr>";
+                        str += "<td class='setWidth1' style='display:none;'>" + +"</td>";
+                        str += "<td class='setWidth2'>" + Scaffref + "</td>";
+                        str += "<td class='setWidth2'>" + WorkGroup + "</td>";
+                        str += "<td class='setWidth3'>" + Location + "</td>";
+                        str += "<td class='setWidth4'>" + BuildingNo + "</td>";
+                        str += "<td class='setWidth5'>" + AssetNo + "</td>";
+                        str += "<td class='setWidth6'>" + FloorLevel + "</td>";
+                        str += "<td class='setWidth7'>" + Bearing + "</td>";
+                        // str += "<td class='setWidth8'><a href='' data-toggle='tooltip' title=''>'"+ +"'</a>" + Description + "</td>";
+                        str += "<td class='setWidth8' title='" + Description1 + "'>" + Description + "</td>";
+                        str += "<td class='setWidth8' style='display:none;'>" + Description1 + "</td>"; // For Export To Excel Full Values Of Description
+                        str += "<td class='setWidth9'>" + Photo + "</td>";
+                        str += "<td class='setWidth10'>" + ManHrsErect + "</td>";
+                        str += "<td class='setWidth11'>" + ManHrsDismantle + "</td>";
+                        str += "<td class='setWidth12'>" + JobInventoryList + "</td>";
+                        str += "<td class='setWidth13'>" + FinalMaterialList + "</td>";
+                        str += "<td class='setWidth14'>" + Length + "</td>";
+                        str += "<td class='setWidth15'>" + Width + "</td>";
+                        str += "<td class='setWidth16'>" + Height + "</td>";
+                        str += "<td class='setWidth17'>" + CycloneAction + "</td>";
+                        str += "<td class='setWidth18'>" + TotalDeBoardHrs + "</td>";
+                        str += "<td class='setWidth19'>" + TotalReinstateHrs + "</td>";
+                        str += "<td class='setWidth20'>" + datetagged + "</td>";
+                        str += "<td class='setWidth21'>" + DateOfDismantle + "</td>";
+                        str += "<td class='setWidth22'>" + discipline + "</td>";
+                        str += "<td class='setWidth23'>" + EngineeredDesign + "</td>";
+                        str += "<td class='setWidth24'>" + ClientRef + "</td>";
+                        str += "<td class='setWidth25'>" + RegisterPin + "</td>";
+                        str += "<td class='setWidth26'>" + SitePin + "</td>";
+                        str += "<td class='setWidth27'>" + SiteLocation + "</td>";
+                        str += "</tr>";
+
+                    });
+
+                    $('#LoadingPanel1').hide();
+
+                    $('#tbodyTblFinalRegister').html(str);
+                    table = $('#tblFinalRegister').dataTable({
+                        "bSort": false,
+                        "processing": true,
+                        searching: true,
+                        autoWidth: true,
+                        paging: false,
+                        info: false,
+                        scrollX: true,
+                        scrollY: true,
+                        scrollCollapse: true,
+                        scrollY: '60vh',
+
+                        dom: 'Bfrtip',
+                        buttons: [
+
+                            {
+                                extend: 'csvHtml5',
+                                title: 'Job Register Excel Dump',
+                                exportOptions: {
+                                    //  columns: ':visible'
+                                    columns: [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 , 21, 22, 23, 24, 25, 26, 27,28]
+                                }
+                            }
+                        ],
+
+                    });
+                }
+            }
+        });
+    }
+
+    function btnCAncel_Click() {
+        var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+
+        window.location.href = '/RegisterList/RegisterList?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientID;
+
+    }
+    function ExportToCsvButton_Click() {
+        $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+    }
+
+
+</script>
+
+<div class="row">
+    <div class="col-lg-10 col-md-10 col-sm-8 col-xs-7">
+        @*<h4 class="heading" style="color: #0070ba"><b><i class="fa fa-flag"></i>&nbsp;<asp:Label ID="lblclient" runat="server" Text="Job Register Excel Dump" Font-Size="16px" Font-Bold="true"></asp:Label></b></h4>*@
+        <h4 class="heading" style="color: #0070ba !important;"><b><i class="fa fa-flag"></i>&nbsp;<label ID="lblclient" style="Font-Size:16px; font-weight:bold; color: #0070ba !important;">Job Register Excel Dump</label></b></h4>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-5">
+        @*<asp:LinkButton runat="server" ID="btnCAncel" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnCAncel_Click"> <span class="icon"><i class="fa fa-backward"> </i></span><span class="text">&nbsp;Back to Register </span></asp:LinkButton>*@
+        <button ID="btnCAncel" Width="100%" class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnCAncel_Click()"> <span class="icon"><i class="fa fa-backward"> </i></span><span class="text">&nbsp;Back to Register </span></button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12"><button type="button" class="w3-btn w3-teal" onclick="ExportToCsvButton_Click()">Export to CSV</button></div>
+</div>
+
+<div class="col-lg-2 col-md-2 col-sm-4 col-xs-5">
+    <input type="checkbox" id="checkbox" @*onclick="JobPendingForUpdate(this);"*@ />
+    <label style="margin-left: 10px;">Include Dismantled Jobs</label>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="FinalRegisterDiv" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblFinalRegister" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th class="setWidth1" style="display:none"></th>
+                        <th class="setWidth2">Scaf Ref#</th>
+                        <th class="setWidth2">WorkGroup</th>
+                        <th class="setWidth3">Location</th>
+                        <th class="setWidth4">Building/ Module No.</th>
+                        <th class="setWidth5">Asset#/ Func. Loc</th>
+                        <th class="setWidth6">Floor Level</th>
+                        <th class="setWidth7">Bearing</th>
+                        <th class="setWidth8">Reason for Access. (Provide Detailed Description)</th>
+                        <th class="setWidth8" style="display:none">Reason for Access. (Provide Detailed Description)</th>  @*For Excel Export*@
+                        <th class="setWidth9">Photo</th>
+                        <th class="setWidth10">Man Hrs Erect</th>
+                        <th class="setWidth11">Man Hrs Dismantle</th>
+                        <th class="setWidth12">Job Inventory List</th>
+                        <th class="setWidth13">Final Material List</th>
+                        <th class="setWidth14">Length</th>
+                        <th class="setWidth15">Width</th>
+                        <th class="setWidth16">Height</th>
+                        <th class="setWidth17">Cyclone Action</th>
+                        <th class="setWidth18">Total De-Board Hrs</th>
+                        <th class="setWidth19">Total Re-Instate Hrs</th>
+                        @* Commented on 14-09-2023 Renamed as Date Built *@
+                        @*<th class="setWidth20">Date Tagged</th>*@
+                        <th class="setWidth20">Date Built</th>
+                        <th class="setWidth21">Date Of Dismantle</th>
+                        <th class="setWidth22">Discipline</th>
+                        <th class="setWidth23">Engineered Design</th>
+                        <th class="setWidth24">Planner Group</th>
+                        <th class="setWidth25">Register Pin</th>
+                        <th class="setWidth26">Site Pin</th>
+                        <th class="setWidth27">Site Location</th>
+
+                    </tr>
+                </thead>
+                <tbody id="tbodyTblFinalRegister"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

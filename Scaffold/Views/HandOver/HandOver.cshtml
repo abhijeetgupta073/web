@@ -1,0 +1,465 @@
+﻿
+@{
+    ViewBag.Title = "HandOver";
+}
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<script src="~/Content/js/HandOver.js?V1=9"></script>
+<script>
+    $(document).ready(function () {
+        $('#LiHandOver').removeClass('active').addClass('active');
+        $('#hdnTimeOffSet').val(new Date().getTimezoneOffset());
+        ShowJobInfoDetails();
+        GetHandOverListData();
+    });
+</script>
+
+<script>
+
+    $(document).ready(function () {
+        //    $("#ulalwaysactive").css("display", "none");
+        var screensize = $(window).width();
+        if (screensize < 1150 && screensize > 650) {
+            ($BODY.hasClass('nav-md'))
+            $('#CreateNewDropDown').css("margin-top", "2px");
+            $BODY.removeClass('nav-md').addClass('nav-sm');
+            $LEFT_COL.removeClass('scroll-view');
+            //$('#BlackSection').css('display', 'block');
+            $('#imgLogo').parent().css('display', 'none');
+            $('#imgLogo1').css('display', 'block').css("height", "38px");
+            $('#leftbarsection').css('margin-top', '0px');
+
+
+        }
+
+
+        else {
+            if (screensize < (650)) {
+                $BODY.removeClass('nav-sm')
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "52px");
+                $('.xsfieldset').css('margin-left', '-22px').css("width", "100%");
+                $('.xsgridwidth').css("width", "110%");
+            }
+            else {
+                $('#CreateNewDropDown').css("margin-top", "6px");
+                $BODY.removeClass('nav-sm').addClass('nav-md');
+                //$('#BlackSection').css('display', 'none');
+                $('#imgLogo').parent().css('display', 'block');
+                $('#imgLogo1').css('display', 'none');
+                $('#leftbarsection').css('margin-top', '40px');
+            }
+
+        }
+    });
+
+
+    function hide() {
+        document.getElementById('#Adddocs').style.display = 'none';
+        $('#Adddocs').css('dispaly', 'none');
+    }
+    function upload() {
+        $('#fileuplod').click();
+    }
+
+
+    function onRequestStartevnt(sender, args) {
+        if (args.get_eventTarget().indexOf("ExportToExcelButton") >= 0 ||
+            args.get_eventTarget().indexOf("ExportToWordButton") >= 0 ||
+            args.get_eventTarget().indexOf("ExportToCsvButton") >= 0) {
+            args.set_enableAjax(false);
+        }
+        if (args.EventTarget.indexOf("btnadddocs") != -1 || args.EventTarget.indexOf("btnview") != -1 || args.EventTarget.indexOf("btnsave") != -1) {
+            args.EnableAjax = false;
+        }
+    }
+
+
+</script>
+<script>
+    function opennewpdf(url) {
+
+        window.open(url);
+
+    }
+</script>
+<style>
+    .dataTables_length {
+        display: none;
+    }
+
+    #txtEmailMSg {
+        border-radius: 4px !important;
+        border-color: #e5e5e5 !important;
+    }
+
+    .rdf-initial {
+        margin-top: -16px;
+    }
+
+    .form-control {
+        height: 28px !important;
+    }
+
+    .x_content {
+        padding: 0 0px 6px;
+    }
+
+    .input-group {
+        margin-bottom: 0px;
+    }
+
+    #FormSection label {
+        color: gray !important;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .nav-sm span.fa, .nav-sm .menu_section h3 {
+        display: block !important;
+    }
+
+    .w3-card-4, .w3-hover-shadow:hover {
+        box-shadow: 0 0px 0px 0 rgba(0,0,0,0.2),0 0px 0px 0 rgba(0,0,0,0.19) !important;
+    }
+
+    .panel_toolbox > li > a:hover {
+        background: none;
+    }
+
+    .rgCommandTable td:nth-child(1) {
+        display: block !important;
+    }
+
+    .double-scroll {
+        width: auto;
+    }
+
+    @@media(max-width:1150px) and (min-width:990px) {
+        #btnsave {
+            font-size: 12px;
+            width: 121% !important;
+        }
+
+        #btnbrowse {
+            font-size: 12px;
+        }
+    }
+
+    #btnadddocs {
+        margin-left: -50px !important;
+    }
+
+    label {
+        font-size: 12px;
+    }
+
+    .spancolorandsize {
+        font-size: 12px !important;
+    }
+
+    /*Added on 27Feb2025*/
+    .cross-icon {
+        color: red;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+        .cross-icon:hover {
+            color: darkred;
+            text-decoration: none;
+        }
+</style>
+
+<input type="hidden" id="hdnTimeOffSet" visible="true" value="0" />
+<input type="hidden" id="hdnHandOverID" />
+@*<div runat="server" style="display: none" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <asp:Label ID="alertlabel" runat="server"></asp:Label>
+    </div>*@
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-thumbs-up"></i>&nbsp;<span id="lblclient" Text="Hand Over List" Font-Size="16px" Font-Bold="true">Hand Over List</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+    </div>
+
+</div>
+<div class="clearfix"></div>
+@Html.Partial("_RegisterPartiaView")
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12 xsgridwidth">
+                <div class="clearfix"></div>
+
+                <div class="double-scroll">
+                    <div class=" col-sm-2 col-md-5 col-lg-5"></div>
+                    <div class=" col-sm-3 col-md-5 col-lg-5"></div>
+                    <div class="col-xs-5 col-sm-3 col-md-2 col-lg-2 ">
+                        @*<asp:LinkButton Style="margin: 0%" runat="server" ID="btnadddocs" CausesValidation="false" CssClass="w3-btn w3-teal w3-text-white" OnClick="btnadddocs_Click" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add Hand Over</asp:LinkButton>*@
+                        <button Style="margin: 0%" id="btnadddocs" Class="w3-btn w3-teal w3-text-white" OnClick="btnadddocs_Click()" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add Hand Over</button>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div id="HandOverList" style="color: black; width: 100%;margin-top:5px;">
+                            <table id="tblHandOverList" class="table table-striped ">
+                                <thead style="background-color: #efefef; color: #716262;">
+                                    <tr>
+                                        <th class="setWidth0" style="display:none;"></th>
+                                        <th class="setWidth1" id="UniqueDelete"></th>
+                                        <th class="setWidth2">Hand Over Status</th>
+                                        <th class="setWidth3">Hand Over Date</th>
+                                        <th class="setWidth4">Description</th>
+                                        <th class="setWidth5">Certificate No</th>
+                                        <th class="setWidth6">Comments</th>
+                                        <th class="setWidth7" id="UniqueOpen">Hand Over Record</th>
+                                        <th class="setWidth8" id="UniqueView">View</th>
+                                        <th class="setWidth9" id="UniqueEmail">Email</th>
+                                        <th class="setWidth10" id="UniqueUnconfirm"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyHandOverList" style="width:100%"></tbody>
+                            </table>
+
+                        </div>
+                    </div>
+
+                    @*<Telerik:RadGrid runat="server" HeaderStyle-BackColor="#e7eaea" ID="GridHandOverList" Width="100%" AutoGenerateColumns="false" AllowSorting="true" GroupingSettings-CaseSensitive="false" ClientSettings-EnableRowHoverStyle="true" Skin="Metro" OnNeedDataSource="GridHandOverList_NeedDataSource" OnItemCommand="GridHandOverList_ItemCommand" OnItemDataBound="GridHandOverList_ItemDataBound">
+                            <ClientSettings>
+                            </ClientSettings>
+                            <PagerStyle AlwaysVisible="true" />
+                            <MasterTableView DataKeyNames="Id,HandOverTime" CommandItemDisplay="Top" EditMode="EditForms" CommandItemSettings-ShowExportToCsvButton="false" CommandItemSettings-ShowExportToExcelButton="false" CommandItemSettings-ShowRefreshButton="true" CommandItemSettings-ShowAddNewRecordButton="false">
+
+                                <CommandItemTemplate>
+                                    <%--<div class="col-xs-7 col-md-9 col-lg-10 col-sm-9"></div>
+                                    <div class="col-xs-5 col-md-3 col-lg-2 col-sm-3">
+                                        --%>
+                                        <div class=" col-sm-2 col-md-5 col-lg-5"></div>
+                                        <div class=" col-sm-3 col-md-5 col-lg-5"></div>
+                                        <div class="col-xs-5 col-sm-3 col-md-2 col-lg-2 ">
+                                            <asp:LinkButton Style="margin: 0%" runat="server" ID="btnadddocs" CausesValidation="false" CssClass="w3-btn w3-teal w3-text-white" OnClick="btnadddocs_Click" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add Hand Over</asp:LinkButton>
+                                        </div>
+                                </CommandItemTemplate>
+                                <Columns>
+                                    <%--<Telerik:GridTemplateColumn HeaderStyle-Width="3%" AllowFiltering="false" ItemStyle-Width="3px">
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="lnkEdit" runat="server" CausesValidation="false" CommandName="Edit"> <i class="glyphicon glyphicon-pencil"></i> </asp:LinkButton>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>--%>
+                                    <Telerik:GridTemplateColumn HeaderStyle-Width="20px" UniqueName="UniqueDelete">
+                                        <ItemTemplate>
+                                            <asp:LinkButton Exportable="false" ID="btnDeleteTask" ToolTip="Delete" runat="server" CommandName="Delete"> <i class="fa fa-trash"></i> </asp:LinkButton>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+
+
+                                    <Telerik:GridTemplateColumn HeaderStyle-Width="120px" FilterControlWidth="100px" HeaderStyle-HorizontalAlign="Left" HeaderText="Hand Over Status" AllowFiltering="true" AllowSorting="true" DataField="IsConfirmed" DataType="System.String" ShowFilterIcon="false" UniqueName="IsConfirmed" FilterDelay="1500">
+                                        <ItemTemplate>
+                                            <asp:Label ID="lblHandover" runat="server" Text='<%#Eval("IsConfirmed").ToString()=="True"?"Confirmed":""%>'></asp:Label>
+                                        </ItemTemplate>
+
+                                    </Telerik:GridTemplateColumn>
+                                    <Telerik:GridTemplateColumn DataField="MyDate" HeaderText="Hand Over Date" HeaderStyle-Width="90px" UniqueName="MyDate" HeaderStyle-HorizontalAlign="Left" DataType="System.DateTime" ShowFilterIcon="false">
+
+                                        <ItemTemplate>
+                                            <asp:Label ID="Label1" Width="100px" runat="server" Text='<%# Eval("HandOverDate", "{0:dd-MMM-yyyy hh:mm tt}") %>'></asp:Label>
+                                            <asp:Label ID="lblHandoverDate" Width="100px" runat="server" Text='<%# Eval("HandOverDate", "{0:dd-MMM-yyyy}") %>'></asp:Label>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+
+
+                                    <Telerik:GridTemplateColumn DataField="HandOverDesc" HeaderText="Description" HeaderStyle-Width="150PX" DataType="System.String" ShowFilterIcon="false"
+                                                                UniqueName="Description" CurrentFilterFunction="Contains">
+                                        <ItemTemplate>
+                                            <asp:Label runat="server" Width="180PX" ID="lblHandOverDesc" Text='<%#Eval("HandOverDesc") %>' ToolTip='<%#Eval("HandOverDesc") %>'></asp:Label>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+                                    <Telerik:GridTemplateColumn HeaderStyle-Width="70px" UniqueName="CertificateNo" HeaderText="Certificate No" DataField="CertificateNo" DataType="System.String" ShowFilterIcon="false">
+
+                                        <ItemTemplate>
+                                            <asp:Label runat="server" Width="100px" ID="lblCertificateNo" Text='<%#Eval("CertificateNo") %>'></asp:Label>
+                                            <%--<asp:Label runat="server" ID="Label1" Text='<%#Eval("InspectedBy") %>' ToolTip='<%#Eval("DocumentName") %>'></asp:Label>--%>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+                                    <Telerik:GridTemplateColumn HeaderStyle-Width="150px" UniqueName="Comments" HeaderText="Comments" DataField="Comments" DataType="System.String">
+
+                                        <ItemTemplate>
+                                            <asp:Label runat="server" Width="100px" ID="lbldesc" Text='<%#Eval("HandOverComments") %>' ToolTip='<%#Eval("HandOverComments") %>'></asp:Label>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+                                    <Telerik:GridTemplateColumn HeaderStyle-Width="90px" HeaderText="Hand Over Record" ShowFilterIcon="false" UniqueName="UniqueOpen">
+
+                                        <ItemTemplate>
+                                            <%-- <asp:LinkButton runat="server" Width="106px" CausesValidation="false" CommandName="Link"><i class="fa fa-link"></i>&nbsp;Open</asp:LinkButton>--%>
+                                            <asp:LinkButton runat="server" Width="106px" CausesValidation="false" CommandName="Link" Visible='<%#Eval("IsConfirmed").Equals(true)? false :true %>'><i class="fa fa-link"></i>&nbsp;Open</asp:LinkButton>
+                                            <%--    <asp:LinkButton ID="btnView" runat="server" Width="106px" CausesValidation="false" Visible='<%#Eval("IsConfirmed").Equals(true)? true :false %>' CommandName="View" CssClass="w3-btn w3-teal"><i class="fa fa-search"></i>&nbsp;View</asp:LinkButton>--%>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+                                    <Telerik:GridTemplateColumn HeaderStyle-Width="90px" HeaderText="View" ShowFilterIcon="false" UniqueName="UniqueView">
+
+                                        <ItemTemplate>
+                                            <%-- <asp:LinkButton runat="server" Width="106px" CausesValidation="false" CommandName="Link"><i class="fa fa-link"></i>&nbsp;Open</asp:LinkButton>--%>
+                                            <%--    <asp:LinkButton runat="server" Width="106px" CausesValidation="false" CommandName="Link" Visible='<%#Eval("IsConfirmed").Equals(true)? false :true %>'><i class="fa fa-link"></i>&nbsp;Open</asp:LinkButton>--%>
+                                            <asp:LinkButton ID="btnView" runat="server" Width="106px" CausesValidation="false" Visible='<%#Eval("IsConfirmed").Equals(true)? true :false %>' CommandName="View" CssClass="w3-btn w3-teal"><i class="fa fa-search"></i>&nbsp;View</asp:LinkButton>
+
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+
+                                    <%--<Telerik:GridTemplateColumn FilterControlWidth="100px" HeaderStyle-Width="90px" HeaderText="HandOver Record" AllowFiltering="false" AllowSorting="false" ShowFilterIcon="false">
+                                        <ItemTemplate>
+                                            <asp:LinkButton Visible='<%# Eval("OnlineInsp").Equals(false)? false :true %>' runat="server" ID="btnlink" CausesValidation="false" CommandName="Link"><i class="fa fa-link"></i>&nbsp;Open</asp:LinkButton>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn> --%>
+
+
+
+                                    <Telerik:GridTemplateColumn HeaderStyle-Width="90px" HeaderText="Email" ShowFilterIcon="false" UniqueName="UniqueEmail">
+                                        <ItemTemplate>
+                                            <asp:LinkButton runat="server" ID="btnEmail" CausesValidation="false" CommandName="Email" ForeColor="White"><i class="fa fa-envelope"></i>&nbsp;Email</asp:LinkButton>
+                                        </ItemTemplate>
+                                    </Telerik:GridTemplateColumn>
+                                </Columns>
+
+                            </MasterTableView>
+                        </Telerik:RadGrid>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Adddocs" class="w3-modal">
+</div>
+@*<asp:SqlDataSource runat="server" ID="dsddlInspectedBy" SelectCommand="select firstName+ ' '+LastName as name from tblUser where Role='Inspector' and clientid=@clientid" ConnectionString='<%$ ConnectionStrings:connectionstring %>'>
+        <SelectParameters>
+            <asp:QueryStringParameter Name="clientid" QueryStringField="id" DbType="Int32" />
+        </SelectParameters>
+    </asp:SqlDataSource>*@
+<div id="divdelete" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@*<%--  Check Inspection & HandOver  --%>*@
+
+<div id="emailConfirm" class="w3-modal">
+    <div class="w3-modal-content w3-round-medium w3-animate-zoom" style="margin-top: -86px; width: 750px; color: black;">
+        <header class="w3-container nln-gray-bg">
+            <h5 class="w3-text-white">Email Form</h5>
+        </header>
+        <div class="w3-container">
+            <fieldset>
+                <legend>
+                    <label><b>Email Client</b></label>
+                </legend>
+
+                <div class="row">
+                    <span ID="alertlabel2"></span>
+
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                        <label>To </label>
+                    </div>
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+                        @*<asp:TextBox runat="server" ID="txtClientEmail" CssClass="form-control"></asp:TextBox>
+                            <asp:TextBox runat="server" ID="txtcc" Style="display: none" CssClass="form-control"></asp:TextBox>
+                            <asp:RequiredFieldValidator runat="server" ID="rdftxtClientEmail" ControlToValidate="txtClientEmail" CssClass="rdf-initial" ErrorMessage="<i class='fa fa-exclamation-triangle'></i>" ValidationGroup="emailValidate"></asp:RequiredFieldValidator>*@
+                        <input type="text" id="txtClientEmail" Class="form-control" />
+                        <input type="text" id="txtcc" Style="display: none" Class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                        <label>Subject </label>
+                    </div>
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+                        @*<asp:TextBox runat="server" ID="txtsubject" CssClass="form-control"></asp:TextBox>
+                            <asp:RequiredFieldValidator runat="server" ID="rdftxtsubject" ControlToValidate="txtsubject" CssClass="rdf-initial" ErrorMessage="<i class='fa fa-exclamation-triangle'></i>" ValidationGroup="emailValidate"></asp:RequiredFieldValidator>*@
+                        <input type="text" id="txtsubject" Class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                        <label>File </label>
+                    </div>
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+                        @*<asp:TextBox runat="server" ID="txttempfile" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                            <asp:TextBox runat="server" ID="txtFile" Style="display: none;" CssClass="form-control" ReadOnly="true"></asp:TextBox>*@
+                        <input type="text" id="txttempfile" Class="form-control" disabled>
+                        <input type="text" id="txtFile" Style="display: none;" Class="form-control" disabled />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        @*<asp:TextBox runat="server" ID="txtEmailMSg" TextMode="MultiLine" Rows="18" Width="100%" CssClass="w3-padding-small">
+
+                            </asp:TextBox>*@
+                        <textarea rows="18" id="txtEmailMSg" style="width:100%" class="w3-padding-small"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-4">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2">
+                        @*<asp:LinkButton runat="server" ID="btnSend" CssClass="w3-btn w3-green w3-small w3-padding-small" Width="100%" ValidationGroup="emailValidate" OnClientClick="validate()" OnClick="btnSend_Click"> <i class="fa fa-share"></i> Send</asp:LinkButton>*@
+                        <button id="btnSend" Class="w3-btn w3-green w3-small w3-padding-small" style="Width:100%" OnClientClick="validate()" OnClick="btnSend_Click()"> <i class="fa fa-share"></i> Send</button>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2">
+                        @*<asp:LinkButton runat="server" ID="btnCancel" CausesValidation="false" CssClass="w3-btn w3-red w3-small w3-padding-small" Style="width: 100%" OnClick="btnCancel_Click"><i class="fa fa-recycle"></i>&nbsp;Cancel</asp:LinkButton>*@
+                        <button id="btnCancel" Class="w3-btn w3-red w3-small w3-padding-small" Style="width: 100%" OnClick="btnCancel_Click()"><i class="fa fa-recycle"></i>&nbsp;Cancel</button>
+                    </div>
+                </div>
+            </fieldset>
+            <br />
+        </div>
+    </div>
+</div>
+
+@* Added on 26Feb2025 *@
+<div id="divUnconfirm" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Unconfirm</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Unconfirm the Hand Over?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnUnconfirmyes_Click()" id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnUnconfirmno_Click()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+            </div>
+        </div>
+    </div>
+</div>

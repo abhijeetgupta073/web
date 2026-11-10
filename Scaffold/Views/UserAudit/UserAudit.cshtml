@@ -1,0 +1,237 @@
+﻿
+@{
+    ViewBag.Title = "UserAudit";
+}
+
+
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #toDate, #fromDate {
+        color: black;
+    }
+
+    .clsCompanyNameWidth, .clsFirstNameWidth, .clsLastNameWidth, .clsIPaddressWidth {
+        min-width: 70px !important;
+    }
+
+    .clsUserEmailWidth, .clsRoleWidth,.clsAtteptReasonWidth {
+        min-width: 120px !important;
+    }
+
+    .clsStatusWidth, .clsAttemptSuccessWidth {
+        min-width: 50px !important;
+    }
+
+    .clsCreatedByWidth, .clsCreatedOnWidth {
+        min-width: 150px !important;
+    }
+
+</style>
+
+<script>
+    $(function () {
+
+        var date = new Date();
+        var newdate = new Date(date);
+        newdate.setDate(newdate.getDate() - 2);
+
+        $("#fromDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            closeText: 'Close',
+        }).datepicker("setDate", newdate);
+
+        $("#toDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            closeText: 'Close',
+        }).datepicker("setDate", new Date());
+
+        GetUserAuditData();
+    });
+
+    function GetUserAuditData() {
+        $("#LoadingPanel1").css("display", "block");
+        var fromDate = $('#fromDate').val();
+        var toDate = $('#toDate').val();
+        $.ajax({
+            type: 'POST',
+            url: '/UserAudit/GetUserAuditData',
+            data: JSON.stringify({ fromDate: fromDate, toDate: toDate }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var data = response;
+                var str = '';
+                $('#tblUserAudit').DataTable().clear();
+                $('#tblUserAudit').DataTable().destroy();
+                if (data.length != 0) {
+                   
+                    $.each(data, function (index, obj) {
+
+                        var CompanyName = obj.Name == null ? "" : obj.Name;
+                        var FirstName = obj.FirstName == null ? "" : obj.FirstName;
+                        var LastName = obj.LastName == null ? "" : obj.LastName;
+                        var UserName = obj.UserName == null ? "" : obj.UserName;
+                        var Role = obj.Role == null ? "" : obj.Role;
+                        var Status = obj.Status == null ? "" : obj.Status;
+                        var AttemptSuccess = obj.AttemptSuccess == null ? "" : obj.AttemptSuccess;
+                        var IPAddress = obj.IPAddress == null ? "" : obj.IPAddress;
+                        var CreatedBy = obj.CreatedBy == null ? "" : obj.CreatedBy;
+                        var CreatedOn = obj.CreatedOn == null ? "" : obj.CreatedOn;
+                        var AtteptReason = obj.AtteptReason == null ? "" : obj.AtteptReason;
+
+                        str += "<tr>";
+                        str += "<td class='clsCompanyNameWidth' style='display:none;'></td>";
+                        str += "<td class='clsCompanyNameWidth'>" + CompanyName + "</td>";
+                        str += "<td class='clsFirstNameWidth'>" + FirstName + "</td>";
+                        str += "<td class='clsLastNameWidth'>" + LastName + "</td>";
+                        str += "<td class='clsUserEmailWidth'>" + UserName + "</td>";
+                        str += "<td class='clsRoleWidth'>" + Role + "</td>";
+                        str += "<td class='clsStatusWidth'>" + Status + "</td>";
+                        str += "<td class='clsAttemptSuccessWidth'>" + AttemptSuccess + "</td>";
+                        str += "<td class='clsIPaddressWidth'>" + IPAddress+ "</td>";
+                        str += "<td class='clsCreatedByWidth'>" + CreatedBy + "</td>";
+                        str += "<td class='clsCreatedOnWidth'>" + DateTimeFormat(CreatedOn) + "</td>";
+                        str += "<td class='clsAtteptReasonWidth'>" + AtteptReason + "</td>";
+                        str += "</tr>";
+                    });
+                   
+                }
+                $("#LoadingPanel1").css("display", "none");
+                $('#tbodyTblUserAudit').html(str);
+                var table = $('#tblUserAudit').dataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    "bLengthChange": false,
+                    "bInfo": false,
+                    autoWidth: false,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+
+                    dom: 'Bfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'User Audit',
+                            exportOptions: {
+                              columns: ':visible'
+                            }
+                        }
+                    ],
+                });
+            }
+        });
+    }
+
+    function btnRefresh_Click() {
+        GetUserAuditData();
+    }
+
+    function btnExportToCSV() {
+        $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+    }
+
+
+
+    // Get DateTime Format for Json Datetime
+    function ReturnTime(date) {
+        if (date != null && date != undefined && date != "") {
+            date = date.toString();
+            var newDate = new Date(parseInt(date.substr(6)));
+
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var DateTo2 = tConvert(("0" + newDate.getHours()).slice(-2) + ':' + ("0" + newDate.getMinutes()).slice(-2));
+
+            return DateTo2.toString();
+            //return DateTo.toString();
+        }
+        else {
+            return "";
+        }
+    }
+
+    function tConvert(time) {
+        // Check correct time format and split into components
+        time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+        if (time.length > 1) { // If time format correct
+            time = time.slice(1); // Remove full string match value
+            time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+            time[0] = +time[0] % 12 || 12; // Adjust hours
+        }
+        return time.join(''); // return adjusted time or original string
+    }
+
+
+
+</script>
+
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial; height: auto !important;">
+       
+        <div class="row"></div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="heading" style="color: #0070ba; font-size: 15px;"><i class="fa fa-file"></i><b>&nbsp;User Audit Report</b></h4>
+        </div>
+
+        <div class="row row-common">
+            <div class="col-lg-1 col-md-2 col-sm-1  col-xs-4">
+                <label style="width:100%; padding-top: 5px; color: black">From Date</label>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3  col-xs-8">
+                <input id="fromDate" style="width:70%; padding-top: 5px" DateInput-DateFormat="dd-MMM-yyyy" />
+            </div>
+            <div class="col-lg-1 col-md-2 col-sm-1  col-xs-4">
+                <label style="width:100%; padding-top: 5px; color: black">To Date</label>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-8">
+                <input id="toDate" style="width:70%; padding-top: 5px" DateInput-DateFormat="dd-MMM-yyyy"/>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2  col-xs-6">
+                <button id="btnRefresh" onclick="btnRefresh_Click()" style="width:90px" class="w3-btn w3-blue"><i class="fa fa-refresh"></i>&nbsp;Refresh</button>
+            </div>
+            <div class="col-md-2 col-sm-2 col-lg-2 col-xs-6">
+                <button id="ExportToCsvButton" style="width:100%" class="btn w3-btn w3-teal" onclick="btnExportToCSV()">Export to CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="UserAuditDiv" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblUserAudit" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th class="clsCompanyNameWidth" style="display:none;">Company Name</th>
+                        <th class="clsCompanyNameWidth">Company Name</th>
+                        <th class="clsFirstNameWidth">First Name</th>
+                        <th class="clsLastNameWidth">Last Name</th>
+                        <th class="clsUserEmailWidth">User Email</th>
+                        <th class="clsRoleWidth">Role</th>
+                        <th class="clsStatusWidth">Status</th>
+                        <th class="clsAttemptSuccessWidth">User Attempt Success</th>
+                        <th class="clsIPaddressWidth">IP Address</th>
+                        <th class="clsCreatedByWidth">Created By</th>
+                        <th class="clsCreatedOnWidth">Created On(UTC Time)</th>
+                        <th class="clsAtteptReasonWidth">Reason</th>
+                    </tr>
+
+                </thead>
+                <tbody id="tbodyTblUserAudit"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+

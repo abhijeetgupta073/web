@@ -1,0 +1,737 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCAFPAC</title>
+    @*<link rel="icon" href="~/images/TopLogofavicon.png?v=2" />*@
+    @*<link rel="icon" type="image/x-icon" href="/images/TopLogofavicon.png?v=@DateTime.Now.Ticks" />*@
+    <link rel="icon" href="~/images/TopLogofavicon.png" />
+    @*@Styles.Render("~/Content/ScaffoldCss")*@
+    <link href="~/Content/Css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Css/custom.css" rel="stylesheet" />
+    <link href="~/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Css/w3.css?v=1.1" rel="stylesheet" />
+    <link href="~/Content/Css/SecStyle.css" rel="stylesheet" />
+    <link href="~/Content/Css/style-conquer.css?v=1.1" rel="stylesheet" />
+    <link href="~/Content/Css/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" />
+    <link href="~/Content/Css/HoverDropdown.css" rel="stylesheet" />
+    <link href="~/Content/Css/select2.min.css" rel="stylesheet" />
+    <link href="~/Content/Css/jquery-ui.css" rel="stylesheet" />
+
+    <link href="~/Content/Css/CustomAlert.css" rel="stylesheet" />
+
+    <link href="~/Content/Css/jquery.dataTables.min.css" rel="stylesheet" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" rel="stylesheet" />
+
+    @*<link href="~/Content/Css/library/font-awesome.min.css" rel="stylesheet" />*@
+
+
+    @*<link href="~/Content/Css/HoverDropdown.css" rel="stylesheet" />*@
+
+    @*<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" rel="stylesheet">*@
+    @*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">*@
+
+    <script src="~/Content/Js/jquery.min.js"></script>
+    <script src="~/Content/js/jquery-ui.min.js"></script>
+    <script src="~/Content/js/jquery.doubleScroll.js"></script>
+    <script src="~/Content/js/select2.min.js"></script>
+    <script src="~/Content/Js/bootstrap.min.js"></script>
+    <script src="~/Content/Js/jquery.dataTables.min.js"></script>
+    @*<script src="~/Content/Js/dataTables.bootstrap.min.js"></script>*@
+
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+    @*<script src="https://rawgit.com/makeusabrew/bootbox/f3a04a57877cab071738de558581fbc91812dce9/bootbox.js"></script>*@
+    <script src="~/Content/Js/bootbox.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.jquery.min.js"></script>
+    @*<script src="~/Content/js/inputmask.js"></script>*@
+    @*<script src="https://rawgit.com/RobinHerbots/jquery.inputmask/3.x/dist/jquery.inputmask.bundle.js"></script>*@
+    <!-- Replace the broken rawgit line with this -->
+    <script src="~/Content/Js/jquery.inputmask.bundle.js"></script>
+    <script src="~/Content/js/Layout.js?V1=58"></script>
+    <script src="~/Content/js/CustomAlert.js"></script>
+
+    @*@Scripts.Render("~/Content/ScaffoldJs")*@
+    @*<script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>*@
+
+    @*<link href="~/Content/Css/select2.min.css" rel="stylesheet" />
+        <link href="~/Content/Css/style-conquer.css" rel="stylesheet" />*@
+    @*<script src="https://rawgit.com/makeusabrew/bootbox/f3a04a57877cab071738de558581fbc91812dce9/bootbox.js"></script>
+        <script src="~/Content/js/Seccustom.js"></script>*@
+
+    <style>
+        table.dataTable thead th, table.dataTable thead td {
+            padding: 10px 10px;
+            border-bottom: 1px solid #111;
+        }
+        /*.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+         padding: 8px !important;
+
+        }*/
+        .hideLeftBarLi {
+            display: none !important;
+        }
+
+        .LiChildActive {
+            color: blue !important;
+            background-color: white !important;
+        }
+
+        #btnOwnerReport {
+            margin-top: 20px;
+            height: 28px;
+            padding-top: 5px;
+        }
+
+        .bootbox-body {
+            color: black !important;
+            font-weight: 600;
+        }
+
+        .openmanhrs {
+            display: none;
+        }
+
+        .form-control {
+            height: 28px !important;
+        }
+        /*  Added By Neeraj Joshi on 22/08/1024*/
+        #customAlertBox {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        #customAlertContent {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 762px;
+            max-height: 80vh;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            text-align: left;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        #customAlertMessage {
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+            display: block;
+            color: black;
+        }
+
+        #customAlertClose {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+        }
+
+            #customAlertClose:hover {
+                background-color: #0056b3;
+            }
+    </style>
+    <style>
+        @@media (min-width:1024px) and (max-width:1200px) {
+            #lblSelectedCLient {
+                display: none !important;
+            }
+        }
+
+        @@media (min-width:768px) and (max-width:1023px) {
+            #lblSelectedCLient {
+                display: none !important;
+            }
+        }
+
+        @@media (min-width:481px) and (max-width:767px) {
+            #lblSelectedCLient {
+                display: none !important;
+            }
+        }
+
+        @@media (min-width:320px) and (max-width:480px) {
+            #lblSelectedCLient {
+                display: none !important;
+            }
+        }
+
+        @@media (max-width:319px) {
+            #lblSelectedCLient {
+                display: none !important;
+            }
+        }
+    </style>
+    <script>
+
+        // For Right Click Disable All Projects Because View Pagesourc code not Allow To Show Any One.
+
+        $(document).ready(function () {
+            $("body").on("contextmenu", function (e) {
+                return false;
+            });
+            ////Code For Ctrl+U And Ctrl+Shift+I Stop Disable All Projects Because View Pagesourc code not Allow To Show Any One.
+            document.onkeydown = function (e) {
+                if (event.keyCode == 123) { return false; }
+                //    //  else if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 16 || e.keyCode === 73 || e.keyCode === 86 || e.keyCode === 85 || e.keyCode === 117)) { return false; }
+                else if (e.ctrlKey && (e.keyCode === 16 || e.keyCode === 73 || e.keyCode === 85 || e.keyCode === 117)) { return false; }
+
+            };
+        });
+
+        $(document).ready(function () {
+
+            //$("select.chosen-select").select2();
+            $('#hdnTimeOffSetForAllPage').val(new Date().getTimezoneOffset());
+            var list = $('#lstSearch');
+            list.val('dfg');
+            var href = location.href.split('?');
+            var href2 = href[0].split('/');
+            if (href2[href2.length - 1] == "Default") {
+                $('.side-menu li').removeClass('hideLeftBarLi');
+                $('#LiMenuitem').addClass('hideLeftBarLi');
+                $('#spnConfigleftBar').html('Configuration');
+                $('#LiManage').addClass("hideLeftBarLi");
+                $('#LiOprationalSetup').addClass("hideLeftBarLi");
+            };
+
+        });
+        //function redirectToDash() {
+        //    window.location.href = '/Default.aspx';
+        //};
+
+        function setinterval(Userid) {
+            // alert(sessionid);
+            setTimeout(function () {
+                setinterval(Userid);
+            }, 20000);
+            var hdnoffset = $('#hdnTimeOffSetForAllPage').val();
+            $.ajax({
+                type: 'POST',
+                //data: JSON.stringify({ id: Userid, session: sessionid }),
+                data: JSON.stringify({ id: Userid, hdnoffset: hdnoffset }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                global: false,
+                // url: '../WebApi/Dashboard.asmx/ForceLogOut',
+                url: '/Layout/ForceLogOut',
+                success: function (response) {
+                    console.log(JSON.stringify(response));
+                    if (response == "InActive") {
+                        bootbox.alert({
+                            message: "This Log-in is currently being used. Only one log in per user",
+                            callback: function () {
+                                window.location.href = '/Login/Login';
+                            }
+                        })
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            //  var Userid = $("#hdnUserId").val();
+            //  var sessionid = $("#hdnsessionid").val();
+
+            DropdownBindClient();
+
+            var Userid = getParameterByName('UID');
+            setinterval(Userid);
+
+
+
+            var screensize = $(window).width();
+            if (screensize < 1150 && screensize > 650) {
+                ($BODY.hasClass('nav-md'))
+                $('#CreateNewDropDown').css("margin-top", "2px");
+                $BODY.removeClass('nav-md').addClass('nav-sm');
+                $LEFT_COL.removeClass('scroll-view');
+                //$('#BlackSection').css('display', 'block');
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "32px");
+                $('#leftbarsection').css('margin-top', '0px');
+                //$('.dropdown-menu').css('margin-left', '-96px');
+                $('.imgdisplay').css('display', 'none');
+                $('#ulalwaysdashboardactive').css('display', 'none');
+                $('#ulalwaysactive').css('display', 'none');
+            }
+            else {
+                if (screensize < (650)) {
+                    $BODY.removeClass('nav-sm')
+                    // $('#imgLogo').parent().css('display', 'none');
+                    //$('#imgLogo1').css('display', 'block').css("height", "52px");
+                    $('#lblSelectedCLient').css("font-size", "12px");
+                    $('.dropdown user').css('margin-top', '3px');
+                    //$('#lblSelectedCLient').css("font-size", "14px");
+                    $('.dropdown-menu').css('margin-left', '-121px');
+                    $('#lblUserName').css("font-size", "10px");
+                    $('#DdlClient').css("width", "116px !important");
+                    $('.imgdisplay').css('display', 'none');
+                    $('.xsleft').css('margin-left', '-12px').css('float', 'left').css('text-allign', 'left');
+                }
+                else {
+                    $('#CreateNewDropDown').css("margin-top", "6px");
+                    $BODY.removeClass('nav-sm').addClass('nav-md');
+                    //$('#BlackSection').css('display', 'none');
+                    $('#imgLogo').parent().css('display', 'block');
+                    $('#imgLogo1').css('display', 'none');
+                    $('#leftbarsection').css('margin-top', '40px');
+                    $('.xsleft').css('margin-top', '14px');
+                }
+            }
+        });
+
+        //if ('serviceWorker' in navigator) {
+        //    window.addEventListener('load', function () {
+        //        navigator.serviceWorker.register('/service-worker.js?v=1.93')
+        //            .then(function (registration) {
+        //                console.log('Service Worker registered with scope:', registration.scope);
+        //            })
+        //            .catch(function (err) {
+        //                console.log('Service Worker registration failed:', err);
+        //            });
+        //    });
+        //}
+
+
+
+    </script>
+
+
+
+
+
+</head>
+
+
+<body class="nav-md" style="background-color: #242527;">
+    <input type="hidden" id="hdnTimeOffSetForAllPage" values="0" />  @*hidden Time Offset for All Pages*@
+
+
+    <div id="LoadingPanel1" style="display:none; position: fixed; z-index: 1100; height: 100%; width: 100%; top: 0; left: 0; background-color: darkgrey; filter: alpha(opacity=60); opacity: 0.3; -moz-opacity: 0.8;">
+        <div style="z-index: 99999; margin: 16% 43%; padding: 10px; width: 175px; border-radius: 10px; filter: alpha(opacity=100); opacity: 1; -moz-opacity: 5;">
+            <img src="~/Content/images/loading.gif" style="height: 128px; width: 128px;" />
+            <p style="color:black;"><b>Please Wait.......</b></p>
+        </div>
+    </div>
+
+    <div style="display:none" id="CustomAlert">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn" style="float:right">×</span>
+        <span id="alertMsg"></span>
+    </div>
+    @*<%--Popup for Change PassWord Start--%>*@
+    <div id="ChangePasWorkModel" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey ">
+                <h4 class="w3-text-white" id="H2"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Change Password</h4>
+            </header>
+            <div class="w3-container" style="padding-top: 10px;">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <label>Enter Current Password</label>
+                        <input type="Password" id="txtCurrentPassWord" Style="background-color: aliceblue;" class="form-control" required />
+                        @*<Telerik:RadTextBox Style="background-color: aliceblue;" runat="server" ID="txtCurrentPassWord" Width="100%" Skin="Metro" TextMode="Password"></Telerik:RadTextBox>
+                            <asp:RequiredFieldValidator ValidationGroup="ChangePassWord" runat="server" ID="RfvFortxtCurrentPassWord" ControlToValidate="txtCurrentPassWord" CssClass="rdf-text rdf-initial" ErrorMessage="*Required!"></asp:RequiredFieldValidator>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <label>Enter New Password</label>
+                        <input type="Password" id="txtNewPassword" Style="background-color: aliceblue;" class="form-control" required />
+                        @*<Telerik:RadTextBox Style="background-color: aliceblue;" runat="server" ID="txtNewPassword" Width="100%" Skin="Metro" TextMode="Password"></Telerik:RadTextBox>
+                            <asp:RequiredFieldValidator ValidationGroup="ChangePassWord" runat="server" ID="RfvFortxtNewPassword" ControlToValidate="txtNewPassword" CssClass="rdf-text rdf-initial" ErrorMessage="*Required!"></asp:RequiredFieldValidator>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <label>Confirm New Password</label>
+                        <input type="Password" id="txtConfirmNewPassword" Style="background-color: aliceblue;" class="form-control" required />
+                        @*<Telerik:RadTextBox Style="background-color: aliceblue;" runat="server" ID="txtConfirmNewPassword" Width="100%" Skin="Metro" TextMode="Password"></Telerik:RadTextBox>
+                            <asp:RequiredFieldValidator ValidationGroup="ChangePassWord" runat="server" ID="RfvFortxtConfirmNewPassword" ControlToValidate="txtConfirmNewPassword" CssClass="rdf-text rdf-initial" ErrorMessage="*Required!"></asp:RequiredFieldValidator>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                        <a style="margin-top: 2px; width: 100%;" onclick="CloseChangePassWordPopup();" id="btnCancel" class="btn btn-primary">Cancel</a>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                        @*<asp:LinkButton Style="margin-top: 2px;" OnClick="btnSaveChangePassword_Click" ValidationGroup="ChangePassWord" Text="Change Password" runat="server" ID="btnSaveChangePassword" Width="100%" CssClass="btn btn-success"></asp:LinkButton>*@
+                        <button Style="margin-top: 2px;Width:100%" OnClick="btnSaveChangePassword_Click()" ID="btnSaveChangePassword" Class="btn btn-success">Change Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Popup for Cahnge PassWord End--%>*@
+
+    @*<nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Scaffold</a>
+                </div>
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="InventoryManagement"><i class="fa fa-tachometer"></i>InventoryManagement</a></li>
+                    <li><a href="#">Page 1</a></li>
+
+                </ul>
+            </div>
+        </nav>*@
+
+
+    <div class="container body">
+        <div style="display: none" id="art1">
+            <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+            @*<asp:Label ID="alertlabel" runat="server"></asp:Label>*@
+            <label id="alertlabel" style="color:white !important"></label>
+            @*<label id="alertlabel1"  style="color:white !important"></label>*@
+
+        </div>
+        <div class="main_container">
+            <div class="top_nav" id="right-bar">
+                <div class="nav_menu" style="background-color: #242527;">
+                    <nav role="navigation">
+                        <div class="row" style="margin-bottom: 4px !important;">
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 imgdisplay" style="padding: 0px; width: 230px; display: block;">
+                                <img src="/images/NobgLogo.png" id="imgLogo" class="img-responsive" style="object-fit: contain; height: 55px; background-color: #242527;" />
+                            </div>
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="width: 60px; padding-left: 0px;">
+                                <div class="nav toggle">
+                                    <a id="menu_toggle" onclick="HideChildMenu()"><i class="fa fa-bars"></i></a>
+                                </div>
+                            </div>
+                            <div style="text-align: center;" class="col-xs-3 col-md-1  col-sm-3 col-lg-1 ">
+                                <div style="margin-top: 14px;">
+                                    <label id="lblSelectedCLient" style="color: white !important; float: right">Company</label>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center;" class="col-xs-6 col-md-4 col-sm-7 col-lg-3">
+                                <div style="margin-top: 10px; width: 100%">
+                                    @*<asp:DropDownList ID="ddlClient" Enabled="false" OnSelectedIndexChanged="ddlClient_SelectedIndexChanged" AutoPostBack="true" runat="server" CssClass="form-control" Width="100%"></asp:DropDownList>*@
+                                    <select id="ddlClient" class="form-control" onchange="ddlClient_SelectedIndexChanged()">
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="text-align: left;" class="col-xs-12 col-md-4 col-sm-6 col-lg-3">
+                                <div id="divLayoutScaReff" style="margin-top: 11px; display:inline-flex">
+                                    <label class="lblscaf" style="color: white !important; margin-top:4px;display: inline-flex; width:20%">Scaf Ref</label>
+                                    <input type="text" id="txtSacff" class="form-control" ToolTip="Enter Scaf Ref Number" Style="padding: 0px;margin-left:15px; Width:40% " />
+                                    <button type="button" id="btnscaff" ToolTip="Go To Job" Class="w3-btn w3-teal" Style="margin-left:10px;" onclick="GoToJob()">Job</button>
+                                    <button type="button" id="btnScafInspection" ToolTip="Go To Inspection" Class="w3-btn w3-teal" Style="margin-left:10px; width: 49px" onclick="GoToInspection()">Insp</button>
+                                    @*<asp:TextBox ID="txtSacff" CssClass="form-control" ToolTip="Enter Scaf Ref Number" runat="server" Style="padding: 0px;margin-left:15px;" Width="40%"></asp:TextBox>
+                                        <asp:LinkButton runat="server" OnClick="btnscaff_Click" ID="btnscaff" ToolTip="Go To Job" Width="15%" OnClientClick=" return checkScaffrefField();" CausesValidation="false" Style="margin-left:10px;" CssClass="w3-btn w3-teal">Job</asp:LinkButton>
+                                              <asp:LinkButton runat="server" OnClick="btnScafInspection_Click" ToolTip="Go To Inspection" ID="btnScafInspection" Width="15%" OnClientClick=" return checkScaffrefField();" CausesValidation="false" Style="margin-left:10px;" CssClass="w3-btn w3-teal">Insp</asp:LinkButton>*@
+
+                                </div>
+
+
+
+
+                            </div>
+
+                            <div class="col-xs-10 col-sm-6 col-md-2 col-lg-2 xsleft" style="text-align: right; float: right; margin-top:15px;">
+                                <ul style="margin-bottom: 0px !important; list-style-type: none;padding:0Px;">
+
+                                    <li class="dropdown user">
+                                        <i class="fa fa-user"></i>
+
+                                        <a style="color: white !important; text-decoration: none !important" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                                            @*<%--<img runat="server" id="imgUserProfile" alt="" src="/images/avatar3_small.jpg" style="border-radius: 13px; width: 40px; height: 34px;" />--%>*@
+                                            <span id="lblUserName" class="username username-hide-on-mobile"></span>
+                                            @*<label>Super Admin</label>*@
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            @*<%--
+                                                <li>
+                                                    <asp:LinkButton ID="btlMyProfile" OnClick="btlMyProfile_Click" runat="server"><i class="fa fa-user"></i> My Profile</asp:LinkButton>
+                                                </li>
+                                                <li id="liConfiguration" runat="server" style="display: none;">
+                                                    <a style="cursor: pointer;" onclick="ConfigureLeftBar();$('#btnSetConfigure').click();"><i class="fa fa-gears"></i>&nbsp;<span id="spnConfigleftBar">Configuration</span></a>
+                                                </li>--%>*@
+                                            <li>
+                                                <a id="btnOpenChangePasswordModel" style="cursor: pointer;" onclick="OpenChangePassWordPopup();"><i class="fa fa-key"></i>Change Password</a>
+                                            </li>
+                                            @*<%--
+                                                <li class="divider"></li>--%>*@
+                                            <li>
+                                                @*<asp:LinkButton ID="btnlogout" OnClick="btnLogout_Click" runat="server"><i class="fa fa-sign-out"></i> Log Out</asp:LinkButton>*@
+                                                <a id="btnlogout" title="Logout" style="cursor: pointer;" onclick="btnLogout_Click();"><i class="fa fa-key"></i>Log out</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </nav>
+                </div>
+            </div>
+            @*<asp:LinkButton ID="btnredirect" runat="server" Style="display: none" OnClick="btnredirect_Click"></asp:LinkButton>*@
+            @*<div id="leftbarsection" class="col-md-3 col-xs-1 col-lg-2 left_col" style="margin-top: 40px;">*@
+            <div id="leftbarsection" class="col-md-3 col-xs-1 col-lg-2 left_col" style="margin-top: 20px;">
+                <img src="/images/Logofabicon2.png" id="imgLogo1" class="img-responsive" style=" width: 70%; height: 54px; display: none; background-color: #242527;" />
+                <div class="left_col scroll-view" style="width: 100%;">
+                    <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                        <div class="menu_section">
+                            <ul class="nav side-menu">
+                                <li id="LiSales_Register">
+                                    <a style="margin-top: 25px;" onclick="ClientRegister();"><i class="fa fa-book"></i>&nbsp;Job Register</a>
+                                </li>
+                                <li id="LiDashnoard" style="display:block">
+                                    <a><i class="fa fa-tachometer"></i>Dashboards<span class="fa fa-chevron-down"></span></a>
+                                    <ul id="ulalwaysdashboardactive" class="nav child_menu">
+                                        <li id="LiDashBoard">
+                                            <a onclick="Dashboard();">All Sites</a>
+                                        </li>
+                                        <li id="LiDashBoards">
+                                            <a onclick="Dashboards();">Site Analytics</a>
+                                        </li>
+                                        <li id="LiMap">
+                                            <a onclick="MapSiteLocation();">ScafMap Planned</a>
+                                        </li>
+                                        @*<li id="LiScafMapJobstatus">
+                                                <a onclick="ScafMapJobstatus();">ScafMap JobStatus</a>
+                                            </li>*@
+                                        <li id="LiScafMapJobstatus">
+                                            <a onclick="ScafMapJobstatus();">ScafMap Inspection</a>
+                                        </li>
+                                        <li id="LiScafMapJobPipelinestatus">
+                                            <a onclick="ScafMapJobPipelinestatus();">ScafMap Pipeline</a>
+                                        </li>
+                                        <li id="LiFloorMap">
+                                            <a onclick="MapSiteFloorLevel();">FloorMap</a>
+                                        </li>
+                                        <li id="LiCyloneDashBoard">
+                                            <a onclick="CyloneDashBoard();">Cyclone Management</a>
+                                        </li>
+                                        <li id="LiItemUtilization">
+                                            <a onclick="ItemUtilization();">Item Utilization</a>
+                                        </li>
+                                        <li id="LiInventorySiteHistory">
+                                            <a onclick="InventorySiteHistory();">Inventory Site History </a>
+                                        </li>
+                                        <li id="LiSiteAnalysis">
+                                            <a onclick="SiteAnalysis();">Site Structure Analysis</a>
+                                        </li>
+                                        <li id="LiWeeklyDashboard">
+                                            <a onclick="Weeklyprogress();">Weekly Progress</a>
+                                        </li>
+                                        <li id="LiWeeklySummaryReport">
+                                            <a onclick="WeeklySummaryReport();">Weekly Summary Report</a>
+                                        </li>
+                                        <li id="LiModularVsTubeFit">
+                                            <a onclick="ModularVsTubeFit();">Modular Vs Tube & Fit</a>
+                                        </li>
+                                        <li id="LiInspectionDashboard">
+                                            <a onclick="InspectionDashboard();">Inspection Dashboard</a>
+                                        </li>
+                                        <li id="LiVariationHoursReport">
+                                            <a onclick="VariationHoursReport();">Variation Hours Report</a>
+                                        </li>
+                                        <li id="LongTermStructure">
+                                            <a onclick="LongTermStructureDashboard();">Long Term Structure Dashboard</a>
+                                        </li>
+                                        @*<li id="LiOffSystemInspection">
+                                              <a onclick="OffSystemInspectionDashboard();">Off System Inspection                        Dashboard</a>
+
+                                            </li>*@
+                                        <li id="ComparisonDashboard">
+                                            <a onclick="ComparisonDashboard();">Comparison Dashboard</a>
+                                        </li>
+                                        @*<li id="Li">
+                                                <a onclick="PIMaintenanceDashboard();">Maintenance Vs P&I Report</a>
+                                            </li>*@
+                                        <li id="LiStandingVsAvailablebyMaterialType">
+                                            <a onclick="StandingVsAvailablebyMaterialType();">Standing Vs Available by Material Type</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li id="LiHeadingReport">
+                                    <a onclick="MultipleReport();"><i class="fa fa-file"></i>&nbsp;Reports</a>
+                                </li>
+                                <li id="LiDocumentation">
+                                    <a onclick="Documentation();"><i class="fa fa-book"></i> &nbsp;Site Documents</a>
+                                </li>
+                                <li id="LiScafpacDocumentation">
+                                    <a onclick="ScafpacDocumentation();"><i class="fa fa-book"></i> &nbsp;How To Scafpac</a>
+                                </li>
+                                <li id="Li_Client">
+                                    <a onclick="ClientProfile();"><i class="fa fa-industry"></i>&nbsp;Company Profile</a>
+                                </li>
+                                <li id="Li_OffSystem">
+                                    <a onclick="OffSystemInsp();"><i class="fa fa-search"></i>&nbsp;Off System Inspection</a>
+                                </li>
+                                <li id="Li_VoidedOfflineInspectionsList">
+                                    <a onclick="VoidedOfflineInspectionsList();"><i class="fa fa-search"></i>&nbsp;Voided Offline Inspection</a>
+                                </li>
+                                <li id="LiSetup_InventoryPlan1" style="display:none">
+                                    <a onclick="Inventory();"><i class="fa fa-tag"></i>&nbsp;Inventory</a>
+                                </li>
+                                <li id="LiSetup_InventoryManagement">
+                                    <a onclick="InventoryManagement();"><i class="fa fa-tag"></i>&nbsp;Inventory Management</a>
+                                </li>
+
+
+
+                                <li id="LiManHrs" aria-expanded="false">
+                                    <a><i class="fa fa-male"></i>Man Hours Management<span class="fa fa-chevron-down"></span></a>
+                                    <ul id="ulalwaysact" class="nav openmanhrs child_menu">
+
+
+                                        <li id="LiManHrs_ManHrsDashboard">
+                                            <a onclick="ManHrsDashboard();">Dashboard</a>
+                                        </li>
+                                        <li id="LiManHrs_SiteManHrs">
+                                            <a onclick="SiteManHrs();">Daily Site Hours Input</a>
+                                        </li>
+                                        <li id="LiManHrs_ManHrs">
+                                            <a onclick="ManHrs();">Daily Job Hours Allocation</a>
+                                        </li>
+                                        <li id="LiManHrs_ReconcileHrs">
+                                            <a onclick="ReconcileHrs();">Daily Man Hours Reconciliation</a>
+                                        </li>
+                                        <li id="LiManHrs_DayDocket">
+                                            <a onclick="DayDocket();">Day Docket</a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                                <li id="LiSetup_TermsAndCondition">
+                                    @*<a onclick="TermsAndCondition();"><i class="fa fa-external-link"></i>&nbsp;Terms and Conditions</a>*@
+                                    <a onclick="TermsAndCondition();"><i class="fa fa-external-link"></i>&nbsp;Terms of Service</a>
+                                </li>
+
+                                <li id="LiSetup" style="display:block">
+                                    <a><i class="fa fa-cog"></i>Setup <span class="fa fa-chevron-down"></span></a>
+                                    <ul id="ulalwaysactive" class="nav child_menu">
+
+                                        <li id="LiSetup_User">
+                                            <a onclick="ManageUsers();">&nbsp;User</a>
+                                        </li>
+                                        <li id="LiSetup_ActualPlanningWeek">
+                                            <a onclick="ActualWeekPlan();">&nbsp;Actual Planning Week</a>
+                                        </li>
+
+                                        <li id="LiSetup_DesignType">
+                                            <a onclick="DesignType();">&nbsp;Design Type</a>
+                                        </li>
+                                        <li id="LiSetup_DutyRating">
+                                            <a onclick="DutyRating();">&nbsp;Duty Rating</a>
+                                        </li>
+                                        <li id="LiSetup_MaterialType">
+                                            <a onclick="MaterialType();">&nbsp;Material Type</a>
+                                        </li>
+                                        <li id="LiSetup_State">
+                                            <a onclick="State();">&nbsp;State/County</a>
+                                        </li>
+                                        <li id="LiSetup_Representative_Position">
+                                            <a onclick="Representative_Position();">&nbsp;Representative Position</a>
+                                        </li>
+                                        <li id="LiSetup_Email_Content">
+                                            <a onclick="Email_Content();">&nbsp;Email Content</a>
+                                        </li>
+                                        <li id="LiSetup_checklist">
+                                            <a onclick="InspectionCheckList();">&nbsp;Inspection Checklist Builder</a>
+                                        </li>
+                                        <li id="LiSetup_UserCategory">
+                                            <a onclick="UserCategory();">&nbsp;User Category</a>
+                                        </li>
+                                        <li id="LiSetup_TermsNCondition">
+                                            @*<a onclick="TermsNCondition();">&nbsp;Terms and Conditions</a>*@
+                                            <a onclick="TermsNCondition();">&nbsp;Terms of Service</a>
+                                        </li>
+                                        <li id="LiSetup_EncryptDecrypt">
+                                            <a onclick="EncryptDecrypt();">&nbsp;Encrypt/Decrypt</a>
+                                        </li>
+                                        <li id="LiSetup_UserAccessLevel">
+                                            <a onclick="UserAccessLevel();">&nbsp;User Access Level</a>
+                                        </li>
+                                        <li id="LiSetup_LoginAudit">
+                                            <a onclick="LoginAudit();">&nbsp;Login Audit Report</a>
+                                        </li>
+                                        <li id="LiSetup_UserAudit">
+                                            <a onclick="UserAudit();">&nbsp;User Audit Report</a>
+                                        </li>
+                                        <li id="LiFloorLevel">
+                                            <a onclick="FloorLevel();">&nbsp;Floor Level</a>
+                                        </li>
+
+                                        @* Added on 06-12-2023 new master Shift Allocation*@
+                                        <li id="LiShiftAllocation">
+                                            <a onclick="ShiftAllocation();">&nbsp;Shift Allocation</a>
+                                        </li>
+
+                                        <li id="LiSubCategories">
+                                            <a onclick="SubCategories();">Sub Category</a>
+                                        </li>
+                                        <li id="LiInvoicedSurgeReport">
+                                            <a onclick="InvoicedSurgeReport();">Surge Rate Variables</a>
+                                        </li>
+                                        <li id="LiRegisterListSorting">
+                                            <a onclick="RegisterListSorting();">Register List Sorting</a>
+                                        </li>
+                                        <li id="Liworkgroup">
+                                            <a onclick="WorkGroups();">&nbsp;Work Groups & Sub Groups</a>
+                                        </li>
+                                        <li id="LiRequestedby">
+                                            <a onclick="RequestedBy();">&nbsp;Requested By</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*<div class="col-md-9 col-xs-12 col-lg-10 right_col" role="main" style="min-height: 931px">*@
+            <div class="right_col" role="main" style="min-height: 931px">
+                <script src="~/Content/js/Seccustom.js"></script>
+                @RenderBody()
+                @*<asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                    </asp:ContentPlaceHolder>*@
+            </div>
+            <footer class="footermargin">
+                <div class="pull-right w3-text-dark-grey">
+                    &copy;<label id="lblYear"></label>
+                    Scaffold Project Controls Pty Ltd
+                </div>
+                <div class="clearfix"></div>
+            </footer>
+        </div>
+        @*<div class="container body-content">
+
+                <hr />
+                <footer class="footermargin">
+                    <div class="pull-right w3-text-dark-grey">
+                        &copy;<asp:Label runat="server" ID="lblYear"></asp:Label>
+                        Scaffold Project Controls Pty Ltd
+                    </div>
+                    <div class="clearfix"></div>
+                </footer>*
+            </div>*@
+
+        @*Added By Neeraj Joshi on 22/08/1024*@
+        <!-- Custom Alert Box -->
+        <div id="customAlertBox" style="display: none;">
+            <div id="customAlertContent">
+                <span id="customAlertMessage"></span>
+                <button id="customAlertClose" onclick="customAlertClose()">OK</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

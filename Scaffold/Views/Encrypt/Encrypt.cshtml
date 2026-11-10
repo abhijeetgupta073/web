@@ -1,0 +1,112 @@
+﻿
+@{
+    ViewBag.Title = "Encrypt";
+}
+
+<style>
+
+    .clsUserIDWidth:after {
+    content:"" !important;
+    }
+
+    .table.dataTable thead .sorting_asc {
+    background-image:none !important;
+    }
+
+</style>
+
+<script>
+
+    $(function () {
+        GetEncrptyDecrypt('');
+    });
+
+    function GetEncrptyDecrypt(Decrypt) {
+        $("#LoadingPanel1").css("display", "block");
+        var id = getParameterByName('id');
+        $.ajax({
+            type: 'POST',
+            url: '/Encrypt/GetEncryptDecrypt',
+            data: JSON.stringify({ Decrypt: Decrypt, id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var data = response;
+               
+                $('#tblEncrypt').DataTable().clear();
+                $('#tblEncrypt').DataTable().destroy();
+                if (data.length != 0) {
+                    var str = '';
+                    $.each(data, function (index, obj) {
+
+                        var userID = obj.userID == null ? "" : obj.userID;
+                        var LoginID = obj.LoginID == null ? "" : obj.LoginID;
+                        var Password = obj.Password == null ? "" : obj.Password;
+
+                        str += "<tr>";
+                        str += "<td class='clsUserIDWidth' > " + userID + "</td>";
+                        str += "<td class='clsLoginIDWidth' > " + LoginID + "</td>";
+                        str += "<td class='clsPasswordWidth' > " + Password + "</td>";
+                        str += "</tr>";
+                    });
+                    $("#LoadingPanel1").css("display", "none");
+                    $('#tbodyTblEncrypt').html(str);
+                    var table = $('#tblEncrypt').dataTable({
+                        "bSort": false,
+                        "processing": true,
+                        searching: true,
+                        "bLengthChange": false,
+                        "bInfo": false,
+                        autoWidth: false,
+                        scrollX: true,
+                        scrollCollapse: true,
+                        scrollY: "60vh",
+
+                    });
+                }
+
+            }
+        });
+       
+    }
+
+
+</script>
+
+
+<div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-8">
+        <h4 class="heading">
+            <b><label id="lblchecklistname" style="color: #0070ba !important; font-size: 15px;"><i class="fa fa-bullseye"></i>&nbsp;Encrypt/Decrypt</label></b>
+        </h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2" id="process" runat="server">
+        <button id="LinkButton1" class="btn btn-primary pull-right w3-margin-right w3-green " onclick="GetEncrptyDecrypt('Encrypt');">
+            <i class="fa fa-lock" aria-hidden="true"></i>&nbsp;Encrypt Process
+        </button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+        <button id="btnprocessdecrypt" class="btn btn-primary pull-right w3-margin-left nln-bg w3-teal" onclick="GetEncrptyDecrypt('Decrypt');"><i class="fa fa-unlock-alt" aria-hidden="true"></i>&nbsp;Decrypt Process</button>
+    </div>
+</div>
+
+
+<div class="row">
+    @*<div class="col-lg-12 col-md-12 col-sm-12">*@
+    <div class="col-xs-12 col-lg-12 col-md-9 col-sm-12">
+        <div id="EncryptDiv" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblEncrypt" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th class="clsUserIDWidth">User ID</th>
+                        <th class="clsLoginIDWidth">Login ID</th>
+                        <th class="clsPasswordWidth">Password</th>
+                    </tr>
+
+                </thead>
+                <tbody id="tbodyTblEncrypt"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

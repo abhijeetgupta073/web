@@ -1,0 +1,276 @@
+﻿
+@{
+    ViewBag.Title = "InventoryManagement";
+
+}
+
+@*<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" />
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>*@
+<script src="~/Content/js/InventoryManagement.js?V1=20.7"></script>
+
+<link href="~/Content/Css/jquery.dataTables.min.css" rel="stylesheet" />
+<script src="/Content/js/jquery.dataTables.min.js"></script>
+<script src="/Content/js/dataTables.buttons.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $("#hdnid").val(@ViewBag.id);
+        $("#hdnUID").val(@ViewBag.UID);
+        var id = $("#hdnid").val();
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+
+        if ($("#hdnerror").val() == true) {
+            errorgrid(id, UID)
+        }
+        else {
+            GetInventoryData(id, "All");
+        }
+    });
+</script>
+<style>
+
+    .dataTables_scrollHead {
+        width: 100% !important;
+    }
+
+    .rgFilterBox {
+        border-radius: 4px;
+    }
+
+    .RadComboBoxDropDown_Simple .rcbHovered {
+        background-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbInner {
+        border-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbActionButton {
+        border-color: #ffffff !important;
+        background-color: #ffffff !important;
+        /*height: 24px !important;*/
+    }
+
+    html .RadComboBox .rcbInner, html .RadComboBox .rcbActionButton {
+        border-radius: 4px;
+        /*height: 27px;*/
+    }
+
+    #ctl00_ContentPlaceHolder1_ErrorGrid_ctl00_ctl02_ctl00_InitInsertButton {
+        display: none;
+    }
+
+    #ctl00_ContentPlaceHolder1_ErrorGrid_ctl00_ctl02_ctl00_AddNewRecordButton {
+        display: none;
+    }
+
+    #ctl00_ContentPlaceHolder1_gridinventory_ctl00_ctl02_ctl00_AddNewRecordButton {
+        display: none !important;
+    }
+
+    #ctl00_ContentPlaceHolder1_gridinventory_ctl00_ctl02_ctl00_InitInsertButton {
+        font-weight: bold;
+        padding-top: 8px;
+        height: 31px;
+    }
+
+    .riTextBox {
+        border-color: #e5e5e5 !important;
+        border-radius: 4px !important;
+    }
+
+    @@media (min-width: 1900px) and (max-width: 2050px) {
+        #headerExpend {
+            width: 3% !important;
+        }
+
+        #headEdit {
+            width: 11% !important;
+        }
+    }
+
+    #dataforgrid_filter {
+        display: inline-block;
+        width: auto;
+    }
+
+    .dataTables_length {
+        display: inline-block !important;
+        width: auto !important;
+    }
+
+    .dataTables_length {
+        width: 80%;
+    }
+</style>
+
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            @*<li id="liThirdParty" runat="server" class="active" style="width: 191px">
+                    <a id="AnchorThirdPartyInventory" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Depot Inventory</span>
+                    </a>
+                </li>*@
+            <li id="liThirdParty" runat="server" class="active" style="width: 191px">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotInventory" runat="server">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSite" runat="server">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+
+            <li id="liJob">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            <li id="LiSacafpac" runat="server">
+                <a id="AnchorReturnInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                </a>
+            </li>
+            <li id="LiDamaged" runat="server">
+                <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                </a>
+            </li>
+            <li id="PipeLineInventory">
+                <a id="AnchorPipeLineInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;PipeLine Inventory</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+@*<div runat="server" style="display: none" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <asp:Label ID="alertlabel" runat="server"></asp:Label>
+    </div>*@
+<div class="row">
+    @*<asp:HiddenField ID="hdnFileName" runat="server" />
+
+        <asp:HiddenField ID="hdnUID" runat="server" />
+        <asp:HiddenField ID="hdnid" runat="server" />*@
+    <input type="hidden" id="hdnid" />
+    <input type="hidden" id="hdndeleteinv" value="" />
+    <input type="hidden" id="hdnTableData" />
+    <input type="hidden" id="hdnOldQty" />
+    <input type="hidden" id="hdnUID" />
+    <input type="hidden" id="hdnhire" value="@ViewBag.hdnhire" />
+    <input type="hidden" id="hdnerror" />
+</div>
+
+<div class="row ">
+    <form>
+        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3">
+            <button type="button" class="btn" id="btndelete" style="background:#0492d9; color:white;" onclick="btndelete_Click()"><i class="fa fa-trash"></i>&nbsp;Delete</button>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6">
+            <button type="button" class="btn btn-primary" id="btnLoad" style="background:#0492d9; color:white; display: block" onclick="DowloadTemplete()"><i class="fa fa-download">&nbsp;</i>Download Template</button>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            @*<asp:Label ID="Label1" runat="server" Style="text-align: right" Text="Select file for Load" Width="100%" CssClass="blue"></asp:Label>*@
+            <span id="Label1" Style="float: right;font-size: 15px;" class="blue">Select file for Load</span>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6">
+            @*<asp:FileUpload onchange="OnClientChange(this,event)" EnableViewState="true" ID="FileUploadSelectfile" runat="server" Width="100%" CssClass="blue" />*@
+            <input type="file" id="FileUploadSelectfile" class="blue" accept=".xlsx" name="InventoryFile" />
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+            @*<asp:LinkButton ID="btnLoad" runat="server" OnClientClick="ButtonClient();" Style="display: block" Width="100%" OnClick="btnLoad_Click" CssClass="btn btn-primary "><i class="fa fa-spinner"></i> Load & Save</asp:LinkButton>
+        <asp:LinkButton ID="btnLoadforsm" runat="server" OnClientClick="ButtonClient();" Style="display: none" Width="100%" OnClick="btnLoad_Click" CssClass="btn btn-primary "><i class="fa fa-spinner"></i> Load</asp:LinkButton>*@
+            <button type="button" class="btn btn-primary" id="btnLoad" style="background: #0492d9; width: -webkit-fill-available; color: white; display: block" onclick="btnLoad_Click(false)"><i class="fa fa-spinner"></i>Load & Save</button>
+            <button type="button" class="btn btn-primary" id="btnLoadforsm" style="background: #0492d9; width: -webkit-fill-available; color: white; display: none" onclick="btnLoad_Click(false)"><i class="fa fa-spinner"></i>Load</button>
+ 
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+            <button type="button" class="btn btn-primary" id="btnLoadSortOrder" style="background: #9f9d9e; width: -webkit-fill-available; color: white; display: block " onclick="btnLoad_Click(true)"><i class="fa fa-spinner"></i>Load Sort Order</button>
+
+        </div>
+    </form>
+    <form>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6">
+            <button id="btnaddinventorysss" type="button" class="w3-btn w3-teal fa fa-plus" style="margin-top:19px"> Add New Inventory Item</button>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6">
+            <button id="ExportToCsvButton" type="button" class="w3-btn w3-teal Export" style="margin-left:23px;height:26px;padding-top:3px; margin-top:19px"><i class="fa fa-file-excel-o"></i> Export to CSV</button>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+            <label id="lblmaterial">Filter By Material Type  </label>
+            <select id="ddlMaterialType" class="form-control" ; onchange="ddlMaterialTypeOptionsChanged()">
+            </select>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-5">
+            <label># of Items</label>
+            <input type="text" id="txtitems" class="form-control" disabled="disabled" />
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+            <label>Total Tonnage</label>
+            <input type="text" id="txttotaltonnage" class="form-control" disabled="disabled" />
+        </div>
+    </form>
+</div>
+<div class="row"></div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+        <div id="errordata" style="color: black"></div>
+    </div></div>
+@*Delete Popup Start Here*@
+
+<div id="divdelete" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey ">
+            <h4 class="w3-text-white" id="H1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class=" row" style="padding-bottom: 20px;">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                <a class="w3-btn w3-green w3-hover-dark-grey" onclick="deleterowyes()"
+                   id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i>&nbsp;Yes</a>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                <a class="w3-btn nln-bg w3-hover-dark-grey" onclick="deleterowno()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Delete Popup End Here *@
+
+<div id="divSave" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 148px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey ">
+            <h4 class="w3-text-white" id="save"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label2">Please clear the SEARCH  and then click on Add New Inventory?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px;">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                <a class="w3-btn w3-green w3-hover-dark-grey" onclick="btnsaveyes()"
+                   id="btnsaveYes"><i class="glyphicon glyphicon-ok-circle "></i>&nbsp;OK</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+﻿using Scaffold.App_Code;
+using Scaffold.Models;
+using Scaffold_DataAccess;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace Scaffold.Controllers
+{
+    public class AllDamageReportController : Controller
+    {
+        ScaffoldEntities dbContext = new ScaffoldEntities();
+        // GET: AllDamageReport
+        public ActionResult AllDamageReport(string UID, string UserRole, string id, string Check)
+        {
+            ViewBag.UID = UID;
+            ViewBag.UserRole = UserRole;
+            ViewBag.id = id;
+            ViewBag.Check = Check;
+            return View();
+        }
+
+        public ActionResult GetDamageReport(string ClientID, string Check)
+        {
+            string query = "";
+            ClientID = databaseCon.Decrypt(ClientID);
+            Check = databaseCon.Decrypt(Check);
+            if (Check == "1")
+            {
+
+                //query = "select MaterialType,ItemCode,ItemDesc,ItemWeight,FromName,ToName,Reason,tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,CONVERT(varchar(11),tblDamagedInventoryDetails.CreatedOn,106) as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity,0)) as QuantityDamaged,(DamagedQuantity*ItemWeight)as TotalWeight from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId=tblInventory.InventoryId where tblInventory.clientid='" + databaseCon.Decrypt(Request.QueryString["id"]) + "'  and FromName= 'Depot' and ToName='Depot' group by MaterialType,ItemCode,ItemDesc,ItemWeight,FromName,ToName,Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId";
+
+                //// Change On 19-Feb-2019 Showing Name In Place Of CreatedBy 
+                //query = "select MaterialType,ItemCode,ItemDesc,ItemWeight,FromName,ToName,Reason,   (firstname + ' ' + LastName) as Name,tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity,0)) as QuantityDamaged,(DamagedQuantity*ItemWeight)as TotalWeight from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId=tblInventory.InventoryId join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid='" + ClientID + "'  and FromName= 'Depot' and ToName='Depot' group by MaterialType,ItemCode,ItemDesc, ItemWeight,FromName,ToName ,Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId,tbluser.firstname,tbluser.LastName";
+
+                //query = "select MaterialType,ItemCode,ItemDesc,ItemWeight,FromName,ToName,Reason,   (firstname + ' ' + LastName) as Name,tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity,0)) as QuantityDamaged,(DamagedQuantity*ItemWeight)as TotalWeight from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId=tblInventory.InventoryId join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid='" + ClientID + "'  and FromName= 'Depot' and ToName='ThirdParty' group by MaterialType,ItemCode,ItemDesc, ItemWeight,FromName,ToName ,Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId,tbluser.firstname,tbluser.LastName";
+                // Added ORDER BY on 25-04-2025 by SS to include DisplaySortOrder
+
+                query = "select MaterialType,ItemCode,ItemDesc,ItemWeight,FromName,ToName,Reason,   (firstname + ' ' + LastName) as Name,tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity,0)) as QuantityDamaged,(DamagedQuantity*ItemWeight)as TotalWeight from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId=tblInventory.InventoryId join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid='" + ClientID + "'  and FromName= 'Depot' and ToName='ThirdParty' group by MaterialType,ItemCode,ItemDesc, ItemWeight,FromName,ToName ,Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId,tbluser.firstname,tbluser.LastName ,DisplaySortOrder order by   MaterialType ,ISNULL(DisplaySortOrder,9999999),ItemCode";
+            }
+            if (Check == "2")
+            {
+                // query = "select(SiteLocation) as FromName,MaterialType,ItemCode,ItemDesc,ItemWeight,ToName,Reason, tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,CONVERT(varchar(11), tblDamagedInventoryDetails.CreatedOn, 106) as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity, 0)) as QuantityDamaged,(DamagedQuantity * ItemWeight) as TotalWeight  from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId = tblInventory.InventoryId join tblSiteLocation on tblDamagedInventory.FromId = tblSiteLocation.SiteLocID where tblInventory.clientid = '" + databaseCon.Decrypt(Request.QueryString["id"])+ "' and FromName = 'Site' and ToName = 'Depot' group by SiteLocation,MaterialType,ItemCode,ItemDesc,ItemWeight, ToName, Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId ";
+
+                // Change On 19-Feb-2019 Showing Name In Place Of CreatedBy 
+                //query = "select(SiteLocation) as FromName,MaterialType,ItemCode,ItemDesc,ItemWeight,ToName,Reason, (firstname + ' ' + LastName) as Name, tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity, 0)) as QuantityDamaged,(DamagedQuantity * ItemWeight) as TotalWeight  from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId = tblInventory.InventoryId join tblSiteLocation on tblDamagedInventory.FromId = tblSiteLocation.SiteLocID join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid = '" + ClientID + "' and FromName = 'Site' and ToName = 'Depot' group by SiteLocation,MaterialType,ItemCode,ItemDesc,ItemWeight, ToName, Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId ,tbluser.firstname,tbluser.LastName";
+                // Added ORDER BY on 25-04-2025 by SS to include DisplaySortOrder
+
+                //query = "select(SiteLocation) as FromName,MaterialType,ItemCode,ItemDesc,ItemWeight,ToName,Reason, (firstname + ' ' + LastName) as Name, tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity, 0)) as QuantityDamaged,(DamagedQuantity * ItemWeight) as TotalWeight  from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId = tblInventory.InventoryId join tblSiteLocation on tblDamagedInventory.FromId = tblSiteLocation.SiteLocID join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid = '" + ClientID + "' and FromName = 'Site' and ToName = 'Depot' group by SiteLocation,MaterialType,ItemCode,ItemDesc,ItemWeight, ToName, Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId ,tbluser.firstname,tbluser.LastName";
+                query = "select(SiteLocation) as FromName,MaterialType,ItemCode,ItemDesc,ItemWeight,ToName,Reason, (firstname + ' ' + LastName) as Name, tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity, 0)) as QuantityDamaged,(DamagedQuantity * ItemWeight) as TotalWeight  from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId = tblInventory.InventoryId join tblSiteLocation on tblDamagedInventory.FromId = tblSiteLocation.SiteLocID join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid = '" + ClientID + "' and FromName = 'Site' and ToName = 'Depot' group by SiteLocation,MaterialType,ItemCode,ItemDesc,ItemWeight, ToName, Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId ,tbluser.firstname,tbluser.LastName  ,DisplaySortOrder order by  SiteLocation,MaterialType,ISNULL(DisplaySortOrder,9999999),ItemCode";
+
+            }
+            if (Check == "3")
+            {
+                //query = "select(SiteLocation) as ToName,RIGHT('000000' + CONVERT(varchar, ScaffRef), 6) as FromName,tblInventory.MaterialType,ItemCode,ItemDesc,ItemWeight,Reason,tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,CONVERT(varchar(11), tblDamagedInventoryDetails.CreatedOn, 106) as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity, 0)) as QuantityDamaged,(DamagedQuantity * ItemWeight) as TotalWeight from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId = tblInventory.InventoryId join tblSiteLocation on tblDamagedInventory.ToId = tblSiteLocation.SiteLocID join tblRegister on tblSiteLocation.SiteLocID = tblRegister.SiteLocId and tblregister.registerid = tblDamagedInventory.fromId where tblInventory.clientid = '" + databaseCon.Decrypt(Request.QueryString["id"]) + "' and FromName = 'Job' and ToName = 'Site' group by SiteLocation,ScaffRef,tblInventory.MaterialType,ItemCode,ItemDesc,ItemWeight,Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId";
+
+                // Change On 19-Feb-2019 Showing Name In Place Of CreatedBy 
+                //query = "select(SiteLocation) as ToName,RIGHT('000000' + CONVERT(varchar, ScaffRef), 6) as FromName,tblInventory.MaterialType,ItemCode,ItemDesc,ItemWeight,Reason, (firstname + ' ' + LastName) as Name,tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity, 0)) as QuantityDamaged,(DamagedQuantity * ItemWeight) as TotalWeight from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId = tblInventory.InventoryId join tblSiteLocation on tblDamagedInventory.ToId = tblSiteLocation.SiteLocID join tblRegister on tblSiteLocation.SiteLocID = tblRegister.SiteLocId and tblregister.registerid = tblDamagedInventory.fromId join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid = '" + ClientID + "' and FromName = 'Job' and ToName = 'Site' group by SiteLocation,ScaffRef,tblInventory.MaterialType,ItemCode,ItemDesc,ItemWeight,Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId ,tbluser.firstname,tbluser.LastName";
+                // Added ORDER BY on 25-04-2025 by SS to include DisplaySortOrder
+                query = "select(SiteLocation) as ToName,RIGHT('000000' + CONVERT(varchar, ScaffRef), 6) as FromName,tblInventory.MaterialType,ItemCode,ItemDesc,ItemWeight,Reason, (firstname + ' ' + LastName) as Name,tblDamagedInventoryDetails.CreatedBy as DamageEnterBy,Replace(convert(nvarchar,tblDamagedInventoryDetails.CreatedOn,106),' ','-') as DamageEnterOn, tblDamagedInventoryDetails.InventoryId, Sum(isnull(DamagedQuantity, 0)) as QuantityDamaged,(DamagedQuantity * ItemWeight) as TotalWeight from tblDamagedInventoryDetails  join tblDamagedInventory on tblDamagedInventoryDetails.DamagedInvId = tblDamagedInventory.DamagedInvId join tblInventory on tblDamagedInventoryDetails.InventoryId = tblInventory.InventoryId join tblSiteLocation on tblDamagedInventory.ToId = tblSiteLocation.SiteLocID join tblRegister on tblSiteLocation.SiteLocID = tblRegister.SiteLocId and tblregister.registerid = tblDamagedInventory.fromId join tbluser on tblUser.EmailID=tblDamagedInventoryDetails.CreatedBy where tblInventory.clientid = '" + ClientID + "' and FromName = 'Job' and ToName = 'Site' group by SiteLocation,ScaffRef,tblInventory.MaterialType,ItemCode,ItemDesc,ItemWeight,Reason,DamagedQuantity,tblDamagedInventoryDetails.CreatedBy, tblDamagedInventoryDetails.CreatedOn,tblDamagedInventoryDetails.InventoryId ,tbluser.firstname,tbluser.LastName,DisplaySortOrder order by SiteLocation,ScaffRef,tblInventory.MaterialType,ISNULL(DisplaySortOrder,9999999),ItemCode";
+            }
+
+            var getData = dbContext.Database.SqlQuery<AllDamageReportViewModel>(query).ToList();
+
+            return Json(getData, JsonRequestBehavior.AllowGet);
+        }
+
+
+    }
+}

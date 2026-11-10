@@ -1,0 +1,72 @@
+﻿.j-alertBox-Warning1 {
+    color: #fcfcfc;
+    background-color: #00adef;
+    position: fixed;
+    top: 4px;
+    width: 54%;
+    z-index: 10000;
+    left: 20%;
+    padding-top: 10px;
+    /*padding: 6px;*/
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 4px 4px 4px 4px;
+}
+
+.j-alertBox-Success1 {
+    color: #fcfcfc;
+    background-color: rgb(76, 175, 80);
+    position: fixed;
+    top: 4px;
+    width: 54%;
+    z-index: 10000;
+    left: 20%;
+    padding-top: 10px;
+    /*padding: 6px;*/
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 4px 4px 4px 4px;
+}
+
+.j-alertBox-Info1 {
+    color: #fcfcfc;
+    background-color: #00adef;
+    position: fixed;
+    top: 4px;
+    width: 54%;
+    z-index: 10000;
+    left: 20%;
+    padding-top: 10px;
+    /*padding: 6px;*/
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 4px 4px 4px 4px;
+}
+
+  /*background-color: #c33d3d;
+    color: white;
+    position: fixed;
+    top: -14px;
+    width: 54%;
+    z-index: 10000;
+    left: 20%;
+    padding-top: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 4px 4px 4px 4px;*/
+.j-alertBox-Failed1 {
+    color: #fcfcfc;
+    background-color: #c33d3d;
+    position: fixed;
+    top: 4px;
+    width: 54%;
+    z-index: 10000;
+    left: 20%;
+    padding-top: 10px;
+    /*padding: 6px;*/
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 4px 4px 4px 4px;
+}
+
+

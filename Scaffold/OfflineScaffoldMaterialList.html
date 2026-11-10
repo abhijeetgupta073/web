@@ -1,0 +1,203 @@
+﻿
+<!DOCTYPE html>
+<html xmlns="https://www.w3.org/1999/xhtml" manifest="OfflineRegister.appcache">
+
+<!--<html xmlns="https://www.w3.org/1999/xhtml">-->
+<head>
+    <title>SCAFPAC</title>
+    <link rel="icon" href="images/TopLogo.png" />
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1" />-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5, user-scalable=no" />-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <!--<meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5, user-scalable=no" http-equiv="origin-trial" content="AtuFfgxjtLmQZWq5BdprMFHj6MdEFHohwk9eRU/f1PNSD+G8i094SCwTwQCzoqDvqu0svTS3PYaTNkJg6zVQ2Q4AAAB1eyJvcmlnaW4iOiJodHRwczovL3NjYWZwYWNhcHB0ZXN0LmF6dXJld2Vic2l0ZXMubmV0OjQ0MyIsImZlYXR1cmUiOiJBcHBDYWNoZSIsImV4cGlyeSI6MTYxNzc1MzU5OSwiaXNTdWJkb21haW4iOnRydWV9">-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" http-equiv="origin-trial" content="AtuFfgxjtLmQZWq5BdprMFHj6MdEFHohwk9eRU/f1PNSD+G8i094SCwTwQCzoqDvqu0svTS3PYaTNkJg6zVQ2Q4AAAB1eyJvcmlnaW4iOiJodHRwczovL3NjYWZwYWNhcHB0ZXN0LmF6dXJld2Vic2l0ZXMubmV0OjQ0MyIsImZlYXR1cmUiOiJBcHBDYWNoZSIsImV4cGlyeSI6MTYxNzc1MzU5OSwiaXNTdWJkb21haW4iOnRydWV9" />-->
+    <link href="/Content/Css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="/Content/Css/custom.css" rel="stylesheet" />
+    <!--<link rel="stylesheet" href="/Content/Css/base_jquery-ui.css">-->
+    <link href="/Content/Css/w3.css" rel="stylesheet" />
+    <link href="/Content/Css/SecStyle.css" rel="stylesheet" />
+    <link href="/Content/Css/CustomAlert.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery-ui.css" rel="stylesheet" />
+
+    <script src="/Content/js/jquery.min.js"></script>
+    <script src="/Content/js/jquery-ui.min.js"></script>
+    <script src="/Content/js/bootstrap.min.js"></script>
+    <script src="/Content/js/bootbox.min.js"></script>
+    <script src="Content/js/CustomAlert.js"></script>
+    <script src="/Content/js/jquery.dataTables.min.js"></script>
+    <!--<script src="/Content/js/Register-sw.js"></script>-->
+    <script src="Content/js/OfflineEncryptDecript.js"></script>
+    <script src="Content/js/crypto-js.min.js"></script>
+    <script src="Content/js/OfflineScaffoldMaterialList.js?V=2.0"></script>
+    <style>
+        /*  Job inventory datalist ends*/
+        @@media (min-width: 1900px) and (max-width: 2050px) {
+            #freeze {
+                width: 100% !important;
+            }
+
+            #ExportTo {
+                width: 100% !important;
+            }
+
+            #btnrequest {
+                width: 100% !important;
+            }
+
+            #btnReturn {
+                width: 100% !important;
+            }
+
+            #btnDamage {
+                width: 100% !important;
+            }
+        }
+
+        @@media only screen and (max-width: 600px) {
+
+            #btnReturn {
+                width: 107% !important;
+            }
+
+            #btnDamage {
+                width: 107% !important;
+            }
+        }
+
+        @@media (min-width: 768px) and (max-width: 1024px) {
+
+            #btnReturn {
+                width: 107% !important;
+            }
+
+            #btnDamage {
+                width: 107% !important;
+            }
+        }
+
+        label {
+            font-size: 12px;
+        }
+
+
+        .setWidth1, .setWidth2, .setWidth4, .setWidth5, .setWidth6, .setWidth7 {
+            min-width: 90px !important;
+        }
+
+        .setWidth8, .setWidth9 {
+            min-width: 80px !important;
+        }
+
+        .setWidth10, .setWidth11, .setWidth12 {
+            min-width: 80px !important;
+        }
+
+        .setWidth3 {
+            min-width: 180px !important;
+        }
+        /*  Job inventory datalist ends*/    
+    </style>
+
+
+</head>
+<body onselectstart="return false" style="background: #F7F7F7;">
+
+    <div id="InventoryTab">
+        <div class="row">
+            <div class="col-lg-12"></div>
+        </div>
+        <div class="row">
+
+
+            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                <div class="col-lg-2 col-sm-4 col-md-2 col-xs-11" style="margin-top: -16px">
+                    <label style="font-size: 14px">Filter By</label>
+                    <!--<asp:DropDownList ID="ddlMaterialType" CssClass="form-control" runat="server" AutoPostBack="true" Style="height: 26px !important; padding-top: 4px !important; width: 107% !important"
+                                    OnSelectedIndexChanged="ddlMaterialType_SelectedIndexChanged" AppendDataBoundItems="true">
+                </asp:DropDownList>-->
+                    <select id="ddlMaterialType" class="form-control" Style="height: 28px !important;" onchange="MaterialChange()"></select>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6" style="margin-top: 5px">
+                    <!--<asp:LinkButton ID="btnrequest" runat="server" Style="padding-left: 5px; width: 107%; height: 28px; padding-top: 6px; font-size: 12px;" CssClass="btn  btn-primary w3-btn w3-blue" OnClick="btnrequest_Click">Request Items</asp:LinkButton>-->
+                    <button id="btnrequest" Style="padding-left: 5px; width: 107%; height: 28px; padding-top: 6px; font-size: 12px;" Class="btn  btn-primary w3-btn w3-blue" OnClick="btnrequest_Click()">Request Items</button>
+                </div>
+              
+            </div>
+        </div>
+
+        <div class="row"></div>
+        <div class="row" style="width:98%;display:none;" id="divTotalDailyHireCost">
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12"></div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-7">
+                <label><b>Total Daily Job Hire Cost:</b></label>
+            </div>
+            <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" style="float:left;margin-left:-20px;width: 110px;">
+                <!--<asp:TextBox ID="txtTotalDailyHireCost" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>-->
+                <input type="text" id="txtTotalDailyHireCost" value="@ViewBag.TotalDailyHireCost" Class="form-control" disabled />
+            </div>
+        </div>
+        <!--<%--
+    <div class="row">
+    </div>--%>-->
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="RegisterInventoryList" style="color: black; width: 100%;margin-top:5px;">
+                    <table id="tblRegisterInventoryList" class="table table-striped " style="width: 100%">
+                        <thead style="background-color: #efefef; color: #716262;">
+                            <tr>
+                                <!--<th class="setWidth0" style="display:none;"></th>-->
+                                <th class="setWidth1">Material Type</th>
+                                <th class="setWidth2">Item Code</th>
+                                <th class="setWidth3">Item Desc</th>
+                                <th class="setWidth4">Quantity</th>
+
+                                <th class="setWidth8">Item Weight (kg)</th>
+                                <th class="setWidth9">Total Weight (kg)</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyRegisterInventoryList" style="width:100%"></tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 98%">
+            <div class="clearfix"></div>
+
+            <div class="double-scroll">
+            </div>
+
+        </div>
+        <div id="freezepopup" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 158px; width: 400px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h1">Alert!</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label runat="server" id="c1">Are you sure that you want to finalise the material list?</label>
+                        <!--<%-- <label runat="server" id="Label7">Do you wish to confirm?</label>--%>-->
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                        <!--<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnoptimizeyes" runat="server" OnClick="btnoptimizeyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>-->
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnoptimizeyes" OnClick="btnoptimizeyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <!--<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnoptimizeno" runat="server" OnClick="btnoptimizeno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>-->
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnoptimizeno" OnClick="btnoptimizeno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

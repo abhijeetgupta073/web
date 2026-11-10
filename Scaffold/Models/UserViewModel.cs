@@ -1,0 +1,49 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace Scaffold.Models
+{
+    public class UserViewModel
+    {
+        public int UserId { get; set; }
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Zip { get; set; }
+        public string CellPhone { get; set; }
+        public string EmailID { get; set; }
+        public string Status { get; set; }
+        public Nullable<int> ClientId { get; set; }
+        public string Role { get; set; }
+        public string LoginId { get; set; }
+        public string Password { get; set; }
+        public string CreatedBy { get; set; }
+        public Nullable<System.DateTime> CreatedOn { get; set; }
+        public string UpdatedBy { get; set; }
+        public Nullable<System.DateTime> UpdatedOn { get; set; }
+        public string firstName { get; set; }
+        public string LastName { get; set; }
+        public string FullName { get; set; }
+        public string Notes { get; set; }
+        public string LicenceNo { get; set; }
+        public Nullable<bool> IsInspector { get; set; }
+        public Nullable<System.DateTime> BirthDate { get; set; }
+        public string Direct_In_Direct { get; set; }
+        public Nullable<int> CategoryId { get; set; }
+        public Nullable<bool> Accept { get; set; }
+        public string Country { get; set; }
+        public string LicencePic { get; set; }
+        public string LicencePicUpload { get; set; }
+        public string SessionId { get; set; }
+        public string PhotoAngle { get; set; }
+        public string IPAddress { get; set; }
+        public Nullable<bool> IPAuthentication { get; set; }
+        public Nullable<bool> EmailAuthentication { get; set; }
+        public Nullable<bool> SmsAuthentication { get; set; }
+        public string CountryCode { get; set; }
+        public string SiteOwnerName { get; set; }
+        public string ScaffoldOwner { get; set; }
+    }
+}

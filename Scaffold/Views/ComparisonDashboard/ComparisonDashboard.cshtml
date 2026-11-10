@@ -1,0 +1,2969 @@
+﻿@{
+    ViewBag.Title = "WeeklySummaryReport";
+}
+
+@*<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+    <script src="https://rawgithub.com/laff/technical-indicators/master/technical-indicators.src.js"></script>
+    <script src="https://rawgithub.com/phpepe/highcharts-regression/master/highcharts-regression.js?8"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>*@
+
+<script src="~/Content/js/highcharts.js"></script>
+<script src="~/Content/js/highcharts-3d.js"></script>
+<script src="~/Content/js/highcharts-more.js"></script>
+<script src="~/Content/js/highcharts-regression.js"></script>
+<script src="~/Content/js/html2canvas.min.js"></script>
+<script src="~/Content/js/exporting.js"></script>
+<script src="~/Content/js/export-data.js"></script>
+<script src="~/Content/js/no-data-to-display.js"></script>
+<script src="~/Content/js/technical-indicators.src.js"></script>
+
+<script type="text/javascript" src="https://lib.arvancloud.com/ar/canvg/1.5/canvg.js"></script>
+@*<script type="text/javascript" src="http://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>*@
+<script type="text/javascript" src="~/Content/js/html2canvas.min.js"></script>
+@*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>*@
+
+<script>
+    var Page1base64;
+    var Page2base64;
+    var siteLocid = 0;
+    var locaid = 0;
+
+    $(document).ready(function () {
+        $("[id$=exportButton]").click(function (e) {
+            //window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('div[id$=divTableDataHolder]').html()));
+            //e.preventDefault();
+            var uri = 'data:application/vnd.ms-excel;base64,',
+            template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+              base64 = function (s) {
+                  return window.btoa(unescape(encodeURIComponent(s)))
+              },
+        format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        }
+
+            var toExcel = "Locked in Scaffolds for " + $("#lblLockedSite").text();
+            toExcel += document.getElementById("tbDetailsLockedIn").innerHTML;
+            var ctx = {
+                worksheet: name || '',
+                table: toExcel
+            };
+            var link = document.createElement("a");
+            link.download = "Locked In Scaffolds for " + $("#lblLockedSite").text() + ".xls";
+            link.href = uri + base64(format(template, ctx))
+            link.click();
+        });
+    });
+
+    $(document)
+               .ajaxStart(function () {
+                   $('#LoadingPanel1').css('display', 'block');
+               })
+             .ajaxStop(function () {
+                 $('#LoadingPanel1').css('display', 'none');
+             });
+
+
+    $(document).ready(function () {
+        $('#imgLogoWeeklySummryReport').attr('src', '@ViewBag.ClientImage');
+        var id = getParameterByName('id');
+        var DecriptData = Decrypt([id]);
+        $("#hdnClientID").val(DecriptData[0]);
+        var ClientID = $("#hdnClientID").val();
+        var screensize = $(window).width();
+
+        if (screensize < 1150 && screensize > 650) {
+            ($BODY.hasClass('nav-md'))
+            $('#CreateNewDropDown').css("margin-top", "2px");
+            $BODY.removeClass('nav-md').addClass('nav-sm');
+            $LEFT_COL.removeClass('scroll-view');
+            //$('#BlackSection').css('display', 'block');
+            $('#imgLogo').parent().css('display', 'none');
+            $('#imgLogo1').css('display', 'block').css("height", "52px");
+            $('#leftbarsection').css('margin-top', '0px');
+            $('.smbysite').css('margin-top', '32px');
+            //$('.smshow').css('margin-top', '-128px');
+            $('.smhireshow').css('margin-top', '-152px');
+            $('.smwidth').css('margin-top', '0px');
+            $('.smallsite').css('margin-top', '13px');
+        }
+        else {
+            if (screensize < (650)) {
+                $BODY.removeClass('nav-sm')
+                $('#imgLogo').parent().css('display', 'none');
+                $('.summaryData').parent().css('font-size', '10px');
+                $('.smalllocation').parent().css('font-size', '10px');
+                $('.smhireshow').css('margin-top', '7px');
+            }
+            else {
+                $('#CreateNewDropDown').css("margin-top", "6px");
+                $BODY.removeClass('nav-sm').addClass('nav-md');
+                //$('#BlackSection').css('display', 'none');
+                $('#imgLogo').parent().css('display', 'block');
+                $('#imgLogo1').css('display', 'none');
+                $('#leftbarsection').css('margin-top', '40px');
+            }
+        }
+
+
+        $('#container1').dblclick(function (e) {
+            $('#btnOpenModel').click();
+        });
+
+        $('#container2').dblclick(function (e) {
+            $('#btnOpenModel1').click();
+        });
+
+        $('#Chart3container').dblclick(function (e) {
+            $('#btnOpenModel3').click();
+        });
+
+        $("#WeekEnding").datepicker({
+            dateFormat: 'dd-M-yy',
+            maxDate: new Date(),
+            closeText: 'Close',
+        });
+        $("#ComparisonWeek").datepicker({
+            dateFormat: 'dd-M-yy',
+            maxDate: new Date(),
+            closeText: 'Close',
+        });
+
+        SetStartEndDate();
+
+        ddlSitebind(ClientID);
+
+        $("#ddlSite").on("change", function () {
+            funGraphLoad();
+        });
+
+        $("#WeekEnding").on("change", function () {
+            funGraphLoad();
+        });
+
+        $("#ComparisonWeek").on("change", function () {
+            funGraphLoad();
+        });
+
+
+    });
+
+
+    function ddlSitebind(id) {
+        $.ajax({
+            type: "POST",
+            //url: "../WebApi/Dashboard.asmx/ddlsitedropdownbindquery",
+            url: "/ComparisonDashboard/ddlsitedropdownbindquery",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddlSitedropdownbind = response;
+                var Siteid = "";
+                var SiteLocatext = "";
+                $("#ddlSite").html("");
+                $("#ddlSite").append('<option value="All">All</option>');
+                for (var i = 0; i < ddlSitedropdownbind.length; i++) {
+                    $("#ddlSite").append('<option value="' + ddlSitedropdownbind[i].SiteLocID + '">' + ddlSitedropdownbind[i].SiteLocation + '</option>');
+                }
+
+                Siteid = ddlSitedropdownbind[0].SiteLocID;
+                SiteLocatext = ddlSitedropdownbind[0].SiteLocation;
+                $("#hdnSiteID").val(Siteid);
+
+                funGraphLoad();
+
+            }
+        });
+
+    }
+
+    function SetStartEndDate() {
+        var StartDate = "";
+        var CompareFullDate = "";
+        var now = new Date();
+        var prevMonthLastDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        EndDate = getFormattedDate(prevMonthLastDate);
+        $('#WeekEnding').val(EndDate);
+
+        if (EndDate != "") {
+            var Comparenow = new Date(now.getFullYear(), now.getMonth(), 0); //Commneted on 03june-2021
+            var CompareMonthLastDate = new Date(Comparenow.getFullYear(), Comparenow.getMonth(), 0);
+            CompareFullDate = getFormattedDate(CompareMonthLastDate);
+            $('#ComparisonWeek').val(CompareFullDate);
+        }
+    }
+
+    function getFormattedDate(InputDate) {
+        var Curryear = InputDate.getFullYear();
+        var Currmonth = (InputDate.getMonth()).toString();
+
+        var CurrDay = InputDate.getDate().toString();
+        CurrDay = CurrDay.length > 1 ? CurrDay : '0' + CurrDay;
+        var month = new Array();
+        month[0] = "Jan";
+        month[1] = "Feb";
+        month[2] = "Mar";
+        month[3] = "Apr";
+        month[4] = "May";
+        month[5] = "Jun";
+        month[6] = "Jul";
+        month[7] = "Aug";
+        month[8] = "Sep";
+        month[9] = "Oct";
+        month[10] = "Nov";
+        month[11] = "Dec";
+        var CurrmonthName = month[Currmonth];
+
+        return CurrDay + '-' + CurrmonthName + '-' + Curryear;
+    }
+
+    function numberWithCommas(value) {
+        value = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return value;
+    }
+
+    function WeekEndingData(Siteid, ClientID, WeekEnding, DashboardColumn) {
+        $.ajax({
+            type: "POST",
+            async : false,
+            url: "/ComparisonDashboard/WeekEndingData",
+            data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, WeekEndingDate: WeekEnding }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                //var SitedataDetails = response.d;
+                var ComparisondataDetails = response;
+                if (DashboardColumn == 1) {
+                    $("#TextBox1").val(ComparisondataDetails[0]["ErectedDate1"]);
+                    var numCommaVarWeek1 = numberWithCommas($("#TextBox1").val());
+                    $("#TextBox1").val(numCommaVarWeek1);
+
+                    $("#TextBox2").val(ComparisondataDetails[0]["ScaffoldsStanding1"]);
+                    var numCommaVarWeek2 = numberWithCommas($("#TextBox2").val());
+                    $("#TextBox2").val(numCommaVarWeek2);
+
+                    $("#TextBox3").val(ComparisondataDetails[0]["ErectedDate2"]);
+                    var numCommaVarWeek3 = numberWithCommas($("#TextBox3").val());
+                    $("#TextBox3").val(numCommaVarWeek3);
+
+                    $("#TextBox4").val(ComparisondataDetails[0]["DismantledScaffolds1"]);
+                    var numCommaVarWeek4 = numberWithCommas($("#TextBox4").val());
+                    $("#TextBox4").val(numCommaVarWeek4);
+
+                    $("#TextBox5").val(ComparisondataDetails[0]["ManHrs"]);
+                    var numCommaVarWeek5 = numberWithCommas($("#TextBox5").val());
+                    $("#TextBox5").val(numCommaVarWeek5);
+
+                    $("#TextBox6").val(ComparisondataDetails[0]["TonnageErected1"]);
+                    var numCommaVarWeek6 = numberWithCommas($("#TextBox6").val());
+                    $("#TextBox6").val(numCommaVarWeek6);
+
+                    $("#TextBox7").val(ComparisondataDetails[0]["TonnageStanding1"]);
+                    var numCommaVarWeek7 = numberWithCommas($("#TextBox7").val());
+                    $("#TextBox7").val(numCommaVarWeek7);
+
+                    $("#TextBox8").val(ComparisondataDetails[0]["AverageTonnage1"]);
+                    var numCommaVarWeek8 = numberWithCommas($("#TextBox8").val());
+                    $("#TextBox8").val(numCommaVarWeek8);
+
+                    $("#TextBox9").val(ComparisondataDetails[0]["HireDays1"]);
+                    var numCommaVarWeek9 = numberWithCommas($("#TextBox9").val());
+                    $("#TextBox9").val(numCommaVarWeek9);
+                }
+                else {
+
+                    $("#ComparisonTextBox1").val(ComparisondataDetails[0]["ErectedDate1"]);
+                    var numCommaVarCompare1 = numberWithCommas($("#ComparisonTextBox1").val());
+                    $("#ComparisonTextBox1").val(numCommaVarCompare1);
+                    //var testval1 = 1580;
+                    //var testComma1 = numberWithCommas(testval1);
+                    //$("#ComparisonTextBox1").val(testComma1);
+
+                    $("#ComparisonTextBox2").val(ComparisondataDetails[0]["ScaffoldsStanding1"]);
+                    var numCommaVarCompare2 = numberWithCommas($("#ComparisonTextBox2").val());
+                    $("#ComparisonTextBox2").val(numCommaVarCompare2);
+
+                    $("#ComparisonTextBox3").val(ComparisondataDetails[0]["ErectedDate2"]);
+                    var numCommaVarCompare3 = numberWithCommas($("#ComparisonTextBox3").val());
+                    $("#ComparisonTextBox3").val(numCommaVarCompare3);
+
+                    $("#ComparisonTextBox4").val(ComparisondataDetails[0]["DismantledScaffolds1"]);
+                    var numCommaVarCompare4 = numberWithCommas($("#ComparisonTextBox4").val());
+                    $("#ComparisonTextBox4").val(numCommaVarCompare4);
+
+                    $("#ComparisonTextBox5").val(ComparisondataDetails[0]["ManHrs"]);
+                    var numCommaVarCompare5 = numberWithCommas($("#ComparisonTextBox5").val());
+                    $("#ComparisonTextBox5").val(numCommaVarCompare5);
+
+                    $("#ComparisonTextBox6").val(ComparisondataDetails[0]["TonnageErected1"]);
+                    var numCommaVarCompare6 = numberWithCommas($("#ComparisonTextBox6").val());
+                    $("#ComparisonTextBox6").val(numCommaVarCompare6);
+
+                    $("#ComparisonTextBox7").val(ComparisondataDetails[0]["TonnageStanding1"]);
+                    var numCommaVarCompare7 = numberWithCommas($("#ComparisonTextBox7").val());
+                    $("#ComparisonTextBox7").val(numCommaVarCompare7);
+
+                    $("#ComparisonTextBox8").val(ComparisondataDetails[0]["AverageTonnage1"]);
+                    var numCommaVarCompare8 = numberWithCommas($("#ComparisonTextBox8").val());
+                    $("#ComparisonTextBox8").val(numCommaVarCompare8);
+
+                    $("#ComparisonTextBox9").val(ComparisondataDetails[0]["HireDays1"]);
+                    var numCommaVarCompare9 = numberWithCommas($("#ComparisonTextBox9").val());
+                    $("#ComparisonTextBox9").val(numCommaVarCompare9);
+
+
+                    var numCommaVar1 = numberWithCommas(($("#TextBox1").val().replace(",", "") - $("#ComparisonTextBox1").val().replace(",", "")).toFixed(0));
+                    $("#ChangeWeekText1").val(numCommaVar1);
+                    if (numCommaVar1 > 0) {
+                        $('#faArrowLeft1').css('display', 'none');
+                        $('#faArrowRight1').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight1').css('display', 'none');
+                        $('#faArrowLeft1').css('display', 'block');
+                        }
+
+                    $("#ChangeWeekText2").val(($("#TextBox2").val().replace(",", "") - $("#ComparisonTextBox2").val().replace(",", "")).toFixed(0));
+                    var numCommaVar2 = numberWithCommas($("#ChangeWeekText2").val());
+                    $("#ChangeWeekText2").val(numCommaVar2);
+                    if (numCommaVar2 > 0) {
+                        $('#faArrowLeft2').css('display', 'none');
+                        $('#faArrowRight2').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight2').css('display', 'none');
+                        $('#faArrowLeft2').css('display', 'block');
+                    }
+
+                    $("#ChangeWeekText3").val(($("#TextBox3").val().replace(",", "") - $("#ComparisonTextBox3").val().replace(",", "")).toFixed(0));
+                    var numCommaVar3 = numberWithCommas($("#ChangeWeekText3").val());
+                    $("#ChangeWeekText3").val(numCommaVar3);
+                    if (numCommaVar3 > 0) {
+                        $('#faArrowLeft3').css('display', 'none');
+                        $('#faArrowRight3').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight3').css('display', 'none');
+                        $('#faArrowLeft3').css('display', 'block');
+                    }
+
+                    $("#ChangeWeekText4").val(($("#TextBox4").val().replace(",", "") - $("#ComparisonTextBox4").val().replace(",", "")).toFixed(0));
+                    var numCommaVar4 = numberWithCommas($("#ChangeWeekText4").val());
+                    $("#ChangeWeekText4").val(numCommaVar4);
+                    if (numCommaVar4 > 0) {
+                        $('#faArrowLeft4').css('display', 'none');
+                        $('#faArrowRight4').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight4').css('display', 'none');
+                        $('#faArrowLeft4').css('display', 'block');
+                    }
+
+                    $("#ChangeWeekText5").val(($("#TextBox5").val().replace(",", "") - $("#ComparisonTextBox5").val().replace(",", "")).toFixed(2));
+                    var numCommaVar5 = numberWithCommas($("#ChangeWeekText5").val());
+                    $("#ChangeWeekText5").val(numCommaVar5);
+                    if (numCommaVar5 > 0) {
+                        $('#faArrowLeft5').css('display', 'none');
+                        $('#faArrowRight5').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight5').css('display', 'none');
+                        $('#faArrowLeft5').css('display', 'block');
+                    }
+
+                    $("#ChangeWeekText6").val(($("#TextBox6").val().replace(",", "") - $("#ComparisonTextBox6").val().replace(",", "")).toFixed(2));
+                    var numCommaVar6 = numberWithCommas($("#ChangeWeekText6").val());
+                    $("#ChangeWeekText6").val(numCommaVar6);
+                    if (numCommaVar6 > 0) {
+                        $('#faArrowLeft6').css('display', 'none');
+                        $('#faArrowRight6').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight6').css('display', 'none');
+                        $('#faArrowLeft6').css('display', 'block');
+                    }
+
+                    $("#ChangeWeekText7").val(($("#TextBox7").val().replace(",", "") - $("#ComparisonTextBox7").val().replace(",", "")).toFixed(2));
+                    var numCommaVar7 = numberWithCommas($("#ChangeWeekText7").val());
+                    $("#ChangeWeekText7").val(numCommaVar7);
+                    if (numCommaVar7 > 0) {
+                        $('#faArrowLeft7').css('display', 'none');
+                        $('#faArrowRight7').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight7').css('display', 'none');
+                        $('#faArrowLeft7').css('display', 'block');
+                    }
+
+                    $("#ChangeWeekText8").val(($("#TextBox8").val().replace(",", "") - $("#ComparisonTextBox8").val().replace(",", "")).toFixed(2));
+                    var numCommaVar8 = numberWithCommas($("#ChangeWeekText8").val());
+                    $("#ChangeWeekText8").val(numCommaVar8);
+                    if (numCommaVar8 > 0) {
+                        $('#faArrowLeft8').css('display', 'none');
+                        $('#faArrowRight8').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight8').css('display', 'none');
+                        $('#faArrowLeft8').css('display', 'block');
+                    }
+
+                    $("#ChangeWeekText9").val(($("#TextBox9").val().replace(",", "") - $("#ComparisonTextBox9").val().replace(",", "")).toFixed(0));
+                    var numCommaVar9 = numberWithCommas($("#ChangeWeekText9").val());
+                    $("#ChangeWeekText9").val(numCommaVar9);
+                    if (numCommaVar9 > 0) {
+                        $('#faArrowLeft9').css('display', 'none');
+                        $('#faArrowRight9').css('display', 'block');
+                    }
+                    else {
+                        $('#faArrowRight9').css('display', 'none');
+                        $('#faArrowLeft9').css('display', 'block');
+                    }
+
+                    if ($("#ComparisonTextBox1").val() == 0 && $("#TextBox1").val() == 0) {
+                        $("#ChangeWeekPer1").val(0 + "%");
+                    }
+                   else if ($("#ComparisonTextBox1").val() == 0) {
+                        $("#ChangeWeekPer1").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer1").val((parseFloat(($("#TextBox1").val().replace(",", "") - $("#ComparisonTextBox1").val().replace(",", "")) / $("#ComparisonTextBox1").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek1 = numberWithCommas($("#ChangeWeekPer1").val());
+                        $("#ChangeWeekPer1").val(numCommaChangeWeek1);
+                    }
+
+                    if ($("#ComparisonTextBox2").val() == 0 && $("#TextBox2").val() == 0) {
+                        $("#ChangeWeekPer2").val(0 + "%");
+                    }
+                   else if (
+                        $("#ComparisonTextBox2").val() == 0) {
+                        $("#ChangeWeekPer2").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer2").val((parseFloat(($("#TextBox2").val().replace(",", "") - $("#ComparisonTextBox2").val().replace(",", "")) / $("#ComparisonTextBox2").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek2 = numberWithCommas($("#ChangeWeekPer2").val());
+                        $("#ChangeWeekPer2").val(numCommaChangeWeek2);
+                    }
+
+                    if ($("#ComparisonTextBox3").val() == 0 && $("#TextBox3").val() == 0) {
+                        $("#ChangeWeekPer3").val(0 + "%");
+                    }
+                    else if ($("#ComparisonTextBox3").val() == 0) {
+                        $("#ChangeWeekPer3").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer3").val((parseFloat(($("#TextBox3").val().replace(",", "") - $("#ComparisonTextBox3").val().replace(",", "")) / $("#ComparisonTextBox3").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek3 = numberWithCommas($("#ChangeWeekPer3").val());
+                        $("#ChangeWeekPer3").val(numCommaChangeWeek3);
+                    }
+
+                    if ($("#ComparisonTextBox4").val() == 0 && $("#TextBox4").val() == 0) {
+                        $("#ChangeWeekPer4").val(0 + "%");
+                    }
+                    else if ($("#ComparisonTextBox4").val() == 0) {
+                        $("#ChangeWeekPer4").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer4").val((parseFloat(($("#TextBox4").val().replace(",", "") - $("#ComparisonTextBox4").val().replace(",", "")) / $("#ComparisonTextBox4").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek4 = numberWithCommas($("#ChangeWeekPer4").val());
+                        $("#ChangeWeekPer4").val(numCommaChangeWeek4);
+                    }
+
+                    if ($("#ComparisonTextBox5").val() == 0 && $("#TextBox5").val() == 0) {
+                        $("#ChangeWeekPer5").val(0 + "%");
+                    }
+                    if ($("#ComparisonTextBox5").val() == 0) {
+                        $("#ChangeWeekPer5").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer5").val((parseFloat(($("#TextBox5").val().replace(",", "") - $("#ComparisonTextBox5").val().replace(",", "")) / $("#ComparisonTextBox5").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek5 = numberWithCommas($("#ChangeWeekPer5").val());
+                        $("#ChangeWeekPer5").val(numCommaChangeWeek5);
+                    }
+
+                    if ($("#ComparisonTextBox6").val() == 0 && $("#TextBox6").val() == 0) {
+                        $("#ChangeWeekPer6").val(0 + "%");
+                    }
+                    if ($("#ComparisonTextBox6").val() == 0) {
+                        $("#ChangeWeekPer6").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer6").val((parseFloat(($("#TextBox6").val().replace(",", "") - $("#ComparisonTextBox6").val().replace(",", "")) / $("#ComparisonTextBox6").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek6 = numberWithCommas($("#ChangeWeekPer6").val());
+                        $("#ChangeWeekPer6").val(numCommaChangeWeek6);
+                    }
+
+                    if ($("#ComparisonTextBox7").val() == 0 && $("#TextBox7").val() == 0) {
+                        $("#ChangeWeekPer7").val(0 + "%");
+                    }
+                    if ($("#ComparisonTextBox7").val() == 0) {
+                        $("#ChangeWeekPer7").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer7").val((parseFloat(($("#TextBox7").val().replace(",", "") - $("#ComparisonTextBox7").val().replace(",", "")) / $("#ComparisonTextBox7").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek7 = numberWithCommas($("#ChangeWeekPer7").val());
+                        $("#ChangeWeekPer7").val(numCommaChangeWeek7);
+                    }
+
+                    if ($("#ComparisonTextBox8").val() == 0 && $("#TextBox8").val() == 0) {
+                        $("#ChangeWeekPer8").val(0 + "%");
+                    }
+                   else if ($("#ComparisonTextBox8").val() == 0) {
+                        $("#ChangeWeekPer8").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer8").val((parseFloat(($("#TextBox8").val().replace(",", "") - $("#ComparisonTextBox8").val().replace(",", "")) / $("#ComparisonTextBox8").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek8 = numberWithCommas($("#ChangeWeekPer8").val());
+                        $("#ChangeWeekPer8").val(numCommaChangeWeek8);
+                   }
+
+                    if ($("#ComparisonTextBox9").val() == 0 && $("#TextBox9").val() == 0) {
+                        $("#ChangeWeekPer9").val(0 + "%");
+                    }
+                   else  if ($("#ComparisonTextBox9").val() == 0) {
+                        $("#ChangeWeekPer9").val(100 + "%");
+                    }
+                    else {
+                        $("#ChangeWeekPer9").val((parseFloat(($("#TextBox9").val().replace(",", "") - $("#ComparisonTextBox9").val().replace(",", "")) / $("#ComparisonTextBox9").val().replace(",", "") * 100)).toFixed(2) + "%");
+                        var numCommaChangeWeek9 = numberWithCommas($("#ChangeWeekPer9").val());
+                        $("#ChangeWeekPer9").val(numCommaChangeWeek9);
+                    }
+
+
+
+
+                    var ChangeWeek = [];
+                    var ChangeWeekNeg = [];
+
+                    var ChangeInt1 = parseFloat($('#ChangeWeekPer1').val());
+                    var ChangeInt2 = parseFloat($('#ChangeWeekPer2').val());
+                    var ChangeInt3 = parseFloat($('#ChangeWeekPer3').val());
+                    var ChangeInt4 = parseFloat($('#ChangeWeekPer4').val());
+                    var ChangeInt5 = parseFloat($('#ChangeWeekPer5').val());
+                    var ChangeInt6 = parseFloat($('#ChangeWeekPer6').val());
+                    var ChangeInt7 = parseFloat($('#ChangeWeekPer7').val());
+                    var ChangeInt8 = parseFloat($('#ChangeWeekPer8').val());
+                    var ChangeInt9 = parseFloat($('#ChangeWeekPer9').val());
+
+
+
+                    if (ChangeInt1 >= 0) {
+                        ChangeWeek.push({ name: "Total Number of Scaffold Built to Date", y: ChangeInt1, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Number of Scaffold Built to Date", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Total Number of Scaffold Built to Date", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Number of Scaffold Built to Date", y: ChangeInt1, sliced: true });
+                    }
+                    if (ChangeInt2 >= 0) {
+                        ChangeWeek.push({ name: "Total Number of Scaffold Standing", y: ChangeInt2, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Number of Scaffold Standing", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Total Number of Scaffold Standing", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Number of Scaffold Standing", y: ChangeInt2, sliced: true });
+                    }
+                    if (ChangeInt3 >= 0) {
+                        ChangeWeek.push({ name: "Erected Scaffold", y: ChangeInt3, sliced: true });
+                        ChangeWeekNeg.push({ name: "Erected Scaffold", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Erected Scaffold", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Erected Scaffold", y: ChangeInt3, sliced: true });
+                    }
+                    if (ChangeInt4 >= 0) {
+                        ChangeWeek.push({ name: "Dismantled Scaffold", y: ChangeInt4, sliced: true });
+                        ChangeWeekNeg.push({ name: "Dismantled Scaffold", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Dismantled Scaffold", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Dismantled Scaffold", y: ChangeInt4, sliced: true });
+                    }
+                    if (ChangeInt5 >= 0) {
+                        ChangeWeek.push({ name: "Total Man Hrs Spent", y: ChangeInt5, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Man Hrs Spent", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Total Man Hrs Spent", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Man Hrs Spent", y: ChangeInt5, sliced: true });
+                    }
+                    if (ChangeInt6 >= 0) {
+                        ChangeWeek.push({ name: "Total Tonnage Built To Date", y: ChangeInt6, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Tonnage Built To Date", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Total Tonnage Built To Date", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Tonnage Built To Date", y: ChangeInt6, sliced: true });
+                    }
+                    if (ChangeInt7 >= 0) {
+                        ChangeWeek.push({ name: "Total Tonnage Standing", y: ChangeInt7, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Tonnage Standing", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Total Tonnage Standing", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Total Tonnage Standing", y: ChangeInt7, sliced: true });
+                    }
+                    if (ChangeInt8 >= 0) {
+                        ChangeWeek.push({ name: "Average Tonnage Per Scaffold (Built to Date)", y: ChangeInt8, sliced: true });
+                        ChangeWeekNeg.push({ name: "Average Tonnage Per Scaffold (Built to Date)", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Average Tonnage Per Scaffold (Built to Date)", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Average Tonnage Per Scaffold (Built to Date)", y: ChangeInt8, sliced: true });
+                    }
+                    if (ChangeInt9 >= 0) {
+                        ChangeWeek.push({ name: "Avg Standing Days per Scaffold (Built to Date)", y: ChangeInt9, sliced: true });
+                        ChangeWeekNeg.push({ name: "Avg Standing Days per Scaffold (Built to Date)", y: 0, sliced: true });
+                    }
+                    else {
+                        ChangeWeek.push({ name: "Avg Standing Days per Scaffold (Built to Date)", y: 0, sliced: true });
+                        ChangeWeekNeg.push({ name: "Avg Standing Days per Scaffold (Built to Date)", y: ChangeInt9, sliced: true });
+                    }
+
+                    function getPointCategoryName(point, dimension) {
+                        var series = point.series,
+                            isY = dimension === 'y',
+                            axis = series[isY ? 'yAxis' : 'xAxis'];
+                        return axis.categories[point[isY ? 'y' : 'x']];
+                    }
+                }
+            }
+        });
+    }
+
+    function funGraphLoad() {
+        $('#TextBox1').val('');
+        $('#TextBox2').val('');
+        $('#TextBox3').val('');
+        $('#TextBox4').val('');
+        $('#TextBox5').val('');
+        $('#TextBox6').val('');
+        $('#TextBox7').val('');
+        $('#TextBox8').val('');
+        $('#TextBox9').val('');
+        $('#ComparisonTextBox1').val('');
+        $('#ComparisonTextBox2').val('');
+        $('#ComparisonTextBox3').val('');
+        $('#ComparisonTextBox4').val('');
+        $('#ComparisonTextBox5').val('');
+        $('#ComparisonTextBox6').val('');
+        $('#ComparisonTextBox7').val('');
+        $('#ComparisonTextBox8').val('');
+        $('#ComparisonTextBox9').val('');
+        $('#ChangeWeekText1').val('');
+        $('#ChangeWeekText2').val('');
+        $('#ChangeWeekText3').val('');
+        $('#ChangeWeekText4').val('');
+        $('#ChangeWeekText5').val('');
+        $('#ChangeWeekText6').val('');
+        $('#ChangeWeekText7').val('');
+        $('#ChangeWeekText8').val('');
+        $('#ChangeWeekText9').val('');
+        $('#ChangeWeekPer1').val('');
+        $('#ChangeWeekPer2').val('');
+        $('#ChangeWeekPer3').val('');
+        $('#ChangeWeekPer4').val('');
+        $('#ChangeWeekPer5').val('');
+        $('#ChangeWeekPer6').val('');
+        $('#ChangeWeekPer7').val('');
+        $('#ChangeWeekPer8').val('');
+        $('#ChangeWeekPer9').val('');
+
+
+        var combo = $("#ddlSite").val();
+        var Siteid = combo;
+
+        if (Siteid == null) {
+            var Siteid = $("#hdnSiteID").val;
+        }
+
+        var ClientID = $("#hdnClientID").val();
+        var WeekEndIDate = $("#WeekEnding").val();
+        var ComparisonDate = $("#ComparisonWeek").val();
+        if (WeekEndIDate != "" && ComparisonDate != "") {
+            WeekEndingData(Siteid, ClientID, WeekEndIDate, 1);
+            WeekEndingData(Siteid, ClientID, ComparisonDate, 2);
+            chart3(ClientID, Siteid, WeekEndIDate);
+            chart1(ClientID, Siteid, WeekEndIDate);
+            chart4(ClientID, Siteid, WeekEndIDate);
+        }
+        else if (WeekEndIDate == "") {
+            $("#WeekEnding").css('border-corlor', 'red');
+        } else if (ComparisonDate == "") {
+            $("#ComparisonWeek").css('border-corlor', 'red');
+        }
+
+        $("#hdnSiteID").val(Siteid);
+        // $("#lblLockedSite").text(getsitename);
+    }
+
+    //LockedIn - Chart 3 End
+
+    function chart3(ClientID, Siteid, WeekEndIDate) {
+        $('.forRemoveData3').remove();
+        $.ajax({
+            type: "POST",
+            url: "/ComparisonDashboard/ManHrsDashboard",
+            data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, WeekEndingDate: WeekEndIDate }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // WRegister = response.d;
+                WRegister = response;
+                var Week = [];
+                var WRegisterDataErect = [];
+                var WRegisterDataDismantle = [];
+                var week1Register = 0;
+                var weeks = [];
+                var start = "";
+                var end = "";
+                var erect = 0;
+                var week10Register = 0;
+                if (WRegister.length > 0) {
+                    for (var i = 0; i < WRegister.length; i++) {
+                        var TobePush = true;
+                        if (TobePush) {
+
+                            WRegisterDataErect.push({ name: WRegister[i].WeekNum, y: WRegister[i].TotManHrsErect, sliced: true });
+                            WRegisterDataDismantle.push({ name: WRegister[i].WeekNum, y: WRegister[i].TotManHrsDismantle, sliced: true });
+                            Week.push('Week ' + WRegister[i].WeekNum);
+                            weeks.push([WRegister[i].WeekNum - 1, WRegister[i].TotManHrsErect]);
+                            //alert(weeks);
+                            if (WRegister[i].WeekNum == '10') {
+                                start = WRegister[i].WeekStartDate;
+                                end = WRegister[i].WeekEndDate;
+                            }
+                        }
+
+                        ///Chart 3 data
+                        $("#CategoryTextBox" + (i + 1)).val('Week ' + WRegister[i].WeekNum);
+                        var numCommaManHrsTextBox = numberWithCommas(WRegister[i].TotManHrsErect);
+                        $("#ManHrsTextBox" + (i + 1)).val(numCommaManHrsTextBox);
+
+                        var numCommaManHrsDisTextBox = numberWithCommas(WRegister[i].TotManHrsDismantle);
+                        $("#ManHrsDisTextBox" + (i + 1)).val(numCommaManHrsDisTextBox);
+
+                        var numCommaLinerTextBox = numberWithCommas(WRegister[i].LinerManHrs);
+                        $("#LinerTextBox" + (i + 1)).val(numCommaLinerTextBox);
+                    }
+                }
+                var chart = new Highcharts.chart({
+                    chart: {
+                        renderTo: 'Chart3container',
+                        backgroundColor: "#f2f2f2"
+                    },
+                    title: {
+                        text: 'Man Hours Spent Erect Vs Dismantle',
+                        x: -20,
+                    },
+                    subtitle: {
+                        text: '(Week 10 => ' + start + ' to ' + end + ')',
+                        x: -20,
+                    },
+                    yAxis: {
+                        allowDecimals: false,
+                        title: {
+                            text: ''
+                        }
+                    },
+
+                    xAxis: {
+                        categories: Week
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                            },
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#btnOpenModel3').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+                    },
+                    series: [{
+                        type: 'column',
+                        regression: true,
+                        regressionSettings: {
+                            name: 'Linear (Man Hours Erect)',
+                            dashStyle: 'ShortDot',
+                            color: '#76C3FD',
+                        },
+                        name: 'Man Hours Erect',
+                        id: 'primary',
+                        data: weeks
+                    }, {
+                        //type: 'line',
+                        type: 'column',
+                        name: 'Man Hours Dismantle',
+                        color: '#D5333E',
+                        data: WRegisterDataDismantle,
+                        //marker: {
+                        //    enabled: false,
+                        //    radius: 3
+                        //},
+                    }
+                    ]
+
+                });
+
+                function redrawchart() {
+                    var chart = $('#Chart3container').highcharts();
+                    var w = $('#Chart3container').closest(".wrapper").width()
+                    var size = $(window).width();
+
+                    if (size < 1150 && size > 650) {
+                        chart.setSize(
+                            w, w * (1.0 / 4), false
+                        );
+                    } else {
+                        if (size < (650)) {
+                            chart.setSize(
+                                w, w * (3.0 / 4), false
+                            );
+                        }
+                        else {
+                            chart.setSize(
+                                w, w * (1.0 / 4), false
+                            );
+                        }
+                    }
+                }
+
+                $(window).resize(redrawchart);
+                redrawchart();
+                var row3 = '';
+                $.each(response, function (index, obj) {
+                    row3 += "<tr class='forRemoveData3'><td style='text-align: center;'>" + obj.WeekNum + "</td><td style='text-align: center;'>" + obj.TotErectedRegister + "</td><td style='text-align: center;'>" + obj.TotDismantleRegister + "</td></tr>";
+                });
+                $("#tbDetails3 tbody").append(row3);
+            }
+        });
+    }
+
+    function chart1(ClientID, Siteid, WeekEndIDate) {
+        $('#loadingpanel1').css('display', 'block');
+        $('.forRemoveData').remove();
+        $.ajax({
+            type: "POST",
+            url: "/ComparisonDashboard/ManHrsDashboard",
+            data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, WeekEndingDate: WeekEndIDate }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // WTonnage = response.d;
+                WTonnage = response;
+                var Week = [];
+                var WTonnageDataErect = [];
+                var WTonnageDataDismantle = [];
+                var week1tonnage = 0;
+                var weeks = [];
+                var week10tonnage = 0;
+                var start = "";
+                var end = "";
+                if (WTonnage.length > 0) {
+                    for (var i = 0; i < WTonnage.length; i++) {
+                        var TobePush = true;
+                        if (TobePush) {
+
+                            WTonnageDataErect.push({ name: WTonnage[i].WeekNum, y: WTonnage[i].TotErectedTonnage, z: WTonnage[i].LinearTonnage, sliced: true });
+                            WTonnageDataDismantle.push({ name: WTonnage[i].WeekNum, y: WTonnage[i].TotDismantleTonnage, sliced: true });
+                            Week.push('Week ' + WTonnage[i].WeekNum);
+                            weeks.push([WTonnage[i].WeekNum - 1, WTonnage[i].TotErectedTonnage]);
+                            if (WTonnage[i].WeekNum == '10') {
+                                start = WTonnage[i].WeekStartDate;
+                                end = WTonnage[i].WeekEndDate;
+                            }
+
+                            $("#CatTonnageTextBox" + (i + 1)).val('Week ' + WTonnage[i].WeekNum);
+                            var numCommaTonnageTextBox = numberWithCommas(WTonnage[i].TotErectedTonnage);
+                            $("#TonnageTextBox" + (i + 1)).val(numCommaTonnageTextBox);
+
+                            var numCommaTonDismantledTextBox = numberWithCommas(WTonnage[i].TotDismantleTonnage);
+                            $("#TonDismantledTextBox" + (i + 1)).val(numCommaTonDismantledTextBox);
+
+                            var numCommaTonnageErectedTextBox = numberWithCommas(WTonnage[i].LinearTonnage);
+                            $("#TonnageErectedTextBox" + (i + 1)).val(numCommaTonnageErectedTextBox);
+                        }
+                    }
+                }
+                var chart = Highcharts.chart({
+                    chart: {
+                        renderTo: 'Chart1container',
+                    },
+                    title: {
+                        //align: 'left',
+                        text: 'Tonnage Erected Vs Dismantled',
+                        x: -40,
+                    },
+                    subtitle: {
+                        // align: 'left',
+                        text: '(Week 10 => ' + start + ' to ' + end + ')',
+                        x: -40,
+                    },
+                    yAxis: {
+                        allowDecimals: true,
+                        title: {
+                            text: ''
+                        }
+                    },
+
+                    xAxis: {
+                        categories: Week
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                left: '50px',
+                                top: '18px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                            },
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#btnOpenModel1').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+
+
+                    },
+                    series: [{
+                        type: 'column',
+                        regression: true,
+                        regressionSettings: {
+                            name: 'Linear (Tonnage Erected)',
+                            dashStyle: 'ShortDot',
+                            color: '#76C3FD'
+                        },
+                        name: 'Tonnage Erected',
+                        id: 'primary',
+                        data: weeks
+                    }, {
+                        type: 'column',
+                        name: 'Tonnage Dismantled',
+                        color: '#D5333E',
+                        data: WTonnageDataDismantle
+                    }]
+                });
+
+                function redrawchart() {
+                    var chart = $('#Chart1container').highcharts();
+                    var w = $('#Chart1container').closest(".wrapper").width()
+                    var size = $(window).width();
+
+                    if (size < 1150 && size > 650) {
+                        chart.setSize(
+                            w, w * (1.0 / 4), false
+                        );
+                    }
+                    else {
+                        if (size < (650)) {
+                            chart.setSize(
+                                w, w * (3.0 / 4), false
+                            );
+                        } else {
+                            chart.setSize(
+                                w, w * (1.0 / 4), false
+                            );
+                        }
+                    }
+                }
+
+                $(window).resize(redrawchart);
+                redrawchart();
+                var row = '';
+                $.each(response, function (index, obj) {
+                    var num;
+                    row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNum + "</td><td style='text-align: center;'>" + obj.TotErectedTonnage + "</td><td style='text-align: center;'>" + obj.TotDismantleTonnage + "</td></tr>";
+                });
+                $("#tbDetails1 tbody").append(row);
+            }
+
+        });
+    }
+
+    function chart4(ClientID, Siteid, WeekEndIDate) {
+        $('.forRemoveData').remove();
+        $.ajax({
+            type: "POST",
+            url: "/ComparisonDashboard/TonneTacking",
+            data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, WeekEndingDate: WeekEndIDate }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                WManHrs = response;
+                var Week = [];
+                var WManHrsDataErect = [];
+                var WManHrsDataDismantle = [];
+                var TotalTonneHour = [];
+                var week1ManHrs = 0;
+                var week10ManHrs = 0;
+                var weeks = [];
+                var start = "";
+                var end = "";
+                if (WManHrs.length > 0) {
+                    for (var i = 0; i < WManHrs.length; i++) {
+                        var TobePush = true;
+                        if (TobePush) {
+
+                            WManHrsDataErect.push({ name: WManHrs[i].WeekNumb, y: WManHrs[i].AverageErectHoursTonne, a: WManHrs[i].TotManHrsErect, b: WManHrs[i].TotErectedTonnage, c: WManHrs[i].TotalManHours, d: WManHrs[i].TotalTonnageMoved, sliced: true });
+                            TotalTonneHour.push([WManHrs[i].AverageTotalHoursTonne]);
+                            WManHrsDataDismantle.push({ name: WManHrs[i].WeekNumb, y: WManHrs[i].AverageDismantleHoursTonne, sliced: true });
+
+                            Week.push('Week ' + WManHrs[i].WeekNumb);
+                            weeks.push([WManHrs[i].WeekNumb - 1, WManHrs[i].AverageErectHoursTonne]);
+                            if (WManHrs[i].WeekNumb == '10') {
+                                start = WManHrs[i].WeekStartDate;
+                                end = WManHrs[i].WeekEndDate;
+                            }
+
+                            $("#Category_Box" + (i + 1)).val('Week ' + WManHrs[i].WeekNumb);
+                            var numCommaManBox = numberWithCommas(WManHrs[i].TotManHrsErect);
+                            $("#ManBox" + (i + 1)).val(numCommaManBox);
+
+                            var numCommaTonnageBox = numberWithCommas(WManHrs[i].TotErectedTonnage);
+                            $("#TonnageBox" + (i + 1)).val(numCommaTonnageBox);
+
+                            var numCommaAverage_ErectBox = numberWithCommas(WManHrs[i].AverageErectHoursTonne);
+                            $("#Average_ErectBox" + (i + 1)).val(numCommaAverage_ErectBox);
+
+                            var numCommaManHour_Box = numberWithCommas(WManHrs[i].TotManHrsDismantle);
+                            $("#ManHour_Box" + (i + 1)).val(numCommaManHour_Box);
+
+                            var numCommaTonnage_Box = numberWithCommas(WManHrs[i].TotDismantleTonnage);
+                            $("#Tonnage_Box" + (i + 1)).val(numCommaTonnage_Box);
+
+                            var numCommaAvgDis_Box = numberWithCommas(WManHrs[i].AverageDismantleHoursTonne);
+                            $("#AvgDis_Box" + (i + 1)).val(numCommaAvgDis_Box);
+
+                            var numCommaTotMan_Box = numberWithCommas(WManHrs[i].TotalManHours);
+                            $("#TotMan_Box" + (i + 1)).val(numCommaTotMan_Box);
+
+                            var numCommaTonMove_Box = numberWithCommas(WManHrs[i].TotalTonnageMoved);
+                            $("#TonMove_Box" + (i + 1)).val(numCommaTonMove_Box);
+
+                            var numCommaAvgTotal_Box = numberWithCommas(WManHrs[i].AverageTotalHoursTonne);
+                            $("#AvgTotal_Box" + (i + 1)).val(numCommaAvgTotal_Box);
+                        }
+                    }
+                }
+                var chart = Highcharts.chart({
+                    chart: {
+                        renderTo: 'Chart4container',
+                    },
+                    title: {
+                        //align: 'left',
+                        text: 'Man Hours Per Tonne Tracking',
+                        x: -40,
+
+                    },
+                    subtitle: {
+                        //align: 'left',
+                        text: '(Week 10 => ' + start + ' to ' + end + ')',
+                        x: -40,
+
+                    },
+                    yAxis: {
+                        allowDecimals: false,
+                        title: {
+                            text: ''
+                        }
+                    },
+
+                    xAxis: {
+                        categories: Week
+                    },
+                    labels: {
+                        items: [{
+                            html: '',
+                            style: {
+                                top: '18px',
+                                left: '50px',
+                                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                            }
+                        }]
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                            },
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#btnOpenModel2').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All',
+
+                            }
+                        }
+
+
+                    },
+                    series: [{
+                        type: 'column',
+                        name: 'Average-Erect/Hours Tonne',
+                        regression: false,
+                        regressionSettings: {
+                            name: 'Linear (Average-Total/Hours Tonne)',
+                            dashStyle: 'ShortDot',
+                            color: '#76C3FD'
+                        },
+                        data: weeks
+                    }, {
+                        type: 'column',
+                        name: 'Average-Dismantle/Hours Tonne',
+                        color: '#D5333E',
+                        data: WManHrsDataDismantle
+                    },
+                    {
+                        type: 'line',
+                        //type: 'column',
+                        color: '#C0C0C0',
+                        marker: {
+                            enabled: false,
+                            radius: 3
+                        },
+                        name: 'Average Total Hour/ Tonne',
+                        data: TotalTonneHour
+                    }]
+                });
+
+                function redrawchart() {
+                    var chart = $('#Chart4container').highcharts();
+
+                    var w = $('#Chart4container').closest(".wrapper").width()
+                    var size = $(window).width();
+                    if (size < 1150 && size > 650) {
+                        chart.setSize(
+                            w, w * (1.0 / 4), false
+                        );
+                    }
+                    else {
+                        if (size < (650)) {
+                            chart.setSize(
+                                w, w * (3.0 / 4), false
+                            );
+                        } else {
+                            chart.setSize(
+                                w, w * (1.0 / 4), false
+                            );
+                        }
+                    }
+                }
+
+                $(window).resize(redrawchart);
+                redrawchart();
+                var row2 = '';
+                $.each(response, function (index, obj) {
+                    var num;
+                    row2 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNumb + "</td><td style='text-align: center;'>" + obj.TotManHrsErect + "</td><td style='text-align: center;'>" + obj.TotManHrsDismantle + "</td></tr>";
+                });
+                $("#tbDetails2 tbody").append(row2);
+            }
+        });
+    }
+
+    function btnPrintComparison_Click() {
+        html2canvas(document.querySelector('#PrintPage1')).then(function (canvas) {
+            Page1base64 = canvas.toDataURL();
+
+            html2canvas(document.querySelector('#PrintPage2')).then(function (canvas) {
+                Page2base64 = canvas.toDataURL();
+
+                $.ajax({
+                    url: "/ComparisonDashboard/GetPageImagePath",
+                    async: false,
+                    data: { 'Page1base64': Page1base64, 'Page2base64': Page2base64 },
+                    type: "post",
+                    success: function () {
+                        console.log("Data Sended");
+                    }
+                });
+            });
+        });
+        ReportOpen();
+    }
+
+    function ReportOpen() {
+        window.open("/ComparisonDashboardReport/ComparisonDashboardReport");
+    }
+
+    //var objId = document.getElementById('btnComparison');
+
+    //objId.onclick = function () {
+    //    html2canvas(document.querySelector('#PrintPage1')).then(function (canvas) {
+    //        Page1base64 = canvas.toDataURL();
+
+    //        html2canvas(document.querySelector('#PrintPage2')).then(function (canvas) {
+    //            Page2base64 = canvas.toDataURL();
+
+    //            $.ajax({
+    //                url: "/ComparisonDashboard/GetPageImagePath",
+    //                async: true,
+    //                data: { 'Page1base64': Page1base64, 'Page2base64': Page2base64 },
+    //                type: "post",
+    //                success: function () {
+    //                    console.log("Data Sended");
+    //                    window.open('/ComparisonDashboardReport/ComparisonDashboardReport');
+    //                }
+    //            });
+    //        });
+    //    });
+    //}
+
+
+
+    //$('#btnComparison').onclick = () => {
+    //    html2canvas(document.querySelector('#PrintPage1')).then(function (canvas) {
+    //        Page1base64 = canvas.toDataURL();
+
+    //        html2canvas(document.querySelector('#PrintPage2')).then(function (canvas) {
+    //            Page2base64 = canvas.toDataURL();
+
+    //            $.ajax({
+    //                url: "/ComparisonDashboard/GetPageImagePath",
+    //                async: true,
+    //                data: { 'Page1base64': Page1base64, 'Page2base64': Page2base64 },
+    //                type: "post",
+    //                success: function () {
+    //                    console.log("Data Sended");
+    //                    window.open('/ComparisonDashboardReport/ComparisonDashboardReport');
+    //                }
+    //            });
+    //        });
+    //    });
+    //};
+
+
+
+
+</script>
+
+<style>
+    /*canvas{
+        width:100% !important;
+        height: 500px !important;
+
+    }*/
+
+
+    .smalllocation {
+        color: black;
+    }
+
+    .right_col {
+        min-height: 700px;
+        height: auto;
+    }
+
+    #tbDetails tr td {
+        color: #808080;
+    }
+
+    #tbDetails1 tr td {
+        color: #808080;
+    }
+
+
+    .page-title {
+        width: 100%;
+        height: auto;
+        padding: 10px 0;
+    }
+
+
+    td#sitenamemodal {
+        width: 25%;
+        border-right: none;
+        text-align: center;
+        word-wrap: unset;
+    }
+
+    body .container.body .right_col {
+        background: #ffffcc;
+    }
+
+    .page-title {
+        width: 100%;
+        height: auto;
+        padding: 0px 0;
+    }
+
+    hr.mainHeadhr {
+        margin: 0 0;
+        border: 1px solid grey !important;
+    }
+
+    text.highcharts-credits {
+        display: none;
+    }
+
+
+    /*Chart 3 starts*/
+
+    #tbDetails2 tr td {
+        color: #808080;
+    }
+
+    span#Label6 {
+        margin: 0 0 0 250px;
+    }
+    /*Chart 3 Ends*/
+
+    /*Chart 4 Starts*/
+
+    #tbDetails4 tr td {
+        color: #808080;
+    }
+
+    /*chart 4 Ends*/
+
+    /*Chart 5 Starts*/
+    #tbDetails5 tr td {
+        color: #808080;
+    }
+
+
+
+    /*Chart 5 Ends*/
+    /************************Dashboard css starts****************/
+    .siteInfo {
+        margin: 0 0 10px;
+        font-size: 14px;
+    }
+
+    hr.pageDivi {
+        border: 2px dotted #000;
+        border-style: none none dotted;
+        color: #fff;
+        background-color: #fff;
+        margin: 0 0 0 0;
+    }
+
+    .row.chartfrstrow {
+        margin: 0px 0 0px 0 !important;
+    }
+
+    .container.DshbrdBack {
+        background-color: #ffffcc;
+    }
+
+    .summaryData {
+        color: #000;
+    }
+
+    div#container1, div#container2 {
+        margin: 3px 0 0 0;
+    }
+
+
+    h3.summaryHead {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 15px 0 6px 0px;
+        color: #000000;
+    }
+
+
+
+    .txtsummaryData {
+        width: 15%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ddecee;
+    }
+
+    .txtTonnageData {
+        width: 100%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ddecee;
+    }
+
+    .txtweekendingdata {
+        width: 100%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ddecee;
+    }
+
+    .txtweekendingdata1 {
+        width: 100%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ffffff;
+    }
+
+    .txtweekendingdata2 {
+        width: 100%;
+        border: 1px solid #ffffcc !important;
+    }
+
+    .txtlblTonnageData {
+        /*height: 60px;*/
+        width: auto;
+    }
+
+    .txtTonData {
+        width: 100%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ddecee;
+        float: none;
+    }
+
+    .txtTonData1 {
+        width: 100%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ddecee;
+        float: none;
+        color: red;
+    }
+
+    .labelwidth {
+        /*height: 88px;*/
+    }
+
+    .lblweekdata {
+        margin-top: 4px;
+    }
+
+    .clsAverageErectHours {
+        color: red !important;
+    }
+
+
+
+    .summaryData p {
+        margin: 6px 0 12px 0;
+    }
+
+    /*Chart 1 starts*/
+
+
+
+    .siteList1 {
+        height: 70px;
+    }
+
+    .AllsitesPricelabel1 {
+        margin-top: -16px;
+        width: 20%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ddecee;
+    }
+
+    span#Label1 {
+        font-size: 15px;
+        font-weight: 400;
+        float: right;
+        margin: 4px 0 0 0;
+    }
+
+    /*Chart 1 Ends*/
+
+    /*Chart 2 starts*/
+    .siteList2 {
+        height: 64px;
+    }
+
+    .BysitesPricelabel {
+        margin-top: -5px;
+        width: 20%;
+        border: 1px solid #D3D3D3 !important;
+        background-color: #ddecee;
+        float: right;
+    }
+
+    div#ddlSite {
+        width: 238px !important;
+        white-space: normal;
+        float: right;
+        margin: 0px 0 0px 0;
+    }
+
+    div#RadComboBox1 {
+        width: 229px !important;
+        white-space: normal;
+        float: right;
+        margin: -5px 0 0 0;
+    }
+
+    div#RadComboBox2 {
+        width: 229px !important;
+        white-space: normal;
+        float: right;
+        margin: -5px 0 0 0;
+    }
+
+    @@media (min-width:200px) and (max-width:667px) {
+
+        .smwidth {
+            margin-top: 0px !important;
+        }
+
+        .smbysite {
+            margin-top: 0px !important;
+        }
+
+        .smhireshow {
+            margin-top: -207px !important;
+        }
+
+        div#ddlSite {
+            width: 138px !important;
+        }
+    }
+
+    span#Label2 {
+        font-size: 15px;
+        font-weight: 400;
+        float: right;
+        margin: 4px 0 0 0;
+    }
+
+    /*Chart 2 Ends*/
+
+
+    /*Chart 3 starts*/
+    #tonnageAllstandinglbl {
+        font-size: 14px;
+        font-weight: 400;
+        float: right;
+        margin: 7px 0 0 0;
+    }
+
+    .siteList3 {
+        height: 160px;
+        margin: 10px 0 0 0;
+    }
+
+    span#grandTotal3Price {
+        float: right;
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    .TonnageAllsitesPricelabel {
+        margin-top: -16px;
+        float: right;
+        display: block;
+    }
+
+    div#container3 {
+        margin: 20px 0 10px 0;
+    }
+
+    span#Label7 {
+        font-size: 14px;
+        font-weight: 400;
+        float: right;
+        margin: 5px 0 0 0;
+    }
+
+    .TonnageByjobPricelabel {
+        margin-top: -16px;
+        float: right;
+        display: block;
+    }
+
+    span#grandTotal4Price {
+        float: right;
+    }
+
+
+    .siteList4 {
+        height: 190px;
+    }
+
+
+    div#container4 {
+        margin: 20px 0 10px 0;
+    }
+
+    .siteList5 {
+        height: 188px;
+    }
+
+
+
+    .HirePerjobPriceLabel {
+        margin: -16px 0px;
+        float: right;
+        display: block;
+    }
+
+    span#Label6 {
+        margin: 1px;
+        float: right;
+    }
+
+
+
+    span#Label9 {
+        font-size: 14px;
+        font-weight: 400;
+        float: right;
+        margin: 5px 0 0 0;
+    }
+
+    div#container5 {
+        margin: 20px 0 10px 0;
+    }
+
+    .smallsite {
+        color: black;
+    }
+
+    #lblLockedSite {
+        text-decoration: underline;
+    }
+
+    @@media only screen and (max-width: 600px) {
+
+        .txtTonnageData {
+            text-align: center;
+            width: 100%;
+        }
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        .Chide {
+            display: none;
+            width: 0%;
+            height: 0%;
+            opacity: 0%;
+            visibility: collapse;
+        }
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        .b2 {
+            width: 68px;
+        }
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        .b3 {
+            width: 65px;
+            margin-left: 140%;
+        }
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        .b4 {
+            width: 64px;
+        }
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        .b5 {
+            text-align: center;
+            margin-left: 2323%;
+            width: 65px;
+        }
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        .b6 {
+            margin-left: -739%;
+            width: 65px;
+        }
+    }
+
+
+
+    @@media only screen and (Max-width: 600px) {
+
+        .b7 {
+            width: 68px;
+            margin-left: 751%;
+        }
+    }
+
+    #b8 {
+        margin-left: 17px;
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        #b8 {
+            margin-left: -57%;
+        }
+    }
+
+
+    #b9 {
+        margin-left: 17px;
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        #b9 {
+            margin-left: -13%;
+        }
+    }
+
+
+    #b10 {
+        margin-left: 17px;
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        #b10 {
+            margin-left: -13%;
+        }
+    }
+
+
+    #b11 {
+        color: black;
+        margin-left: 26px;
+        text-align: center;
+    }
+
+    @@media only screen and (Max-width: 600px) {
+
+        #b11 {
+            color: black;
+            margin-left: -5%;
+            text-align: center;
+        }
+    }
+
+    .clsSummaryManHours {
+        margin: 2px;
+        color: black;
+    }
+
+    #Table1, #Table1 th, #Table1 td, #Table2, #Table2 th, #Table2 td, #Table3, #Table3 th, #Table3 td, #Table4, #Table4 th, #Table4 td {
+        color: black;
+    }
+
+    #Table1 {
+        width: 80%;
+        border-spacing: 10px;
+        border: none;
+        border-collapse: separate;
+        padding: 20px;
+    }
+
+        #Table1 tr th label {
+            font-size: 16px;
+            height: 49px;
+            font-weight: bold;
+        }
+
+    .thwidth {
+        width: 86px;
+    }
+
+    @@media only screen and (max-width: 1024px) {
+        #Table1 {
+            width: 100%;
+        }
+
+            #Table1 tr th label {
+                font-size: 14px;
+                height: 49px;
+            }
+
+        .thwidth {
+            width: 90px;
+        }
+    }
+
+    #Table2 tr th, #Table3 tr th, #Table4 tr th {
+        text-align: center;
+    }
+
+    #Table2, #Table3, #Table4 {
+        width: 100%;
+        border-spacing: 10px;
+        border: 0.5px;
+        border-collapse: separate;
+        padding: 0;
+    }
+
+    #Table2, #Table3, #Table4, .MainthHead {
+        border: 0.5px solid #D3D3D3;
+    }
+
+    .Table2thWidth {
+        width: 100px;
+    }
+
+    .Table2thHeight {
+        height: 85px;
+    }
+</style>
+
+<input type="hidden" id="hdnClientID" />
+
+<input type="hidden" id="hdnSiteID" />
+
+<div class="container DshbrdBack">
+    <div id='PrintPage1'>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xm-12" style="border: 1px solid lightgrey;text-align:center;height:39px;font-size:22px">
+                <label><b style="font-size:171%;">Comparison Dashboard</b></label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xm-12" style="margin-top:1vh">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xm-4">
+                    <div class="row" style="display:flex;">
+                        <label id="lblsite" Style="font-size: 14px; color: #808080; margin-left: 7px;padding-right:7px; font-weight: bold;" Text="Site">Site</label>
+                        <select id="ddlSite" style="width: 82%; font-size: 14px; border-radius: 4px; height: 21px; color: #8a8787;"></select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xm-6" style="float:left;">
+                    @*<div class="row" style="display:flex;">
+                            <label id="lblsite" Style="font-size: 14px; color: #808080; margin-left: 7px;padding-right:7px; font-weight: bold;" Text="Site">Site</label>
+                            <select id="ddlSite" style="width: 82%; font-size: 14px; border-radius: 4px; height: 21px; color: #8a8787;"></select>
+                        </div>*@
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-2 col-xm-2">
+                    @*<div class="row" style="display:flex;">
+                            <label id="lblsite" Style="font-size: 14px; color: #808080; margin-left: 7px;padding-right:7px; font-weight: bold;" Text="Site">Site</label>
+                            <select id="ddlSite" style="width: 82%; font-size: 14px; border-radius: 4px; height: 21px; color: #8a8787;"></select>
+                        </div>*@
+                    <button id="btnComparison" Class="btn btn-primary" OnClick="btnPrintComparison_Click()" Style="width: 100%;">Print Pdf</button>
+                    @*<button id="btnComparison" Class="btn btn-primary" Style="width: 100%;">Print Pdf</button>*@
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <table id="Table1">
+                <tr>
+                    <th>
+                        <label id="lblbysite" Text="Scaffolds by Site"> </label>
+                    </th>
+                    <th class="thwidth">
+                        <label id="lblbysite" Text="Scaffolds by Site"> Week Ending:</label>
+                    </th>
+                    <th class="thwidth">
+                        <label id="lblComparison" Text="Scaffolds by Site"> Comparison Week:</label>
+                    </th>
+                    <th class="thwidth">
+                        <label id="lblbysite" Text="Scaffolds by Site">Change</label>
+                    </th>
+                    <th class="thwidth">
+                        <label id="lblbysite" Text="Scaffolds by Site">Change %</label>
+                    </th>
+                    <th class="thwidth">
+                        <label id="lblbysite" Text="Scaffolds by Site"></label>
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        <label class="lblweekdata"></label>
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" class="txtweekendingdata1" id="WeekEnding" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" class="txtweekendingdata1" id="ComparisonWeek" />
+                    </td>
+                    <td class="thwidth"></td>
+                    <td class="thwidth"></td>
+                    <td class="thwidth"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <label class="lblweekdata">Total Number of Scaffold Built to Date</label>
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="TextBox1" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox1" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText1" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer1" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight1" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft1" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td> <label class="lblweekdata">Total Number of Scaffold Standing </label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox2" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox2" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText2" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer2" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight2" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft2" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label class="lblweekdata">Erected Scaffold - (Preceding 7 Days)</label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox3" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox3" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText3" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer3" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight3" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft3" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label class="lblweekdata">Dismantled Scaffold - (Preceding 7 Days)</label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox4" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox4" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText4" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer4" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight4" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft4" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label class="lblweekdata">Total Man Hrs Spent - (Preceding 7 Days)</label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox5" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox5" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText5" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer5" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight5" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft5" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label class="lblweekdata">Total Tonnage Built To Date</label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox6" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox6" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText6" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer6" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight6" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft6" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label class="lblweekdata">Total Tonnage Standing</label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox7" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox7" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText7" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer7" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight7" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft7" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label class="lblweekdata">Average Tonnage Per Scaffold (Built to Date)</label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox8" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox8" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText8" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer8" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight8" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft8" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><label style="margin-top:-10%;">Avg Standing Days per Scaffold (Built to Date)</label></td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;color:black;" disabled class="txtweekendingdata" id="TextBox9" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ComparisonTextBox9" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekText9" />
+                    </td>
+                    <td class="thwidth">
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata" id="ChangeWeekPer9" />
+                    </td>
+                    <td class="thwidth">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fa fa-long-arrow-right fa-4x" id="faArrowRight9" style="position:absolute;margin:5px;color:green;padding-inline:13px;display:none;"></i></span>
+                            <span class="input-group-text"><i class="fa fa-long-arrow-left fa-4x" id="faArrowLeft9" style="position:absolute;margin:5px;color:red;padding-inline:13px;display:none"></i></span>
+                        </div>
+                        <input type="text" style="text-align: center;" disabled class="txtweekendingdata2"
+                               id="#" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xm-12">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xm-12">
+                    <table id="Table2">
+                        <tr>
+                            <th colspan="4" class="MainthHead">
+                                <label>Man Hours Spent Erect Vs Dismantle</label>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Category</label>
+                            </th>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Man Hours <br>Erect</label>
+                            </th>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Man Hours Dismantle</label>
+                            </th>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Linear (Man Hours Erect)</label>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox1" value="Week 1" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox1" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox1" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox1" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox2" value="Week 2" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox2" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox2" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox2" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox3" value="Week 3" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox3" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox3" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox3" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox4" value="Week 4" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox4" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox4" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox4" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox5" value="Week 5" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox5" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox5" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox5" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox6" value="Week 6" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox6" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox6" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox6" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox7" value="Week 7" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox7" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox7" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox7" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox8" value="Week 8" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox8" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox8" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox8" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox9" value="Week 9" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox9" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox9" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox9" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CategoryTextBox10" value="Week 10" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsTextBox10" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="ManHrsDisTextBox10" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="LinerTextBox10" />
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xm-12">
+                    <table id="Table3">
+                        <tr>
+                            <th colspan="4" class="MainthHead">
+                                <label>Tonnage Erected Vs Dismantle</label>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Category</label>
+                            </th>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Tonnage Erected</label>
+                            </th>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Tonnage Dismantled</label>
+                            </th>
+                            <th class="Table2thWidth Table2thHeight">
+                                <label class="txtlblTonnageData">Linear (Tonnage Erected)</label>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox1" value="Week 1" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox1" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox1" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox1" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox2" value="Week 2" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox2" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox2" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox2" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox3" value="Week 3" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox3" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox3" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox3" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox4" value="Week 4" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox4" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox4" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox4" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox5" value="Week 5" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox5" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox5" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox5" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox6" value="Week 6" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox6" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox6" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox6" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox7" value="Week 7" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox7" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox7" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox7" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox8" value="Week 8" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox8" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox8" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox8" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox9" value="Week 9" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox9" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox9" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox9" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="CatTonnageTextBox10" value="Week 10" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageTextBox10" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonDismantledTextBox10" />
+                            </td>
+                            <td class="Table2thWidth">
+                                <input type="text" style="text-align: center;" disabled class="txtTonnageData" id="TonnageErectedTextBox10" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <hr class="pageDivi" />
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="Chart3container" class="wrapper"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id='PrintPage2'>
+        <hr class="pageDivi" />
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="Chart1container" class="wrapper"></div>
+            </div>
+        </div>
+        <div class="row">
+            <table id="Table4">
+                <tr>
+                    <th colspan="10" class="MainthHead">
+                        <label><h3>Summary-Man Hours Per Tonne</h3></label>
+                    </th>
+                </tr>
+                <tr>
+                    <th class="Table4thWidth">
+                        <label class="labelwidth">Category</label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="labelwidth Chide">Man Hrs Erect</label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="labelwidth Chide">Tonnage Erected</label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="clsAverageErectHours b3 ">Avg - Erect Hrs/ Tonne </label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="labelwidth Chide">Man Hours Dismantle </label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="labelwidth Chide">Tonnage Dismantled</label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="clsAverageErectHours b4 ">Avg - Dis. Hrs/ Tonne</label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="labelwidth b6 Chide">Total Man Hours</label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="labelwidth b7 Chide">Total Tonnage Moved</label>
+                    </th>
+                    <th class="Table4thWidth">
+                        <label class="clsAverageErectHours b5">Avg - Total Hrs/ Tonne</label>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box1" value="Week 1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box1" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box1" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box2" value="Week 2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box2" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box2" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box3" value="Week 3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box3" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box3" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box4" value="Week 4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box4" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box4" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box5" value="Week 5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box5" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box5" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box6" value="Week 6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box6" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box6" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box7" value="Week 7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box7" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box7" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box8" value="Week 8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box8" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box8" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box9" value="Week 9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box9" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box9" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b2" id="Category_Box10" value="Week 10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManBox10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="TonnageBox10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b3" id="Average_ErectBox10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="ManHour_Box10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData Chide" id="Tonnage_Box10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b4" id="AvgDis_Box10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b6 Chide" id="TotMan_Box10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData b7 Chide" id="TonMove_Box10" />
+                    </td>
+                    <td class="Table4thWidth">
+                        <input type="text" style="text-align: center;" disabled class="txtTonData1 b5" id="AvgTotal_Box10" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <hr class="pageDivi" />
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="Chart4container" class="wrapper"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<%--Model to Show Scaffold Mat'l Standing - All Sites--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Scaffold Material Standing - All Sites</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails" style="width: 100%;">
+                        <tbody>
+                            <tr>
+                                <td style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                <td style="width: 33%; text-align: center;"><b>Tonnage Standing</b></td>
+                                <td style="width: 33%; text-align: center;"><b>% Of Tonnage Standing</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Scaffold Mat'l Standing - All Sites--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+
+    <div class="modal fade" id="myModals1" role="dialog">
+
+        <div class="row" style="padding-top: 90px;">
+            <div class="col-lg-2 col-md-1"></div>
+            <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12">
+                <div class="modal-content" style="width: 100%">
+
+                    <div class="modal-header row">
+                        <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
+                            <h4 class="modal-title">
+                                Locked In Scaffolds for
+                                <label id="lblLockedSite" style="font-size: 17px"></label>
+                                @*<asp:HiddenField ID="labelaction" runat="server" />*@
+                                <input type="hidden" id="labelaction" />
+                            </h4>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                            @*<asp:LinkButton ID="exporttopdf" runat="server" Style="height: 28px; padding-left: 5px; padding-top: 5px;" OnClick="exporttopdf_Click" CssClass="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                            <button ID="exporttopdf" Style="height: 28px; padding-top: 5px; width:100px;" OnClick="exporttopdf_Click()" Class="btn btn-blue w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+                        </div>
+
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+
+                            @*<asp:LinkButton ID="exportButton" runat="server" Style="height: 28px; padding-top: 5px;" CssClass="btn btn-primary w3-btn w3-teal" Text="Export">Export</asp:LinkButton>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>*@
+                            <button id="exportButton" Style="height: 28px; padding-top: 5px; width:100px;" Class="btn btn-primary w3-btn w3-teal"><i class="fa fa-file-excel-o"></i>&nbsp;Export</button>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-body" id="divTableDataHolder">
+                        <div style="overflow: auto">
+                            <table class="table table-bordered" id="tbDetailsLockedIn" style="width: 100%; color: black">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Scaf Ref #</b></td>
+                                        <td style="width: 25%; text-align: center; font-size: 12px;"><b>Reason for Access</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Location</b></td>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Building / Module No.</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Asset # / Func. Loc</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Floor Level</b></td>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Design Type</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-1"></div>
+        </div>
+
+    </div>
+</div>
+<div class="container">
+    <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+    <div class="modal fade" id="myModal3" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Scaffold Build and Dismantles </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Week</b></td>
+                                <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Scaffolds Builds</b></td>
+                                <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Scaffolds Dismantles</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

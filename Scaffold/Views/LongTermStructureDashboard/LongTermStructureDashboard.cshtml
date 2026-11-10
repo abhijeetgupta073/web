@@ -1,0 +1,1274 @@
+﻿
+@{
+    ViewBag.Title = "LongTermStructureDashboard";
+}
+
+@*<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-3d.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>*@
+<script src="/Content/js/highcharts.js"></script>
+<script src="/Content/js/highcharts-3d.js"></script>
+<script src="/Content/js/exporting.js"></script>
+<script src="/Content/js/highcharts-more.js"></script>
+<script src="/Content/js/export-data.js"></script>
+<script src="/Content/js/no-data-to-display.js"></script>
+<script>
+    $(document)
+               .ajaxStart(function () {
+                   $('#LoadingPanel1').css('display', 'block');
+               })
+             .ajaxStop(function () {
+                 $('#LoadingPanel1').css('display', 'none');
+             });
+    var siteLocid = 0;
+    var locaid = 0;
+
+    $(document).ready(function () {
+        $("#hdnClientID").val('@ViewBag.ClientID');
+        var logo = '@ViewBag.ClientImage';
+        $("#imgLogoDahsboardHere").attr('src', '@ViewBag.ClientImage');
+
+        var ClientID = $("#hdnClientID").val();
+
+        var screensize = $(window).width();
+        if (screensize < 1150 && screensize > 650) {
+            ($BODY.hasClass('nav-md'))
+            $('#CreateNewDropDown').css("margin-top", "2px");
+            $BODY.removeClass('nav-md').addClass('nav-sm');
+            $LEFT_COL.removeClass('scroll-view');
+            //$('#BlackSection').css('display', 'block');
+            $('#imgLogo').parent().css('display', 'none');
+            $('#imgLogo1').css('display', 'block').css("height", "52px");
+            $('#leftbarsection').css('margin-top', '0px');
+            $('.smbysite').css('margin-top', '32px');
+            //$('.smshow').css('margin-top', '-128px');
+            $('.smhireshow').css('margin-top', '-152px');
+            $('.smwidth').css('margin-top', '0px');
+            $('.smallsite').css('margin-top', '13px');
+        }
+        else {
+            if (screensize < (650)) {
+                $BODY.removeClass('nav-sm')
+                $('#imgLogo').parent().css('display', 'none');
+                $('.summaryData').parent().css('font-size', '10px');
+                $('.smalllocation').parent().css('font-size', '10px');
+                $('.smhireshow').css('margin-top', '7px');
+            }
+            else {
+                $('#CreateNewDropDown').css("margin-top", "6px");
+                $BODY.removeClass('nav-sm').addClass('nav-md');
+                //$('#BlackSection').css('display', 'none');
+                $('#imgLogo').parent().css('display', 'block');
+                $('#imgLogo1').css('display', 'none');
+                $('#leftbarsection').css('margin-top', '40px');
+            }
+        }
+
+
+        $('#container1').dblclick(function (e) {
+            $('#btnOpenModel').click();
+        });
+        $('#container2').dblclick(function (e) {
+            $('#btnOpenModel1').click();
+        });
+
+        var Siteid = $("#ddlSite").val();
+        ddlSitebind(Siteid, ClientID);
+        
+
+        $("#ddlSite").on("change", function () {
+            var Siteid = $("#ddlSite").val();
+            var Sitelocation = document.getElementById("ddlSite");
+            var getsitename = Sitelocation.options[Sitelocation.selectedIndex].text;
+            ddlJobbind(ClientID, Siteid);
+            //ddlDisciplinesbind(Siteid, ClientID);
+            //SiteData(Siteid, ClientID, "all");
+            //ByDesigntype(ClientID, Siteid, "all");
+            ddlDisciplinesbind(Siteid, ClientID,"all");
+            SiteData(Siteid, ClientID, "all", "all");
+            ByDesigntype(ClientID, Siteid, "all", "all");
+            $("#hdnSiteID").val(Siteid);
+            
+
+        });
+
+        $("#ddlarea").on("change", function () {
+            var combo = $("#ddlSite");
+            var Siteid = combo.val();
+            var Sitelocation = document.getElementById("ddlSite");
+            var ddlarea = $("#ddlarea").val();
+            var getsitename = Sitelocation.options[Sitelocation.selectedIndex].text;
+
+            ddlDisciplinesbind(Siteid, ClientID,"all");
+            //SiteData(Siteid, ClientID, SubOwner);
+            //ByDesigntype(ClientID, Siteid, SubOwner);
+            SiteData(Siteid, ClientID, "all", ddlarea);
+            ByDesigntype(ClientID, Siteid, "all", ddlarea);
+        });
+
+
+        $("#ddlDisciplines").on("change", function () {
+            var combo = $("#ddlSite");
+            var Siteid = combo.val();
+            var Sitelocation = document.getElementById("ddlSite");
+            var ddlarea = $("#ddlarea").val();
+            var SubOwner = $("#ddlDisciplines").val();
+            var getsitename = Sitelocation.options[Sitelocation.selectedIndex].text;
+            // $("#hdnSubOwner").val(SubOwner);
+
+            //SiteData(Siteid, ClientID, SubOwner);
+            //ByDesigntype(ClientID, Siteid, SubOwner);
+            SiteData(Siteid, ClientID, SubOwner, ddlarea);
+            ByDesigntype(ClientID, Siteid, SubOwner, ddlarea);
+        });
+
+    });
+
+    $(document).ready(function () {
+        $("[id$=myButtonControlID]").click(function (e) {
+            var uri = 'data:application/vnd.ms-excel;base64,',
+            template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+              base64 = function (s) {
+                  return window.btoa(unescape(encodeURIComponent(s)))
+              },
+        format = function (s, c) {
+            return s.replace(/{(\w+)}/g, function (m, p) {
+                return c[p];
+            })
+        }
+
+            var toExcel = "";
+            toExcel += document.getElementById("tbDetails3").innerHTML;
+            var ctx = {
+                worksheet: name || '',
+                table: toExcel
+            };
+            var link = document.createElement("a");
+            link.download = "Long Term Scaffolds By Design Type set as " + $("#lblAction").text() + ".xls";
+            link.href = uri + base64(format(template, ctx))
+            link.click();
+        });
+
+    });
+
+
+    function ddlSitebind(id, ClientID) {
+        $.ajax({
+            type: "POST",
+            url: "/LongTermStructureDashboard/ddlsitedropdownbindquery",
+            data: JSON.stringify({ id: id, ClientID: ClientID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddlSitedropdownbind = response;
+                var Siteid = "";
+                var SiteLocatext = "";
+                $("#ddlSite").html("");
+                for (var i = 0; i < ddlSitedropdownbind.length; i++) {
+                    Siteid = ddlSitedropdownbind[0].SiteLocID;
+                    SiteLocatext = ddlSitedropdownbind[0].SiteLocation;
+                    $("#ddlSite").append('<option value="' + ddlSitedropdownbind[i].SiteLocID + '">' + ddlSitedropdownbind[i].SiteLocation + '</option>');
+
+
+                }
+                //ddlDisciplinesbind(Siteid, ClientID);
+                //SiteData(Siteid, ClientID,"all");
+                ddlJobbind(ClientID, Siteid);
+                ddlDisciplinesbind(Siteid, ClientID,"all");
+                SiteData(Siteid, ClientID, "all","all");
+                $("#hdnSiteID").val(Siteid);
+                $("#lblLockedSite").text(SiteLocatext);
+            }
+        });
+
+    }
+
+    function ddlJobbind(id, SiteId) {
+
+        $.ajax({
+            type: "POST",
+            url: "/LongTermStructureDashboard/ddlJobDashboard",
+            data: JSON.stringify({ id: id, SiteId: SiteId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddlJobdropdownbind = response;
+
+                $("#ddlarea").html("");
+                $("#ddlarea").append('<option value="all">All</option>');
+                for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                    siteLocid = ddlJobdropdownbind[0].areaid;
+                    $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].areaid + '">' + ddlJobdropdownbind[i].area + '</option>');
+
+                }
+            }
+        });
+
+    }
+
+    function ddlDisciplinesbind(Siteid, ClientID,LocId) {
+        $.ajax({
+
+            type: "POST",
+            url: "/LongTermStructureDashboard/ddlDisciplinesdropdownbindquery",
+            data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID,LocId:LocId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddlDisciplinesdropdownbind = response;
+                var ScaffoldOwner = "";
+                $("#ddlDisciplines").html("");
+                $("#ddlDisciplines").append('<option value="all">All</option>');
+                for (var i = 0; i < ddlDisciplinesdropdownbind.length; i++) {
+                    ScaffoldOwner = ddlDisciplinesdropdownbind[0].ScaffoldOwner;
+                    $("#ddlDisciplines").append('<option value="' + ddlDisciplinesdropdownbind[i].ScaffoldOwner + '">' + ddlDisciplinesdropdownbind[i].ScaffoldOwner + '</option>');
+
+                }
+            }
+        });
+
+    }
+
+    function CycloneHours(Siteid, ClientID, SubOwner, ddlarea) {
+         $.ajax({
+             type: "POST",
+             url: "/LongTermStructureDashboard/CycloneHours",
+             data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, SubOwner: SubOwner,ddlarea : ddlarea}),
+             contentType: "application/json; charset=utf-8",
+             dataType: "json",
+             success: function (response) {
+                 var CycloneDetails = response.PreparationHrs;
+                 if (CycloneDetails != null && CycloneDetails != "") {
+                     $("#txtCyclone").val(CycloneDetails);
+                 }
+                 else {
+                     $("#txtCyclone").val("0.00");
+                 }
+                 var LongTermTonnage = $('#txtLongTermTonnage').val();
+                 var TotalTonnage = $('#txtTotalTonnage').val();
+
+                 if ((LongTermTonnage != "0.00") && (TotalTonnage != "0.00")) {
+                     $("#txtPercentageWeight").val(((LongTermTonnage / TotalTonnage) * 100).toFixed(2));
+                 }
+                 else {
+                     $("#txtPercentageWeight").val("0.00 %");
+                 }
+                
+
+             }
+    
+         });
+    }
+
+
+    function SiteData(Siteid, ClientID,SubOwner, ddlarea) {
+
+            $.ajax({
+                type: "POST",
+                url: "/LongTermStructureDashboard/SiteDetails",
+                data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, SubOwner: SubOwner, ddlarea: ddlarea }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var SitedataDetails = response;
+                    if (SitedataDetails.length > 0) {
+                        $("#ErrectedScaffolds").val(SitedataDetails[0]["GraphName"]);
+                        $("#txtTotalQty").val(SitedataDetails[0]["StandingScaffold"]);
+                        $("#txtTotalTonnage").val(SitedataDetails[0]["StandingTonnage"]);
+                        $("#txtTotalPacTonnage").val(SitedataDetails[0]["ATPACTonnage"]);
+                        $("#txtTotalTube").val(SitedataDetails[0]["TubeFitTonnage"]);
+                        $("#txtTotalAvSatnding").val(SitedataDetails[0]["AvgHireDays2"]);
+                        $("#txtTotalOthers").val(SitedataDetails[0]["OtherTonnage"]);
+                        $("#ErrectedScaffolds").val(SitedataDetails[1]["GraphName"]);
+                        $("#txtLongTermQty").val(SitedataDetails[1]["StandingScaffold"]);
+                        $("#txtLongTermTonnage").val(SitedataDetails[1]["StandingTonnage"]);
+                        $("#txtLongTermPacTonnage").val(SitedataDetails[1]["ATPACTonnage"]);
+                        $("#txtLongTermTube").val(SitedataDetails[1]["TubeFitTonnage"]);
+                        $("#txtLongTermAvSatnding").val(SitedataDetails[1]["AvgHireDays2"]);
+                        $("#txtLongTermOthers").val(SitedataDetails[1]["OtherTonnage"]);
+
+                        //AllGraphDashboard(Siteid, ClientID, "QuantityGraph", "all");
+                        //AllGraphLongDashboard(Siteid, ClientID, "TonnageGraph", "all");
+                        //ByDesigntype(ClientID, Siteid, "all");
+                        //CycloneHours(Siteid, ClientID, "all");
+                        AllGraphDashboard(Siteid, ClientID, "QuantityGraph", SubOwner, ddlarea);
+                        AllGraphLongDashboard(Siteid, ClientID, "TonnageGraph", SubOwner, ddlarea);
+                        ByDesigntype(ClientID, Siteid, SubOwner, ddlarea);
+                        CycloneHours(Siteid, ClientID, SubOwner, ddlarea);
+
+                    }
+
+                }
+
+            });
+        }
+
+      function AllGraphDashboard(Siteid, ClientID, GraphData, SubOwner, ddlarea) {
+
+
+            $.ajax({
+                type: "POST",
+                url: "/LongTermStructureDashboard/AllGraphDashboard",
+                data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, GraphData: GraphData, SubOwner: SubOwner, ddlarea: ddlarea }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    TonnageAllsites = response;
+                    var ScaffoldData = [];
+                    var nooftimes = 20;
+                    if (TonnageAllsites.length > 0) {
+                        $('.forRemoveData').remove();
+                        if (TonnageAllsites.length <= nooftimes) {
+                            nooftimes = TonnageAllsites.length;
+                        }
+
+                        for (var i = 0; i < nooftimes; i++) {
+
+                            var TobePush = true;
+
+                            if (TobePush) {
+                                ScaffoldData.push({ name: TonnageAllsites[i].Series, y: TonnageAllsites[i].SeriesValue, z: (TonnageAllsites[i].PctAllSite * 100).toFixed(2), sliced: true });
+
+                            }
+                        }
+                    }
+
+                    Highcharts.chart('container1', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            type: 'line',
+                            backgroundColor: '#ffffcc',
+                            //backgroundColor: '#FFFF99',
+                            //backgroundColor: '#FFFACD',
+                            //backgroundColor: '#FFFFE0',
+                            //backgroundColor: '#f2f2f2',
+                            //backgroundColor: {
+                            //    linearGradient: [0, 0, 500, 500],
+                            //    stops: [
+                            //      [0, 'rgb(255, 255, 255)'],
+                            //      [1, 'rgb(200, 200, 255)']
+                            //    ]
+                            //},
+                            type: 'pie',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+                        title: {
+                            text: ''
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                //size: 100,
+                                slicedOffset: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.y}({point.z}%)',
+                                    style: {
+                                        fontWeight: 'Normal'
+                                    }
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -9,
+                                //x: 9,
+                                symbolStroke: "grey",
+                                theme: {
+                                    fill: "#ffffcc",
+                                    //'stroke-width': 1,
+                                    borderWidth: 0,
+                                    r: 0,
+                                }
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 7,
+                                    menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                                },
+                                exportButton: {
+                                    y: -9,
+                                    x: -20,
+                                    onclick: function () {
+                                        $('#btnOpenModel').click();
+                                    },
+                                    text: 'Show All',
+                                    symbolStroke: "grey",
+                                    theme: {
+                                        fill: "#ffffcc",
+                                        //'stroke-width': 1,
+                                        borderWidth: 0,
+                                        r: 0,
+                                        
+                                    }
+                                }
+                            }
+
+
+                        },
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: 'Quantity Standing ',
+                            data: ScaffoldData,
+                            showInLegend: true
+                        }]
+                    });
+                    function redrawchart() {
+                        var chart = $('#container1').highcharts();
+
+                        console.log('redraw');
+                        var w = $('#container1').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (1.95 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart);
+                        redrawchart();
+                    });
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                    var row = '';
+                    var selectedSiteLocation = $("#ddlSite").val()
+
+                    $.each(response, function (index1, obj1) {
+                        var num;
+                        num = (obj1.PctAllSite * 100);
+                        percentage = num.toFixed(2);
+
+                        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj1.Series + "</td><td style='text-align: center;'>" + obj1.SeriesValue + "</td><td style='text-align: center;'>" + percentage + "%" + "</td></tr>";
+                    });
+                    $("#tbDetails tbody").append(row);
+
+
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+        function AllGraphLongDashboard(Siteid, ClientID, GraphData, SubOwner, ddlarea) {
+
+
+            $.ajax({
+                type: "POST",
+                url: "/LongTermStructureDashboard/AllGraphDashboard",
+                data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID, GraphData: GraphData, SubOwner: SubOwner, ddlarea: ddlarea }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    TonnageAllsites = response;
+                    var ScaffoldData = [];
+                    var nooftimes = 20;
+                    if (TonnageAllsites.length > 0) {
+                        $('.forRemoveData1').remove();
+                        if (TonnageAllsites.length <= nooftimes) {
+                            nooftimes = TonnageAllsites.length;
+                        }
+
+                        for (var i = 0; i < nooftimes; i++) {
+
+                            var TobePush = true;
+                        
+                            if (TobePush) {
+                                ScaffoldData.push({ name: TonnageAllsites[i].Series, y: TonnageAllsites[i].SeriesValue, z: (TonnageAllsites[i].PctAllSite * 100).toFixed(2), sliced: true });
+
+                            }
+                        }
+                    }
+
+                    Highcharts.chart('container2', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            type: 'line',
+                            backgroundColor: '#ffffcc',
+                            //backgroundColor: '#FFFF99',
+                            //backgroundColor: {
+                            //    linearGradient: [0, 0, 500, 500],
+                            //    stops: [
+                            //      [0, 'rgb(255, 255, 255)'],
+                            //      [1, 'rgb(200, 200, 255)']
+                            //    ]
+                            //},
+                            type: 'pie',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+                        title: {
+                            text: ''
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                //size: 100,
+                                slicedOffset: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.y}({point.z}%)',
+                                    style: {
+                                        fontWeight: 'Normal'
+                                    }
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -9,
+                                //x: 9,
+                                symbolStroke: "grey",
+                                theme: {
+                                    fill: "#ffffcc",
+                                    //'stroke-width': 1,
+                                    borderWidth: 0,
+                                    r: 0,
+                                }
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 7,
+                                    menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                                },
+                                exportButton: {
+                                    y: -9,
+                                    x: -20,
+                                    onclick: function () {
+                                        $('#btnOpenModel1').click();
+                                    },
+                                    text: 'Show All',
+                                    symbolStroke: "grey",
+                                    theme: {
+                                        fill: "#ffffcc",
+                                        //'stroke-width': 1,
+                                        borderWidth: 0,
+                                        r: 0,
+                                       
+                                    }
+                                }
+                            }
+
+
+                        },
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: 'Tonnage Standing ',
+                            data: ScaffoldData,
+                            showInLegend: true
+                        }]
+                    });
+                    function redrawchart() {
+                        var chart = $('#container2').highcharts();
+
+                        console.log('redraw');
+                        var w = $('#container2').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (1.94 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart);
+                        redrawchart();
+                    });
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                    var row = '';
+                    var selectedSiteLocation = $("#ddlSite").val()
+
+                    $.each(response, function (index1, obj1) {
+                        var num;
+                        num = (obj1.PctAllSite * 100);
+                        percentage = num.toFixed(2);
+
+                        row += "<tr class='forRemoveData1'><td style='text-align: center;'>" + obj1.Series + "</td><td style='text-align: center;'>" + obj1.SeriesValue + "</td><td style='text-align: center;'>" + percentage + "%" + "</td></tr>";
+                    });
+                    $("#tbDetails1 tbody").append(row);
+
+
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+        function ByLongTermDesignClick(DesignType, ID, Site, SubOwner, ddlarea) {
+            $('.forRemoveDataAction').remove();
+            $.ajax({
+                type: "POST",
+                url: "/LongTermStructureDashboard/LongTermDesignClick",
+                data: JSON.stringify({ DesignType: DesignType, ID: ID, Site: Site, SubOwner: SubOwner, ddlarea: ddlarea }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var DesignAction = response;
+                    var DesignData = [];
+                    if (DesignAction.length > 0) {
+                        for (var i = 0; i < DesignAction.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                DesignData.push({ name: DesignAction[i].ScaffRefAction, y: DesignAction[i].DescriptionAction, z: DesignAction[i].Location, s: DesignAction[i].BuildingNo, r: DesignAction[i].assetId, x: DesignAction[i].FloorLevel, a: DesignAction[i].DesignType, b: DesignAction[i].MaterialType, c: DesignAction[i].PreparationHrs, d: DesignAction[i].RiskRating, sliced: true });
+                            }
+                        }
+                    }
+                    $('#btnOpenModelAllDetails').click();
+                    $("#lblAction").text(DesignType);
+                    $("#labelaction").val(DesignType);
+                    var row1 = '';
+                    $.each(response, function (index, obj) {
+                        row1 += "<tr class='forRemoveDataAction'><td style='text-align: center;font-size: 12px;'>" + obj.ScaffRefAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DescriptionAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.Location + "</td><td style='text-align: center;font-size: 12px;'>" + obj.BuildingNo + "</td><td style='text-align: center;font-size: 12px;'>" + obj.assetId + "</td><td style='text-align: center;font-size: 12px;'>" + obj.FloorLevel + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DesignType + "</td><td style='text-align: center;font-size: 12px;'>" + obj.MaterialType + "</td><td style='text-align: center;font-size: 12px;'>" + Highcharts.numberFormat(obj.PreparationHrs, 2) + "</td><td style='text-align: center;font-size: 12px;'>" + obj.RiskRating + "</td></tr>";
+                    });
+                    $("#tbDetails3 tbody").append(row1);
+                }
+            });
+
+        }
+
+        function ByDesigntype(ID, Site, SubOwner, ddlarea) {
+            $('.forRemoveData2').remove();
+            $.ajax({
+                type: "POST",
+                url: "/LongTermStructureDashboard/ScaffoldDesignType",
+                data: JSON.stringify({ id: ID, site: Site, SubOwner: SubOwner, ddlarea: ddlarea }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // SiteStructure = response.d;
+                    SiteStructure = response;
+                    var Design = [];
+                    var SiteAnalysis = [];
+                    var TotalCount = [];
+                    var noofrow = 20;
+                    if (SiteStructure.length < 20) {
+                        noofrow = SiteStructure.length;
+                    }
+                    if (SiteStructure.length > 0) {
+                        //$('.forRemoveData2').remove();
+                        for (var i = 0; i < noofrow; i++) {
+                            var TobePush = true;
+
+
+                            if (TobePush) {
+                                SiteAnalysis.push({ name: SiteStructure[i].designtype, y: SiteStructure[i].rquantity, sliced: true });
+
+                                Design.push(SiteStructure[i].designtype);
+                                TotalCount.push(SiteStructure[i].rquantity);
+                            }
+
+                        }
+                    }
+
+                    var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                    theExportOptions.splice(0, 1);
+                    theExportOptions.splice(5, 10);
+
+
+                    Highcharts.chart('container3', {
+                        chart: {
+                            type: 'bar',
+                            //backgroundColor: '#f2f2f2',
+                            backgroundColor: '#ffffcc',
+                            //backgroundColor: '#FFFF99',
+                            //backgroundColor: '#FFFACD',
+                           // backgroundColor: '#FFFFE0',
+                            borderWidth: 1,
+                            borderColor: '#D3D3D3',
+                            //backgroundColor: {
+                            //    linearGradient: [0, 0, 500, 500],
+                            //    stops: [
+                            //      [0, 'rgb(255, 255, 255)'],
+                            //      [1, 'rgb(200, 200, 255)']
+                            //    ]
+                            //},
+                            //borderWidth: '5px',
+                            //borderRadius: '20px',
+                            //backgroundColor: '#FCFFC5',
+                            //polar: true,
+                            //type: 'line'
+                            //options3d: {
+                            //     enabled: true,
+                            //     alpha: 10,
+                            //     beta: 25,
+                            //     depth: 70
+                            // }
+                        },
+                        title: {
+                            align: 'left',
+                            text: ''
+                        },
+                        subtitle: {
+                            text: ''
+                        },
+                        xAxis: {
+                            categories: Design,
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            lineWidth: 0,
+                            gridLineWidth: 0,//Set this to zero
+                            title: {
+                                text: '',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify',
+                               // skew3d: true,
+                            }
+                        },
+                        tooltip: {
+                            shared: true,
+                            formatter: function () {
+                                return this.x + ', ' + this.y;
+                            }
+                        },
+                        plotOptions: {
+                            series: {
+                                cursor: 'pointer',
+                                point: {
+                                    events: {
+                                        click: function (eve) {
+
+                                            ByLongTermDesignClick(this.name, ID, Site, SubOwner, ddlarea);
+                                        }
+                                    }
+                                }
+                            },
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    color: 'black'
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -9,    
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+
+                                contextButton: {
+                                    enabled: true,
+                                    x: 7,
+                                    symbolStroke: "grey",
+                                    theme: {
+                                        fill: "#ffffcc",
+                                        //'stroke-width': 1,
+                                        borderWidth: 0,
+                                        r: 0,
+                                    }
+                                   // menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                                },
+
+                                exportButton: {
+                                    //x: -28,
+                                    y: -9,
+                                    x:-20,
+                                    onclick: function () {
+                                        $('#Model2').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All',
+                                    symbolStroke: "grey",
+                                    theme: {
+                                        fill: "#ffffcc",
+                                        //'stroke-width': 1,
+                                        borderWidth: 1,
+                                        r: 0,
+                                       
+                                    }
+                                }
+                            }
+
+
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            showInLegend: false,
+                            data: SiteAnalysis
+                        }]
+                    });
+                    function redrawchart1() {
+                        var chart = $('#container3').highcharts();
+
+                        var w = $('#container3').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (3.96 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart1);
+                        redrawchart1();
+                    });
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                    var row = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                        num = (obj.PctAllSite1 * 100);
+
+                        var Chart1difficultyrating = obj.Chart1difficultyrating == null ? 0 : obj.Chart1difficultyrating;
+
+                        row += "<tr class='forRemoveData2'><td style='text-align: center;'>" + obj.designtype + "</td><td style='text-align: center;'>" + Chart1difficultyrating + "</td><td style='text-align: center;'>" + obj.rquantity + "</td></tr>";
+                    });
+                    $("#tbDetails2 tbody").append(row);
+                },
+            });
+        }
+
+</script>
+
+<style>
+
+
+    .row.chartfrstrow {
+        margin: -8px 0 0px 0 !important;
+    }
+
+    .highcharts-credits {
+        display: none;
+    }
+    .highcharts-contextbutton{
+     margin-top:10px;
+     
+   }
+    .highcharts-button-box{
+      margin-top:0px;
+    }
+
+    label span { 
+        font-size: 20px;
+        color: #615f5f;
+        font-weight: bold;
+
+    }
+
+    h1 {
+        font-size: 20px;
+        color: #615f5f;
+        font-weight: bold;
+        margin-top:-2px;
+    }
+
+    p {
+    /*margin: 0 0 10px;*/
+    font-size: 12px;
+     }
+    .container.DshbrdBack {
+        background-color: #ffffcc;
+    }
+
+    .txtsummaryData {
+        background-color: white;
+    }
+
+    .BuildSummaryData {
+        color: black;
+    }
+
+    .OnSiteSummary {
+        color: black;
+    }
+
+    .BuildSummaryData.placeholder {
+        color: black;
+    }
+
+    #tbDetails tr td {
+        color: #808080;
+    }
+
+    #tbDetails1 tr td {
+        color: #808080;
+    }
+
+    #tbDetails2 tr td {
+        color: #808080;
+    }
+
+    #tbDetails3 tr td {
+        color: #808080;
+    }
+</style>
+
+
+
+
+
+<input type="hidden" id="hdnClientID" />
+<input type="hidden" id="hdnSiteID" />
+
+  <div class="container DshbrdBack">
+
+        <div class="row">
+            @*<div class="col-lg-2 col-md-2 col-sm-2 col-xs-5">
+                <div class="dashLogo  scafLogo">
+                    <img src="/images/logo.png" runat="server" id="imgLogoDahsboardHere" class="img-responsive " />
+                </div>
+            </div>*@
+            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="margin-top: 6px">
+                <label id="lblsite" Style="font-size: 16px; color: #808080; float:right; font-weight: bold;" Text="Site">Site</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-9 col-xs-9" style="margin-top: 6px">
+               
+                <select id="ddlSite" style="width: 100%; font-size: 14px;border-radius:4px; height: 21px; color: #8a8787;" Class="form-control" AppendDataBoundItems="true" onchange="Changesite()"></select>
+            </div>
+           
+            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="margin-top: 6px;">
+                <label id="loc" style="font-weight: 700; font-size: 17px; color: black; float: right">Location</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-9 col-xs-9" style="margin-top: 6px;">
+                
+                <select id="ddlarea" Class="form-control" style="width: 100%; font-size: 14px;border-radius:4px; height: 21px; color: #8a8787;" onchange="selectarea();"></select>
+            </div>
+
+            <div class="row" id="divDisciplinesDashboardHere" style="display:none;">
+                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="margin-top: 6px">
+                    <label id="lblDisciplines" style="font-weight: 700; font-size: 17px; color: black; float: right">Disciplines </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-9 col-xs-9" style="margin-top: 6px;margin-left: 0px;">
+                    
+                    <select id="ddlDisciplines" Class="form-control" style="width: 100%; font-size: 14px;border-radius:4px; height: 21px; color: #8a8787;" onchange="Changediscipline();"></select>
+                </div>
+            </div>
+
+            @*<div class="col-lg-1 col-md-1 col-sm-3 col-xs-2" style="margin-top: 6px;padding: 0px;">
+                <label id="lblsite" Style="font-size: 14px; color: #808080; margin-left: 18px;height: 21px; font-weight: bold;">Site</label>
+            </div>
+            <div class="col-lg-4 col-md-3 col-sm-5 col-xs-5" style="margin-top: 6px">
+                <select id="ddlSite" style="width: 100%; font-size: 14px; border-radius: 4px; height: 21px; color: #8a8787;"></select>
+            </div>*@
+            @*<div class="row" id="divDisciplinesDashboardHere">*@
+                @*<div class="col-lg-1 col-md-2 col-sm-3 col-xs-3" style="margin-top: 6px;padding: 0px;">
+                    
+                    <label id="lblDisciplines" Style="font-size: 14px; color: #808080; margin-left: 18px; font-weight: bold;" Text="Disciplines">Disciplines</label>
+                </div>
+                <div class="col-lg-4 col-md-3 col-sm-5 col-xs-5" style="margin-top: 6px">
+                    <select id="ddlDisciplines" style="width: 100%; font-size: 14px; border-radius: 4px; height: 21px; color: #8a8787;"></select>
+                </div>*@
+            @*</div>*@
+
+        </div>
+
+        @*<div class="row">
+            <div class="col-lg-12 col-sm-12 col-xs-12 col-md-12"  Style="margin-top: -5px;">
+                <label id="lblAnalysisLongTerm" Style="font-size: 20px; margin-top: 0px; color: #615f5f; font-weight: bold;" Text="Site Analysis -Long Term Structure ">Site Analysis - Long Term Structure</label>
+            </div>
+        </div>*@
+      <div class="row">
+      </div>
+          <div class="row chartfrstrow">
+              <div class="col-lg-8 col-sm-12 col-xs-12" style="margin-left:0px">
+                  <div class="BuildSummaryData">
+                      <p>
+                          @*<b>Week Ending    </b>*@
+                          <b>&nbsp;   </b>
+                          @*<input type="text" Style="text-align: center;width:16%;" placeholder="Av. Standing Days" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                   id="AVStanding" />
+                            <input type="text" Style="text-align: center;width:17%;" placeholder="Tube & Fit Tonnage" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                   id="TubeTonnage" />
+                            <input type="text" Style="text-align: center;width:15%;" placeholder="AT-PAC Tonnage" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                   id="ATTonnage" />
+                            <input type="text" Style="text-align: center;width:11%;" placeholder="Tonnage" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                   id="Tonnage" />
+                            <input type="text" Style="text-align: center;width:11%;" placeholder="Qty" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                   id="Qty" />*@
+
+                          <input type="text" Style="text-align: center;width:15%;" placeholder="Av. Standing Days" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                 id="AVStanding" />
+                          <input type="text" Style="text-align: center;width:12%;" placeholder="Other Tonnage" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                 id="OthersTonnage" />
+                          <input type="text" Style="text-align: center;width:16%;" placeholder="Tube & Fit Tonnage" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                 id="TubeTonnage" />
+                          <input type="text" Style="text-align: center;width:14%;" placeholder="AT-PAC Tonnage" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                 id="ATTonnage" />
+                          <input type="text" Style="text-align: center;width:8%;" placeholder="Tonnage" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                 id="Tonnage" />
+                          <input type="text" Style="text-align: center;width:7%;" placeholder="Qty" disabled BackColor="#ddecee" Class="txtsummaryData"
+                                 id="Qty" />
+
+                      </p>
+                      <p>
+                          Total # Of Structures Standing
+                          <input type="text" Style="text-align: center;width:15%;" disabled Class="txtsummaryData"
+                                 id="txtTotalAvSatnding" />
+                          <input type="text" Style="text-align: center;width:12%;" disabled Class="txtsummaryData"
+                                 id="txtTotalOthers" />
+                          <input type="text" Style="text-align: center; width:16%;" disabled Class="txtsummaryData"
+                                 id="txtTotalTube" />
+                          <input type="text" Style="text-align: center; width:14%;" disabled Class="txtsummaryData"
+                                 id="txtTotalPacTonnage" />
+                          <input type="text" Style="text-align: center;width:8%;" disabled Class="txtsummaryData"
+                                 id="txtTotalTonnage" />
+                          <input type="text" Style="text-align: center; width:7%;" disabled Class="txtsummaryData"
+                                 id="txtTotalQty" />
+
+                      </p>
+                      <p>
+                          # Of Long Term Structures Standing
+                          <input type="text" Style="text-align: center;width:15%;" disabled Class="txtsummaryData"
+                                 id="txtLongTermAvSatnding" />
+                          <input type="text" Style="text-align: center;width:12%;" disabled Class="txtsummaryData"
+                                 id="txtLongTermOthers" />
+                          <input type="text" Style="text-align: center;width:16%;" disabled Class="txtsummaryData"
+                                 id="txtLongTermTube" />
+                          <input type="text" Style="text-align: center;width:14%;" disabled Class="txtsummaryData"
+                                 id="txtLongTermPacTonnage" />
+                          <input type="text" Style="text-align: center;width:8%;" disabled Class="txtsummaryData"
+                                 id="txtLongTermTonnage" />
+                          <input type="text" Style="text-align: center; width:7%;" disabled Class="txtsummaryData"
+                                 id="txtLongTermQty" />
+
+                      </p>
+
+
+                  </div>
+              </div>
+
+              <div class="col-lg-4 col-sm-12 col-xs-12 " style="margin-top:0px">
+                  <div class="BuildSummaryData">
+
+                      <div class="row">
+                          <div class="col-lg-12 col-md-12 col-sm-12 col-xm-12" style="margin-top:-1px;margin-left: -15px;">
+                              @*<div class="row">
+
+                                    <label id="lblAnalysisLongTerm" Style="font-size: 19px; margin-top: 0px; color: #615f5f; font-weight: bold;" Text="Site Analysis -Long Term Structure ">Long Term</label>
+                                </div>*@
+                              @*<h1 id="lblAnalysisLongTerm" Text="Site Analysis -Long Term Structure " style="margin-left: 10px;">Long Term</h1>*@
+                              <h1><label id="lblAnalysisLongTerm" Style=" margin-top: 0px;margin-bottom: -3px;margin-left: 8px;" Text="Site Analysis -Long Term Structure "><span>Long Term</span></label></h1>
+                              <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style="margin-top:1px;font-size: 12px;">
+                                  @*<p>Site Analysis - Long Term Structure</p>*@
+                                  <input type="text" style="text-align:center;width:108%;" placeholder="Cyclone Readiness Hrs" disabled />
+                                  <input type="text" id="txtCyclone" style="text-align:center;width:108%;" disabled value="0.00" />
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 col-sm-12 col-lg-12" style="margin-top:0px;font-size: 12px;">
+                                  <input type="text" style="text-align:center;width:113%;" placeholder="% of Total Standing Weight" disabled />
+                                  <input type="text" id="txtPercentageWeight" style="text-align:center;width:113%;" disabled />
+                              </div>
+                          </div>
+                          @*</div>*@
+
+                      </div>
+
+                  </div>
+
+              </div>
+
+          </div>
+
+          <div class="row">
+              <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 wrapper">
+                  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper">
+                      <h1 style="margin-top: 0px;">% Long Term Vs Non Long Term Standing - Qty</h1>
+                      <div id="container1" style="margin-top:0px"></div>
+                  </div>
+                  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top:3px;">
+                      <h1>% Long Term Vs Non Long Term Standing - Tonnage</h1>
+                      <div id="container2" style="margin-top:0px"></div>
+                  </div>
+
+              </div>
+              <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 wrapper">
+                  <h1 style="margin-top: 0px;">Long Term Scaffolds By Design Type</h1>
+                  <div id="container3" style="margin-top:0px"></div>
+              </div>
+              @*<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <h1>% Long Term Vs  Overall Standing - Qty</h1>
+                    <div id="container1" class="wrapper" style="margin-top:0px;"> </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <h1>% Long Term Vs  Overall Standing - Tonnage</h1>
+                    <div id="container2" class="wrapper" style="margin-top:0px;"> </div>
+
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" >
+                    <h1 >Long Term Scaffolds By Design Type</h1>
+                    <div id="container3" class="wrapper" style="margin-top:0px;"> </div>
+                </div>*@
+          </div>
+
+      </div>
+
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModel" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Long Term Vs Non Long Term Standing - Qty</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails" style="width: 100%;">
+                        <tbody>
+                            <tr>
+                                <td style="width: 33%; text-align: center;"><b>Series</b></td>
+                                <td style="width: 33%; text-align: center;"><b>Qty Standing</b></td>
+                                <td style="width: 33%; text-align: center;"><b>% Of Qty Standing</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal1</button>
+    <div class="modal fade" id="myModal1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Long Term Vs Non Long Term Standing - Tonnage</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails1" style="width: 100%;">
+                        <tbody>
+                            <tr>
+                                <td style="width: 33%; text-align: center;"><b>Series</b></td>
+                                <td style="width: 33%; text-align: center;"><b>Tonnage Standing</b></td>
+                                <td style="width: 33%; text-align: center;"><b>% Of Tonnage Standing</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <div class="container">
+            <button style="display: none;" id="Model2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+            <div class="modal fade" id="myModal2" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Long Term Scaffolds By Design Type</h4>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-bordered" id="tbDetails2" style="width: 100%; color: black">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 50%; text-align: center;"><b>Design Type</b></td>
+                                        <td style="width: 30%; text-align: center;"><b>Difficulty Rating</b></td>
+                                        <td style="width: 20%; text-align: center;"><b>Job Counts</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+    <div class="modal fade" id="myModals1" role="dialog">
+        <div class="row" style="padding-top: 90px;">
+            <div class="col-lg-1 col-md-1"></div>
+            <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+                <div class="modal-content" style="width: 100%">
+                    <div class="modal-header row">
+                        <div class="col-lg-9 col-md-8 col-sm-6 col-xs-6">
+                            <h4 class="modal-title">
+                                Long Term Scaffolds By Design Type set as <u>
+                                    <label id="lblAction" style="font-size: 17px"></label>
+                                  
+                                    <input type="hidden" id="labelaction" />
+                                </u>
+                            </h4>
+                        </div>
+                        <div class="col-lg-1 col-md-2 col-sm-3 col-xs-3">
+                            
+                            @*<button id="exporttopdf" Style="height: 28px; padding-left: 5px; padding-top: 5px;" OnClick="exporttopdf_Click()" Class="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</button>*@
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                           
+                            <button id="myButtonControlID" Style="height: 28px; padding-top: 5px;" Class="btn btn-primary w3-btn w3-teal" Text="Export"><i class="fa fa-file-excel-o"></i>&nbsp;Export</button>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body" id="divTableDataHolder">
+                        <div style="overflow: auto">
+                            <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Scaf Ref #</b></td>
+                                        <td style="width: 25%; text-align: center; font-size: 12px;"><b>Reason for Access</b></td>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Location</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Building / Module No.</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Asset # / Func. Loc</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Floor Level</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Design Type</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Prep Hours</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Risk Rating</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1 col-md-1"></div>
+        </div>
+    </div>
+</div>

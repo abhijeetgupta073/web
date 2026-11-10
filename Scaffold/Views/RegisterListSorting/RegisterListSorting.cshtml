@@ -1,0 +1,502 @@
+﻿@{
+    ViewBag.Title = "RegisterListSorting";
+}
+
+
+
+<style>
+    .disabledArrow {
+        pointer-events: none;
+        opacity: 0.3;
+    }
+
+</style>
+
+<script>
+    $(document).ready(function () {
+        setTimeout(function () {
+            GetRegisterListSortingData();
+
+        }, 500);
+    });
+    var tableRegListSorting = "";
+    var tableDisplayColumnNameData = "";
+    var RegisterListSortingArryData = [];
+    function GetRegisterListSortingData() {
+
+        $('#LoadingPanel1').show();
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/RegisterListSorting/GetRegisterListSortingData",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var str = "";
+                var GetData = response;
+                $('#tblRegisterListSorting').DataTable().clear();
+                $('#tblRegisterListSorting').DataTable().destroy();
+
+                if (GetData.length > 0) {
+                    $('#tblRegisterListSorting').css("display", "block");
+
+                    for (var i = 0; i < GetData.length; i++) {
+                        var RegisterListSortingId = GetData[i].RegisterListSortingId == null ? "" : GetData[i].RegisterListSortingId;
+                        var ClientID = GetData[i].ClientID == null ? "" : GetData[i].ClientID;
+                        var DisplayColumnName = GetData[i].DisplayColumnName == null ? "" : GetData[i].DisplayColumnName;
+                        var ItemOrder = GetData[i].ItemOrder == null ? "" : GetData[i].ItemOrder;
+
+                        var IsNA = GetData[i].IsNA == null ? "" : GetData[i].IsNA;
+
+                        DisplayColumnName = htmlAttributeEncode(DisplayColumnName);
+
+                        //str += '<tr>'
+                        str += '<tr style="background:#CCFFFF;">'
+                        str += '<td id="RegisterListSortingId_' + i + '" style="display:none">' + RegisterListSortingId + '</td>'
+                        str += '<td id="ItemOrder_' + RegisterListSortingId + '" style="display:none">' + ItemOrder + '</td>'
+                        /*&nbsp;&nbsp;<i class="fa fa-trash ClassbtnColumnDelete" onclick=ShowDeletePopup("' + RegisterListSortingId + '","ViewLevel1","' + RegisterListSortingId + '")></i>*/
+/*                        str += '<td  class="tdbtnExpend" style="width:5%;display:flex;"><a id="btnUp_' + i + '" class="btnUp"><i style="color:grey" class="fa fa-arrow-up"></i></a>&nbsp;&nbsp;<a id="btnDown_' + i + '" class="btnDown"><i style="color:grey" class="fa fa-arrow-down"></i>&nbsp;</a>&nbsp;&nbsp;<a id="btnEdit_' + RegisterListSortingId + '" class="btnColumnEdit"><i class="fa fa-pencil"></i></a></td>';*/
+
+                        var totalRows = response.length;
+                        var showArrows = (i >= 5 && i < totalRows - 1);   // show only for rows 5 to last-1
+
+                        str += '<td class="tdbtnExpend" style="width:5%;display:flex;">';
+
+                        // SHOW ARROWS only when allowed
+                        if (showArrows) {
+
+                            str += `<a id="btnUp_${i}" class="btnUp"><i style="color:grey" class="fa fa-arrow-up"></i></a>`
+                                + '&nbsp;&nbsp;'
+                                + `<a id="btnDown_${i}" class="btnDown"><i style="color:grey" class="fa fa-arrow-down"></i></a>`;
+
+                        } else {
+
+                            // HIDE arrows but keep alignment same
+                            str += '<span style="width:55px; display:inline-block;"></span>';
+                        }
+
+                        str += '&nbsp;&nbsp;' +
+                            `<a id="btnEdit_${RegisterListSortingId}" class="btnColumnEdit"><i class="fa fa-pencil"></i></a>` +
+                            '</td>';
+
+                        str += '<td id="DisplayColumnNameInputType_' + RegisterListSortingId + '"><input id="txtDisplayColumnName_' + RegisterListSortingId + '" type="text" style="display:none;" class="form-control" value="' + DisplayColumnName + '" disabled><label id="lblDisplayColumnName_' + RegisterListSortingId + '">' + DisplayColumnName + '</label></td>'
+                        debugger;
+                        if (IsNA == true) {
+                            str += '<td><input type="checkbox"  class="chkNA"  id="checkboxNA_' + RegisterListSortingId + '" checked disabled/><span> &nbspNA</span></td>'
+                        } else {
+                            str += '<td><input id="checkboxNA_' + RegisterListSortingId + '" type="checkbox" class="chkNA"  disabled/><span>&nbsp NA</span></td>'
+                        }
+
+                        str += '</tr>'
+                    }
+
+                    $('#tbodyRegisterListSorting').append(str);
+                    $('#LoadingPanel1').css('display', 'none');
+
+                }
+                tableRegListSorting = $('#tblRegisterListSorting').DataTable({
+                    searching: true,
+                    paging: false,
+                    info: false,
+                    autoWidth: true,
+                    length: false,
+                    sort: false,
+
+
+                    initComplete: function () {
+
+                        //$("#tblRegisterListSorting_filter").children().html('<button id="btnAddNewColumn"  type="button" class="fa fa-plus"></button><button id="btnSave"  type="button" class="fa fa-save"></button><button id="btnRefresh"  type="button" class="fa fa-remove"></button>');
+                        /*<a id="btnColumnSave" style="cursor:pointer;" class="fa fa-save"></a>&nbsp;&nbsp<a id="btnAddNewColumn" style="cursor:pointer;" class="fa fa-plus"></a>*/
+                        $("#tblRegisterListSorting_filter").children().html('&nbsp;&nbsp<a id="btnRefresh" style="cursor:pointer;" class="fa fa-remove"></a>');
+
+                        $("#btnAddNewColumn").click(function () {
+                            let txtDisplayColumnName_0 = $('#txtDisplayColumnName_0').val();
+                            if (txtDisplayColumnName_0 != '') {
+                                AddNewRow();
+                            } else {
+                                //var Response = { Result: "Failed", Message: "Please fill the fields" };
+                                //CustomAlert(Response);
+                                $('#txtDisplayColumnName_0').css('border-color', 'red');
+                            }
+                        });
+                        //$(document).on("change", ".chkNA", function () {
+
+                        //    $('#LoadingPanel1').show();
+
+                        //    var RegisterListSortingId = this.id.split('_')[1];
+                        //    var IsNA = $(this).prop("checked");
+                        //    var id = getParameterByName('id');
+                        //    var UID = getParameterByName('UID');
+                        //    $.ajax({
+                        //        url: "/RegisterListSorting/SaveNAStatus",
+                        //        type: "POST",
+                        //        data: {
+                        //            id: id, UID: UID,
+                        //            RegisterListSortingId: RegisterListSortingId,
+                        //            IsNA: IsNA
+                        //        },
+                        //        success: function (response) {
+                        //            if (response.Result == "Success") {
+                        //                CustomAlert(response);
+                        //               /* location.reload();*/
+                        //            } else {
+                        //                CustomAlert(response);
+                                        
+                        //            }
+                        //            $('#LoadingPanel1').hide();
+                        //        }
+                        //    });
+                        //});
+
+                        let saveNATimer;   // global debounce timer
+
+                        $(document)
+                            .off("change", ".chkNA")   // ❗ Remove old handlers correctly
+                            .on("change", ".chkNA", function () {   // Add handler once
+
+                                clearTimeout(saveNATimer); // Cancel previous call
+                                let checkbox = this;
+
+                                saveNATimer = setTimeout(function () {
+
+                                    $('#LoadingPanel1').show();
+
+                                    var RegisterListSortingId = checkbox.id.split('_')[1];
+                                    var IsNA = $(checkbox).prop("checked");
+                                    var id = getParameterByName('id');
+                                    var UID = getParameterByName('UID');
+
+                                    $.ajax({
+                                        url: "/RegisterListSorting/SaveNAStatus",
+                                        type: "POST",
+                                        data: {
+                                            id: id,
+                                            UID: UID,
+                                            RegisterListSortingId: RegisterListSortingId,
+                                            IsNA: IsNA
+                                        },
+                                        success: function (response) {
+                                            CustomAlert(response);
+                                            $('#LoadingPanel1').hide();
+                                            /*GetRegisterListSortingData();*/
+                                            GetRegisterListSortingData();
+                                        }
+                                    });
+
+                                }, 300); // fires after 300ms of no changes
+
+                            });
+
+
+
+                          $("#btnColumnSave").click(function () {
+                      /*  $(document).on("change", ".chkNA", function () {*/
+                            $('#LoadingPanel1').show();
+
+                            $('#tblRegisterListSorting td input').each(function () {
+                                if ($(this).hasClass("txtEditColor")) {
+                                    var RegisterListSortingId = this.id.split('_')[1];
+                                    var DisplayColumnName = this.value;
+                                    var IsNA = $('#checkboxNA_' + RegisterListSortingId).prop('checked');
+
+                                    if (DisplayColumnName != '') {
+                                        var ArryVal = { RegisterListSortingId: RegisterListSortingId, DisplayColumnName: DisplayColumnName, IsNA: IsNA };
+                                        RegisterListSortingArryData.push(ArryVal);
+                                    } else {
+                                        $('#txtDisplayColumnName_' + RegisterListSortingId).css('border-color', 'red');
+                                    }
+
+                                }
+
+                            });
+                            var id = getParameterByName('id');
+                            var UID = getParameterByName('UID');
+                            var TableValues = "ViewLevel1";
+                            debugger;
+                            if (RegisterListSortingArryData.length > 0) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/RegisterListSorting/RegisterListSortingSaveData",
+                                    data: JSON.stringify({ id: id, UID: UID, TableValues: TableValues, RegisterListSortingVal: RegisterListSortingArryData }),
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    async: true,
+                                    success: function (response) {
+                                        if (response.Result == "Success") {
+                                            CustomAlert(response);
+                                            GetRegisterListSortingData();
+                                            clearArray(RegisterListSortingArryData);
+                                        } else {
+                                            CustomAlert(response);
+                                            $('#LoadingPanel1').hide();
+                                            clearArray(RegisterListSortingArryData);
+                                        }
+                                    }
+                                });
+                            } else {
+                                $('#LoadingPanel1').hide();
+                            }
+                        });
+
+
+                        $("#btnRefresh").click(function () {
+                            GetRegisterListSortingData();
+                        });
+                        $(".btnColumnEdit").click(function () {
+                            event.stopImmediatePropagation();
+
+                            var RegisterListSortingId = this.id.split('_')[1];
+                            $('#txtDisplayColumnName_' + RegisterListSortingId).show();
+                            $('#lblDisplayColumnName_' + RegisterListSortingId).hide();
+                            $('#txtDisplayColumnName_' + RegisterListSortingId).addClass('txtEditColor');
+                            $('#checkboxNA_' + RegisterListSortingId).prop('disabled', false);
+
+                        });
+                        $(".btnUp").click(function () {
+                            event.stopImmediatePropagation();
+
+                            var rowindex = this.id.split('_')[1];
+                            var RegisterListSortingId = $('#RegisterListSortingId_' + rowindex).text();
+                            var ItemOrder = $('#ItemOrder_' + RegisterListSortingId).text();
+
+                            var OrderRegisterListSortingId2 = $('#RegisterListSortingId_' + (rowindex - 1)).text();
+
+                            var id = getParameterByName('id');
+                            var UID = getParameterByName('UID');
+                            $.ajax({
+                                type: "POST",
+                                url: "/RegisterListSorting/ShortOrderUpLevel1",
+                                data: JSON.stringify({ id: id, UID: UID, OrderRegisterListSortingId: RegisterListSortingId, OrderRegisterListSortingId2: OrderRegisterListSortingId2, ItemOrder: ItemOrder }),
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                async: true,
+                                success: function (response) {
+                                    if (response.Result == "Success") {
+                                        GetRegisterListSortingData();
+                                    } else {
+                                        CustomAlert(response);
+                                    }
+                                }
+                            });
+                        });
+                        $(".btnDown").click(function () {
+                            event.stopImmediatePropagation();
+
+                            var rowindex = this.id.split('_')[1];
+                            var RegisterListSortingId = $('#RegisterListSortingId_' + rowindex).text();
+                            var ItemOrder = $('#ItemOrder_' + RegisterListSortingId).text();
+                            var OrderRegisterListSortingId2 = $('#RegisterListSortingId_' + (parseInt(rowindex) + 1)).text();
+
+                            var id = getParameterByName('id');
+                            var UID = getParameterByName('UID');
+                            debugger;
+                            $.ajax({
+                                type: "POST",
+                                url: "/RegisterListSorting/ShortOrderDownLevel1",
+                                data: JSON.stringify({ id: id, UID: UID, OrderRegisterListSortingId: RegisterListSortingId, OrderRegisterListSortingId2: OrderRegisterListSortingId2, ItemOrder: ItemOrder }),
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                async: true,
+                                success: function (response) {
+                                    if (response.Result == "Success") {
+                                        GetRegisterListSortingData();
+                                    } else {
+                                        CustomAlert(response);
+                                    }
+                                }
+                            });
+                        });
+
+                    },
+                    "drawCallback": function () {
+                        $('.fa-angle-right').click(function (eve) {
+                            eve.stopImmediatePropagation();
+                            var tr = $(this).closest('tr');
+                            //var row = table.row(tr);
+                            var row = tableRegListSorting.row(tr);
+                            var RegisterListSortingId = this.id.split('_')[1];
+
+                            var visible = $(this).parent().parent().hasClass("shown");
+                            var anglechange = $(this).hasClass("fa-angle-right");
+                            if (anglechange == true) {
+                                var x = tr.children()[0];
+                                $(this).removeClass("fa-angle-right");
+                                $(this).addClass("fa-angle-down");
+                            }
+                            else {
+                                $(this).addClass("fa-angle-right");
+                                $(this).removeClass("fa-angle-down");
+                            }
+                            if (visible == true) {
+                                $(this).parent().parent().next('tr').remove();
+                                //  $(this).parent().parent().next('tr').empty();
+                                $(this).parent().parent().removeClass('shown');
+                            }
+                            else {
+
+                                var Temp = GetRegisterListSortingData(id,RegisterListSortingId);
+                                row.child(Temp).show();
+                                row.child.show();
+                                tr.addClass('shown');
+                            }
+                        });
+                    }
+
+                });
+                $('#LoadingPanel1').hide();
+
+                // Hide Show For DataTable Column And Buttons Start Here
+
+                GridButtonHideShow(tableRegListSorting, "tblRegisterListSorting");
+
+                // Hide Show For DataTable Column And Buttons End Here
+            }
+        })
+
+    }
+    function ShowDeletePopup(RegisterListSortingId, TableValues, hdnChildRegisterListSortingId) {
+        debugger;
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        $('#hdnDeleteFlag').val(TableValues);
+        $('#hdnRegisterListSortingId').val(RegisterListSortingId);
+        $('#hdnChildRegisterListSortingId').val(hdnChildRegisterListSortingId);
+        $.ajax({
+            type: "POST",
+            url: "/RegisterListSorting/ShowDeletePopup",
+            data: JSON.stringify({ id: id, RegisterListSortingId: RegisterListSortingId, TableValues: TableValues }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var checkDiv = response;
+                if (checkDiv == "divChild") {
+                    $('#divChild').css('display', 'block');
+                } if (checkDiv == "divdelete") {
+                    $('#divdelete').css('display', 'block');
+                }
+            }
+        });
+    }
+
+    function clearArray(array) {
+        while (array.length) {
+            array.pop();
+        }
+    } function htmlAttributeEncode(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;')  // always escape &
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+    function AddNewRow() {
+
+        //var str = "<tr><td style='display:none;'></td><td></td><td></td><td></td><td></td><td></td><td><input type='text' id='txtDisplayColumnName_0' class='form-control txtEditColor'/></td><td><input id='checkboxNA_0' type='checkbox'/><span>&nbsp NA</span></td></tr>";
+        var str = "<tr style='background: #CCFFFF;'><td style='display:none;'></td><td></td><td><input type='text' id='txtDisplayColumnName_0' class='form-control txtEditColor'/></td><td><input id='checkboxNA_0' type='checkbox'/><span>&nbsp NA</span></td></tr>";
+        $('#tbodyRegisterListSorting').prepend(str);
+    }
+    function btndeleteyes_Click() {
+
+        $('#LoadingPanel1').show();
+        var DeleteFlag = $('#hdnDeleteFlag').val();
+        var RegisterListSortingId = $('#hdnRegisterListSortingId').val();
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/RegisterListSorting/btndeleteyes_Click",
+            data: JSON.stringify({ id: id, DeleteFlag: DeleteFlag, RegisterListSortingId: RegisterListSortingId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                if (response.Result == "Success") {
+                    $('#divdelete').css("display", "none");
+                    $('#divChild').css("display", "none");
+
+                    GetRegisterListSortingData();
+
+                    CustomAlert(response);
+
+                } else {
+                    CustomAlert(response);
+                    $('#LoadingPanel1').hide();
+                    $('#divdelete').css("display", "none");
+                    $('#divChild').css("display", "none");
+                }
+            }
+        });
+
+    }
+    function btndeleteno_Click() {
+        $('#divdelete').css('display', 'none');
+        $('#divChild').css('display', 'none');
+        //divdelete.Style.Add("display", "none");
+        //divChild.Style.Add("display", "none");
+    }
+</script>
+<input type="hidden" id="hdnDeleteFlag" />
+<input type="hidden" id="hdnRegisterListSortingId" />
+<div id="RegisterListSorting" style="color: black; width: 50%;margin-top:5px;background-color: #CCFFFF;">
+    <table id="tblRegisterListSorting" class="table table-striped " style="width:100%!important;">
+        <thead>
+            <tr>
+                <th style="display:none">RegisterListSortingId</th>
+                <th style="display:none">ItemOrder</th>
+                <th style="width:5%"></th>
+                <th>Column Name</th>
+                <th>NA</th>
+            </tr>
+        </thead>
+        <tbody id="tbodyRegisterListSorting"></tbody>
+    </table>
+</div>
+<div id="divdelete" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 380px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h3"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="lbldelete">There are sub question are you sure you want to Delete the complete Section?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divChild" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h5"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label1">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btnDeleteChildYes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btnDeleteChildYes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btnDeleteChildNo" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btnDeleteChildNo"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+﻿CACHE MANIFEST
+# Version 1.0
+ORIGIN-TRIAL:
+AtuFfgxjtLmQZWq5BdprMFHj6MdEFHohwk9eRU/f1PNSD+G8i094SCwTwQCzoqDvqu0svTS3PYaTNkJg6zVQ2Q4AAAB1eyJvcmlnaW4iOiJodHRwczovL3NjYWZwYWNhcHB0ZXN0LmF6dXJld2Vic2l0ZXMubmV0OjQ0MyIsImZlYXR1cmUiOiJBcHBDYWNoZSIsImV4cGlyeSI6MTYxNzc1MzU5OSwiaXNTdWJkb21haW4iOnRydWV9
+CACHE:
+/Offline.html
+/OfflineInspectionList.html
+/Content/fonts/css/font-awesome.min.css
+/Content/Css/bootstrap.min.css
+/Content/Css/jquery.dataTables.min.css
+/Content/Css/w3.css
+/Content/Css/SecStyle.css
+/Content/Css/signature-pad.css
+/Content/Css/bootstrap-datetimepicker.min.css
+/Content/Css/Offline-bootstrap-glyphicons.css
+
+/Content/Css/jquery.datetimepicker.min.css
+
+/Content/js/jquery.min.js
+/Content/js/bootstrap.min.js
+/Content/js/bootbox.min.js
+/Content/js/jquery.dataTables.min.js
+/Content/js/jquery-ui.min.js
+/Content/js/videoInsp.js
+/Content/js/cameraInsp.js
+/Content/js/signature_pad.js
+/Content/js/html2canvas.js
+/Content/js/sketch.min.js
+/Content/js/signInsp.js
+/Content/js/bootstrap-datetimepicker.min.js
+
+/Content/js/jquery.datetimepicker.js
+
+/images/noimg.jpg
+/Images/loading.gif
+/img/logo1.png
+/images/lock.png
+/images/fonts/fa_list.png
+/images/TopLogo.png
+/images/fonts/fa_edit.png
+/images/onlineStatus.png
+/images/offlineStatus.png
+/images/forspinicon.png
+/images/backspinicon.png
+/images/fonts/fa_backward_arrow.png
+
+
+NETWORK:
+
+FALLBACK:
+/img/logo1.png /img/logo1.png
+/Offline.html /Offline.html
+/OfflineInspectionList.html /OfflineInspectionList.html

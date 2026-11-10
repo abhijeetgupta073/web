@@ -1,0 +1,364 @@
+﻿
+@{
+    ViewBag.Title = "FinalMaterialList";
+}
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<style>
+     .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+    table.dataTable tfoot th {
+        text-align: left;
+    }
+    table.dataTable tbody th, table.dataTable tbody td {
+        padding: 8px 10px;
+    }
+    table.dataTable tfoot th, table.dataTable tfoot td {
+        padding: 8px 10px !important;
+        
+    }
+
+</style>
+<script>
+    $(document).ready(function () {
+        $('#liFinalList').removeClass('active').addClass('active');
+        ShowJobInfoDetails();
+        GetMaterialFinalizedData();
+        $('#txtQuantity').val('@ViewBag.Quantity');
+        $('#txtTotalweight').val('@ViewBag.TotalWeight' + '     ' + '(Tonnes)');
+    });
+
+    function GetMaterialFinalizedData() {
+
+        $('#LoadingPanel1').show();
+        var id = getParameterByName('id');
+        var RID = getParameterByName('RID');
+        $.ajax({
+            type: "POST",
+            url: "/FinalMaterialList/GetMaterialFinalizedData",
+            data: JSON.stringify({ id: id, RID: RID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var str = "";
+                var Totalstr = "";
+                var GetData = response;
+                $('#tblFinalMaterialList').DataTable().clear();
+                $('#tblFinalMaterialList').DataTable().destroy();
+
+                if (GetData.length > 0) {
+                    //$('#Deletefreeze').css('display', 'block');
+                    //$('#Print').css('display', 'block');
+                    //$('#ExportToCSV').css('display', 'block');
+                    for (var i = 0; i < GetData.length; i++) {
+                        var optimizedQuantity = GetData[i].optimizedQuantity == null ? "" : GetData[i].optimizedQuantity;
+                        var MaterialType = GetData[i].MaterialType == null ? "" : GetData[i].MaterialType;
+                        var ItemCode = GetData[i].ItemCode == null ? "" : GetData[i].ItemCode;
+                        var ItemDesc1 = GetData[i].ItemDesc == null ? "" : GetData[i].ItemDesc;
+                        var ItemDesc = (ItemDesc1.length > 40) ? ItemDesc1.substring(0, 40) + '.....' : ItemDesc1;
+                        var ItemWeight = GetData[i].ItemWeight == null ? "" : GetData[i].ItemWeight;
+                        var TotalWeight = GetData[i].TotalWeight == null ? "" : GetData[i].TotalWeight;
+
+                        str += "<tr>"
+                        str += "<td style='display:none;width:10%'></td>"
+                        str += "<td style='width:10%'>" + MaterialType + "</td>"
+                        str += "<td style='width:10%'>" + ItemCode + "</td>"
+                        str += "<td style='width:10%' title='" + ItemDesc1 + "'>" + ItemDesc1 + "</td>"
+                        //str += "<td class='setWidth3' style='display:none' title='" + ItemDesc1 + "'>" + ItemDesc1 + "</td>"
+                        str += "<td style='width:10%'>" + optimizedQuantity + "</td>"
+                        str += "<td style='width:10%'>" + ItemWeight + "</td>"
+                        str += "<td style='width:10%'>" + TotalWeight + "</td>"
+                        str += "</tr>";
+                    }
+                    //ADDED BY S.SOURABH ON 16 MARCH 2023
+                    var TotalWeight = $('#txtQuantity').val();
+                    var TotalTones = $('#txtTotalweight').val();
+                    Totalstr += "<tr>"
+                    Totalstr += "<td style='display:none;width:10%'></td>"
+                    Totalstr += "<td style='width:10%'>" + '' + "</td>"
+                    Totalstr += "<td style='width:10%'>" + '' + "</td>"
+                    Totalstr += "<td style = 'Font-weight:bold; margin-left:60px !important; width:40%'>" + 'Total' + "</td>"
+                    Totalstr += "<td style = 'Font-weight:bold;width:10%'>" + TotalWeight + "</td>"
+                    Totalstr += "<td style = 'Font-weight:bold;width:10%'>" + '' + "</td>"
+                    Totalstr += "<td style = 'Font-weight:bold;width:10%'>" + TotalTones + "</td>"
+                    Totalstr += "</tr>";
+
+                }
+                else {
+                    $('#Deletefreeze').css('display', 'none');
+                    $('#Print').css('display', 'none');
+                    $('#ExportToCSV').css('display', 'none');
+                }
+                $('#tbodyFinalMaterialList').append(str);
+                $('#tblfooter').append(Totalstr);
+
+                $('#LoadingPanel1').hide();
+                var table = $('#tblFinalMaterialList').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    "bLengthChange": true,
+                    "bInfo": false,
+                    //autoWidth: true,
+                    scrollX: true,
+                   scrollY: true,
+                    scrollCollapse: true,   
+                    //scrollY: "60vh",
+                    "bPaginate": true,
+                    dom: 'Bfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Final Material List',
+                            exportOptions: {
+                                 columns: ':visible'
+                               // columns: [1,2,4, 5, 6]
+                            }
+                        }
+                    ],
+                });
+            }
+        })
+    }
+    function ExportToCSV() {
+        $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+    }
+    function Print_Click() {
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var RID = getParameterByName('RID');
+
+
+        window.open('/FinalMaterialListReport/showreport?RegisterID=' + RID + '&ClientID=' + id);
+    }
+    function Deletefreeze_Click() {
+        //Added On (24-01-2024) We now want to check that if Register is finalised then you can not delete record.
+        var JobStatus = $('#txtstatus').html();
+        if (JobStatus == "Completed")
+        {
+            var Response = { Result: "Failed", Message: "You cannot delete the finalised material list as the job has been completed." }
+            CustomAlert(Response);
+        }
+        else
+        {
+            $('#deletefreezepopup').css('display', 'block');
+        }
+        
+    }
+    function btndltoptimizeyes_Click() {
+        $('#LoadingPanel1').show();
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var RID = getParameterByName('RID');
+        $.ajax({
+            type: "POST",
+            url: "/FinalMaterialList/btndltoptimizeyes_Click",
+            data: JSON.stringify({ id: id, RID: RID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                if (response.Result = "Success") {
+                    CustomAlert(response);
+                    window.location.href = '/ScaffoldMaterialListPhase2/ScaffoldMaterialListPhase2?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&RID=' + RID;
+                    //  Response.Redirect("ScaffoldMaterialListPhase2.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&RID=" + Request.QueryString["RID"]);
+                } else {
+                    CustomAlert(response);
+                    $('#LoadingPanel1').show();
+                }
+            }
+        })
+    }
+    function btndltoptimizeno_Click() {
+        $('#deletefreezepopup').css('display', 'none');
+    }
+
+</script>
+
+ 
+
+    <style>
+        .dataTables_length{
+        display:none;
+        }
+       /* .setWidth1, .setWidth2{
+            width: 15%;
+        }
+        .setWidth3 {
+            width: 30%;
+        }*/
+        label {
+            font-size: 12px;
+        }
+
+
+        @@media (min-width:767px) and (max-width:991px) {
+
+            #txtQuantity {
+                width: 80px !important;
+            }
+
+            #txtTotalweight {
+                width: 114px !important;
+                margin-left: -36px !important;
+            }
+        }
+
+        @@media (min-width:688px) and (max-width:767px) {
+            #lbltotal {
+                margin-left: 135px !important;
+            }
+
+            #txtQuantity {
+                width: 60px !important;
+                margin-left: 104px !important;
+            }
+
+            #txtTotalweight {
+                width: 120px !important;
+                margin-left: 56px !important;
+            }
+        }
+
+        @@media (min-width:644px) and (max-width:688px) {
+            #lbltotal {
+                margin-left: 108px !important;
+            }
+
+            #txtQuantity {
+                width: 60px !important;
+                margin-left: 78px !important;
+            }
+
+            #txtTotalweight {
+                width: 120px !important;
+                margin-left: 28px !important;
+            }
+        }
+
+        @@media (min-width:200px) and (max-width:644px) {
+            #lbltotal {
+                margin-left: -48px !important;
+            }
+
+            #txtQuantity {
+                width: 60px !important;
+                margin-left: -43px !important;
+            }
+
+            #txtTotalweight {
+                width: 113px !important;
+                margin-left: -33px !important;
+            }
+        }
+    </style>
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-tasks"></i>&nbsp;<span id="lblclient" Font-Size="16px" Font-Bold="true">Final Material List</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+    </div>
+
+</div>
+@Html.Partial("_RegisterPartiaView")
+    <div class="tab-content">
+        <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+            <div class="row"></div>
+            <div class="row">
+
+
+                <div class="col-lg-6 col-md-6 col-sm-3 col-xs-1"></div>
+                <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+
+                    @*<asp:LinkButton ID="Deletefreeze" Style="width: 100%; height: 28px; float: right; display: none; padding-top: 5px" CssClass="btn  btn-primary w3-btn w3-blue" runat="server" OnClick="Deletefreeze_Click">Delete</asp:LinkButton>*@
+                    <button id="Deletefreeze" Style="width: 100%; height: 28px; float: right; padding-top: 5px" Class="btn  btn-primary w3-btn w3-blue" runat="server" OnClick="Deletefreeze_Click()">Delete</button>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                    @*<asp:LinkButton ID="Print" runat="server" Style="padding-left: 5px; width: 100%; height: 28px; font-size: 13px; padding-top: 6px;" CssClass="btn  btn-primary w3-btn w3-teal" OnClick="Print_Click"><i class="fa fa-print"></i> Print</asp:LinkButton>*@
+                    <button id="Print" Style="padding-left: 5px; width: 100%; height: 28px; font-size: 13px; padding-top: 6px;" Class="btn  btn-primary w3-btn w3-teal"  OnClick="Print_Click()"><i class="fa fa-print"></i> Print</button>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+                    <button id="ExportToCSV" Style="padding-left: 5px; width: 100%; height: 28px; font-size: 13px; padding-top: 6px;" Class="btn  btn-primary w3-btn w3-teal" OnClick="ExportToCSV()">Export To CSV</button>
+                </div>
+            </div>
+
+
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 100%">
+                <div class="clearfix"></div>
+
+                <div class="double-scroll">
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div id="FinalMaterialList" style="color: black; width: 100%;margin-top:5px;">
+                            <table id="tblFinalMaterialList" class="table table-striped " style="width:100%">
+                                <thead style="background-color: #efefef; color: #716262;">
+                                    <tr>
+                                        <th  style="display: none; width: 10%"></th>
+                                        <th style="width:10%">Material Type</th>
+                                        <th style="width:10%">Item Code</th>
+                                        <th  style="width:40%">Item Description</th>
+                                        @*<th class="setWidth3" style="display:none;">Item Description</th>*@  @*For Export To Csv*@
+                                        <th style="width:10%">Quantity</th>
+                                        <th style="width:10%">Item Weight</th>
+                                        <th style="width:10%">Total Weight (Kgs)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyFinalMaterialList" style="width:100%"></tbody>
+                                <tfoot id="tblfooter"  style="text-align: left; width: 100%"></tfoot>
+                            </table>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div  class="row" hidden>
+                <div class="col-lg-7 col-md-6 col-sm-6 col-xs-3"></div>
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2" id="Total">
+                    @*<asp:Label ID="lbltotal" runat="server">Total</asp:Label>*@
+                    <label id="lbltotal" >Total</label>
+                </div>
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+                    @*<asp:TextBox ID="txtQuantity" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>*@
+                    <input type="text" id="txtQuantity" Class="form-control" disabled />
+                </div>
+                <div class="col-lg-1 col-md-3 col-sm-2 col-xs-2"></div>
+                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+                    @*<asp:TextBox ID="txtTotalweight" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>*@
+                    <input style="width:115px; margin-left:10px;" type="text" id="txtTotalweight"  Class="form-control" disabled />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deletefreezepopup"  class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 158px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h1" >Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label  id="c1">Are you sure you want to Delete all Finalised material list..</label>
+                    @*<%-- <label runat="server" id="Label7">Do you wish to confirm?</label>--%>*@
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndltoptimizeyes" runat="server" OnClick="btndltoptimizeyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btndltoptimizeyes" OnClick="btndltoptimizeyes_Click()" ><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndltoptimizeno" runat="server" OnClick="btndltoptimizeno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btndltoptimizeno"  OnClick="btndltoptimizeno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+

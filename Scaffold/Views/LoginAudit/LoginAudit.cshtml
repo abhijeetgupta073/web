@@ -1,0 +1,299 @@
+﻿
+@{
+    ViewBag.Title = "LoginAudit";
+}
+
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+    #txtToDate, #txtFromDate {
+    color:black;
+    }
+    .clslbl {
+    color: black !important;
+    }
+
+    .clsCompanyNameWidth, .clsUserNameWidth, .clsCountryWidth, .clsIPAddressWidth,.clscityWidth {
+        min-width: 70px !important;
+    }
+    .clslogouttime {
+        min-width: 80px !important;
+    }
+
+    .clsUTCLoginWidth, .clsGeographicWidth,.clstotalsession {
+        min-width: 130px !important;
+    }
+    .clsValidUserWidth, .clsLoginAttemptWidth, .clsPerthTimeWidth {
+        min-width: 60px !important;
+    }
+    .clsSessionIdWidth {
+    min-width:120px!important;
+    }
+    .clsLoginFailureWidth,.clsregionNameWidth {
+    min-width: 200px !important;
+    }
+</style>
+
+<script>
+    $(function () {
+
+        var date = new Date();
+        var newdate = new Date(date);
+        newdate.setDate(newdate.getDate() - 2);
+
+        $("#txtFromDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            closeText: 'Close',
+        }).datepicker("setDate", newdate);
+
+        $("#txtToDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            closeText: 'Close',
+        }).datepicker("setDate", new Date());
+        $('#hdnTimeOffSet').val(new Date().getTimezoneOffset());
+        GetLoginAuditData();
+    });
+
+    function GetLoginAuditData()
+    {
+        $("#LoadingPanel1").css("display", "block");
+        var fromDate = $('#txtFromDate').val();
+        var toDate = $('#txtToDate').val();
+        var hdnTimeOffSet = $('#hdnTimeOffSet').val();
+        $.ajax({
+            type: 'POST',
+            url: '/LoginAudit/GetLoginAuditData',
+            data: JSON.stringify({ fromDate: fromDate, toDate: toDate,hdnTimeOffSet:hdnTimeOffSet }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var data = response;
+                var str = '';
+                $('#tblLoginAudit').DataTable().clear();
+                $('#tblLoginAudit').DataTable().destroy();
+                if (data.length != 0) {
+                  
+                    $.each(data, function (index, obj) {
+
+                        var CompanyName = obj.Name == null ? "" : obj.Name;
+                        var ValidUser = obj.ValidUser == null ? "" : obj.ValidUser;
+                        var Username = obj.Username == null ? "" : obj.Username;
+                        var LoginAttemptSuccess = obj.LoginAttemptSuccess == null ? "" : obj.LoginAttemptSuccess;
+                        var Country = obj.Country == null ? "" : obj.Country;
+                        var IPAddress = obj.IPAddress == null ? "" : obj.IPAddress;
+                        var UTCLoginTime = obj.UTCLoginTime == null ? "" : obj.UTCLoginTime;
+                        var GeographicLoginTime = obj.GeographicLoginTime == null ? "" : obj.GeographicLoginTime;
+                        var PerthTime = obj.PerthTime == null ? "" : obj.PerthTime;
+                        var SessionId = obj.SessionId == null ? "" : obj.SessionId;
+                        var LoginFailureReason = obj.LoginFailureReason == null ? "" : obj.LoginFailureReason;
+                        var regionName = obj.regionName == null ? "" : obj.regionName;
+                        var city = obj.city == null ? "" : obj.city;
+                        var zip = obj.zip == null ? "" : obj.zip;
+                        var latitute = obj.latitute == null ? "" : obj.latitute;
+                        var longitude = obj.longitude == null ? "" : obj.longitude;
+                        var timezone = obj.timezone == null ? "" : obj.timezone;
+                        var PerthLogoutTime = obj.PerthLogoutTime == null ? "" : obj.PerthLogoutTime;
+                        var PerthTotalSessionTime = obj.PerthTotalSessionTime == null ? "" : obj.PerthTotalSessionTime;
+                        
+
+                        str += "<tr>";
+                        str += "<td class='clsCompanyNameWidth' style='display:none'></td>";
+                        str += "<td class='clsCompanyNameWidth'>" + CompanyName + "</td>";
+                        str += "<td class='clsValidUserWidth'>" + ValidUser + "</td>";
+                        str += "<td class='clsUserNameWidth'>" + Username + "</td>";
+                        str += "<td class='clsLoginAttemptWidth'>" + LoginAttemptSuccess + "</td>";
+                        str += "<td class='clsCountryWidth'>" + Country + "</td>";
+                        str += "<td class='clsIPAddressWidth'>" + IPAddress + "</td>";
+                        str += "<td class='clsUTCLoginWidth'>" + DateTimeFormat(UTCLoginTime) + "</td>";
+                        str += "<td class='clsGeographicWidth'>" + DateTimeFormat(GeographicLoginTime) + "</td>";
+                        str += "<td class='clsPerthTimeWidth'>" + ReturnTime(PerthTime) + "</td>";
+                        str += "<td class='clslogouttime'>" + ReturnTime(PerthLogoutTime) + "</td>";
+                        str += "<td class='clstotalsession'>" + PerthTotalSessionTime + "</td>";
+                        str += "<td class='clsSessionIdWidth'>" + SessionId + "</td>";
+                        str += "<td class='clsLoginFailureWidth'>" + LoginFailureReason + "</td>";
+                        str += "<td class='clscityWidth'>" + city + "</td>";
+                        str += "<td class='clsregionNameWidth'>" + regionName + "</td>";
+                        str += "</tr>";
+                    });
+                  
+                }
+                $("#LoadingPanel1").css("display", "none");
+                $('#tbodyTblLoginAudit').html(str);
+                var table = $('#tblLoginAudit').dataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    "bLengthChange": false,
+                    "bInfo": false,
+                    autoWidth: false,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+
+                    dom: 'Bfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Login Audit',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        }
+                    ],
+                });
+            }
+        });
+    }
+
+    function btnRefresh_Click() {
+        GetLoginAuditData();
+    }
+
+    function btnExportToCSV()
+    {
+        $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+    }
+
+
+
+    // Get DateTime Format for Json Datetime
+    function ReturnTime(date) {
+        if (date != null && date != undefined && date != "") {
+            date = date.toString();
+            var newDate = new Date(parseInt(date.substr(6)));
+
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var DateTo2 = tConvert(("0" + newDate.getHours()).slice(-2) + ':' + ("0" + newDate.getMinutes()).slice(-2));
+
+            return DateTo2.toString();
+            //return DateTo.toString();
+        }
+        else {
+            return "";
+        }
+    }
+
+    function tConvert(time) {
+        // Check correct time format and split into components
+        time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+        if (time.length > 1) { // If time format correct
+            time = time.slice(1); // Remove full string match value
+            time[5] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+            time[0] = +time[0] % 12 || 12; // Adjust hours
+        }
+        return time.join(''); // return adjusted time or original string
+    }
+
+    function ReturnTime1(date) {
+        if (date != null && date != undefined && date != "") {
+            date = date.toString();
+            var newDate = new Date(parseInt(date.substr(6)));
+
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var DateTo2 = ("0" + newDate.getHours()).slice(-2) + ':' + ("0" + newDate.getMinutes()).slice(-2);
+
+            return DateTo2.toString();
+            //return DateTo.toString();
+        }
+        else {
+            return "";
+        }
+    }
+
+
+
+</script>
+
+<div class="tab-content">
+    <input type="hidden" id="hdnTimeOffSet" visible="true" value="0" />
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial; height: auto !important;">
+       
+        <div class="row"></div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="heading" style="color: #0070ba; font-size: 15px;"><i class="fa fa-file"></i><b>&nbsp;Login Audit Report</b></h4>
+        </div>
+
+        <div class="row row-common">
+            <div class="col-lg-1 col-md-2 col-sm-1  col-xs-4">
+                <label style="Width:100%" Style="padding-top: 5px;" class="clslbl">From Date</label>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3  col-xs-8">
+                @*<Telerik:RadDatePicker ID="fromDate" runat="server" Width="70%" Style="padding-top: 5px" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                <input type="text" id="txtFromDate" style="width:66%;" />
+            </div>
+            <div class="col-lg-1 col-md-2 col-sm-1  col-xs-4">
+                <label style="Width:100%" Style="padding-top: 5px;" class="clslbl">To Date</label>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-8">
+                @*<Telerik:RadDatePicker ID="toDate" runat="server" Width="70%" Style="padding-top: 5px" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                <input type="text" id="txtToDate" style="width:66%;" />
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2  col-xs-6">
+                @*<asp:LinkButton ID="btnRefresh" runat="server" OnClick="btnRefresh_Click" Width="90px" CssClass="w3-btn w3-blue"><i class="fa fa-refresh"></i>&nbsp;Refresh</asp:LinkButton>*@
+                <button type="button" id="btnRefresh" class="w3-btn w3-blue" onclick="btnRefresh_Click();" style="width:90%;"><i class="fa fa-refresh"></i>&nbsp;Refresh</button>
+            </div>
+            <div class="col-md-2 col-sm-2 col-lg-2 col-xs-6">
+                @*<asp:Button ID="ExportToCsvButton" runat="server" CommandName="ExportToCsv" Width="100%" CssClass="btn w3-btn w3-teal " Text="Export to CSV" OnClick="ExportToCsvButton_Click" />*@
+                <button type="button" id="ExportToCsvButton" class="btn w3-btn w3-teal" onclick="btnExportToCSV();" style="width:90%"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <h4 class="heading" style="color: #0070ba; font-size: 15px;"><i class="fa fa-file"></i><b>&nbsp;Login Audit Report</b></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-1"><label>From Date</label></div>
+    <div class="col-sm-2"> <input type="text" id="txtFromDate" style="width:66%;"/></div>
+    <div class="col-sm-1"><label>To Date</label></div>
+    <div class="col-sm-2"><input type="text" id="txtToDate" style="width:66%;"/></div>
+    <div class="col-sm-2">
+        <button type="button" id="btnRefresh" class="w3-btn w3-blue" onclick="btnRefresh_Click();" style="height:28px;"><i class="fa fa-refresh"></i>&nbsp;Refresh</button>
+    </div>
+    <div class="col-sm-2">
+        <button type="button" id="ExportToCsvButton" class="btn w3-btn w3-teal" onclick="btnExportToCSV();" style="height:28px;">Export to CSV</button>
+    </div>
+    <div class="col-sm-2"></div>
+</div>*@
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="LoginAuditDiv" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblLoginAudit" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th class="clsCompanyNameWidth" style="display:none;"></th>
+                        <th class="clsCompanyNameWidth">Company Name</th>
+                        <th class="clsValidUserWidth">Valid User</th>
+                        <th class="clsUserNameWidth">User Name</th>
+                        <th class="clsLoginAttemptWidth">Login Attempt Success</th>
+                        <th class="clsCountryWidth">Country</th>
+                        <th class="clsIPAddressWidth">IP Address</th>
+                        <th class="clsUTCLoginWidth">UTC Login Time</th>
+                        <th class="clsGeographicWidth">Geographic Login Time</th>
+                        <th class="clsPerthTimeWidth">Perth Time</th>
+                        <th class="clslogouttime">Perth Logout Time</th>
+                        <th class="clstotalsession">Perth Total Session Time (hh:mm:ss)</th>
+                        <th class="clsSessionIdWidth">Session Id</th>
+                        <th class="clsLoginFailureWidth">Login Failure Reason</th>
+                        <th class="clscityWidth">City</th>
+                        <th class="clsregionNameWidth">Region Name</th>
+                        
+                    </tr>
+
+                </thead>
+                <tbody id="tbodyTblLoginAudit"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

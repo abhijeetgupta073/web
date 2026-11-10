@@ -1,0 +1,1083 @@
+﻿
+<!DOCTYPE html>
+<!--<html xmlns="https://www.w3.org/1999/xhtml" manifest="OfflineInspectionList.appcache">-->
+<html xmlns="https://www.w3.org/1999/xhtml">
+
+<!--<html xmlns="https://www.w3.org/1999/xhtml">-->
+<head>
+    <title>SCAFPAC</title>
+    <link rel="icon" href="images/TopLogo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="/Content/css/w3.css" rel="stylesheet" />
+    <link href="/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/css/w3.css" rel="stylesheet" />
+    <link href="/Content/css/SecStyle.css" rel="stylesheet" />
+    <link href="/Content/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="/Content/Css/CustomAlert.css" rel="stylesheet" />
+    <!--<link rel="stylesheet" href="/Assets/css/base_jquery-ui.css">-->
+    <!-- jQuery library -->
+    <script src="/Content/js/jquery.min.js"></script>
+    <script src="/Content/js/jquery-ui.min.js"></script>
+    <script src="/Content/js/bootstrap.min.js"></script>
+    <script src="/Content/js/bootbox.min.js"></script>
+    <script src="/Content/js/CustomAlert.js"></script>
+    <script src="/Content/js/jquery.dataTables.min.js"></script>
+    <script src="/Content/js/OfflineInspection.js?V=2.0"></script>
+
+</head>
+
+<style>
+
+
+    .calendar-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: black;
+    }
+
+    #rdpInspDate {
+        width: 100%;
+        padding-right: 30px; /* Adjust as needed to prevent text overlap */
+        box-sizing: border-box;
+    }
+
+    .calendar-icon {
+        cursor: pointer;
+    }
+
+    #btnprint {
+        font-size: 15px;
+    }
+
+    .respText {
+        font-size: 15px;
+    }
+
+    #siteddl {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    #lblInspDate {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblBuilding {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblFloorLevel {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblComment {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblInspectedby {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #ddlLocations {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lbldisciplines {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+
+    td {
+        text-align: left;
+    }
+
+    .double-scroll {
+        width: auto;
+    }
+
+    .setWidth1, .setWidth2 {
+        min-width: 50px !important;
+    }
+
+    .setWidth6, .setWidth9 {
+        min-width: 60px !important;
+    }
+
+    .setWidth3, .setWidth4, .setWidth5, .setWidth7, .setWidth8, .setWidth10 {
+        min-width: 80px !important;
+    }
+
+    .setWidth12 {
+        min-width: 100px !important;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #tblOffSystemInspectionList_filter {
+        margin-right: 11px;
+    }
+
+    @@media (min-width:820px) and (max-width:1180px) {
+        #hiddendiv {
+            display: none
+        }
+    }
+</style>
+
+
+<style>
+    /*css stop change styling of input type File btns*/
+    .custombtn {
+        display: none !important;
+    }
+
+    .custom-file-upload {
+        border: 1px solid #ccc;
+        display: inline-block;
+        padding: 6px 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        color: #fff !important;
+        background-color: #607d8b !important;
+    }
+
+    /*css stop change styling of input type File btns*/
+
+    #lockimg {
+        height: 40px;
+        float: right;
+        margin: 5px;
+    }
+
+    .InspectionheadTitle {
+        color: #187dc0;
+        font-size: 30px;
+        font-family: inherit;
+        font-weight: 600;
+    }
+
+    a#save {
+        display: none;
+    }
+
+    .headinfo {
+        text-align: right;
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .headinfo label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .InspectionheadTitle {
+            color: #187dc0;
+            font-size: 25px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .headinfo label {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .responsiveSign {
+            height: 70vh;
+        }
+    }
+
+    @media (min-width: 211px) and (max-width: 767px) {
+
+        span.icon {
+            display: block !important;
+        }
+
+        span.text {
+            display: none;
+        }
+
+        .responsiveSign {
+            height: 35vh;
+        }
+
+        #audio {
+            width: 60%;
+        }
+
+        #Button3 {
+            float: right;
+            display: block !important;
+        }
+
+        #Button2 {
+            display: none;
+        }
+
+        #Button4 {
+            float: right;
+            display: block !important;
+        }
+
+        #Button1 {
+            display: none;
+        }
+
+        #map_canvas {
+            width: 90% !important;
+        }
+
+        .btn {
+            font-size: 11px;
+            padding: 6px 6px;
+        }
+
+        .InspectionheadTitle {
+            color: #187dc0;
+            font-size: 16px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .hdnCamerabefore {
+            width: 85% !important;
+        }
+
+        #ddlInspectedBy {
+            width: 100% !important;
+        }
+
+        .MainContainer {
+            width: 100%;
+        }
+
+        #save, #save img {
+            height: 6vh;
+        }
+
+        .headinfo label {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+
+        span.InspectionListTitle {
+            font-size: 14px;
+            color: #0091d6;
+            font-weight: 600;
+        }
+
+        th {
+            padding: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: left;
+            color: grey;
+            background-color: #eeeeee;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            font-size: 13px;
+            text-align: left;
+            color: grey;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+    }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .responsiveSign {
+            height: 60vh;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+
+        .responsiveSign {
+            height: 50vh;
+        }
+
+        .InspectionheadTitle {
+            color: #187dc0;
+            font-size: 21px;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .headinfo label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .headinfo span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        span.InspectionListTitle {
+            font-size: 16px;
+            color: #0091d6;
+            font-weight: 600;
+        }
+
+        th {
+            padding: 5px;
+            text-align: left;
+            color: grey;
+            font-size: 15px;
+            font-weight: 600;
+            background-color: #eeeeee;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            text-align: left;
+            color: grey;
+            font-size: 14px;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+    }
+</style>
+
+
+<!--<script>
+        var db = openDatabase("scaffpac", "0.1", "scaffpac", 1024 * 1024);
+        var CreateCheckListHeader = "CREATE TABLE IF NOT EXISTS tblChecklistContent(ContentID INTEGER,CheckListContent TcEXT,InspectionID TcEXT)";
+        var InsertCheckListHeader = "Insert INTO tblChecklistContent(ContentID,CheckListContent,InspectionID) Values(?,?,?)";
+        var SelectCheckListHeader = "select ContentID,CheckListContent from tblChecklistContent";
+        var dropCheckListHeader = "DROP TABLE if exists tblChecklistContent";
+
+        var CreateCheckListContent = "CREATE TABLE IF NOT EXISTS tblInspectionList(ContentID INTEGER,ClientID TcEXT,SiteLocId INTEGER,ScaffRef TcEXT,SiteLocation TEcXT,Location TcEXT,CheckListId INTEGER,RegisterID TcEXT,InspectionID TcEXT,CheckListContent TcEXT,itemOrder  TcEXT,Y TcEXT,N TcEXT,NA TcEXT,IsNA TcEXT,ActionRequired TcEXT,ChecklistItem INTEGER)";
+        var CreateTempCheckListContent = "CREATE TABLE IF NOT EXISTS tbltempInspectionList(ContentID INTEGER,Y TcEXT,N TcEXT,NA TcEXT,ActionRequired TcEXT)";
+        var InsertCheckListContent = "Insert INTO tblInspectionList(ContentID,ClientID,SiteLocId,ScaffRef,SiteLocation,Location,CheckListId,RegisterID,InspectionID,CheckListContent,itemOrder,Y,N,NA,IsNA,ActionRequired,ChecklistItem) Values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        var UpdateCheckListContent = "UPDATE tblInspectionList SET Y=?,N=?,NA=?,ActionRequired=? where ContentID=?";
+        // var SelectCheckListContent = "select * from tblInspectionList  where ContentID=? and ClientID=? and RegisterID=? and InspectionID=?";
+        // var UpdateCheckListContent = "UPDATE tblInspectionList SET Y=?,N=?,NA=?,ActionRequired=? where ContentID=? and ClientID=? and RegisterID=? and InspectionID=?";
+        var SelectCheckListContent = "select * from tblInspectionList";
+        var SelectCheckListContentId = "select * from tblInspectionList where ChecklistItem=?";
+        var dropCheckListContent = "DROP TABLE if exists tblInspectionList";
+        var dropTempCheckListContent = "DROP TABLE if exists tbltempInspectionList";
+        var checkListHeaderDataset;
+        var checkListContentDataset;
+        var checkListdatasetById;
+        var JsonContentDataArray = [];
+        var JsonHeaderDataArray = [];
+
+
+        //Getting Parameters From the Url
+        var InspID = getParameterByName('InspID');
+        var CheckListID = getParameterByName('CheckListID');
+        var ClientID = getParameterByName('id');
+        var RegisterID = getParameterByName('RID');
+        var GetOfflineStatus = getParameterByName('offlinestatus');
+        var OfflineStatus = window.atob(GetOfflineStatus);
+        var InspectionID = getParameterByName('InspectionID');
+        var UID = getParameterByName('UID');
+
+        var url = window.location.href;
+
+        var checkFlag = false;
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function onError(tx, error) // Function for Hendeling Error...
+        {
+            alert(error.message);
+        }
+        function loadAndReset() //Function for Load and Reset...
+        {
+
+        }
+
+        $(function () {
+            updatebtn();
+
+        });
+        function updatebtn() {
+            //if (navigator.onLine == false) {
+            if (navigator.onLine) {
+                //  $("#offlinebtnSave").text("Save To Server");
+                // $("#offlinebtnSave").text("Save To Local");
+                $("#onlineimg").css("display", "block");
+                $("#offlineimg").css("display", "none");
+            } else {
+                // $("#offlinebtnSave").text("Save To Local");
+                $("#onlineimg").css("display", "none");
+                $("#offlineimg").css("display", "block");
+            }
+            setTimeout(function () {
+                updatebtn();
+            }, 1000);
+        }
+
+
+
+        function saveLocalToServer() {
+            db.transaction(function (tx) {
+                // Comment on 23 Oct 2019
+                tx.executeSql(SelectCheckListContent, [], function (tx, results) {
+                    // tx.executeSql("select * from tblInspectionList where InspectionID = '" + InspectionID + "'", [], function (tx, results) {
+
+                    if (results.rows.length > 0) {
+                        var bb = results.rows.length;
+                        var a = jQuery.makeArray(results.rows.item(0));
+                        var len = results.rows.length;
+                        for (var i = 1; i < len; i++) {
+                            a[i] = results.rows.item(i);
+                        }
+
+                        var arForm = a;
+
+                        $.ajax({
+                            type: "POST",
+                            url: "../WebApi/OfflineInspection.asmx/updateCheckList",
+                            data: JSON.stringify({ ListData: arForm, InspID: InspID }),
+                            contentType: "application/json",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response.d;
+                                if (result == "success") {
+                                    var Res = { Result: "Success", Message: "Your Data Moved From Local To Server!" };
+                                    CustomAlert(Res);
+                                    db.transaction(function (t) {
+                                              t.executeSql(dropCheckListHeader);
+                                              t.executeSql(dropCheckListContent);
+                                    });
+                                    location.reload();
+                                } else {
+                                    var Res = { Result: "Error", Message: "SomeThing went wrong!" };
+                                    CustomAlert(Res);
+                                }
+                           },
+
+                        });
+
+                    }
+                });
+            });
+        }
+
+
+        $(function () {
+
+            db.transaction(function (t) {
+
+                                                //// Comment On 22 Oct 2019
+                                                //t.executeSql(dropCheckListHeader);
+                                                //t.executeSql(dropCheckListContent);
+
+                                                t.executeSql(CreateCheckListHeader);
+                                                t.executeSql(CreateCheckListContent);
+            });
+
+
+            // For Register Code
+
+            setTimeout(function () {
+
+
+                if (navigator.onLine)
+                    //if (navigator.onLine)
+                   {
+                    if (OfflineStatus == 1) {
+
+                        showOfflineInspectionListGrid();
+
+                    } else if (OfflineStatus == 0) {
+
+
+                        //CreateDbTables();
+                        db.transaction(function (tx) {
+
+                            tx.executeSql(SelectCheckListContent, [], function (tx, result) {
+                                var NewUrl = window.location.href.split('offlinestatus');
+                                if (result.rows.length > 0) {
+                                    bootbox.confirm("Do you want to Sync your LOCAL data to CLOUD server?", function (result) {
+                                        if (result) {
+                                            $("#customLoader").css("display", "block");
+                                            saveLocalToServer();
+                                        }
+                                        else {
+                                            //db.transaction(function (t) {
+
+                                            //    // Comment On 22 Oct 2019
+                                            //    t.executeSql(dropCheckListHeader);
+                                            //    t.executeSql(dropCheckListContent);
+                                            //});
+                                            //location.reload();
+                                            ////  GetServerData();
+                                          //  showOfflineInspectionListGrid();
+                                            setInterval(function () {
+                                                db.transaction(function (tx) {
+                                                    tx.executeSql("Select * from tblInspectionList", [], function (tx, results) {
+                                                        if (results.rows.length > 0) {
+                                                            var encodedString = window.btoa("1");
+                                                            window.location = NewUrl[0] + "offlinestatus=" + encodedString + "";
+                                                        }
+                                                    });
+                                                });
+                                            }, 2000);
+                                        }
+                                    });
+                                    //console.log(checkListContentDataset);
+                                }
+                                else {
+                                    bootbox.confirm("Do you want to save data on Local Server?", function (result) {
+                                        if (result) {
+                                            var NewUrl = window.location.href.split('offlinestatus');
+                                            $("#customLoader").css("display", "block");
+                                            DownloadServerData();
+                                         setInterval(function () {
+                                               db.transaction(function (tx) {
+                                                        tx.executeSql("Select * from tblInspectionList", [], function (tx, results) {
+                                                            if (results.rows.length > 0) {
+                                                                var encodedString = window.btoa("1");
+                                                                window.location = NewUrl[0] + "offlinestatus=" + encodedString + "";
+                                                            }
+                                                        });
+                                                    });
+                                            }, 2000);
+
+                                        }
+
+                                    });
+
+                                }
+
+                            });
+                        });
+                    }
+                } else {
+                    showOfflineInspectionListGrid();
+                }
+
+            }, 1000);
+
+
+
+        });
+
+
+
+
+
+        //Saving Server Data into the Local Server
+        function DownloadServerData()
+        {
+            db.transaction(function (t) {
+                 // Comment On 22 Oct 2019
+                t.executeSql(dropCheckListHeader);
+                t.executeSql(CreateCheckListHeader);
+
+                t.executeSql(dropCheckListContent);
+                t.executeSql(CreateCheckListContent);
+            });
+
+
+
+            //setTimeout(function () {
+            $.ajax({
+                type: "POST",
+                url: "../WebApi/OfflineInspection.asmx/GetAllCheckListHeadersMultiple",
+               // data: JSON.stringify({ ClientID: ClientID, CheckListID: CheckListID, InspID: InspID }),   //Change Line On 26 Nov 2019
+                data: JSON.stringify({ ClientID: ClientID,UID:UID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (response) {
+                    //alert(response.d);
+                    JsonHeaderDataArray = [];
+                    CheckListHeaderArray = response.d;
+                    $("#customLoader").css("display", "block");
+                    if (CheckListHeaderArray != null && CheckListHeaderArray != undefined) {
+                        var SqlContentHeaderSt = "";
+                        for (var i = 0; i < CheckListHeaderArray.length; i++) {
+                            var contentId = CheckListHeaderArray[i].contentId;
+                            var CheckListContent = CheckListHeaderArray[i].CheckListContent;
+                            var HederInspectionID = CheckListHeaderArray[i].InspectionID;
+                            var hdrArr = { "ContentID": contentId, "CheckListContent": CheckListContent, "HederInspectionID": HederInspectionID };
+                            JsonHeaderDataArray.push(hdrArr);
+
+                            if (i == 0) {
+                                SqlContentHeaderSt += "Insert INTO tblChecklistContent(ContentID,CheckListContent,InspectionID) Values(" + contentId + ",'" + CheckListContent + "','" + HederInspectionID + "'),";
+                            } else if (i != CheckListHeaderArray.length - 1) {
+                                SqlContentHeaderSt += "(" + contentId + ",'" + CheckListContent + "','" + HederInspectionID + "'),";
+                            }
+
+                            if (i == CheckListHeaderArray.length - 1) {
+                                SqlContentHeaderSt += "(" + contentId + ",'" + CheckListContent + "','" + HederInspectionID + "');";
+                                db.transaction(function (tx) {
+                                    tx.executeSql(SqlContentHeaderSt, [], function (tx, results) {
+                                        if (results.rows.length > 0) {
+                                            //GetCheckContentData();
+                                        }
+                                    });
+                                });
+                            }
+                        }
+                        //GetCheckHeaderData();
+                       // showOfflineInspectionListGrid();
+                    }
+                }
+            });
+            //}, 1000);
+
+
+
+
+
+            setTimeout(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "../WebApi/OfflineInspection.asmx/GetAllCheckListContentMultiple",
+                   // data: JSON.stringify({ ClientID: ClientID, CheckListID: CheckListID, InspID: InspID }),    //Line Change On 26 Nov 2019
+                    data: JSON.stringify({ ClientID: ClientID, UID: UID }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    async: false,
+                    success: function (response) {
+                        //alert(JSON.stringify(CheckListHeaderArray));
+                        JsonContentDataArray = [];
+                        CheckListContentArray = response.d;
+                        var SqlContentDataSt = "";
+                              if (CheckListContentArray != null && CheckListContentArray != undefined) {
+
+                                    $("#customLoader").css("display", "block");
+                                    for (var i = 0; i < CheckListContentArray.length; i++) {
+
+                                        var contentId = CheckListContentArray[i].contentId;
+                                        var ClientID = CheckListContentArray[i].ClientID;
+
+                                        var SiteLocId = CheckListContentArray[i].SiteLocId;
+                                        var ScaffRef = CheckListContentArray[i].ScaffRef;
+                                        var SiteLocation = CheckListContentArray[i].SiteLocation;
+                                        var Location = CheckListContentArray[i].Location;
+                                        var CheckListId = CheckListContentArray[i].CheckListId;
+
+                                        var RegisterID = CheckListContentArray[i].RegisterID;
+                                        var InspectionID = CheckListContentArray[i].InspectionID;
+                                        var CheckListContent = CheckListContentArray[i].CheckListContent;
+                                        var CheckListContent1 = CheckListContent.replace(/\'/g, "\"");
+                                        var Y = CheckListContentArray[i].Y;
+                                        var N = CheckListContentArray[i].N;
+                                        var NA = CheckListContentArray[i].NA;
+                                        var IsNA = CheckListContentArray[i].IsNA;
+                                        var ActionRequired = CheckListContentArray[i].ActionRequired;
+                                        var ChecklistItem = CheckListContentArray[i].ChecklistItem;
+                                        var itemOrder = CheckListContentArray[i].itemOrder;
+
+                                        strArray = { "ContentID": contentId,"CheckListContent": CheckListContent1, "itemOrder": itemOrder, "Y": Y, "N": N, "NA": NA, "IsNA": IsNA, "ActionRequired": ActionRequired, "ChecklistItem": ChecklistItem };
+                                        JsonContentDataArray.push(strArray);
+
+                                        //  if (p == 0 && i == 0) {
+                                        if (i == 0) {
+                                            SqlContentDataSt += "Insert INTO tblInspectionList(ContentID,ClientID,SiteLocId,ScaffRef,SiteLocation,Location,CheckListId,RegisterID,InspectionID,CheckListContent,itemOrder,Y,N,NA,IsNA,ActionRequired,ChecklistItem) Values(" + contentId + ",'" + ClientID + "','" + SiteLocId + "','" + ScaffRef + "','" + SiteLocation + "','" + Location + "','" + CheckListId + "','" + RegisterID + "','" + InspectionID + "','" + CheckListContent1 + "'," + itemOrder + "," + Y + "," + N + "," + NA + "," + IsNA + ",'" + ActionRequired + "'," + ChecklistItem + "),";
+                                            // } else if (p != NewCheckListHeaderArray.length - 1) {
+                                        } else if (i != CheckListContentArray.length - 1) {
+                                            SqlContentDataSt += "(" + contentId + ",'" + ClientID + "','" + SiteLocId + "','" + ScaffRef + "','" + SiteLocation + "','" + Location + "','" + CheckListId + "','" + RegisterID + "','" + InspectionID + "','" + CheckListContent1 + "'," + itemOrder + "," + Y + "," + N + "," + NA + "," + IsNA + ",'" + ActionRequired + "'," + ChecklistItem + "),";
+                                        }
+                                        //  if (p == NewCheckListHeaderArray.length - 1 && i == filterResult.length - 1) {
+                                        if (i == CheckListContentArray.length - 1 ) {
+                                            SqlContentDataSt += "(" + contentId + ",'" + ClientID + "','" + SiteLocId + "','" + ScaffRef + "','" + SiteLocation + "','" + Location + "','" + CheckListId + "','" + RegisterID + "','" + InspectionID + "','" + CheckListContent1 + "'," + itemOrder + "," + Y + "," + N + "," + NA + "," + IsNA + ",'" + ActionRequired + "'," + ChecklistItem + ");";
+                                            //console.log(SqlContentDataSt);
+
+                                            db.transaction(function (tx) {
+                                                tx.executeSql(SqlContentDataSt, [], function (tx, results) {
+                                                    if (results.rows.length > 0) {
+                                                        //GetCheckContentData();
+                                                    }
+                                                });
+                                            });
+                                        }
+
+
+
+                                    }
+                                    //GetCheckContentData();
+                                }
+
+                          //  }
+                     //   }
+
+
+                        //GetCheckContentData();
+                        showOfflineInspectionListGrid();
+                    }
+                });
+            }, 1000);
+
+        }
+
+
+        function showOfflineInspectionListGrid() {
+            db.transaction(function (tx) {
+                tx.executeSql("Select distinct InspectionID,SiteLocId,SiteLocation,Location, ScaffRef ,RegisterID,CheckListId from tblInspectionList", [], function (tx, results) {
+                    if (results.rows.length > 0) {
+                        $('#InspectionList').DataTable().clear();
+                        $('#InspectionList').DataTable().destroy();
+                        var InspectionNewArray = jQuery.makeArray(results.rows.item(0));
+                        var len = results.rows.length;
+                        for (var count = 1; count < len; count++) {
+                            InspectionNewArray[count] = results.rows.item(count);
+                        }
+
+                        var InspectionNewDataSet = InspectionNewArray;
+                        var str = "";
+                        for (var i = 0; i < InspectionNewDataSet.length; i++) {
+                            var data = InspectionNewDataSet[i];
+
+                            str += "<tr><td>" + data.SiteLocId + "</td>";
+                            str += "<td>" + data.SiteLocation + "</td>";
+                            str += "<td>" + data.Location + "</td>";
+                            str += "<td>" + data.ScaffRef + "</td>";
+
+                            //str += "<td>" + data.RegisterID + "</td>";
+                            //str += "<td>" + data.CheckListId + "</td>";
+                            str += "<td>" + data.InspectionID + "</td>";
+                            str += "<td><img src='/images/fonts/fa_edit.png' id='edit_" + data.InspectionID +"_" + data.CheckListId +"' class='img-responsive gridActions' style='height: 22px;width: 22px;float: left;'/></td></tr>";
+                        }
+
+                        if (str != "") {
+                            $("#loadOfflineInspectionList").html(str);
+                            $("#customLoader").css("display", "none");
+                            $("#OfflineInspectionList").css("display", "block");
+                            //if (GetCount == 0)
+                            //{
+                            setTimeout(function () {
+                                table = $('#InspectionList').DataTable({
+                                    "bPaginate": false,
+                                    "bFilter": false,
+                                    "bInfo": false,
+                                    //scrollX:true,
+                                    scrollY: "60vh",
+                                });
+                            }, 1000);
+                            //  GetCount++;
+                            // }
+
+
+                            $(".gridActions").click(function () {     //Adding gridActions Class to Get RowId and Type Of Action
+                                var GridAction = $(this).attr('id').split('_')[0];
+                                var InspectionID = $(this).attr('id').split('_')[1];
+                                var CheckListId = $(this).attr('id').split('_')[2];
+                                var NewUrl = window.location.href.split('RID')[0];
+
+                                var GetUrl = url.split("&offlinestatus")[0];
+                                var RedirectUrl = GetUrl.split('OfflineInspectionList.html');
+
+                                if (GridAction == "edit") {
+                                    //  UpdateRID(InspectionID);
+                                    //alert(InspectionID);
+                                    window.location = RedirectUrl[0] + "Offline.html" + RedirectUrl[1]+ "&InspectionID=" + InspectionID + "&CheckListId=" + CheckListId;
+
+
+                                }
+
+                            });
+                        }
+                    }
+
+                });
+                $("#customLoader").css("display", "none");
+            });
+
+        }
+
+        //Making a common custom Alert function for success and failed Messages
+        function CustomAlert(response) {
+            if (response.Result == "Success") {
+                $('#CustomAlert').removeClass('j-alertBox-Failed').removeClass('j-alertBox-Warning').css('display', 'none');
+                $('#CustomAlert').addClass('j-alertBox-Success').css('display', 'block');
+                $('#alertMsg').html('<strong>Success ! </strong>' + response.Message);
+                setTimeout(function () {
+                    $('#CustomAlert').fadeOut('slow', function () {
+                        $('#CustomAlert').removeClass('j-alertBox-Success').css('display', 'none');
+                        $('#alertMsg').html('');
+
+                    });
+                }, 5000);
+            }
+            //else if (response.Result == "Warning") {
+            //    $('#CustomAlert').removeClass('j-alertBox-Failed').removeClass('j-alertBox-Success').css('display', 'none');
+            //    $('#CustomAlert').addClass('j-alertBox-Warning').css('display', 'block');
+            //    $('#alertMsg').html('<strong>Warning ! </strong>' + response.Message);
+            //    setTimeout(function () {
+            //        $('#CustomAlert').fadeOut('slow', function () {
+            //            $('#CustomAlert').removeClass('j-alertBox-Warning').css('display', 'none');
+            //            $('#alertMsg').html('');
+
+            //        });
+            //    }, 5000);
+            //}
+            else if (response.Result == "Error") {
+                $('#CustomAlert').removeClass('j-alertBox-Warning').removeClass('j-alertBox-Success').css('display', 'none');
+                $('#CustomAlert').addClass('j-alertBox-Failed').css('display', 'block');
+                $('#alertMsg').html('<strong>Error ! </strong>' + response.Message);
+                setTimeout(function () {
+                    $('#CustomAlert').fadeOut('slow', function () {
+                        $('#CustomAlert').removeClass('j-alertBox-Failed').css('display', 'none');
+                        $('#alertMsg').html('');
+
+                    });
+                }, 5000);
+            }
+        }
+
+</script>-->
+
+<body>
+
+    <div class="col-lg-11 col-md-12 col-sm-12 col-xs-12 headinfo" style="margin: 6px 0 0 0;">
+        <div class="row">
+            <div class="col-lg-11 col-md-9 col-sm-9 col-xs-9">
+                <label style="font-size:20px; text-align:right;padding-top:15px;">Connection Status:</label>
+            </div>
+            <div class="col-lg-1 col-md-3 col-sm-3 col-xs-3" id="btnImage">
+                <div>
+                    <img src="/images/onlineStatus.png" class="img-responsive" id="onlineimg" style="display:none;max-height:75px;margin: -5px 9px -20px -17px;float:left;" />
+                    <img src="/images/offlineStatus.png" class="img-responsive" id="offlineimg" style="display:none;max-height:75px;margin: -5px 9px -20px -17px;float:left;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <input type="hidden" id="hdnTimeOffSet" value="0" runat="server" />
+
+    <div class="row">
+        <div class="col-lg-6 col-md-4 col-sm-4 col-xs-12">
+            <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span id="lblOffSystemInspection" Font-Size="16px" Font-Bold="true">Off System Inspection</span></b></h4>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-3 col-xs-3">
+
+            <button id="ExportToCsvButton" class="btn w3-btn w3-teal" style="Width:75%; height:33px" onclick="ExportToCSV()"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+        </div>
+
+        <div class="col-lg-2 col-md-2 col-sm-2  col-xs-4">
+
+            <button id="btnprint" OnClick="btnprint_Click()" style="Width:75%; height:33px" Class="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+        </div>
+
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4">
+
+            <button id="btnSaveInspect" OnClick="btnSaveInspect_Click()" style="width:75%;" Class="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></button>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-2 col-xs-3">
+            <label id="siteddl">Sites</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-10 col-xs-9">
+
+            <select id="ddlSitesLoc" class="form-control" style="width:100%" onchange="ddlSites_SelectedIndexChanged()"></select>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+            <label id="ddlLocations">Location</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+
+            <select id="ddlLocaSite" class="form-control" style="width:100%" onchange="ddlLocaSite_SelectedIndexChanged()"></select>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2">
+            <label id="lblBuilding">Building</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-9 col-xs-10">
+            <select id="ddlBuilding" class="form-control" style="width:100%" onchange="ddlBuilding_SelectedIndexChanged()" onmouseover="msgbuilding()"></select>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-6 col-sm-3 col-xs-5">
+            <label id="lblFloorLevel">Floor Level</label>
+        </div>
+
+        <div class="col-lg-8 col-md-6 col-sm-9 col-xs-7">
+            <select onmouseover="msgfloorlevel()" id="ddlFloorLevel" class="form-control" style="width:100%" onchange="ddlFloorLevel_SelectedIndexChanged()"></select>
+        </div>
+    </div>
+
+    <div id="hiddendiv" class="row">
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+            <label id="lbldisciplines">Sub Owner</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+
+            <select id="ddlSubOwner" class="form-control" style="width:100%" onchange="ddlSubOwner_SelectedIndexChanged()"></select>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+            <label id="lblWorkGroup">Work Group</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+            <select id="ddlWorkgroup" class="form-control" style="width:100%" onchange="ddlWorkGroup_SelectedIndexChanged()"></select>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+        <div class="col-lg-6 col-md-6 col-sm-3 col-xs-5">
+            <label id="lblInspDate">Inspection Date:</label>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-9 col-xs-6">
+
+
+            <input type="text" id="rdpInspDate" DateInput-DateFormat="dd-MMM-yyyy" style="width:100%;color:black;" readonly />
+
+            <span class="calendar-icon">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+            </span>
+
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+        <div class="col-lg-4 col-md-6 col-sm-3 col-xs-5">
+            <label class="listyle">Inspector<span style="color: red">&nbsp*</span></label>
+        </div>
+
+        <div class="col-lg-8 col-md-6 col-sm-9 col-xs-7">
+
+
+            <select id="ddlddlInspectedByadd" class="form-control"></select>
+        </div>
+    </div>
+
+    <div id="hiddendiv" class="row">
+    </div>
+    <div class="col-lg-6 col-md-3 col-sm-6 col-xs-12">
+        <div class="col-lg-2 col-md-6 col-sm-3 col-xs-5">
+            <label id="lblComment">Comments</label>
+        </div>
+
+        <div class="col-lg-10 col-md-6 col-sm-9 col-xs-7">
+
+            <input type="text" Class="form-control" id="txtComment" />
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div id="OffSystemInspectionList" style="color: black; width: 100%;margin-top:5px;">
+                <table id="tblOffSystemInspectionList" class="table table-striped " style="width:100%">
+                    <thead style="background-color: #efefef; color: #716262;width: 100%;">
+                        <tr>
+                            <th class="setWidth0" style="display:none;"></th>
+                            <th class="setWidth0">Status</th>
+                            <th class="setWidth0" style="display:none;">Status</th>
+                            <th class="setWidth1">Scaf Ref #</th>
+                            <th class="setWidth2">Site</th>
+                            <th class="setWidth3">Location</th>
+                            <th class="setWidth4">Building / Module No.</th>
+                            <th class="setWidth5">Asset # / Func. Loc</th>
+                            <th class="setWidth6">Floor Level</th>
+
+                            <th class="setWidth10">Inspection<input type='checkbox' class='ChkAllID setWidth10' title="Tick this box to Update All Inspections" ChkRegisterId_='" + RegisterId + "' /></th>
+                            <th class="setWidth11">Comments</th>
+                            <th class="setWidth7">Recent Insp Date</th>
+                            <th class="setWidth8">Inspected By</th>
+                            <th class="setWidth8">Client Ref</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyOffSystemInspectionList" style="width:100%"></tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="divSave" class="w3-modal" runat="server" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 148px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey ">
+                <h4 class="w3-text-white" id="save"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label2">Please clear the SEARCH  and then click on Save Button ?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px;">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                    <a class="w3-btn w3-green w3-hover-dark-grey" onclick="btnsaveyes()"
+                       id="btnsaveYes"><i class="glyphicon glyphicon-ok-circle "></i>&nbsp;OK</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,602 @@
+﻿
+@{
+    ViewBag.Title = "ScafpacDocumentation";
+}
+
+<script>
+    $(function () {
+       // SiteDropDownBind();
+       // ddlCategoryType();
+        ddlDocumentType();
+        GetDocumentTypeData();
+        //$("#ddlSite").on("change", function () {
+        //    ddlCategoryType();
+        //    GetDocumentTypeData();
+        //})
+        //$("#ddlCategory").on("change", function () {
+        //    GetDocumentTypeData();
+        //})
+    });
+
+    //function SiteDropDownBind() {
+    //    var ClientID = getParameterByName('id');
+    //    var UID = getParameterByName('UID');
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "/ScafpacDocumentation/SiteDropDown",
+
+    //        data: JSON.stringify({ id: ClientID, UID: UID }),
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        async: false,
+    //        success: function (response) {
+    //            var SiteData = response;
+    //            var SiteLocId = "";
+    //            if (SiteData.length > 0) {
+    //                for (var i = 0; i < SiteData.length; i++) {
+    //                    SiteLocId = SiteData[i].SiteLocID;
+    //                    if (SiteLocId == 0) {
+    //                        SiteLocId = "";
+    //                    }
+    //                    $("#ddlSite").append("<option value='" + SiteLocId + "'>" + SiteData[i].SiteLocation + "</option>");
+    //                }
+    //            }
+    //        }
+    //    })
+    //}
+
+    function btnadddocs_Click() {
+        //var SiteID = $('#ddlSite').val();
+        //if (SiteID != "") {
+            $('#Adddocs').css('display', 'block');
+        //}
+        //else {
+        //    var Response = { Result: "Failed", Message: "Please Select the Site." };
+        //    CustomAlert(Response);
+        //    $('#LoadingPanel1').hide();
+        //}
+
+    }
+
+    function hideAdddoc() {
+        $('#Adddocs').hide();
+        $('#txtdesc').val('');
+        $('#fileuplod').val('');
+        $('#ddldoctype').val('');
+        $('#spnShowFileName').text('');
+        $('#hdnOriginalfileName').val('');
+    }
+
+    function Upload() {
+        $(".InpFile").trigger("click");
+        $('#fileuplod').on('change', function () {
+            imagesPreview(this);
+        });
+        // Multiple images preview in browser
+        var imagesPreview = function (input) {
+
+            if (input.files) {
+                var filesAmount = input.files.length;
+                $('#spnShowFileName').text(input.files[0].name);
+            }
+        };
+    }
+
+    function txtdoctype_TextChanged() {
+        SaveDocumentTypeValue();
+    }
+
+    function SaveDocumentTypeValue() {
+        //var txtDoctype1 = $('#txtdoctype').val();
+        //var txtDoctype = txtDoctype1.replace(/ /g, "");
+        var txtDoctype = $('#txtdoctype').val();
+        var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        //var SiteID = $('#ddlSite').val();
+        var SiteID = 0;
+        //var alphanumericRegex = /^[a-zA-Z0-9]+$/;
+        var alphanumericRegex = /^[a-zA-Z0-9\s]+$/;
+        if (!alphanumericRegex.test(txtDoctype)) {
+            //alert("Please enter only alphanumeric characters.");
+            var Response = { Result: "Failed", Message: "Please Enter Only Numbers And Alphabet" };
+            CustomAlert(Response);
+            document.getElementById("txtdoctype").value = "";
+        } else {
+            $.ajax({
+                url: '/ScafpacDocumentation/txtdoctype_TextChanged',
+                type: 'POST',
+                data: JSON.stringify({ txtDoctype: txtDoctype, ClientID: ClientID, UID: UID, SiteID: SiteID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: true,
+                success: function (response) {
+                    CustomAlert(response);
+                    $('#modaltextbox').hide();
+                    $('#ddldoctype').empty();
+                    $('#txtdoctype').val('');
+                    ddlDocumentType();
+                }
+            });
+        }
+    }
+
+    //function ddlCategoryType() {
+    //    var ClientID = getParameterByName('id');
+    //    var SiteID = $('#ddlSite').val();
+    //    if (SiteID == "") {
+    //        var SiteID = "All";
+    //    }
+    //    $.ajax({
+    //        url: '/ScafpacDocumentation/ddlDocumentType',
+    //        type: 'POST',
+    //        data: JSON.stringify({ ClientID: ClientID, SiteID: SiteID }),
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        async: false,
+
+    //        success: function (response) {
+    //            data = response;
+    //            var optionAppend = "<option value=''>Select---</option>";
+    //            $.each(data, function (index, obj) {
+    //                optionAppend += "<option value=" + obj.DocumentTypeId + ">" + obj.documentType + "</option>";
+    //            });
+    //            $('#ddlCategory').empty().append(optionAppend);
+
+    //        }
+
+    //    });
+    //}
+
+    function ddlDocumentType() {
+        //var ClientID = getParameterByName('id');
+        var ClientID = 1;
+
+        $.ajax({
+            url: '/ScafpacDocumentation/ddlDocumentType',
+            type: 'POST',
+            data: JSON.stringify({ ClientID: ClientID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+
+            success: function (response) {
+                data = response;
+                var optionAppend = "<option value=''>Select---</option>";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.DocumentTypeId + ">" + obj.documentType + "</option>";
+                });
+                $('#ddldoctype').empty().append(optionAppend);
+
+            }
+
+        });
+    }
+
+    chckflag = false;
+    function SaveDocument() {
+
+        var files;
+        var ddldoctype = $('#ddldoctype option:selected').text();
+        var browerFile = $('#fileuplod').val();
+        if (ddldoctype != 'Select---' && ddldoctype != '' && browerFile != null && browerFile != '') {
+
+            $('#LoadingPanel1').css('display', 'block');
+            // Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+                if (files == null || files == "") {
+                    var fileUpload = $('#fileuplod').get(0);
+                    files = fileUpload.files;
+                }
+                var fileUpload = $('#fileuplod').get(0);
+                // Create FormData object
+                var fileData = new FormData();
+                if (files.length != 0) {
+
+                    var FileName = files[0].name;
+                    var FileSize = files[0].size;
+                    var Extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+                    $('#hdnOriginalfileName').val(files[0].name);
+
+                    if (Extension.toLowerCase() == "gif".toLowerCase() || Extension.toLowerCase() == "png" || Extension.toLowerCase() == "jpg".toLowerCase() || Extension.toLowerCase() == "jpeg".toLowerCase() || Extension.toLowerCase() == "pdf".toLowerCase() || Extension.toLowerCase() == "docx".toLowerCase() || Extension.toLowerCase() == "xlsx".toLowerCase() || Extension.toLowerCase() == "m4a".toLowerCase() || Extension.toLowerCase() == "Wav".toLowerCase() || Extension.toLowerCase() == "xls".toLowerCase() || Extension.toLowerCase() == "doc".toLowerCase() || Extension.toLowerCase() == "tif".toLowerCase() || Extension.toLowerCase() == "tiff".toLowerCase()) {
+
+                        fileData.append(files[0].name, files[0]);
+                        chckflag = true;
+                    }
+                    else {
+                        var response = { Result: "Failed", Message: "<strong>Failed to upload Document ! </strong>Valid File Extensions Are jpg, jpeg, png, gif, pdf, docx, doc, xlsx, xls,tif,tiff" };
+                        CustomAlert(response)
+                        chckflag = false;
+                    }
+                }
+
+
+
+                if (chckflag == true) {
+                    var txtdesc = $('#txtdesc').val();
+                    var OriginalDocumentName = $('#hdnOriginalfileName').val();
+
+                    var UID = getParameterByName('UID');
+                    var ClientID = getParameterByName('id');
+                    var SiteID = $('#ddlSite').val();
+
+                    fileData.append('ClientID', ClientID);
+                    fileData.append('UID', UID);
+                    fileData.append('SiteID', SiteID);
+                    fileData.append('ddldoctype', ddldoctype);
+                    fileData.append('txtdesc', txtdesc);
+                    fileData.append('browerFile', browerFile);
+                    fileData.append('OriginalDocumentName', OriginalDocumentName);
+                    //Commented On 04-07-2023 We currently dont need this check on scafold/inpex. Thus it is copied from Waco but not deployed on Scafold/inpex
+                    /*if (ddldoctype.toUpperCase() == Extension.toUpperCase()) {*/
+                    $.ajax({
+                        url: '/ScafpacDocumentation/btnsave_Click',
+                        type: "POST",
+                        contentType: false, // Not to set any content header
+                        processData: false, // Not to process data
+                        data: fileData,
+
+                        success: function (response) {
+                            CustomAlert(response);
+                            $('#Adddocs').css('display', 'none');
+                            $('#txtdesc').val('');
+                            $('#fileuplod').val('');
+                            $('#ddldoctype').val('');
+                            $('#spnShowFileName').text('');
+                            $('#hdnOriginalfileName').val('');
+                            $('#LoadingPanel1').css('display', 'none');
+                            GetDocumentTypeData();
+                        }
+                    });
+                    //Commented On 04-07-2023 We currently dont need this check on scafold. Thus it is copied from Waco but not deployed on Scafold
+                    //} else {
+                    //    var Response = { Result: "Failed", Message: "Document Type And File Extension Should Be Same. Change Document Type And Click On Save. " };
+                    //    CustomAlert(Response);
+                    //}
+                }
+            }
+        } else {
+            var Response = { Result: "Failed", Message: "Select any file and document type" };
+            CustomAlert(Response);
+        }
+        $('#LoadingPanel1').css('display', 'none');
+    }
+
+    function GetDocumentTypeData() {
+        var ClientID = getParameterByName('id');
+        var SiteID = $('#ddlSite').val();
+        var CategoryID = $('#ddlCategory').val();
+        if (SiteID == "") {
+            var SiteID = "All";
+        }
+        $.ajax({
+            url: '/ScafpacDocumentation/GetDocumentTypeData',
+            type: 'POST',
+            data: JSON.stringify({ ClientID: ClientID, SiteID: SiteID, CategoryID: CategoryID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+
+            success: function (response) {
+                var data = response;
+
+                $('#tblDocument').DataTable().clear();
+                $('#tblDocument').DataTable().destroy();
+
+                if (data.length != 0) {
+                    var str = '';
+                    $.each(data, function (index, obj) {
+
+                        var DocumentId = obj.DocumentId == null ? "" : obj.DocumentId;
+                        var DocumentName = obj.DocumentName == null ? "" : obj.DocumentName;
+                        var documentType = obj.documentType == null ? "" : obj.documentType;
+                        var Description = obj.Description == null ? "" : obj.Description;
+                        var DateOfUpload = obj.DateOfUpload == null ? "" : obj.DateOfUpload;
+                        var DocumentPDFURL = obj.DocumentURL == null ? "" : obj.DocumentURL;
+                        var OriginalDocumentName = obj.OriginalDocumentName == null ? "" : obj.OriginalDocumentName;
+
+
+                        str += "<tr>";
+                        str += "<td style='display:none'></td>";
+                        /* str += "<td id=" + DocumentId + " title='Click here for Edit' style='cursor:pointer;' DDescription='" + Description + "'><i class='fa fa-pencil' onclick=OpeEditPopup('" + DocumentId + "','" + DocumentName + "')></i></td>";*/
+                        str += "<td id=" + DocumentId + " title='Click here for Edit' style='cursor:pointer;' DDescription='" + Description + "'><i class='fa fa-pencil' onclick=OpeEditPopup('" + DocumentId + "')></i></td>";
+                        str += "<td id='DeleveryDocIDDelete_" + index + "' title='Delete' style='cursor:pointer;'><i class='fa fa-trash' onclick=ShowDeletePopup('" + DocumentId + "')></i></td>";
+
+                        str += "<td>" + OriginalDocumentName + "</td>";
+                        str += "<td>" + documentType + "</td>";
+                        str += "<td>" + Description + "</td>";
+                        str += "<td>" + DateFormat(DateOfUpload) + "</td>";
+                        str += "<td id='DeleveryDocID_" + index + "' title='View Record' style='cursor:pointer;'><button type='button' id='tbnView' Class='w3-btn w3-teal ViewRecord' documentURL='" + DocumentPDFURL + "' ><i class='fa fa-search'></i>&nbsp;View</button></td>";
+                        str += "</tr>";
+                    });
+                    $('#tbodyTblDocument').html(str);
+
+                }
+                var table = $('#tblDocument').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    scrollY: '62vh',
+                    searching: true,
+                    paging: false,
+                    info: false,
+                    autoWidth: false,
+
+                });
+
+                $('#tbodyTblDocument').on('click', '.ViewRecord', function (event) {
+                    event.stopImmediatePropagation();
+                    var DocumentURL = $(this).attr('documentURL');
+                    if (DocumentURL != '') {
+                        window.open(DocumentURL);
+                    }
+                });
+                GridButtonHideShow(table, "tblDocument");
+            }
+        });
+    }
+
+    function ShowDeletePopup(DocumentId) {
+        $('#hdnDocumentId').val(DocumentId);
+        $("#Deletemodal").css("display", "block");
+    }
+
+    function OpeEditPopup(DocumentId) {
+        $('#EditPopup').css("display", "block");
+
+        var Description = $('#' + DocumentId).attr("DDescription");
+
+        $('#hdnDocumentId').val(DocumentId);
+        $('#txtdescription').val(Description);
+       /* $('#hdnDocumentName').val(DocumentName);*/
+    }
+
+    function btnCancel() {
+        $('#EditPopup').css("display", "none");
+    }
+
+    function btnyes_Click() {
+
+        var DocumentId = $('#hdnDocumentId').val();
+
+        $.ajax({
+            url: '/ScafpacDocumentation/DeleteDocument',
+            type: 'post',
+            data: { DocumentId: DocumentId },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response == 'Success') {
+                    var Response = { Result: "Success", Message: "Record Delete Successfully." };
+                    CustomAlert(Response);
+                    GetDocumentTypeData();
+                }
+            }
+        });
+    }
+
+    function btneditSave() {
+
+        $('#LoadingPanel1').css('display', 'block');
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var hdnDocumentID = $('#hdnDocumentId').val();
+        var txtdescription = $('#txtdescription').val();
+        var hdnDocumentName = $('#hdnDocumentName').val();
+
+        $.ajax({
+            url: '/ScafpacDocumentation/btnEditSave',
+            type: 'POST',
+            data: JSON.stringify({ id: id, UID: UID, hdnDocumentID: hdnDocumentID, txtdescription: txtdescription, hdnDocumentName: hdnDocumentName }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+
+            success: function (response) {
+                var gat = response;
+                if (response == "Success") {
+
+                    $('#EditPopup').css("display", "none");
+
+                    var Response = { Result: "Success", Message: "Record Saved Successfully." };
+                    CustomAlert(Response);
+                    GetDocumentTypeData();
+                    $('#LoadingPanel1').css('display', 'none');
+                }
+            }
+        });
+        $('#LoadingPanel1').css('display', 'none');
+    }
+
+</script>
+
+
+<input type="hidden" id="hdnOriginalfileName" value="" />
+<input type="hidden" id="hdnDocumentId" />
+<input type="hidden" id="hdnDocumentName" />
+<div class="row">
+    <div class="col-lg-2 col-md-3 col-sm-4">
+        <h4 class="heading" style="color: #0070ba; font-size: 15px;">
+            <b>
+                <i class="fa fa-book"></i>&nbsp;How To Scafpac
+            </b>
+        </h4>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12 col-xs-12">
+                <div class="clearfix"></div>
+
+                <div class=" double-scroll">
+                    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3" style="margin-top: 6px">
+                        @*<label id="lblfrom">Site</label>*@
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-9 col-xs-9">
+                        @*<select id="ddlSite" class="form-control" Style="margin-top: 4px;height: 26px !important; padding-top: 4px !important; width: 100% !important">
+                        </select>*@
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3" style="margin-top: 6px">
+                        @*<label id="lblCategory">Category</label>*@
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-9 col-xs-9">
+                        @*<select id="ddlCategory" class="form-control" Style="margin-top: 4px;height: 26px !important; padding-top: 4px !important; width: 100% !important">
+                        </select>*@
+                    </div>
+                    <div class="col-lg-2 col-md-4  col-sm-3"></div>
+                    <div class="col-lg-2 col-xs-5 col-md-3  col-sm-3">
+                        <button style="margin-left:19px;" type="button" id="btnadddocs" class="w3-btn w3-teal w3-text-white" OnClick="btnadddocs_Click();" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add Document</button>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div id="DocumentDiv" style="color: black; width: 100%; margin-top: 5px;">
+                                <table id="tblDocument" class="table table-striped">
+                                    <thead style="background-color: #efefef; color: #716262;">
+                                        <tr>
+                                            <th style="display:none;"></th>
+                                            <th id="UniqueEdit"></th>
+                                            <th id="UniqueDelete"></th>
+                                            <th style="width:25%">Document Name</th>
+                                            <th style="width:25%">Category Type</th>
+                                            <th style="width:25%">Description</th>
+                                            <th style="width:15%">Date of Upload</th>
+                                            <th style="width:15%">View</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyTblDocument"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Adddocs" class="w3-modal" style="display:none">
+    <div class="w3-modal-content" style="margin-top: 4%; width: 42%; color: black;">
+        <header class="w3-container nln-gray-bg">
+            <div class="row">
+                <div class="col-lg-9 col-sm-9 col-md-9">
+                    <h5 class="w3-text-white">Add Document</h5>
+                </div>
+                <div class="col-lg-3 col-sm-3 col-md-3">
+                    <button type="button" onclick="hideAdddoc();" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 40px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="w3-container">
+            <div class="row w3-margin-top">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <label>Description</label>
+                    <textarea type="text" TextMode="MultiLine" style="padding: 0px; Width:100%;" id="txtdesc"></textarea>
+                </div>
+            </div>
+
+            <div class="row w3-padding-top">
+                <div class="col-lg-6 col-md-5 col-sm-6">
+                    <label>Category Type<span style="color:red;">*</span></label>&nbsp;<a onclick="$('#modaltextbox').show();" style="cursor:pointer; color:#c22b2e" id="acpop"><i class="fa fa-plus-circle"></i>&nbsp;Add Category Type</a>
+                    <select style="width:100%" id="ddldoctype" class="form-control"><option value="">Select---</option></select>
+                </div>
+                <div class="col-lg-4 col-md-5 col-sm-4">
+                    <label>Add New Document<span style="color: red">*</span> </label>
+                    <input type="file" style="display: none;" class="InpFile" id="fileuplod" />
+                    <button type="button" onclick="Upload()" id="btnbrowse" class="w3-btn w3-indigo w3-padding-small"><i class="fa fa-paperclip"></i>&nbsp;Browse</button>
+                </div>
+
+                <div class="col-lg-2 col-sm-3 col-md-2 ">
+                    <br />
+                    <button style="Width:100%" id="btnsave" onclick="SaveDocument();" class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6"></div>
+                <div class="col-sm-6"><span id="spnShowFileName"></span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modaltextbox" class="w3-modal">
+    <div class="w3-modal-content w3-round-medium w3-animate-zoom" style="margin-top: 4%; width: 25%; color: black;">
+        <header class="w3-container nln-gray-bg">
+            <div class="row">
+                <div class="col-lg-9 col-sm-9 col-md-9">
+                    <h5 class="w3-text-white">Add Category Type</h5>
+                </div>
+                <div class="col-lg-3 col-sm-3 col-md-3">
+                    <button type="button" onclick="$('#modaltextbox').hide();" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 25px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                </div>
+            </div>
+        </header>
+        <div class="w3-container">
+            <div class="row w3-margin-top">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <label>Category Type</label>
+                    <input type="text" style="padding: 0px; width:100%" id="txtdoctype" onchange="txtdoctype_TextChanged();" maxlength="30" />
+                </div>
+            </div>
+        </div>
+        <br />
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div id="EditPopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Edit Record</h4>
+        </header>&nbsp;
+        <div class="row">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                <label id="lbldescription" style="font-size: 15px">Description<span style="color: red">&nbsp*</span></label>
+            </div>
+            <div class="col-xs-8 col-lg-8 col-md-8 col-sm-8">
+                <input type="text" id="txtdescription" class="form-control" required />
+            </div>
+
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <button id="btneditSave" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btneditSave()"> <i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Save</button>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <button id="btnCancel" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnCancel()"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,582 @@
+﻿
+@{
+    ViewBag.Title = "Drawings";
+}
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<script>
+    $(document).ready(function () {
+        $('#lidrawings').removeClass('active').addClass('active');
+        ShowJobInfoDetails();
+        showtImage();
+        GetDrawingData();
+    });
+
+
+    //$(document).ready(function () {
+    //    $('.double-scroll').doubleScroll();
+    //    $('input[type="file"]').change(function (e) {
+    //        var output = document.getElementById('fileList');
+    //        output.innerHTML = '<ul>';
+
+    //        for (var i = 0; i <= e.target.files.length; i++) {
+    //            // output.innerHTML += '<li>' + e.target.files.item(i).name + '</li>';
+    //            output.innerHTML += '<li>' + e.target.files.item(i).name + '</li>';
+    //        }
+    //        output.innerHTML += '</ul>';
+    //    });
+    $(document).ready(function () {
+        $('input[type="file"]').change(function (e) {
+            var output = document.getElementById('fileList');
+            output.innerHTML = '<ul>';
+            for (var i = 0; i < e.target.files.length; i++) {
+                output.innerHTML += '<li>' + e.target.files[i].name + '</li>';
+            }
+            output.innerHTML += '</ul>';
+        });
+
+
+
+        $('img').on('click', function () {
+            //alert(this.id);
+            var imageid = this.id;
+            if (imageid != 'ppdl') {
+                $('#ppdl').attr("src", this.src);
+                $('#popup').css('display', 'block');
+            }
+            else {
+
+            }
+        });
+
+        $('.close').on('click', function () {
+            $('#popup').css('display', 'none');
+        });
+
+        $('#btndownload').click(function () {
+            var imageUrl = $('#ppdl').attr('src');
+            var fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+            var registerId = getParameterByName('RID');
+            window.location.href = '/Drawings/DownloadImage?registerId=' + registerId + '&fileName=' + encodeURIComponent(fileName);
+            Res = { Result: "Success", Message: "File downloaded Successfully" };
+            CustomAlert(Res);
+            $('.selectFile').prop('selected', 'selected');
+        });
+    });
+    function addnewimage() {
+        //alert();
+        if (IsSiteStatus == "InActive") {
+        CustomAlert({
+            Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+        });
+        return false;
+    }
+
+        $("#divCreatePop").css("display", "block");
+    }
+
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('.dropdown user').on("click", function () {
+            $('.dropdown user').addClass('open');
+        });
+
+        $('#btndelete').on('click', function () {
+            if (IsSiteStatus == "InActive") {
+                CustomAlert({
+                    Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+                });
+                return false;
+            }
+            var parentids = $(this).parent();
+            var siblingids = parentids.siblings();
+            var imglink = siblingids[0].currentSrc;
+            var splitting = imglink.split('siteimage/');
+            var imgname = splitting[1];
+            $('#hdnimgname').val(imgname);
+            $('#divdelete').css('display', 'block');
+        });
+
+
+        // Trigger photo take
+        //document.getElementById('snap').addEventListener('click', function () {
+        //    $("#btnOpenModel").css("display", "none");
+        //    $('#ContentPlaceHolder1_hdncapture').val("true");
+        //    $("#ContentPlaceHolder1_imageLicence").css("display", "none");
+        //    context.drawImage(video, 0, 0, 640, 480);
+        //    var image = document.getElementById("canvas").toDataURL("image/png");
+        //    $("#ContentPlaceHolder1_tempimg").val(image);
+        //    cameraStream.stop();
+        //});
+    });
+
+    function btnclose() {
+        var output = document.getElementById('fileList');
+        output.innerHTML = '';
+        $('#divCreatePop').css('display', 'none');
+        $("#Photoblock").css('display', 'none');
+    }
+
+
+    function deleteno() {
+        $('#divdelete').css('display', 'none');
+    }
+    function margin() {
+        $('.footermargin').css('margin-top', '300px');
+    }
+
+
+    function ButtonClient() {
+        var desc = $("#txtdesc").val();
+        if (desc != "") {
+            $('#LoadingPanel1').css('display', 'block');
+            //alert(desc);
+
+            var fileData = new FormData();
+            var files;
+
+            // Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+                if (files == null || files == "") {
+                    var fileUpload = $('#FileUpload1').get(0);
+                    files = fileUpload.files;
+                }
+                var fileUpload = $('#FileUpload1').get(0);
+                // Create FormData object
+                //  var fileData = new FormData();
+                if (files.length != 0) {
+
+                    //var FileName = files[0].name;
+                    //var FileSize = files[0].size;
+                    //var extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+                    //fileData.append(files[0].name, files[0]);
+                    for (var i = 0; i < files.length; i++) {
+                        var FileName = files[i].name;
+                        var FileSize = files[i].size;
+                        var extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+                        fileData.append(files[i].name, files[i]);
+                        $('#hdnOriginalfileName').val(files[0].name);//Added on 13-July-2022
+                    }
+                }
+            }
+
+            var UID = getParameterByName('UID');
+            var id = getParameterByName('id');
+            var DIDetailID = getParameterByName('DIDetailID');
+            var RID = getParameterByName('RID');
+            var OriginalDocumentName = $('#hdnOriginalfileName').val();
+
+            var tempimg = $('#tempimg').val();
+            var hdndocument = $('#hdndocument').val();
+            var FileUpload1 = $('#FileUpload1').val();
+            var hdncapture = $('#hdncapture').val();
+            var nameget = $('#nameget').val();
+
+
+            fileData.append('UID', UID);
+            fileData.append('id', id);
+            fileData.append('DIDetailID', DIDetailID);
+            fileData.append('txtdesc', desc);
+            fileData.append('RID', RID);
+            fileData.append('tempimg', tempimg);
+            fileData.append('hdndocument', hdndocument);
+            fileData.append('FileUpload1', FileUpload1);
+            fileData.append('hdncapture', hdncapture);
+            fileData.append('nameget', nameget);
+            fileData.append('OriginalDocumentName', OriginalDocumentName);
+
+
+            $.ajax({
+                url: '/Drawings/btnSave_Click',
+                type: "POST",
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: fileData,
+                success: function (response) {
+                    var res = response;
+
+                    // var response = { Result: "Success", Message: "Data Saved Successfully." };
+                    CustomAlert(response);
+                    $('#divCreatePop').hide();
+                    GetDrawingData();
+                    showtImage();
+                    $('#txtdesc').val('');
+                    $('#TextBox1').val('');
+                    $('#fileList').val('');
+                    $("#LoadingPanel1").css("display", "none");
+                }
+            })
+        } else {
+            $("#LoadingPanel1").css("display", "none");
+            var response = { Result: "Failed", Message: "Fill Description." };
+            CustomAlert(response);
+        }
+    }
+
+
+    function showtImage() {
+        var RID = getParameterByName('RID');
+        $.ajax({
+            url: '/Drawings/showtImage',
+            type: 'POST',
+            data: JSON.stringify({ RID: RID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                $('#placeholderforimage').empty().append(response);
+
+
+                $('img').on('click', function () {
+                    //alert(this.id);
+                    var imageid = this.id;
+                    if (imageid != 'ppdl') {
+                        $('#ppdl').attr("src", this.src);
+                        $('#popup').css('display', 'block');
+                    }
+                    else {
+
+                    }
+                });
+
+                $('.close').on('click', function () {
+                    $('#popup').css('display', 'none');
+                });
+            }
+        });
+    }
+
+    function btndeleteyes_Click() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        $('#LoadingPanel1').css('display', 'block');
+        var fileData = new FormData();
+
+        var RID = getParameterByName('RID');
+        var hdnimagname = $('#hdnimgname').val();
+
+        fileData.append('RID', RID);
+        fileData.append('hdnimgname', hdnimgname);
+
+        $.ajax({
+            url: '/Drawings/btndeleteyes_Click',
+            type: "POST",
+            data: JSON.stringify({ RID: RID, hdnimgname: hdnimagname }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+
+            success: function (response) {
+                var res = response;
+                if (res = "Success") {
+                    $('#divdelete').css('display', 'none');
+                    CustomAlert(response);
+                    showtImage();
+                    GetDrawingData();
+                    $('#LoadingPanel1').css('display', 'none');
+                }
+            }
+        });
+
+    }
+
+    function btnclose() {
+        var output = document.getElementById('fileList');
+        output.innerHTML = '';
+        $('#fileList').val('');
+        $('#divCreatePop').css('display', 'none');
+        $("#Photoblock").css('display', 'none');
+        $('#txtdesc').val('');
+        $('#TextBox1').val('');
+    }
+
+
+    function GetDrawingData() {
+        var ClientID = getParameterByName('id');
+        var RID = getParameterByName('RID');
+        $.ajax({
+            url: '/Drawings/GetDrawingData',
+            type: 'POST',
+            data: JSON.stringify({ RID: RID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+
+            success: function (response) {
+                var data = response;
+
+                $('#tblDrowing').DataTable().clear();
+                $('#tblDrowing').DataTable().destroy();
+
+                if (data.length != 0) {
+                    var str = '';
+                    $.each(data, function (index, obj) {
+                        var ID = obj.ID == null ? "" : obj.ID;
+                        var DocumentName = obj.DocumentName == null ? "" : obj.DocumentName;
+                        var OriginalDocumentName = obj.OriginalDocumentName == null ? "" : obj.OriginalDocumentName;
+                        var RegisterID = obj.RegisterID == null ? "" : obj.RegisterID;
+                        var Description = obj.Description == null ? "" : obj.Description;
+                        var DocumentPdfPath = obj.DocumentURL == null ? "" : obj.DocumentURL;
+                        var CreatedOn = obj.CreatedOn == null ? "" : obj.CreatedOn;
+
+                        str += "<tr>";
+                        str += "<td style='display:none;'></td>";
+                        str += "<td id='DrawingIDDelete_" + index + "' title='Delete' style='cursor:pointer;'><i class='fa fa-trash' onclick=ShowDeletePopup('" + ID + "')></i></td>";
+                        if (OriginalDocumentName == null || OriginalDocumentName == "") {
+                            str += "<td>" + DocumentName + "</td>";
+                        } else {
+                            str += "<td>" + OriginalDocumentName + "</td>";
+                        }
+                        str += "<td>" + Description + "</td>";
+                        str += "<td>" + DateFormat(CreatedOn) + "</td>";
+                        str += "<td id='DrawingID_" + index + "' title='View Record' style='cursor:pointer;'><button type='button' id='tbnView' Class='w3-btn w3-teal ViewRecord' documentURL='" + DocumentPdfPath + "' ><i class='fa fa-search'></i>&nbsp;View</button></td>";
+                        str += "</tr>";
+                    });
+                    $('#tbodyTblDrowing').html(str);
+
+                }
+                table = $('#tblDrowing').dataTable({
+                    "bSort": false,
+                    "processing": true,
+                    scrollY: '22vh',
+                    searching: true,
+                    paging: false,
+                    info: false,
+                    autoWidth: false,
+
+                });
+
+                $('#tbodyTblDrowing').on('click', '.ViewRecord', function (event) {
+                    event.stopImmediatePropagation();
+                    var DocumentURL = $(this).attr('documentURL');
+                    if (DocumentURL != '') {
+                        window.open(DocumentURL);
+                    }
+                });
+            }
+
+        });
+    }
+
+    function ShowDeletePopup(DocumentId) {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        $('#hdnDocumentId').val(DocumentId);
+        $("#Deletemodal").css("display", "block");
+    }
+
+    function btnyes_Click() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        var DocumentId = $('#hdnDocumentId').val();
+        var RID = getParameterByName('RID');
+        $.ajax({
+            url: '/Drawings/DeleteDrawing',
+            type: 'post',
+            data: { DocumentId: DocumentId, RID },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response == 'Success') {
+                    var Response = { Result: "Success", Message: "Record Delete Successfully." };
+                    CustomAlert(Response);
+                    GetDrawingData();
+                    showtImage();
+                }
+            }
+        });
+    }
+
+</script>
+<input type="hidden" id="hdnOriginalfileName" value="" /> @*Added on 13-July-2022*@
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-certificate"></i>&nbsp;<span id="lblclient" Font-Size="16px" Font-Bold="true">Drawings</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+    </div>
+
+</div>
+@Html.Partial("_RegisterPartiaView")
+
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="AddNewImg" runat="server">
+        <button id="btnNewImage" runat="server" type="button" class="w3-btn w3-teal" style="float: right; margin-right: 7px" onclick="addnewimage();"><i class="fa fa-plus"></i>&nbsp;Add New Drawings</button>
+
+    </div>
+</div>
+
+<input type="hidden" id="hdnRegisterId" />
+<input type="hidden" id="hdnDocumentId" />
+<input type="hidden" id="hdnDocumentName" />
+<input type="hidden" id="hdncapture" Value="" />
+<input type="hidden" id="hdnimgname" Value="" />
+<input type="hidden" id="nameget" Value="" />
+<input type="hidden" id="tempimg" name="tempimg" />
+
+
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="DrowingDiv" style="color: black; width: 100%; margin-top: 5px;">
+            <table id="tblDrowing" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th style="display:none"></th>
+                        <th></th>
+                        <th>Drawing Document</th>
+                        <th> Description</th>
+                        <th>Date of Upload</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyTblDrowing"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+<div id="placeholderforimage" style="overflow-y: scroll;height:500px"></div>
+
+
+<div class="w3-modal" id="popup" runat="server">
+    <div class="w3-modal-content w3-animated-zoom w3-card-8" style="height: auto; width: fit-content;">
+
+        <span class="crossbtn" style="cursor: pointer; color: Black; font-weight: bold; margin-right: 5px; float: right; background: white" onclick="document.getElementById('popup').style.display='none'">
+            <a id="btndownload" download><i class="glyphicon glyphicon-download-alt"></i></a>
+            &nbsp;&nbsp;<a id="btndelete"><i class="glyphicon glyphicon-trash"></i></a>&nbsp;&nbsp;X
+        </span>
+
+        <img id="ppdl" class="img-responsive" src="" align="middle" style="min-height: 350px; min-width: 350px !important; height: auto; width: auto; max-width: 1000px; max-height: 450px; margin-top: -10px;" />
+    </div>
+</div>
+<div id="divCreatePop" class="w3-modal" style="display: none">
+    <div class=" w3-modal-content w3-animate-zoom w3-card-8" style="height: 300px; width: 300px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Drawings<a id="close" class="close" style="float: right; color: white" onclick="btnclose();">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                <label id="lbldescription" style="font-size: 15px">Description<span style="color: red">&nbsp*</span></label>
+                @*<asp:TextBox ID="txtdesc" runat="server" CausesValidation="true" CssClass="form-control"></asp:TextBox>
+                    <asp:RequiredFieldValidator ID="rfv" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtdesc" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+                <input type="text" id="txtdesc" class="form-control" required />
+                @*<asp:RequiredFieldValidator ID="rfv" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtdesc" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                @*<asp:FileUpload runat="server" ID="FileUpload1" AllowMultiple="true" />*@
+                <input type="file" id="FileUpload1" AllowMultiple="true" multiple="multiple" />
+            </div>
+            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                @*<asp:Button runat="server" ID="btnSave" ValidationGroup="Save" OnClientClick="ButtonClient();" Width="100%" CssClass="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSave_Click" Text="Save" />*@
+                <button type="button" id="btnSave" onclick="ButtonClient();" style="Width:100%;" class="w3-btn w3-small w3-green btnheight imagesize"><i class="fa fa-save"></i>&nbsp;Save</button>
+            </div>
+        </div>
+        <div id="fileList" style="color: black; margin-left: 14px; overflow: hidden">
+        </div>
+        <div class="col-xs-11 col-lg-11 col-md-11 col-sm-11">
+        </div>
+
+        <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1" style="position: absolute; bottom: 0; opacity: 0">
+            @*<asp:TextBox ID="TextBox1" runat="server" CausesValidation="true" CssClass="form-control"></asp:TextBox>*@
+            <input type="text" id="TextBox1" class="form-control" />
+        </div>
+
+    </div>
+</div>
+
+<div id="divdelete" runat="server" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Delete the Image?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeleteyes" runat="server" OnClick="btndeleteyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteyes" onclick="btndeleteyes_Click();"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndeleteno" runat="server" OnClientClick="deleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" onclick="deleteno();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="confmodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span onclick="document.getElementById('ContentPlaceHolder1_emailNewClient').style.display='none'"
+                  class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                @*<asp:LinkButton runat="server" ID="btnyes" CausesValidation="false" CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click"> <i class=" glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button id="btnyes" class="w3-btn w3-green w3-hover-dark-grey" onclick="btnyes_Click();"><i class=" glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton runat="server" CausesValidation="false" ID="btnno" CssClass="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnno_Click"><i class=" glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button id="btnno" class="w3-btn nln-bg w3-hover-border-dark-grey" onclick="btnno_Click();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>

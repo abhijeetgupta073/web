@@ -1,0 +1,182 @@
+﻿<style>
+     label {
+            font-size: 12px;
+        }
+</style>
+<div class="row">
+    <div class="col-xs-12 col-lg-12 col-sm-12 col-md-12 xsfieldset">
+        <fieldset>
+            <legend>Job Info</legend>
+            <div class="row w3-padding-0">
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4 sn">
+                    <label>Site Name</label>
+                    @*<asp:TextBox runat="server" ID="txtSiteName" Enabled="false" CssClass="form-control" Width="100%"></asp:TextBox>*@
+                    <input type="text" id="txtSiteName" disabled Class="form-control" style="Width:100%" />
+                </div>
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                    <label>Site Location</label>
+                    @*<asp:TextBox ID="txtSiteLocation" Enabled="false" Width="100%" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtSiteLocation" disabled style="Width:100%" Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                    <label>Inspected By</label>
+                    @*<asp:TextBox ID="txtInspectedBy" Enabled="false" Width="100%" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtInspectedBy" disabled style="Width:100%" Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                    <label>Most Recent Insp. Date</label>
+                    @*<asp:TextBox ID="txtRecentinspectiondate" Enabled="false" CssClass="form-control" Width="100%" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtRecentinspectiondate" disabled Class="form-control" style="Width:100%" />
+                </div>
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                    <label>Days Since Last Insp.</label>
+                    @*<asp:TextBox ID="txtDaylastinspetion" Width="100%" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input id="txtDaylastinspetion" style="width:100%;" disabled Class="form-control" />
+                </div>
+                @*<div class="col-xs-6 col-sm-2 col-lg-1 col-md-2" id="statusinsp" runat="server">*@
+                <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2" id="statusinsp" style="padding:0px">
+                    <label>Job Status</label>
+                    @*<asp:Label ID="txtstatus" Style="background: #eeeeee; word-break: break-all; overflow: hidden;" Enabled="false" runat="server" CssClass="form-control"></asp:Label>*@
+                    <label id="txtstatus" Style="background: #eeeeee; word-break: break-all; overflow: hidden;" Enabled="false" Class="form-control"></label>
+                    <br />
+                    @*<asp:Image Height="20px" Style="margin-top: -14px; border: none;" runat="server" ID="imgstaus" />*@
+                    <img Style="height:23px; border: none;" id="imgstaus" />
+                </div>
+                <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                    <label>Plan Status</label>
+                    @*<asp:TextBox ID="txtPlannedStatus" Style="background: #eeeeee;" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input type="text" id="txtPlannedStatus" Style="background: #eeeeee;" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                    <label>Standing Days to Date</label>
+                    @*<asp:TextBox ID="txtHireDays" Width="100%" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input type="text" id="txtHireDays" Width="100" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                    <label>Total Standing Days</label>
+                    @*<asp:TextBox ID="txtTotalhireday" Width="100%" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input type="text" id="txtTotalhireday" Width="100" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                    <label>Date Built</label>
+                    @*<asp:TextBox ID="txtdatetagged" Enabled="false" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtdatetagged" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                    <label>Date Dismantle</label>
+                    @*<asp:TextBox ID="txtDatedismantle" Enabled="false" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtDatedismantle" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                    <label>Copied From Job</label>
+                    <input type="text" id="txtcopiedscaffref" style="width:100%" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                    <label># of Items</label>
+                    @*<asp:TextBox ID="txtNoOfItem" Width="100%" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input type="text" id="txtNoOfItem" style="width:100%" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                    <label>Tonnage</label>
+                    @*<asp:TextBox ID="txttonnage" Width="100%" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input type="text" id="txttonnage" style="width:100%" disabled Class="form-control" />
+                </div>
+                <div class="col-xs-3 col-sm-2 col-lg-1 col-md-2">
+                    <label style="margin-left: -11%;">Mat.Finalised</label>
+                    @*<asp:TextBox ID="txtoptstatus" Width="100%" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input type="text" id="txtoptstatus" style="width:100%" disabled Class="form-control" />
+                    <br />
+                    @*<asp:Image Height="20px" Style="margin-top: -14px; border: none;" runat="server" ID="imgopt" />*@
+                    <img Style="height: 23px; border: none; margin-left: -10%;" id="imgopt" />
+                </div>
+                <div class="col-xs-3 col-sm-2 col-lg-1 col-md-2">
+                    <label>Scaf Ref # </label>
+                    @*<asp:TextBox ID="txtscaffref" Width="100%" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                    <input type="text" id="txtscaffref" style="width:100%" disabled Class="form-control" />
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+
+<div class="clearfix"></div>
+    <div id="FormSection" class="row">
+        <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+            <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+                @*<li id="liCompany" class="active">*@
+                <li id="liCompany">
+                    <a id="AnchorRegister" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-user"></i>&nbsp;Job</span>
+                    </a>
+                </li>
+                @*<li id="LiHierarchyofAccessChoice" runat="server">*@
+                <li id="LiHierarchyofAccessChoice">
+                    <a id="AnchorHierarchyofAccessChoice" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-check"></i>&nbsp;Access Choice</span>
+                    </a>
+                </li>
+                @*<li id="LiSacafpac" runat="server>*@
+                @*<li id="LiSacafpac">
+            <a id="AnchorScafpacDetails" style="cursor: pointer;" data-toggle="tab">
+                <span class="spancolorandsize"><i class="fa fa-list"></i>&nbsp;Scaffold Material List</span>
+            </a>
+        </li>*@
+                @*<li id="limaterialPhase2" runat="server">*@
+                <li id="limaterialPhase3">
+                    <a id="AnchorScafpacphase3" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tasks"></i>&nbsp;Pipeline Inventory List</span>
+                    </a>
+                </li>
+
+                <li id="limaterialPhase2">
+                    <a id="AnchorScafpacphase2" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tasks"></i>&nbsp;Job Inventory List</span>
+                    </a>
+                </li>
+                @*<li id="liFinalList" runat="server">*@
+                <li id="liFinalList">
+                    <a id="AnchorFinallist" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tasks"></i>&nbsp;Final Material List</span>
+                    </a>
+                </li>
+
+                @*<li id="LiInspection" runat="server">*@
+                <li id="LiInspection">
+                    <a id="AnchorInspection" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-search"></i>&nbsp;Inspection</span>
+                    </a>
+                </li>
+                @*<li id="LiHandOver" runat="server">*@
+                <li id="LiHandOver">
+                    <a id="AnchorHandOver" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-thumbs-up" aria-hidden="true"></i>&nbsp;Hand Over</span>
+                    </a>
+                </li>
+                @*<li id="LiDocuments" runat="server">*@
+                <li id="LiDocuments">
+                    <a id="Anchordocument" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-book"></i>&nbsp;Documents</span>
+                    </a>
+                </li>
+                @*<li id="lidrawings" runat="server">*@
+                <li id="lidrawings">
+                    <a id="Anchordrawings" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-certificate"></i>&nbsp;Drawings</span>
+                    </a>
+                </li>
+                @*<li id="liimage" runat="server">*@
+                <li id="liimage">
+                    <a id="AnchorImg" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-image"></i>&nbsp;Image Gallery</span>
+                    </a>
+                </li>
+                @*<li id="liCyclone" runat="server">*@
+                <li id="liCyclone">
+                    <a id="AnchorCyclone" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-qrcode"></i>&nbsp;Cyclone</span>
+                    </a>
+                </li>
+            </ul>
+</div>
+</div>

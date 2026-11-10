@@ -1,0 +1,234 @@
+﻿
+@{
+    ViewBag.Title = "ReturnInventory";
+}
+<script src="~/Content/js/ReturnInventory.js?V1=15"></script>
+
+<style>
+    .setWidth {
+        /*width:11%;*/
+    }
+
+    .setWidth1 {
+        min-width: 10px !important;
+    }
+   .setWidth2 {
+        min-width: 60px !important;
+    }
+    
+   .setWidth7,.setWidth6{
+        min-width: 100px !important;
+    }
+    .setWidth5,.setWidth10,.setWidth11 {
+        min-width: 80px !important;
+    }
+     .setWidth4,.setWidth9 {
+        min-width: 200px !important;
+    }
+         .setWidth8,.setWidth3 {
+        min-width: 120px !important;
+    }
+    .dataTables_scrollHead table thead th {
+        background: #e9e9e9 !important;
+        color: #333 !important;
+    }
+    
+</style>
+
+<div class="clearfix"></div>
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liThirdParty" runat="server">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotInventory" runat="server">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSiteInventory">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+
+            <li id="liJob">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            <li id="liSite" class="active" style="width: 161px">
+                <a id="AnchorReturnInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                </a>
+            </li>
+            <li id="LiDamaged" runat="server">
+                <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                </a>
+            </li>
+            <li id="PipeLineInventory">
+                <a id="AnchorPipeLineInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;PipeLine Inventory</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+            <div class="row">
+                <input type="hidden" id="hdnfield"  />
+                <input type="hidden" id="hdnReturnInvId" />
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5">
+                    
+                    <input type="radio" id="rdomaindepottodepot" style="font-size:13px" onchange="rdomaindepottodepot_CheckedChanged()" name="abc" />
+                    <label>Depot Inventory Return</label>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-xs-5"style="margin-left:-5%;">
+                    @*<asp:RadioButton ID="rdodepottosite" AutoPostBack="true" OnCheckedChanged="rdodepottosite_CheckedChanged" GroupName="abc" runat="server" Text="Site Inventory Return" />*@
+                    <input type="radio" id="rdodepottosite" style="font-size:13px;" onchange="rdodepottosite_CheckedChanged()" name="abc" />
+                    <label>Site Inventory Return</label>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-4">
+                    @*<asp:RadioButton ID="rdositetojob" AutoPostBack="true" OnCheckedChanged="rdositetojob_CheckedChanged" GroupName="abc" runat="server" Text="Job Inventory Return" />*@
+                   
+                    <input type="radio" id="rdositetojob"  onchange="rdositetojob_CheckedChanged()" name="abc" />
+                    <label>Job Inventory Return </label>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-2">
+                    <button type="button" Class="w3-btn w3-teal w3-small" id="ReturnExportCSV" Style="color:white;width:95%; " onclick="ExportToReturnCsvButton_Click()"><i class="fa fa-file-excel-o"></i>&nbsp;Export To CSV</button>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-3">
+                    @*<asp:LinkButton CssClass="w3-btn  w3-green buttonBlue" CausesValidation="false" ID="Return" Visible="true" OnClick="Return_Click" runat="server">&nbsp;Return </asp:LinkButton>*@
+                   <button Class="w3-btn  w3-green buttonBlue" id="Return" style="width:95%;" OnClick="Return_Click()"><i class="fa fa-undo"></i>&nbsp;Return / Confirm</button>
+                </div>
+            </div>
+            <div class="row">
+                <div id="DtoS"  style="display: none">
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="display: none">
+                        <label id="lblto">To:</label>
+                        @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlto" Text="Depot" EmptyMessage="All" Style="width: 148px" runat="server">
+                        </Telerik:RadComboBox>*@
+                        <select id="ddlto" Style="width: 148px;height:28px;" ></select>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                        @*<asp:Label ID="lblfrom" Text="Site" runat="server"></asp:Label>
+                        <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlfrom" EmptyMessage="All" Style="width: 148px" runat="server" AutoPostBack="true" OnSelectedIndexChanged="ddlfrom_SelectedIndexChanged">
+                        </Telerik:RadComboBox>*@
+                        <label id="lblfrom">Site</label>
+                         <select id="ddlfrom"  Style="width: 148px"  onchange="ddlfrom_SelectedIndexChanged()"></select>
+                      </div>
+
+
+                </div>
+
+                <div id="StoJ"  style="display: none">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                        @*<asp:Label ID="txtFrom" Text="Site" runat="server"></asp:Label>
+                        <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddl1to" EmptyMessage="All" OnSelectedIndexChanged="ddl1to_SelectedIndexChanged" AutoPostBack="true" Style="width: 148px" runat="server">
+                        </Telerik:RadComboBox>*@
+
+                        <label id="txtFrom">Site</label>
+                        <select id="ddl1to" Style="width: 148px" onchange="ddl1to_SelectedIndexChanged()"></select>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                        @*<asp:Label ID="txtTo" Text="Job" runat="server"></asp:Label>
+                        <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddl1from" EmptyMessage="All" OnSelectedIndexChanged="ddl1from_SelectedIndexChanged" Style="width: 148px" runat="server" AutoPostBack="true">
+
+                            <HeaderTemplate>
+                                <ul>
+                                    <li class="col-xs-4">ScaffRef</li>
+                                    <li class="col-xs-8">Description</li>
+                                </ul>
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <ul>
+                                    <li class="col-xs-4">
+                                        <%# DataBinder.Eval(Container.DataItem, "ScaffRef") %>
+                                    </li>
+                                    <li class="col-xs-8">
+                                        <%# DataBinder.Eval(Container.DataItem, "Description") %>
+                                    </li>
+                                </ul>
+                            </ItemTemplate>
+                        </Telerik:RadComboBox>*@
+                        <label id="txtTo">Job</label>
+                        <select id="ddl1from" Style="width: 148px" onchange="ddl1from_SelectedIndexChanged()"></select>
+                       
+                    </div>
+
+                </div>
+     
+            <div id="displaygrid" class="row" style="display:none">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 98%">
+                    @*<div class="clearfix"></div>
+                    <div id="ReturnInventoryGrid" style="color: black; width: 100%;margin-top:5px;">
+                        <table id="tblReturnInventoryGrid" class="table table-striped " style="width:100%;">
+                            <thead style="background-color: #efefef; color: #716262;">
+                                <tr>
+                                    <th style="display:none"></th>
+                                    <th  class="setWidth0">#</th>
+                                    <th  class="setWidth1" id="UniqueImage"></th>
+                                    <th class="setWidth0" id="ReturnDelete">#</th>
+                                    <th  class="setWidth2">Trans Id</th>
+                                    <th  class="setWidth3">View</th>
+                                    <th  class="setWidth9">Description</th>
+                                    <th  class="setWidth4">From</th>
+                                    <th  class="setWidth5">To</th>
+                                    <th  class="setWidth6">Return Status</th>
+                                    <th  class="setWidth7">Return Done By</th>
+                                    <th  class="setWidth8">Return Done On</th>
+                                    <th  class="setWidth10">(Returned) No. of Items</th>
+                                    <th  class="setWidth11">Total Weight (Tonnes)</th>
+                                    <th style="display:none">ReturnInvID</th>
+                                    <th style="display:none">FromID</th>
+                                    <th style="display:none">ToID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyReturnInventoryGrid"></tbody>
+                        </table>
+
+                    </div>
+
+
+        </div>*@
+                    <div id="ReturnInventoryGrid" style="color: black; width: 100%; margin-top: 5px;">
+                        <table id="tblReturnInventoryGrid" class="display nowrap" style="width:100%">
+                            <tbody id="tbodyReturnInventoryGrid"></tbody>
+                        </table>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+
+    <div id="divdelete" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label runat="server" id="c1">Are you sure you want to Delete the Record?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" ID="btndeleteyes" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" ID="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>

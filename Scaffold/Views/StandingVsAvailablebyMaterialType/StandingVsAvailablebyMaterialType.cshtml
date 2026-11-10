@@ -1,0 +1,473 @@
+﻿
+@{
+    ViewBag.Title = "StandingVsAvailablebyMaterialType";
+}
+<script src="/Content/js/highcharts.js"></script>
+<script src="/Content/js/exporting.js"></script>
+<script src="/Content/js/highcharts-3d.js"></script>
+<script src="/Content/js/no-data-to-display.js"></script>
+
+<script>
+    $(document)
+        .ajaxStart(function () {
+
+            $('#LoadingPanel1').css('display', 'block');
+        })
+        .ajaxStop(function () {
+            $('#LoadingPanel1').css('display', 'none');
+        });
+    // Modified JavaScript code for Standing vs Available Material Type Charts
+
+    $(document).ready(function () {
+        BindallDropdown();
+        var id = getParameterByName('id');
+        var DecriptData = Decrypt([id]);
+        $("#hdnClientID").val(DecriptData[0]);
+        var ClientID = $("#hdnClientID").val();
+        var Siteid = $("#ddlsite").val();
+
+        // Load both graphs
+        LoadStandingMaterialGraph(ClientID, Siteid);
+        LoadAvailableMaterialGraph(ClientID, Siteid);
+    });
+
+    function BindallDropdown() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/CycloneDashboard/BindallDropdown',
+            async: false,
+            data: { id: id },
+            success: function (response) {
+
+                data = response;
+
+                var ddSite = "<option value='0'>All</option>";
+                $.each(response.ddlsites, function (idx, obj) {
+                    if (obj != null) {
+                        ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                    }
+                });
+
+              
+
+                $('#ddlsite').empty().append(ddSite);
+               
+
+            }
+        });
+    }
+    function Changesite() {
+        $('#LoadingPanel1').css('display', 'block');
+        var ClientID = $("#hdnClientID").val();
+        var Siteid = $("#ddlsite").val();
+
+        // Reload both graphs
+        LoadStandingMaterialGraph(ClientID, Siteid);
+        LoadAvailableMaterialGraph(ClientID, Siteid);
+    }
+
+    // Generic function to load material data for both graphs
+    function LoadMaterialGraph(ClientID, Siteid, Type, ContainerId) {
+        $('.forRemoveData').remove();
+
+        $.ajax({
+            type: "POST",
+            url: "/StandingVsAvailablebyMaterialType/GetMaterialData",
+            data: JSON.stringify({
+                clientid: ClientID,
+                Sitelocid: Siteid,
+                Type: Type,
+                MaterialType: 'ALL'
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var chartData = [];
+                var categories = [];
+
+                if (response.length > 0) {
+                    for (var i = 0; i < response.length; i++) {
+                        var value = Type === 'Standing' ?
+                            parseFloat(response[i].TonnageStanding) :
+                            parseFloat(response[i].Tonnageavailable);
+
+                        chartData.push({
+                            name: response[i].MaterialType,
+                            y: value,
+                            materialType: response[i].MaterialType
+                        });
+                        categories.push(response[i].MaterialType);
+                    }
+                }
+
+                // Render the chart
+                RenderMaterialChart(ContainerId, Type, chartData, categories, ClientID, Siteid);
+            },
+            error: function (error) {
+                console.error("Error loading " + Type + " data:", error);
+                $('#LoadingPanel1').css('display', 'none');
+            }
+        });
+    }
+
+    // Function to render the chart
+    function RenderMaterialChart(containerId, type, chartData, categories, ClientID, Siteid) {
+        var chartTitle = type === 'Standing' ?
+            'Standing Material Quantity (Tonnage)' :
+            'Available Material Quantity (Tonnage)';
+
+        Highcharts.chart(containerId, {
+            chart: {
+                type: 'bar',
+                backgroundColor: '#f2f2f2'
+            },
+            title: {
+                align: 'left',
+                text: chartTitle,
+                style: {
+                    fontSize: '16px',
+                }
+            },
+            subtitle: {
+                text: ''
+            },
+            xAxis: {
+                categories: categories,
+                title: {
+                    text: 'Material Type'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Tonnage',
+                    align: 'high'
+                },
+                labels: {
+                    overflow: 'justify'
+                }
+            },
+            tooltip: {
+                formatter: function () {
+                    return '<b>' + this.x + '</b><br/>' +
+                        'Tonnage: ' + Highcharts.numberFormat(this.y, 2) + ' T';
+                }
+            },
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: function (eve) {
+                                // Call generic function with material type and graph type
+                                ShowMaterialDetails(
+                                    this.materialType,
+                                    ClientID,
+                                    Siteid,
+                                    type
+                                );
+                            }
+                        }
+                    }
+                },
+                bar: {
+                    dataLabels: {
+                        enabled: true,
+                        color: 'black',
+                        formatter: function () {
+                            return Highcharts.numberFormat(this.y, 2);
+                        }
+                    }
+                }
+            },
+            navigation: {
+                buttonOptions: {
+                    verticalAlign: 'top',
+                    y: -12,
+                }
+            },
+            exporting: {
+                buttons: {
+                    contextButton: {
+                        enabled: true,
+                        x: 9,
+                    }
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: [{
+                showInLegend: false,
+                colorByPoint: true,
+                data: chartData
+            }]
+        });
+
+        // Redraw chart on window resize
+        function redrawChart() {
+            var chart = $('#' + containerId).highcharts();
+            if (chart) {
+                var w = $('#' + containerId).closest(".wrapper").width();
+                chart.setSize(w, w * (2.2 / 4), false);
+            }
+        }
+
+        $('#menu_toggle').on('click', function () {
+            setTimeout(redrawChart, 300);
+        });
+
+        $(window).resize(redrawChart);
+        redrawChart();
+
+        $('#LoadingPanel1').css('display', 'none');
+    }
+
+    // Load Standing Material Graph
+    function LoadStandingMaterialGraph(ClientID, Siteid) {
+        LoadMaterialGraph(ClientID, Siteid, 'Standing', 'container');
+    }
+
+    // Load Available Material Graph
+    function LoadAvailableMaterialGraph(ClientID, Siteid) {
+        LoadMaterialGraph(ClientID, Siteid, 'Available', 'container1');
+    }
+
+    // Generic function to show material details in modal
+    function ShowMaterialDetails(MaterialType, ClientID, Siteid, Type) {
+        $('.forRemoveDataAction').remove();
+
+        var infoType = Type === 'Standing' ? 'StandingInfo' : 'AvailableInfo';
+
+        $.ajax({
+            type: "POST",
+            url: "/StandingVsAvailablebyMaterialType/GetMaterialData",
+            data: JSON.stringify({
+                clientid: ClientID,
+                Sitelocid: Siteid,
+                Type: infoType,
+                MaterialType: MaterialType
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                $('#btnOpenModelAllDetails').click();
+                $("#lblAction").text(MaterialType);
+                $("#labelaction").val(MaterialType);
+                $("#hdnGraphType").val(Type); // Store graph type for print function
+
+                // Update modal title
+                var modalTitle = Type === 'Standing' ?
+                    'Standing Material Details for ' :
+                    'Available Material Details for ';
+                $("#QuantityModal1").html(modalTitle + '<u><label id="lblAction" style="font-size: 17px">' +
+                    MaterialType + '</label></u>');
+                $("#QuantityModal1").css("display", "block");
+                $("#QuantityModal2").css("display", "none");
+
+                var row = '';
+                var totalTonnage = 0;
+
+                $.each(response, function (index, obj) {
+                    var tonnage = Type === 'Standing' ?
+                        parseFloat(obj.TonnageStanding) :
+                        parseFloat(obj.Tonnageavailable);
+
+                    totalTonnage += tonnage;
+
+                    row += "<tr class='forRemoveDataAction'>" +
+                        "<td style='text-align: center;font-size: 12px;'>" + obj.MaterialType + "</td>" +
+                        "<td style='text-align: center;font-size: 12px;'>" + obj.ItemCode + "</td>" +
+                        "<td style='text-align: center;font-size: 12px;'>" + obj.ItemDesc + "</td>" +
+                        "<td style='text-align: center;font-size: 12px;'>" + obj.AvailableQuantity + "</td>" +
+                        "<td style='text-align: center;font-size: 12px;'>" +
+                        Highcharts.numberFormat(obj.ItemWeight, 2) + "</td>" +
+                        "<td style='text-align: center;font-size: 12px;'>" +
+                        Highcharts.numberFormat(tonnage, 2) + "</td>" +
+                        "</tr>";
+                });
+
+                // Add total row
+                row += "<tr class='forRemoveDataAction' style='font-weight: bold; background-color: #e8e8e8;'>" +
+                    "<td colspan='5' style='text-align: right;font-size: 12px;'>Total Tonnage:</td>" +
+                    "<td style='text-align: center;font-size: 12px;'>" +
+                    Highcharts.numberFormat(totalTonnage, 2) + "</td>" +
+                    "</tr>";
+
+                $("#tbDetails tbody").append(row);
+            },
+            error: function (error) {
+                console.error("Error loading material details:", error);
+            }
+        });
+    }
+
+    function exporttopdf_Click() {
+        $("#LoadingPanel1").css("display", "block");
+
+        var id = getParameterByName('id');
+        var DecriptData = Decrypt([id]);
+        $("#hdnClientID").val(DecriptData[0]);
+        var ClientID = $("#hdnClientID").val();
+        var Siteid = $("#ddlsite").val();
+
+        //var siteID = $('#ddlsite').val();
+        var materialType = $("#lblAction").text();
+        var GraphType = $('#hdnGraphType').val() === 'Standing' ? 'StandingInfo' : 'AvailableInfo';
+       // var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+
+        window.open(
+            '/StandingVsAvailablebyMaterialTypeReport/ShowMaterialReport?' +
+            'UID=' + encodeURIComponent(UID) +
+            '&UserRole=' + encodeURIComponent(UserRole) +
+            '&clientid=' + encodeURIComponent(ClientID) +
+            '&MaterialType=' + encodeURIComponent(materialType) +
+            '&Sitelocid=' + encodeURIComponent(Siteid) +
+            '&Type=' + encodeURIComponent(GraphType)
+        );
+
+        $("#LoadingPanel1").css("display", "none");
+    }
+
+    // Modified Excel export
+    $(document).ready(function () {
+        $("[id$=myButtonControlID]").click(function (e) {
+            var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+                base64 = function (s) {
+                    return window.btoa(unescape(encodeURIComponent(s)))
+                },
+                format = function (s, c) {
+                    return s.replace(/{(\w+)}/g, function (m, p) {
+                        return c[p];
+                    })
+                };
+
+            var graphType = $("#hdnGraphType").val();
+            var materialType = $("#lblAction").text();
+            var fileName = graphType + " Material Details - " + materialType;
+
+            var toExcel = fileName;
+            toExcel += document.getElementById("tbDetails").innerHTML;
+
+            var ctx = {
+                worksheet: fileName,
+                table: toExcel
+            };
+
+            var link = document.createElement("a");
+            link.download = fileName + ".xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        });
+    });
+
+
+
+
+
+</script>
+<style>
+    .container .DshbrdBack {
+        background-color: #ffffcc;
+        height: 1023px;
+    }
+
+    #lblAction {
+        text-decoration: underline;
+    }
+</style>
+
+
+<!-- Add this hidden field to store graph type -->
+<input type="hidden" id="hdnGraphType" />
+<input type="hidden" id="hdnClientID" />
+
+<div class="container DshbrdBack">
+    <div class="row">
+        <div style="margin-left: 11px">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="border: 1px solid lightgrey; width: 550px; height: 50px; text-align: center; background: #f2f2f2; margin-top: 4px">
+                <label id="lbl" style="color: black; font-size: 25px">
+                    Standing Vs Available by Material Type
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 col-md-6 col-sm-9 col-xs-9" style="margin-top: 6px; display: flex;">
+            <label id="Label1" style="font-weight: 700; font-size: 17px; color: black; margin-top: 2px; float: right">Site</label>
+            <select id="ddlsite" class="form-control" onchange="Changesite()" style="border: 1px solid; margin-left: 10px;" runat="server" Width="80%"></select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+            <div id="container" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+            <div id="container1" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Material Details -->
+<div class="container">
+    <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+    <div class="modal fade" id="myModals1" role="dialog">
+        <div class="row" style="padding-top: 90px;">
+            <div class="col-lg-1 col-md-1"></div>
+            <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+                <div class="modal-content" style="width: 100%">
+                    <div class="modal-header row">
+                        <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
+                            <h4 class="modal-title" id="QuantityModal1" style="display:none">
+                                Material Details for <u>
+                                    <label id="lblAction" style="font-size: 17px"></label>
+                                    <input type="hidden" id="labelaction" />
+                                </u>
+                            </h4>
+                            <h4 class="modal-title" id="QuantityModal2" style="display:none">
+                                Material Information for <u>
+                                    <label id="lblAction1" style="font-size: 17px"></label>
+                                </u>
+                            </h4>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                            <button id="exporttopdf" style="height: 28px; padding-top: 5px; width:100px;" onclick="exporttopdf_Click()" class="btn btn-blue w3-btn w3-blue">
+                                <i class="fa fa-print"></i>&nbsp;Print
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                            <button id="myButtonControlID" style="height: 28px; padding-top: 5px; width:100px;" class="btn btn-primary w3-btn w3-teal">
+                                <i class="fa fa-file-excel-o"></i>&nbsp;Export
+                            </button>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body" id="divTableDataHolder">
+                        <div style="overflow: auto">
+                            <table class="table table-bordered" id="tbDetails" style="width: 100%; color: black">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Item Code</b></td>
+                                        <td style="width: 30%; text-align: center; font-size: 12px;"><b>Item Description</b></td>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Available Quantity</b></td>
+                                        <td style="width: 12%; text-align: center; font-size: 12px;"><b>Item Weight (kg)</b></td>
+                                        <td style="width: 13%; text-align: center; font-size: 12px;"><b>Tonnage</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1 col-md-1"></div>
+        </div>
+    </div>
+</div>
+

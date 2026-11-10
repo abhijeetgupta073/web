@@ -1,0 +1,338 @@
+﻿
+@{
+    ViewBag.Title = "DamagedInventoryConfirmDetails";
+}
+<script src="~/Content/js/DamagedInventoryConfirmDetails.js"></script>
+<style>
+    .spancolorandsize {
+        font-size: 12px !important;
+    }
+
+    .img-container {
+        margin-left: 45px;
+        margin-top: 13px;
+    }
+
+    .imagesize {
+        height: 23px;
+        font-size: 13px;
+        padding-top: 3px;
+    }
+
+    .img-container:hover {
+        border: 1px solid black;
+    }
+
+    element.style {
+    }
+
+    label {
+        font-weight: 400;
+        font-size: 12px;
+    }
+    /*.sorting, .sorting_asc, .sorting_desc {
+    background : none;
+}*/
+</style>
+
+
+
+<div class="row">
+    <div class="col-lg-6 col-md-5 col-sm-5 col-xs-6">
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        @*<asp:LinkButton CssClass="w3-btn w3-small w3-green btnheight" CausesValidation="false" ID="btnSaveData" Style="width: 100%; background: none; color: black; height: 32px;" OnClientClick="SaveChangesInGrid(); return false;" runat="server"><i class="fa fa-save"></i>&nbsp;&nbsp;Save</asp:LinkButton>*@
+        <button type="button" id="btnSaveData" class="w3-btn w3-small w3-green btnheight" onclick="BatchEditCommand();" style="Width:100%; background: none; color: black; height: 32px;"><i class="fa fa-save"></i>&nbsp;&nbsp;Save</button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        @*<asp:LinkButton CssClass="w3-btn w3-blue" CausesValidation="false" ID="btnprint" Style="width: 100%; background: none; color: black" OnClick="btnprint_Click" runat="server" OnClientClick="BindButton();"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+        <button type="button" id="btnprint" class="w3-btn w3-blue" onclick="btnprint_Click();" style="Width:100%; background: none; color: black"><i class="fa fa-print"></i>&nbsp;Print</button>
+
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-2">
+        @*<asp:LinkButton runat="server" ID="btnBack" Style="padding-left: 7px" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnBack_Click"> <span class="icon"><i class="fa fa-backward"> </i></span><span class="text">&nbsp;Back to Damage </span></asp:LinkButton>*@
+
+        <button type="button" id="btnBack" class="w3-btn w3-small  nln-bg w3-text-white" onclick="btnBack_Click();" style="Width:100%; padding-left: 7px"><span class="icon"><i class="fa fa-backward"> </i></span><span class="text">&nbsp;Back to Damage </span></button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="DamageInventoryConfirmDetailsDiv" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblDamageInventoryConfirmDetails" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th style="display:none;"></th>
+                        <th>Material Type</th>
+                        <th>Item Code</th>
+                        <th>Item Desc</th>
+                        <th>Available Quantity</th>
+                        <th>Damaged Quantity</th>
+                        <th>Reason for Damage</th>
+                        <th>Supplier</th>
+                        <th>Site Ref.#</th>
+                        <th>Date Actioned</th>
+                        <th>Item Weight</th>
+                        <th>Total Item Weight (kg)</th>
+                    </tr>
+
+                </thead>
+                <tbody id="tbodyTblDamageInventoryConfirmDetails"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-8 col-lg-8 col-sm-2 col-xs-1"></div>
+    <div class="col-lg-2 col-md-2 col-sm-5 col-xs-5" id="AddNewImg" runat="server">
+        <button id="btnNewImage" type="button" class="w3-btn w3-teal" style="width: 100%; padding-left: 5px" onclick="addnewimage();"><i class="fa fa-plus"></i>&nbsp;Add New Image</button>
+
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-5 col-xs-6" id="btnNewDocu" runat="server">
+        <button id="btnNewDocument" type="button" class="w3-btn w3-teal" style="width: 100%;" onclick="addnewDocument();"><i class="fa fa-plus"></i>&nbsp;Add New Pdf File</button>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="AddPDfDatatblDiv" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblAddPDfData" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th style="display:none;"></th>
+                        <th style="width:5%"></th>
+                        <th style="width:5%"></th>
+                        <th style="width:60%">Description</th>
+                        <th style="width:15%">Date Of Upload</th>
+                        <th style="width:15%">View</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbodyTblAddPDfDatatbl"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+<div id="placeholderforimage"></div>
+
+<!-- -->
+
+<input type="hidden" runat="server" id="tempimg" name="tempimg" />
+
+<div runat="server" style="display: none" id="art1">
+    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+    @*<asp:Label ID="alertlabel" runat="server"></asp:Label>*@
+    <label id="alertlabel"></label>
+</div>
+@*<asp:HiddenField ID="hdncapture" runat="server" Value="" />
+    <asp:HiddenField ID="hdnimgname" runat="server" Value="" />
+    <asp:HiddenField ID="nameget" runat="server" Value="" />
+    <asp:HiddenField ID="hdndocument" runat="server" Value="" />
+    <asp:HiddenField ID="hdntxttempfile" runat="server" Value="" />
+    <asp:HiddenField ID="hdntxtFile" runat="server" Value="" />
+    <asp:HiddenField ID="hdntemppdffile" runat="server" Value="" />
+    <asp:HiddenField ID="hdnpdffile" runat="server" Value="" />
+    <asp:HiddenField ID="hdnAvailableQty" runat="server" Value="" />*@
+
+<input type="hidden" id="hdncapture" value="" />
+<input type="hidden" id="hdnimgname" value="" />
+<input type="hidden" id="nameget" value="" />
+<input type="hidden" id="hdndocument" value="" />
+<input type="hidden" id="hdntxttempfile" value="" />
+<input type="hidden" id="hdntxtFile" value="" />
+<input type="hidden" id="hdntemppdffile" value="" />
+<input type="hidden" id="hdnpdffile" value="" />
+<input type="hidden" id="hdnAvailableQty" value="" />
+
+<input type="hidden" id="hdnDDDocumentID" />
+<input type="hidden" id="hdnDocumentName" />
+
+
+<div id="popup" class="w3-modal" runat="server">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width:fit-content;">
+        @*<div class="row">*@
+
+        <span class="crossbtn" style="cursor: pointer; color: Black; font-weight: bold; margin-right: 5px; float: right; background: white" onclick="$('#popup').hide();"><a id="btndelete"><i class="glyphicon glyphicon-trash"></i></a>&nbsp;&nbsp;X</span>
+
+        @*</div>*@
+        @*<div class="row">*@
+
+        <img id="ppdl" class="img-responsive" runat="server" src="" align="middle" style="min-height: 350px; min-width: 350px !important; height: auto; width: auto; max-width: 1000px; max-height: 450px; margin-top: -10px;" />
+        @*</div>*@
+    </div>
+</div>
+
+
+<div id="divCreatePop" runat="server" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8 rowheight" style="width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;<label id="lblimgdoc" style="font-size: 20px; color: white !important;"></label><a id="close" class="close" style="float: right; color: white" onclick="btnclose();">X</a></h4>
+        </header>
+        <div class="row"></div>
+        <div class="row">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                <label id="lbldescription" runat="server" style="font-size: 15px">Description<span style="color: red">&nbsp*</span></label>
+            </div>
+            <div class="col-xs-8 col-lg-8 col-md-8 col-sm-8">
+                @*<asp:TextBox ID="txtdesc" runat="server" CausesValidation="true" CssClass="form-control"></asp:TextBox>
+                    <asp:RequiredFieldValidator ID="rfv" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtdesc" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+                <input type="text" id="txtdesc" class="form-control" />
+                <label id="rfv" class="rdf-initial rdf-text"></label>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="row safari" style="display: none;">
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    <input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn" accept="image/*;capture=camera" />
+                </div>
+            </div>
+            @*<div class="nonsafari" style="display: none;">
+                <div class="desktopApp" style="display: none;">*@
+            <div class="nonsafari">
+                <div class="desktopApp">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                        @*<asp:FileUpload runat="server" ID="FileUpload1" Style="width: 93px" AllowMultiple="true" />*@
+                        <input type="file" id="FileUpload1" Style="width: 95px" AllowMultiple="true" />
+                    </div>
+
+                    @*<div class="col-xs-4 col-lg-4 col-md-4 col-sm-4 desktopApp nonsafari rowhide" style="display: none;">*@
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4 desktopApp nonsafari rowhide">
+                        <button type="button" id="getCamera" style="width: 95%" class="btn w3-btn w3-ripple w3-blue-grey imagesize">Capture</button>
+                    </div>
+                </div>
+                <div class="mobileApp" style="display: none;">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        <input type="file" name="file" id="mobApp_file" class="custombtn" accept="image/*;capture=camera" />
+                    </div>
+                </div>
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                    @*<asp:Button runat="server" ID="btnSave" ValidationGroup="Save" OnClientClick="ButtonClient();" Width="100%" CssClass="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSave_Click" Text="Save" />*@
+                    <button type="button" id="btnSave" OnClick="ButtonClient();" style="Width:100%" class="w3-btn w3-small w3-green btnheight imagesize">Save</button>
+                </div>
+                <div runat="server" id="Photoblock" class="hdnCamerabefore" style="display: none; width: 200px;">
+                    <canvas id="canvas" width="640" height="480" style="width: 336px; height: 180px; margin-left: 14px; margin-top: 10px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div id="fileList" style="color: black; margin-left: 14px">
+        </div>
+    </div>
+</div>
+
+<div id="btnOpenModel" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4" runat="server">Capture Your Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <video id="video" style="width:100%; height:auto" autoplay></video>
+                <div class="row">
+                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+                    </div>
+                    <div class="col-lg-5 col-md-6 col-sm-3 col-xs-3"></div>
+                    <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="cancelsnap" class="btn btn-danger" onclick="Cancel();">Cancel</button>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="divdelete" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Delete the Image?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeleteyes" runat="server" OnClick="btndeleteyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+
+                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteyes" onclick="btndeleteyes_Click();"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndeleteno" runat="server" OnClientClick="deleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" onclick="deleteno();"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="confmodal" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span onclick="document.getElementById('ContentPlaceHolder1_emailNewClient').style.display='none'"
+                  class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                @*<asp:LinkButton runat="server" ID="btnyes" CausesValidation="false" CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click"> <i class=" glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button  id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+
+                @*<asp:LinkButton runat="server" CausesValidation="false" ID="btnno" CssClass="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnno_Click"><i class=" glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="EditPopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span onclick="document.getElementById('ContentPlaceHolder1_emailNewClient').style.display='none'"
+                  class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Edit Record</h4>
+        </header>&nbsp;
+        <div class="row">
+          <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                <label id="lbldescription"  style="font-size: 15px">Description<span style="color: red">&nbsp*</span></label>
+            </div>
+            <div class="col-xs-8 col-lg-8 col-md-8 col-sm-8">
+               <input type="text" id="txtdescription" class="form-control" required/>
+            </div>
+
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <button id="btneditSave" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btneditSave()"> <i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Save</button>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                  <button id="btnCancel" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnCancel()"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

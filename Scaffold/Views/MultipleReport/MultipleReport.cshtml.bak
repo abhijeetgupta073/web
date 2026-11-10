@@ -1,0 +1,743 @@
+﻿
+@{
+    ViewBag.Title = "MultipleReport";
+}
+
+<script>
+
+    //function viewPrintReportclick() {
+    //    var Reportlist = document.getElementById("<%=listboxAvailableReports.ClientID%>");
+    //    var reportgettext = Reportlist.options[Reportlist.selectedIndex].text;
+    //    if (reportgettext == 'Over 90 days Standing Report' || reportgettext == 'Over 180 days Standing Report') {
+    //        var flag = true;
+    //        var sitdropdown = $('#<%=ddlsiteloctnid.ClientID %> option:selected').val();
+    //        if (sitdropdown == '') {
+    //            flag = false;
+    //            $('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+    //            $('#ContentPlaceHolder1_art1').css("display", "block");
+    //            $('#ContentPlaceHolder1_lblalert').html('<strong>Alert ! </strong>Please Select Site from dropdown list.');
+    //            return flag;
+    //        } else {
+    //            flag = true;
+    //            return flag;
+    //        }
+    //    }
+
+    //}
+
+
+
+    $(document).ready(function () {
+        
+        BoxAvailableReportBind();
+        // ddlsiteloction();
+        //  ddlOwnerName();
+        $('#listboxAvailableReports').change(function () {
+            var listAvailable = $('option:selected', this).text();
+            if (listAvailable == 'Approved for Dismantle Report') {
+                $('#Sitelocidhide').css('display', 'Block');
+                $('#hideowner').css('display', 'block');
+            }
+            //if (listAvailable == 'Over 180 days Standing Report' || listAvailable == 'Over 90 days Standing Report') {
+            if (listAvailable == 'Approved for Dismantle Report' || listAvailable == 'Over 180 days Standing Report' || listAvailable == 'Over 90 days less than 180 days Standing Report' || listAvailable == 'Over 30 days less than 90 days Standing Report' || listAvailable == 'Over 30 days Standing Report' || listAvailable == 'ALL Current Standing Scaffolds Report') {
+                $('#hideowner').css('display', 'Block');
+                $('#Sitelocidhide').css('display', 'block');
+
+            }
+            if (listAvailable == 'Last 7 Days Activity Report') {
+                $('#Sitelocidhide').css('display', 'Block');
+                $('#hideowner').css('display', 'block');
+            }
+     
+            if (listAvailable == "'Date of Dismantle' Entered By") {
+                $('#Sitelocidhide').css('display', 'Block');
+                $('#hideowner').css('display', 'block');
+            }
+
+            if (listAvailable == "Build & Dismantled By Report") {
+                $('#Sitelocidhide').css('display', 'Block');
+                $('#hideowner').css('display', 'block');
+            }
+            if (listAvailable == 'Activity Report - User Set Days') {
+                $('#Sitelocidhide').css('display', 'Block');
+                $('#hideowner').css('display', 'block');
+            }
+            if (listAvailable == 'Qty & Tonnage By Workgroup, (Standing Jobs)') {
+                $('#Sitelocidhide').css('display', 'Block');
+                $('#hideowner').css('display', 'block');
+            }
+            if (listAvailable == 'Jobs Requiring Isolation Report') {
+                $('#Sitelocidhide').css('display', 'Block');
+                $('#hideowner').css('display', 'block');
+            }
+            //BoxAvailableReportBind();
+            ddlsiteloction();
+            ddlOwnerName();
+            GetDescriptionValue();
+        });
+    });
+    var buttontype = 0;
+    function listdescriptionChange() {
+        SaveDescriptionValue();
+    }
+
+    function GetDescriptionValue() {
+        var listboxAvailableReports = $('#listboxAvailableReports option:selected').text();
+        //$("#listdescription").val('');
+        $.ajax({
+            url: '/MultipleReport/GetDescriptionValueData',
+            type: 'post',
+            async: false,
+            data: { listboxAvailableReports: listboxAvailableReports },
+            success: function (response) {
+
+                if (response != null) {
+                    $('#listdescription').text(response);
+                }
+            }
+        });
+    }
+
+    function SaveDescriptionValue() {
+        var listboxAvailableReports = $('#listboxAvailableReports option:selected').text();
+        var listdescription = $('#listdescription').val();
+        $.ajax({
+            url: '/MultipleReport/listdescription_TextChanged',
+            type: 'POST',
+            async: false,
+            data: { listboxAvailableReports: listboxAvailableReports, listdescription: listdescription },
+            success: function (response) {
+                if (response.Result == 'Success') {
+                    CustomAlert(response);
+                    GetDescriptionValue();
+                } else {
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+
+    //function BoxAvailableReportBind() {
+    //    $.ajax({
+    //        url: '/MultipleReport/ListBoxAvailableReportBind',
+    //        type: 'get',
+    //        contentType: "application/json; charset=utf-8",
+    //        async: false,
+    //        data: {},
+    //        success: function (response) {
+
+    //            if (response != null) {
+    //                var optionAppend = "";
+    //                $.each(response, function (index, obj) {
+    //                    optionAppend += "<option value=" + obj.ReportID + ">" + obj.ReportName + "</option>";
+
+    //                });
+    //                $('#listboxAvailableReports').empty().append(optionAppend);
+    //            }
+    //        }
+    //    });
+    //}
+
+
+        function BoxAvailableReportBind() {
+            var id = getParameterByName('id');
+            var UID = getParameterByName('UID');
+            var UserRole = getParameterByName('UserRole');
+            $.ajax({
+                url: '/MultipleReport/ListBoxAvailableReportBind',
+                type: 'get',
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                data: {
+                    UID: UID, id: id, UserRole: UserRole
+                },
+                success: function (response) {
+                    if (response != null) {
+                        var optionAppend = "";
+                        $.each(response, function (index, obj) {
+                            optionAppend += "<option value=" + obj.ReportID + ">" + obj.ReportName + "</option>";
+                        });
+                        $('#listboxAvailableReports').empty().append(optionAppend);
+                    }
+                }
+            });
+        }
+
+
+
+
+
+    function ddlsiteloction() {
+        var id = getParameterByName('id');
+        var UserRole = getParameterByName('UserRole');
+        var UID = getParameterByName('UID');
+        $.ajax({
+            url: '/MultipleReport/ddlSiteLocation',
+            type: 'post',
+            async: false,
+            data: { id: id, UserRole: UserRole, UID: UID },
+            success: function (response) {
+
+                if (response != null) {
+                    var optionAppend = "<option value=''></option>";
+                    $.each(response, function (index, obj) {
+                        optionAppend += "<option value=" + obj.SiteLocID + ">" + obj.SiteLocation + "</option>";
+                    });
+                    $('#ddlsiteloctnid').empty().append(optionAppend);
+                }
+            }
+        });
+    }
+
+    function ddlOwnerName() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/MultipleReport/ddlownername',
+            type: 'post',
+            async: false,
+            data: { id: id },
+            success: function (response) {
+
+                if (response != null) {
+                    var optionAppend = "";
+                   // $('#ddlScaffoldOwner').empty(); ///Add 07-Sep-2021
+                    var optionAppend = "<option value=''>All</option>";   // Add 07-Sep-2021
+                        $.each(response, function (index, obj) {
+                        optionAppend += "<option value=" + obj.ScaffoldOwner + ">" + obj.ScaffoldOwner + "</option>";
+                    });
+                    $('#ddlScaffoldOwner').empty().append(optionAppend);
+                }
+            }
+        });
+    }
+
+    //Changes made on 30-Oct-2020
+
+    //function ExportToCsv_Click() {
+        //$("#LoadingPanel1").css("display", "block");
+        //$("#divWeeklyPopup").css("display", "none");
+        //var siteID = $('#ddlSite option:selected').val();
+        //if (siteID != "Select Site") {
+            //var ClientID = getParameterByName('id');
+            //var EncryptData = [siteID];
+            //var encry = Encrypt(EncryptData);
+            //siteID = encry[0];
+            //window.location.href = '/MultipleReport/ExportToCsv_Click?ClientID=' + ClientID + '&SiteID=' + siteID;
+
+          //  $("#LoadingPanel1").css("display", "none");
+        //}
+        //else {
+            //$('#art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+            //$('#art1').css("display", "block");
+            //$('#alertlabel').html('<strong>Alert ! </strong>Please Select the Site.');
+            //var Response = { Result: "Failed", Message: "Please Select the Site." };
+            //CustomAlert(Response);
+          //  $("#LoadingPanel1").css("display", "none");
+        //}
+
+
+
+        function ExportToCsv_Click() {
+        var ddlScaffoldOwnerValue = $('#ddlScaffoldOwner option:selected').text();
+        var siteLocationId = $('#ddlsiteloctnid').val();
+
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+
+        let listboxAvailableReports = $('#listboxAvailableReports option:selected').text();
+            if (siteLocationId != '' && siteLocationId != null || ddlScaffoldOwnerValue != '') {
+
+            //if (listboxAvailableReports == 'Approved for Dismantle Report') {
+            //    var encryData = Encrypt([ddlScaffoldOwnerValue]);
+            //    ddlScaffoldOwnerValue = encryData[0];
+            //  //  window.open('/ApprovedforDismantleReport/ApprovedforDismantleReportPdf?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&btn=' + 'prv');
+
+            //}
+
+            if (listboxAvailableReports == 'Approved for Dismantle Report' || listboxAvailableReports == 'Over 90 days less than 180 days Standing Report' || listboxAvailableReports == 'Over 180 days Standing Report' || listboxAvailableReports == 'Over 30 days less than 90 days Standing Report' || listboxAvailableReports == 'Over 30 days Standing Report' || listboxAvailableReports == 'ALL Current Standing Scaffolds Report') {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.location.href = '/MultipleReport/ExportToCsv_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv';
+                    @*window.location.href = '/MultipleReport/ExportToCsv_Click?ClientID=' + ClientID + '&SiteID=' + siteID;*@
+                } else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+
+            if (listboxAvailableReports == 'Last 7 Days Activity Report') {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/MultipleReport/ExportToCsvWeekly_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+
+                if (listboxAvailableReports == "'Date of Dismantle' Entered By") {
+                    if (siteLocationId != null && siteLocationId != '') {
+                        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                        var clientID = $('#ddlClient').val();
+                        var siteLocId = $('#ddlsiteloctnid').val();
+                        var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                        siteLocationId = encryData[0];
+                        listboxAvailableReports = encryData[1];
+                        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                        ddlScaffoldOwnerValue = encryData[2];
+                        window.open('/MultipleReport/ExportToCsvDateofDismantleReport_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv' + '&ClientID=' + clientID + '&SiteLocId=' + siteLocId);
+                    }
+                    else {
+                        var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                        CustomAlert(response);
+                    }
+                }
+
+
+                if (listboxAvailableReports == "Build & Dismantled By Report") {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var clientID = $('#ddlClient').val();
+                    var siteLocId = $('#ddlsiteloctnid').val();
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/MultipleReport/ExportToCsvBuildDismantledByReport_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv' + '&ClientID=' + clientID + '&SiteLocId=' + siteLocId);
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+            if (listboxAvailableReports == "Activity Report - User Set Days") {
+                if (siteLocationId != null && siteLocationId != '') {
+                    buttontype = 2;
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    listboxAvailableReports = encryData[1];
+                    ddlScaffoldOwnerValue = encryData[2];
+                    var modal = document.getElementById('activityReportPopup');
+                    modal.style.display = "block";
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+                }
+                if (listboxAvailableReports == "Qty & Tonnage By Workgroup, (Standing Jobs)") {
+                    if (siteLocationId != null && siteLocationId != '') {
+                        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                        var clientID = $('#ddlClient').val();
+                        var siteLocId = $('#ddlsiteloctnid').val();
+                        var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                        siteLocationId = encryData[0];
+                        listboxAvailableReports = encryData[1];
+                        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                        ddlScaffoldOwnerValue = encryData[2];
+                        window.open('/MultipleReport/ExportToCsvOtyAndTonnage_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv' + '&ClientID=' + clientID + '&SiteLocId=' + siteLocId);
+                    }
+                    else {
+                        var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                        CustomAlert(response);
+                    }
+                }
+                if (listboxAvailableReports == 'Jobs Requiring Isolation Report') {
+                    if (siteLocationId != null && siteLocationId != '') {
+                        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                        var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                        siteLocationId = encryData[0];
+                        listboxAvailableReports = encryData[1];
+                        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                        ddlScaffoldOwnerValue = encryData[2];
+                        window.open('/MultipleReport/ExportToCsvJobsRequiringIsolation_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+                    }
+                    else {
+                        var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                        CustomAlert(response);
+                    }
+                }
+
+                //if (listboxAvailableReports == "Jobs Requiring Isolation Report") {
+                //    if (siteLocationId != null && siteLocationId != '') {
+                //        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                //        var clientID = $('#ddlClient').val();
+                //        var siteLocId = $('#ddlsiteloctnid').val();
+                //        var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                //        siteLocationId = encryData[0];
+                //        listboxAvailableReports = encryData[1];
+                //        //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                //        ddlScaffoldOwnerValue = encryData[2];
+                //        window.open('/MultipleReport/ExportToCsvJobsRequiringIsolation_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv' + '&ClientID=' + clientID + '&SiteLocId=' + siteLocId);
+                //    }
+                //    else {
+                //        var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                //        CustomAlert(response);
+                //    }
+                //}
+        } else {
+            var response = { Result: 'Failed', Message: 'Select Report name from the list..' };
+            CustomAlert(response);
+        }
+    }
+
+
+      function openActivityReportPopup() {
+        document.getElementById("activityReportPopup").style.display = "block";
+    }
+
+    function btnPreview_Click() {
+
+        var ddlScaffoldOwnerValue = $('#ddlScaffoldOwner option:selected').text();
+        var siteLocationId = $('#ddlsiteloctnid').val();
+
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+
+        let listboxAvailableReports = $('#listboxAvailableReports option:selected').text();
+        if (siteLocationId != '' && siteLocationId != null || ddlScaffoldOwnerValue != '') {
+            if (listboxAvailableReports == 'Approved for Dismantle Report') {
+                if (siteLocationId != null && siteLocationId != '') {
+                //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId,listboxAvailableReports,ddlScaffoldOwnerValue]);
+                siteLocationId = encryData[0];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    listboxAvailableReports = encryData[1];
+                    ddlScaffoldOwnerValue = encryData[2];
+                   
+                    window.open('/ApprovedforDismantleReport/ApprovedforDismantleReportPdf?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+            } else {
+                var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                CustomAlert(response);
+            }
+
+            }
+            if (listboxAvailableReports == 'Over 90 days less than 180 days Standing Report' || listboxAvailableReports == 'Over 180 days Standing Report' || listboxAvailableReports == 'Over 30 days less than 90 days Standing Report' || listboxAvailableReports == 'Over 30 days Standing Report' || listboxAvailableReports == 'ALL Current Standing Scaffolds Report') {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/StandingReport/StandingReportPdf?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+                } else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+            if (listboxAvailableReports == 'Last 7 Days Activity Report') {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/WeeklyStandingReport/WeeklyStandingReports?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+
+            if (listboxAvailableReports == "'Date of Dismantle' Entered By") {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    // var clientID = $('#ddlClient').val();
+                    // var siteLocId = $('#ddlsiteloctnid').val();
+
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/Date_of_DismantleReport/Date_of_DismantleReport?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+
+            if (listboxAvailableReports == "Build & Dismantled By Report") {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                   // var clientID = $('#ddlClient').val();
+                   // var siteLocId = $('#ddlsiteloctnid').val();
+
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/Date_of_DismantleReport/Build_Dismantled_By_ReportReport?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+            if (listboxAvailableReports == "Activity Report - User Set Days") {
+                if (siteLocationId != null && siteLocationId != '') {
+                    buttontype = 1;
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    listboxAvailableReports = encryData[1];
+                    ddlScaffoldOwnerValue = encryData[2];
+                    var modal = document.getElementById('activityReportPopup');
+                    modal.style.display = "block";
+                } else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+            if (listboxAvailableReports == "Qty & Tonnage By Workgroup, (Standing Jobs)") {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    // var clientID = $('#ddlClient').val();
+                    // var siteLocId = $('#ddlsiteloctnid').val();
+
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/Qty_And_Tonnage_By_Workgroup_Standing_Jobs/Qty_And_Tonnage_By_Workgroup_Standing_Jobs?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+            if (listboxAvailableReports == "Jobs Requiring Isolation Report") {
+                if (siteLocationId != null && siteLocationId != '') {
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+                    siteLocationId = encryData[0];
+                    // var clientID = $('#ddlClient').val();
+                    // var siteLocId = $('#ddlsiteloctnid').val();
+
+                    listboxAvailableReports = encryData[1];
+                    //Added on 24-04-2024 for Decrypt Owner for Speacial Character like C&I
+                    ddlScaffoldOwnerValue = encryData[2];
+                    window.open('/JobsRequiringIsolationReport/JobsRequiringIsolationReportPdf?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv');
+
+                }
+                else {
+                    var response = { Result: 'Failed', Message: 'Please Select Site from dropdown list.' };
+                    CustomAlert(response);
+                }
+            }
+        } else {
+            var response = { Result: 'Failed', Message: 'Select Report name from the list..' };
+            CustomAlert(response);
+        }
+    }
+
+    function submitDays() {
+        var ddlScaffoldOwnerValue = $('#ddlScaffoldOwner option:selected').text();
+        var siteLocationId = $('#ddlsiteloctnid').val();
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var listboxAvailableReports = $('#listboxAvailableReports option:selected').text();
+        var Days = $('#daysDropdown option:selected').val();
+        var clientID = $('#ddlClient').val();
+        var siteLocId = $('#ddlsiteloctnid').val();
+        var encryData = Encrypt([siteLocationId, listboxAvailableReports, ddlScaffoldOwnerValue]);
+        siteLocationId = encryData[0];
+        listboxAvailableReports = encryData[1];
+        ddlScaffoldOwnerValue = encryData[2];
+        if (buttontype == 1) {
+            window.open('/NdaysStandingReport/NdaysStandingReport?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=' + 'prv' + '&ClientID=' + clientID + '&SiteLocId=' + siteLocId + '&Days=' + Days);
+        } else {
+            window.open('/MultipleReport/ExportToCsvnStandingReportsDays_Click?UID=' + UID + '&id=' + id + '&site=' + siteLocationId + '&Owner=' + ddlScaffoldOwnerValue + '&availablereportname=' + listboxAvailableReports + '&btn=prv&ClientID=' + clientID + '&SiteLocId=' + siteLocId + '&Days=' + Days);
+        }
+    }
+
+    function closePopup() {
+        var modal = document.getElementById('activityReportPopup');
+        modal.style.display = "none";
+    }
+</script>
+<style>
+    .rbtnPad {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .w3-btn {
+        background-color: #1ABB9C;
+        margin-bottom: 9px;
+        padding: 7px 12px;
+    }
+
+    .btn-danger {
+        margin-bottom: 9px;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    .modal-footer {
+        text-align: right;
+    }
+
+    .modal-close {
+        background-color: #ff3d3d;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .w3-modal {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+    }
+
+    body.modal-open {
+        pointer-events: none;
+    }
+</style>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+
+        <div runat="server" style="display: none;" id="art1">
+            @*<asp:Label ID="lblalert" runat="server"></asp:Label>*@
+            <label id="lblalert"></label>
+            <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">&times;</span>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="Sitelocidhide" style="display: none">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
+        <div class="col-lg-3 col-md-3 col-sm-4 col-xs-8 ">
+            <label>Site : </label>
+            @*<asp:DropDownList Style="padding: 0px" runat="server" Width="100%" ID="ddlsiteloctnid" CssClass="form-control" OnSelectedIndexChanged="ddlsiteloctnid_SelectedIndexChanged"></asp:DropDownList>*@
+            <select style="padding: 0px; width:100%;" id="ddlsiteloctnid" class="form-control" onchange="ddlOwnerName()"></select>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="hideowner" runat="server" style="display: none">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-3 col-md-3 col-sm-4 col-xs-8">
+            <label>Sub Owner</label>
+            @*<asp:DropDownList Style="padding: 0px" runat="server" Width="100%" ID="ddlScaffoldOwner" CssClass="form-control" AutoPostBack="true"></asp:DropDownList>*@
+            <select style="padding: 0px; width:100%;" id="ddlScaffoldOwner" class="form-control"></select>
+        </div>
+
+    </div>
+</div>
+
+@*<asp:HiddenField ID="sitelocationid" runat="server" /> <%--//tk hdnfield -18-Oct-2018--%>*@
+<input type="hidden" id="sitelocationid" />
+
+<div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+    <fieldset style="margin: 19px 2px; margin-left: 12px; height: 300px">
+        <legend></legend>
+        <div class="w3-row">
+            <div class="col-lg-2 col-md-2 rbtnPad">
+                @*<asp:LinkButton ID="btnPreview" Width="100%" runat="server" CssClass="w3-btn w3-teal w3-small" OnClick="btnPreview_Click" OnClientClick="return viewPrintReportclick();">
+                        <i class="fa fa-file-o"></i>&nbsp;Print
+                    </asp:LinkButton>*@
+                <button id="btnPreview" style="Width:100%" class="w3-btn w3-teal w3-small" onclick="btnPreview_Click();">
+                    <i class="fa fa-file-o"></i>&nbsp;Print
+                </button>
+            </div>
+
+            @*changes made on 30-Oct-2020*@
+            <div class="col-lg-2 col-md-2 rbtnPad">
+                <button type="button" Class="w3-btn w3-teal w3-small" id="ExportToCsv" Style="color:white; width: 100%;" onclick="ExportToCsv_Click()"><i class="fa fa-file-excel-o"></i>&nbsp;Export To CSV</button>
+            </div>
+
+
+            <div class="col-lg-2 col-md-2 rbtnPad">
+                @*<%--<asp:LinkButton ID="btnemail" Width="100%" runat="server" OnClick="btnemail_Click" CssClass="w3-btn w3-small w3-red" Visible="true">
+                        <i class="fa fa-envelope"></i>&nbsp;&nbsp;E-mail
+                    </asp:LinkButton>--%>*@
+            </div>
+            <div class="r-clearfix"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 rbtnPad">
+            <label for="listboxAvailableReports">Available Reports</label>
+            @*<asp:ListBox ID="listboxAvailableReports" OnSelectedIndexChanged="listboxAvailableReports_SelectedIndexChanged" CssClass="form-control" runat="server" ForeColor="Black" Style="width: 100%; height: 200px !important; border-radius: 3px;" AutoPostBack="TRUE" BackColor="#f2f2f2"></asp:ListBox>*@
+            <select id="listboxAvailableReports" size="20" class="form-control" style="width: 100%; height: 200px !important; border-radius: 3px; background-color:#f2f2f2;"></select>
+            <div class="r-clearfix"></div>
+
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 rbtnPad divDesc">
+            <label for="description">Description</label>
+            @*<asp:TextBox ID="listdescription" runat="server" CssClass="form-control" AutoPostBack="true" OnTextChanged="listdescription_TextChanged" TextMode="MultiLine" Rows="10" Style="max-width: 576px; min-width: 100%; height: 200px !important"></asp:TextBox>*@
+            <textarea id="listdescription" class="form-control" Rows="10" style="max-width: 576px; min-width: 100%; height: 200px !important" onchange="listdescriptionChange();"></textarea>
+            @*<input type="text" id="listdescription" class="form-control" Rows="10" style="max-width: 576px; min-width: 100%; height: 200px !important" onchange="listdescriptionChange();"/>*@
+        </div>
+    </fieldset>
+</div>
+
+
+<div id="activityReportPopup" class="w3-modal" style="display: none;">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="width: 500px; margin-top: 10%;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white"><i class="fa fa-calendar w3-text-yellow"></i>&nbsp;Select Report Duration</h4>
+        </header>
+        <div class="w3-container" style="padding: 20px;">
+            <h6 style="font:200">Please select the number of days for the report:</h6>
+            <div class="form-group">
+                <select id="daysDropdown" class="form-control">
+                    <option value="7">Last 7 Days</option>
+                    <option value="28">Last 28 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="31">Last 31 Days</option>
+                </select>
+            </div>
+            <div class="w3-center">
+                <button type="button" class="w3-btn w3-teal w3-small" onclick="submitDays()">Submit</button>
+                <button type="button" class="w3-btn w3-red w3-small" onclick="closePopup()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

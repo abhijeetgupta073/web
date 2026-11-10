@@ -1,0 +1,143 @@
+﻿
+@{
+    ViewBag.Title = "MainDepotRequestDetails";
+}
+
+<script src="~/Content/js/MainDepotRequestDetails.js?V1=1"></script>
+
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liCompany" runat="server" style="width: 191px">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotRequest" class="active" runat="server">
+                <a id="AnchorDepotRequestInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Request Inventory</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</div>
+
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                    <label id="lblto" Class="labeltext">To:</label>
+                    <input id="txtto" disabled="disabled" value="Depot" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                </div>
+                <div class="col-lg-4 col-md-3 col-sm-8 col-xs-8">
+                    <label id="lblfrom" Class="labeltext">From:</label>
+                    <input id="txtfrom" disabled="disabled" value="Main Depot Inventory"  Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+
+
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                    <label id="lbl" Class="labeltext">Requested By:</label>
+                    <input id="txtrequestedby" disabled="disabled"  Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                </div>
+                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3">
+                    <label id="lblrequestdate" Class="labeltext">Date:</label>
+                    <input id="txtrequesteddate" Class="form-control labeltext" Style="color: black; width:100px; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+                <div class="col-lg-1 col-md-2 col-sm-1 col-xs-1"></div>
+                <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+      
+                    <label id="lblTransId" Class="labeltext">Transaction ID:</label>
+                    <input id="txtTransId" disabled="disabled" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+            </div>
+
+            <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4">
+                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                    <h4 style="margin-top: 6px; font-size: 15px" id="H5" runat="server"><i class="fa fa-list"></i>&nbsp;Request Inventory Details <span style="margin-left: 5px;" id="Span5" runat="server"></span></h4>
+                    <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+      
+                        <li>
+                            <a id="Back" style="cursor: pointer; display:none;" class="w3-btn w3-green buttonBlue btn"  onclick="Back_Click();"><i class="fa fa-backward"></i>&nbsp;Save & Go Back</a>
+                        </li>
+                        <li>
+                            <a id="btnbackSite" style="cursor: pointer; background: none; color:black" class="w3-btn btn" onclick="Back_Click();"><i class="fa fa-backward"></i>&nbsp;Back</a>
+                        </li>
+
+                    </ul>
+
+                </div>
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6  col-xs-12 ajectrow">
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                          <label id="lbltab" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE ICON to save data</label>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            <label id="lblnote" Style="font-size: 11px; color: #151414;"><strong style="color:red">*</strong> Yellow indicates insufficient Quantity</label>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            <label id="lblJobMsg" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press <strong style="font-weight:bold">Save & Go Back </strong>to Confirm Request-Delivery</label>
+                        </div>
+                    </div>
+
+                    <div id="ddlmat" class="col-lg-2 col-md-2 col-sm-3  col-xs-12">
+                
+                        <label id="lblmaterial" Class="labeltext">Filter By MaterialType</label>
+                        <select id="ddlMaterialType" class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="MaterialChange()"></select>
+                    </div>
+
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12" style="margin-top: 2px">
+
+                        <label id="lbldesc" Class="labeltext" style="display:block">Description</label>
+                        <label id="lblTralblJobDescnsId" Class="labeltext" style="display:none">Delivery Description</label>
+                        <input id="txtdesc" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                    </div>
+                    <div id="ddlSupp" class="col-lg-2  col-md-2 col-sm-4 col-xs-12">
+                        @*<label id="lblSupplier" Class="labeltext">Supplier</label>
+                        <a title="Add new Supplier" onclick="addnewSupplier();" ID="btnSupplier" Style="float: right;cursor:pointer; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller"></i>Add</a>
+                        <select id="ddlSupplier" class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important"></select>*@
+                    </div>
+                    
+
+                    <div id="jobdropdown" style="display:none;">
+                        <div class="col-lg-3 col-md-3 col-sm-4  col-xs-9" style="margin-left: 1px">
+                     
+                            <label id="lblJob" Class="labeltext">Copy Historical Job Material List</label>
+                            <input type="text" id="ddljob" class="form-control" />
+                   
+
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="margin-top: 18px; margin-left: -1px;">
+                            <button type="button" Class="btn btn-primary" Style="border: 1px solid #82CAFA; width: 100%; height: 27px; padding-top: 3px; margin-left: -38px;" OnClick="btnSelect_Click()">Select</button>
+
+                        </div>
+                 
+                    </div>
+
+                    @*<asp:HiddenField runat="server" ID="getgridcount" />*@
+                    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6"></div>
+                    <div id="forinventory" class="col-lg-2 col-md-3 col-sm-3 col-xs-6" style="display: block; margin-top: 18px">
+         
+                        <button type="button" Class="w3-btn  w3-green buttonBlue" id="btnconfirm" Style="height: 26px !important;display: block; width: 105%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="btnconfirm_Click()">Confirm Request</button>
+
+                        <div id="lockimage" class="col-lg-12 col-md-12 col-sm-6 col-xs-6" runat="server" style="display: none">
+                            <img src="/images/lock.png" class="img-responsive" id="imglock" title="red pin" style="float: right; height: 50px; object-fit: contain; background-color: white;" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

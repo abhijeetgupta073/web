@@ -1,0 +1,439 @@
+﻿
+@{
+    ViewBag.Title = "VoidedOfflineInspectionsList";
+}
+
+<style>
+
+    #btnprint {
+        font-size: 15px;
+    }
+
+    .respText {
+        font-size: 15px;
+    }
+
+
+    #listyle {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+
+
+    td {
+        text-align: left;
+    }
+
+    .double-scroll {
+        width: auto;
+    }
+
+    .setWidth1, .setWidth2 {
+        min-width: 50px !important;
+    }
+
+    .setWidth6, .setWidth9 {
+        min-width: 60px !important;
+    
+
+    .setWidth3, .setWidth4, .setWidth5, .setWidth7, .setWidth8, .setWidth10 {
+        min-width: 80px !important;
+    }
+
+    .setWidth12 {
+        min-width: 100px !important;
+    }
+
+    .dt-button buttons-csv buttons-html5 {
+        display: none !important;
+    }
+
+
+    #tblOffSystemInspectionList_filter {
+        margin-right: 11px;
+    }
+
+    @@media (min-width:820px) and (max-width:1180px) {
+        #hiddendiv {
+            display: none
+        }
+    }
+
+    .w3-modal {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+    }
+
+    body.modal-open {
+        pointer-events: none;
+    }
+
+ 
+</style>
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+</head>
+
+        <script>
+            $(document).ready(function () {
+              BindallDropdown();
+                GetVoidedOfflineInspectionsListData();
+            });
+
+            function GetVoidedOfflineInspectionsListData() {
+                var id = getParameterByName('id');
+                var CreatedBy = $('#ddlCreatedBy option:selected').text();
+                var CreatedOn = $('#ddlCreatedOn option:selected').text();
+                $('#LoadingPanel1').show();
+                if (CreatedBy == "Select User--") {
+                    CreatedBy = "All";
+                }
+                if (CreatedOn == "Select--") {
+                    CreatedOn = "All";
+                }
+              
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/VoidedOfflineInspectionsList/GetVoidedOfflineInspectionsListData",
+                    data: JSON.stringify({ id: id , CreatedBy : CreatedBy , CreatedOn : CreatedOn}),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    maxJsonLength: 50000000, //Added on 26-07-2023 Set the maximum JSON length here, e.g., 50,000,000 characters
+                    async: false,
+                    success: function (response) {
+                        var str = "";
+                        var GetData = response;
+                        $('#DivtblVoidedOfflineInspectionsListListMessage').hide();
+                        $('#VoidedOfflineInspectionsListList').show();
+                        /*  $('#ChkAllInspections').show();*/
+                        /* $('#btnSaveInspect').prop('disabled', false);*/
+
+                        $('#tblVoidedOfflineInspectionsListList').DataTable().clear();
+                        $('#tblVoidedOfflineInspectionsListList').DataTable().destroy();
+
+                        if (GetData.length > 0) {
+
+                            for (var i = 0; i < GetData.length; i++) {
+                                var OfflineStatus = GetData[i].OfflineStatus == null ? "" : GetData[i].OfflineStatus;
+                                var Status = GetData[i].Status == null ? "" : GetData[i].Status;
+                                if (OfflineStatus != 'NotStarted' && OfflineStatus != 'Pipeline' && Status != 'NotStarted' && Status != 'Pipeline') {
+                                    var RegisterId = GetData[i].REGISTERId == null ? "" : GetData[i].REGISTERId;
+                                    //var ClientID = GetData[i].ClientID == null ? "" : GetData[i].ClientID;
+                                    var CreatedBy = GetData[i].CreatedBy == null ? "" : GetData[i].CreatedBy;
+                                    var CreatedOn = GetData[i].CreatedOn == null ? "" : GetData[i].CreatedOn;
+                                    var ScaffRef = GetData[i].ShowRegisterID == null ? "" : GetData[i].ShowRegisterID;
+                                    var ClientScaffref = GetData[i].ClientScaffref == null ? "" : GetData[i].ClientScaffref;
+                                    //var WONumber = GetData[i].WONumber == null ? "" : GetData[i].WONumber;
+                                    var Location = GetData[i].Location == null ? "" : GetData[i].Location;
+                                    var BuildingNo = GetData[i].BuildingNo == null ? "" : GetData[i].BuildingNo;
+                                    var FloorLevel = GetData[i].FloorLevel == null ? "" : GetData[i].FloorLevel;
+                                    var Bearing = GetData[i].Bearing == null ? "" : GetData[i].Bearing;
+                                    var Description1 = GetData[i].Description == null ? "" : GetData[i].Description;
+                                    //var Description = (Description1.length > 40) ? Description1.substring(0, 40) + '.....' : Description1;
+                                    var AssetNo = GetData[i].AssetNo == null ? "" : GetData[i].AssetNo;
+                                    //var DateTagged = GetData[i].DateTagged == null ? "" : GetData[i].DateTagged;
+                                    //var DaysSinceLastInsp = GetData[i].DaysSinceLastInsp == null ? "" : GetData[i].DaysSinceLastInsp;
+                                    //var Tonnage = GetData[i].Tonnage == null ? "" : GetData[i].Tonnage;
+                                    //var DesignType = GetData[i].DesignType == null ? "" : GetData[i].DesignType;
+                                    //var MaterialType = GetData[i].MaterialType == null ? "" : GetData[i].MaterialType;
+                                    //var DutyRating = GetData[i].DutyRating == null ? "" : GetData[i].DutyRating;
+                                    //var DateOFDismantle = GetData[i].DateOFDismantle == null ? "" : GetData[i].DateOFDismantle;
+                                    var InspectedBy = GetData[i].InspectedBy == null ? "" : GetData[i].InspectedBy;
+                                    //var HireDaysToDate = GetData[i].HireDaysToDate == null ? "" : GetData[i].HireDaysToDate;
+                                    //var TotalHireDays = GetData[i].TotalHireDays == null ? "" : GetData[i].TotalHireDays;
+                                    //var SAPNumber = GetData[i].SAPNumber == null ? "" : GetData[i].SAPNumber;
+                                    //var ScafType = GetData[i].ScafType == null ? "" : GetData[i].ScafType;
+                                    //var ClientRef = GetData[i].ClientRef == null ? "" : GetData[i].ClientRef;
+                                    //var OwnerName = GetData[i].OwnerName == null ? "" : GetData[i].OwnerName;
+                                    var SiteLocation = GetData[i].SiteLocation == null ? "" : GetData[i].SiteLocation;
+                                    //var ScaffoldOwner = GetData[i].ScaffoldOwner == null ? "" : GetData[i].ScaffoldOwner;
+                                    //var discipline = GetData[i].discipline == null ? "" : GetData[i].discipline;
+                                    var Comments = GetData[i].Comments == null ? "" : GetData[i].Comments;
+                                    var RecentInspDate = GetData[i].RecentInspDate == null ? "" : GetData[i].RecentInspDate;
+                                    var ClientScaffref = GetData[i].ClientScaffref == null ? "" : GetData[i].ClientScaffref;
+
+                                    str += "<tr>"
+                                    str += "<td class='setWidth0' style='display:none'></td>"
+                                    if (OfflineStatus.toUpperCase() == "Red".toUpperCase() || OfflineStatus.toUpperCase() == "Green".toUpperCase() || OfflineStatus.toUpperCase() == "Yellow".toUpperCase()) {
+
+                                        str += "<td class='setWidth1'><img src='/images/" + OfflineStatus + ".jpg' class='img-responsive' style='height: 22px;width: 22px;float: left;'/></td>";
+                                    }
+                                    else {
+                                        str += "<td class='setWidth1'>" + OfflineStatus + "</td>"
+                                    }
+                                    if (Status.toUpperCase() == "Red".toUpperCase() || Status.toUpperCase() == "Green".toUpperCase() || Status.toUpperCase() == "Yellow".toUpperCase()) {
+
+                                        str += "<td class='setWidth1'><img src='/images/" + Status + ".jpg' class='img-responsive' style='height: 22px;width: 22px;float: left;'/></td>";
+                                    }
+                                    else {
+                                        str += "<td class='setWidth1'>" + Status + "</td>"
+                                    }
+                                    str += "<td class='setWidth1' style='display:none;'>" + OfflineStatus + "</td>" // For Export Column Funclity
+                                    str += "<td class='setWidth1' style='display:none;'>" + Status + "</td>" // For Export Column Funclity
+                                    str += "<td class='setWidth1'>" + CreatedBy + "</td>"
+                                    str += "<td class='setWidth1'>" + DateFormat(CreatedOn) + "</td>"
+                                    str += "<td class='setWidth1'>" + ScaffRef + "</td>"
+                                    str += "<td class='setWidth2'>" + SiteLocation + "</td>"
+                                    str += "<td class='setWidth3'>" + Location + "</td>"
+                                    str += "<td class='setWidth4'>" + BuildingNo + "</td>"
+                                    str += "<td class='setWidth5'>" + AssetNo + "</td>"
+                                    str += "<td class='setWidth6'>" + FloorLevel + "</td>"
+                                    //str += "<td class='setWidth7'>" + DateFormat(RecentInspDate) + "</td>"
+                                    str += "<td class='setWidth8'>" + Bearing + "</td>"
+                                    //str += "<td class='setWidth10' style='cursor:pointer;' title='Click here to do Off System Inspection Update .'><input type='checkbox' id='ChkTransID_" + RegisterId + "' class='ChkTransID setWidth10' value=" + RegisterId + " ChkRegisterId_='" + RegisterId + "' /></td>"
+                                    //str += "<td class='setWidth9' style='cursor:pointer;' title='Click here to mark Inspection as Out Of Service .'><input type='checkbox' class='ChkTransIDOutOffServ setWidth9' id='OutOffServiceRegisterId_" + RegisterId + "'/></td>"
+                                    //str += "<td class='setWidth0' style='cursor:pointer;' title='Click here to mark Inspection as De-Planked .'><input type='checkbox' class='ChkTransIDDePlank setWidth9' id='DePlankRegisterId_" + RegisterId + "'/></td>"
+                                    //str += "<td class='setWidth13' style='cursor:pointer;' title='Click here to mark Inspection as Tied Down .'><input type='checkbox' class='ChkTransIDTieDown setWidth9' id='TieDownRegisterId_" + RegisterId + "'/></td>"
+
+                                    /* str += "<td class='setWidth11'><input id='txtcomment_" + RegisterId + "' type='text' class='setWidth11' /></td>"*/
+                                    str += "<td class='setWidth11'>" + Comments + "</td>"
+                                    str += "<td class='setWidth7'>" + RecentInspDate + "</td>"
+                                    str += "<td class='setWidth8'>" + InspectedBy + "</td>"
+                                    str += "<td class='setWidth8'>" + ClientScaffref + "</td></tr>"
+                                }
+                            }
+
+                            $('#tbodyVoidedOfflineInspectionsListList').append(str);
+
+                            $('#LoadingPanel1').hide();
+                        }
+                        $('#LoadingPanel1').hide();
+                        table = $('#tblVoidedOfflineInspectionsListList').DataTable({
+                            "bSort": false,
+                            "processing": true,
+                            searching: true,
+                            "bLengthChange": true,
+                            //"bInfo": false,
+                            autoWidth: true,
+                            scrollX: true,
+                            scrollY: true,
+                            scrollCollapse: true,
+                            scrollY: "60vh",
+                            "paging": false,
+                            //"lengthMenu": [10, 25, 50, 100, 200],
+                            //"pageLength": 50,
+
+                            dom: 'Bfrtip',
+                            buttons: [
+
+                                {
+                                    extend: 'csvHtml5',
+                                    title: 'Voided Offline Inspections List',
+                                    exportOptions: {
+                                        columns: [ 3,4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+                                        //  columns: [2]
+                                    },
+                                }
+                            ],
+
+                        });
+
+                        
+                    }
+                })
+
+               
+                $(".dt-button.buttons-csv.buttons-html5").hide();
+            }
+
+            function BindallDropdown() {
+                var id = getParameterByName('id');
+                $.ajax({
+                    url: '/VoidedOfflineInspectionsList/BindallDropdown',
+                    async: false,
+                    data: { id: id },
+                    success: function (response) {
+
+                        data = response;
+
+                        var ddlCreatedBy = "<option value=''>Select User--</option>";
+                        $.each(response.ddlCreatedBy, function (idx, obj) {
+                            if (obj != null) {
+                                // ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                                if (response.ddlCreatedBy.length === 1) {
+                                    // If there is only one site, set ddSite to that site and break the loop
+                                    ddlCreatedBy = '<option value="' + obj.CreatedBy + '" selected>' + obj.CreatedBy + '</option>';
+                                } else {
+                                    // If there are multiple sites, append the options normally
+                                    ddlCreatedBy += '<option value="' + obj.CreatedBy + '">' + obj.CreatedBy + '</option>';
+                                }
+                            }
+                        });
+
+                        var ddlCreatedOn = "<option value=''  disabled selected='selected'>Select--</option>";
+
+                        $.each(response.ddlCreatedOn, function (idx, obj) {
+                            if (obj != null) {
+                                ddlCreatedOn += '<option value="' + obj.CreatedOn + '">' + obj.CreatedOn + '</option>';
+                            }
+                        });
+
+
+
+                        $('#ddlCreatedBy').empty().append(ddlCreatedBy);
+                        $('#ddlCreatedOn').empty().append(ddlCreatedOn);
+
+                    }
+                });
+            }
+    
+            function ExportToCSV() {
+              
+        $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+            }
+
+            function ddlCreatedBy_SelectedIndexChanged() {
+                dropdownCreatedOn();
+                GetVoidedOfflineInspectionsListData();
+
+            }
+            function ddlCreatedOn_SelectedIndexChanged() {
+                GetVoidedOfflineInspectionsListData();
+
+            }
+            function dropdownCreatedOn() {
+                var id = getParameterByName('id');
+               
+                var CreatedBy = $('#ddlCreatedBy option:selected').text();
+                
+                if (CreatedBy == "Select User--") {
+                    CreatedBy = "All";
+                }
+                $.ajax({
+                    url: '/VoidedOfflineInspectionsList/dropdownCreatedOn',
+                    type: 'POST',
+                    data: { id: id, CreatedBy: CreatedBy},
+                    success: function (response) {
+
+                        var ddlCreatedOn = "<option value=''>All</option>";
+                        $.each(response, function (idx, obj) {
+                            if (obj != null) {
+                                ddlCreatedOn += '<option value="' + obj.CreatedOn + '">' + obj.CreatedOn + '</option>';
+                            }
+                        });
+
+                        $('#ddlCreatedOn').empty().append(ddlCreatedOn);
+
+                    }
+                });
+            }
+
+ 
+
+    function Refresh_Click() {
+        window.location.reload();
+    }
+   
+  
+
+</script>
+
+<input type="hidden" id="hdnTimeOffSet" value="0" runat="server" />
+@*<div class="clearfix"></div>*@
+<div class="row">
+    <div class="col-lg-8 col-md-4 col-sm-4 col-xs-12">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span id="lblVoidedOfflineInspectionsList" Font-Size="16px" Font-Bold="true">Voided Offline Inspections List</span></b></h4>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+            <label id="lblCreatedBy">Created By</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+  <select id="ddlCreatedBy" class="form-control" style="width:100%" onchange="ddlCreatedBy_SelectedIndexChanged()"></select>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+            <label id="lblCreatedOn">Created On</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+            <select id="ddlCreatedOn" class="form-control" style="width:100%" onchange="ddlCreatedOn_SelectedIndexChanged()"></select>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="display: flex; justify-content: center;margin-bottom: 10px; ">
+
+        <button id="ExportToCsvButton" class="btn w3-btn w3-teal" style="Width: -webkit-fill-available; height: 33px; margin-bottom: 10px;" onclick="ExportToCSV()"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+    </div>
+
+    <!--<div class="col-lg-2 col-md-2 col-sm-4 col-xs-12" style="display: flex; justify-content: center;margin-bottom: 10px; ">-->
+    @*<asp:LinkButton ID="btnprint" OnClick="btnprint_Click" runat="server" Width="90px" height="33px" CssClass="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+    <!--<button id="btnprint" OnClick="btnprint_Click()" style="Width: -webkit-fill-available; height: 33px; margin-bottom: 10px;" Class="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+    </div>-->
+    <!--<div class="col-lg-2 col-md-2 col-sm-4 col-xs-12" style="display: flex; justify-content: center;margin-bottom: 10px; ">-->
+    @*<asp:LinkButton runat="server" ID="btnSaveInspect" OnClick="btnSaveInspect_Click" CausesValidation="true" ValidationGroup="btnInspectSave" CssClass="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></asp:LinkButton>*@
+    <!--<button id="btnSaveInspect" OnClick="btnSaveInspect_Click()" style="width: -webkit-fill-available; margin-bottom: 10px;" Class="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></button>
+    </div>-->
+
+
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="display: flex; justify-content: center; margin-bottom: 10px;">
+        <button id="btnSaveInspect" onclick="Refresh_Click()" style="width: -webkit-fill-available; background-color: #808080; border: none; color: white; height: 33px;" class="w3-btn w3-small btnheight">
+            <i class="fa fa-refresh"></i>&nbsp;Refresh
+        </button>
+    </div>
+    @*<div class="col-lg-2 col-md-2 col-sm-4 col-xs-12" style="display: flex; justify-content: center; margin-bottom: 10px;">
+            <button id="btnClearOfflineData" onclick="BtnOnclickclerOfflinedata()" style="width: -webkit-fill-available; background-color: #8b2e93; border: none; color: white; height: 33px;" class="w3-btn w3-small btnheight">
+                <i class="fa fa-step-backward"></i>&nbsp;Clear Offline Data
+            </button>
+        </div>*@
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="VoidedOfflineInspectionsListList" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblVoidedOfflineInspectionsListList" class="table table-striped " style="width:100%">
+                <thead style="background-color: #efefef; color: #716262;width: 100%;">
+                    <tr>
+                        <th class="setWidth0" style="display:none;"></th>
+                        <th class="setWidth0">Offline Status</th>
+                        <th class="setWidth0">Online Status</th>
+                        <th class="setWidth0" style="display:none;">Offline Status</th>
+                        <th class="setWidth0" style="display:none;">Online Status</th>
+                        <th class="setWidth1">Created By</th>
+                        <th class="setWidth1">Created On</th>
+                        <th class="setWidth1">Scaf Ref #</th>
+                        <th class="setWidth2">Site</th>
+                        <th class="setWidth3">Location</th>
+                        <th class="setWidth4">Building / Module No.</th>
+                        <th class="setWidth5">Asset # / Func. Loc</th>
+                        <th class="setWidth6">Floor Level</th>
+                        @*<th class="setWidth7">Recent Insp Date</th>*@
+                        <th class="setWidth8">Bearing</th>
+                        @* Commeted On 07-03-2023 Now Update All Has Been Renamed as Inspection *@
+                        @*<th class="setWidth10">Update All<input type='checkbox' class='ChkAllID setWidth10' ChkRegisterId_='" + RegisterId + "' /></th>*@
+                        @*<th class="setWidth10">Inspection<input type='checkbox' class='ChkAllID setWidth10' title="Tick this box to Update All Inspections" ChkRegisterId_='" + RegisterId + "' /></th>*@
+                        @*Comment on the 16 oct for hodi ccheck box all inspection and re arrange the order *@
+                        @*<th class="setWidth10">Inspection<div id="DivAllInspectionCheckBox"><input id="ChkAllInspections" type='checkbox' class='ChkAllID setWidth10' title="Tick this box to Update All Inspections" ChkRegisterId_='" + RegisterId + "' /></div></th>
+        <th class="setWidth9">Out Of Service</th>
+        <th class="setWidth0">De-Planked</th>
+        <th class="setwidth13">Tied-Down</th>*@
+
+                        <th class="setWidth11">Comments</th>
+                        <th class="setWidth7">Recent Insp Date</th>
+                        <th class="setWidth8">Inspected By</th>
+                        <th class="setWidth8">Client Ref</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyVoidedOfflineInspectionsListList" style="width:100%"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+

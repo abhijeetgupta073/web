@@ -1,0 +1,669 @@
+﻿
+@{
+    ViewBag.Title = "DeliveryDocketDocument";
+}
+
+<script>
+
+    $(function () {
+
+        var lblclientValues = '@ViewBag.lblclient';
+
+        $('#lblclient').html(lblclientValues.replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+
+        deliveryDocketDoc();
+
+        $("#getCamera").on("click", function () {
+            // alert();
+            $("#cancelsnap").on("click", function () {
+                $("#btnOpenModel").css("display", "none");
+                cameraStream.stop();
+            });
+            $("#btnOpenModel").css("display", "block");
+            $(".hdnCamerabefore").css("display", "block");
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var video = document.querySelector('video#video');
+            var cameraStream = null;
+            var mediaConfig = { video: true };
+            var errBack = function (e) {
+                console.log('An error has occurred!', e)
+            };
+            // Put video listeners into place
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(mediaConfig).then(function (stream) {
+                    video.srcObject = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                });
+            }
+            /* Legacy code below! */
+            else if (navigator.getUserMedia) { // Standard
+                navigator.getUserMedia(mediaConfig, function (stream) {
+                    video.src = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                }, errBack);
+            }
+            else if (navigator.mozGetUserMedia) {// Mozilla-prefixed
+                navigator.mozGetUserMedia(mediaConfig, function (stream) {
+                    video.src = window.URL.createObjectURL(stream);
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                }, errBack);
+            }
+            // Trigger photo take
+            document.getElementById('snap').addEventListener('click', function () {
+                $("#btnOpenModel").css("display", "none");
+                $('#hdncapture').val("true");
+                context.drawImage(video, 0, 0, 640, 480);
+                var image = document.getElementById("canvas").toDataURL("image/png");
+                $("#tempimg").val(image);
+                cameraStream.stop();
+            });
+        });
+
+    });
+
+    $(document).ready(function () {
+        var GetisSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && !navigator.userAgent.match('CriOS');
+        if (GetisSafari == false) {
+            $(".nonsafari").css("display", "block");
+            $(".safari").css("display", "none");
+
+            var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                $(".mobileApp").css("display", "block");
+                $(".desktopApp").css("display", "none");
+                $(".hideAudioMob").css("display", "none");
+            } else {
+                $(".mobileApp").css("display", "none");
+                $(".desktopApp").css("display", "block");
+            }
+        } else {
+            $(".nonsafari").css("display", "none");
+            $(".safari").css("display", "block");
+            $(".hideAudioMob").css("display", "none");
+        }
+
+        $("#getSign").on("click", function () {
+            // $("#btnOpenModel4").click();
+            $("#btnsignModal").click();
+        });
+    });
+    $(document).on("change", ".file_video", function (evt) {
+        $("#Imageblock").css("display", "none");
+        var $mobImagesource = $('#imagetruck');
+        var base64mobdata;
+        var reader = new FileReader();
+        reader.readAsDataURL(this.files[0]);
+        var name = this.files[0].name;
+        $("#nameget").val(name);
+        reader.onloadend = function () {
+            base64mobdata = reader.result;
+            console.log(base64mobdata);
+            $mobImagesource[0].src = base64mobdata;
+            $("#tempimg").val(base64mobdata);
+        }
+
+        //  $("#ContentPlaceHolder1_imagetruck").css("display", "none");
+        $("#imagetruck").css("display", "none");
+    });
+
+
+
+
+    $(document).on("change", ".mob_file_image", function (evt) {
+        $("#Imageblock").css("display", "none");
+        var $mobImagesource = $('#imagetruck');
+        var base64mobdata;
+        var reader = new FileReader();
+        reader.readAsDataURL(this.files[0]);
+        var name = this.files[0].name;
+        $("#nameget").val(name);
+        reader.onloadend = function () {
+            base64mobdata = reader.result;
+            console.log(base64mobdata);
+            $mobImagesource[0].src = base64mobdata;
+            $("#tempimg").val(base64mobdata);
+        }
+
+        $("#imagetruck").css("display", "none");
+    });
+
+
+
+
+
+    function hide() {
+        $('#Adddocs').hide();
+    }
+
+    function OpenBrowse() {
+        $(".InpFile").trigger("click");
+    }
+
+    function filepath() {
+        $('#LoadingPanel1').show();
+        var files;
+        // Checking whether FormData is available in browser
+        if (window.FormData !== undefined) {
+            if (files == null || files == "") {
+                var fileUpload = $('#fileuplod').get(0);
+                files = fileUpload.files;
+            }
+            var fileUpload = $('#fileuplod').get(0);
+            // Create FormData object
+            var fileData = new FormData();
+            if (files.length != 0) {
+
+                var FileName = files[0].name;
+                var FileSize = files[0].size;
+                var Extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+
+                if (Extension.toLowerCase() == "gif".toLowerCase() || Extension.toLowerCase() == "png" || Extension.toLowerCase() == "jpg".toLowerCase() || Extension.toLowerCase() == "jpeg".toLowerCase() || Extension.toLowerCase() == "pdf".toLowerCase() || Extension.toLowerCase() == "docx".toLowerCase() || Extension.toLowerCase() == "xlsx".toLowerCase() || Extension.toLowerCase() == "m4a".toLowerCase() || Extension.toLowerCase() == "Wav".toLowerCase() || Extension.toLowerCase() == "xls".toLowerCase() || Extension.toLowerCase() == "doc".toLowerCase()) {
+
+                    fileData.append(files[0].name, files[0]);
+
+                }
+            }
+
+            var UID = getParameterByName('UID');
+            var UserRole = getParameterByName('UserRole');
+            var id = getParameterByName('id');
+            var transId = getParameterByName('TranId');
+            var RInvId = getParameterByName('RInvId');
+            var Site = getParameterByName('Site');
+            var Job = getParameterByName('Job');
+
+            var txtdesc = $('#txtdesc').val();
+            var temimg = $('#tempimg').val();
+            var fileuplod = $('#fileuplod').val();
+
+            fileData.append('UID', UID);
+            fileData.append('ClientID', id);
+            fileData.append('TransId', transId);
+            fileData.append('txtdesc', txtdesc);
+            fileData.append('RInvId', RInvId);
+            fileData.append('UserRole', UserRole);
+            fileData.append('image', temimg);
+            fileData.append('fileUpload', fileuplod);
+            fileData.append('Site', Site);
+            fileData.append('Job', Job);
+            if (txtdesc != null && txtdesc != '') {
+                $.ajax({
+                    url: '/DeliveryDocketDocument/btnsave_Click',
+                    type: "POST",
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    data: fileData,
+                    success: function (response) {
+                        var res = response;
+                        //$('#art1').addClass("w3-section w3-card-12  j-close j-alertBox-Success").css('display', 'block');
+                        //$('#alertlabel1').text("Success ! Data Saved Successfully.");
+                        //var Response = { Result: "Success", Message: "Data Saved Successfully." };
+                        CustomAlert(response);
+                        $('#Adddocs').hide();
+                        location.reload();
+                       // deliveryDocketDoc();
+                    }
+                });
+            } else {
+                //$('#art1').addClass("w3-section w3-card-12 j-alertBox-Failed").css('display', 'block');
+                //$('#alertlabel').text("Alert ! Fill Description.");
+                var Response = { Result: "Failed", Message: "Please Fill Description." };
+                CustomAlert(Response);
+                $('#LoadingPanel1').hide();
+            }
+        }
+    }
+
+
+    function btnCAncel_Click() {
+        var Href = window.location.href.split('?');
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var TranId = getParameterByName('TranId') == null ? "" : getParameterByName('TranId');
+        var RInvId = getParameterByName('RInvId') == null ? "" : getParameterByName('RInvId');
+
+        // var EncryptData = [transId];
+        // var encryData = Encrypt(EncryptData);
+        // transId = encryData[0];
+
+        var DecryptData = Decrypt([TranId, RInvId]);
+        TranId = DecryptData[0];
+        RInvId = DecryptData[1];
+
+
+        //if (Request.QueryString["TranId"] != null) {
+        if (TranId != null && TranId != 0) {
+            window.location.href = '/RequestInventory/RequestInventory?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id;
+        }
+        if (RInvId != null && RInvId != 0) {
+            window.location.href = '/ReturnInventory/ReturnInventory?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id;
+        }
+    }
+
+
+    $(function () {
+        $('#AddNewRecordButton').click(function () {
+            setTimeout(function () {
+                $('.rgEditForm').css('display', 'none');
+            }, 1000);
+        });
+    });
+
+    function deliveryDocketDoc() {
+        $('#LoadingPanel1').show();
+        var id = getParameterByName('id');
+        var transId = getParameterByName('TranId');
+        var RInvId = getParameterByName('RInvId');
+
+        $.ajax({
+            url: '/DeliveryDocketDocument/GetdeliveryDocketDoc',
+            type: 'get',
+            data: { id: id, transId: transId, RInvId: RInvId },
+            async: false,
+            success: function (response) {
+                var str = "";
+                var GetData = response;
+                $('#tblDeliveryDocketDocument').DataTable().clear();
+                $('#tblDeliveryDocketDocument').DataTable().destroy();
+
+                if (GetData.length > 0) {
+
+                    for (var i = 0; i < GetData.length; i++) {
+                        var DDocumentId = GetData[i].DDDocumentId == null ? "" : GetData[i].DDDocumentId;
+                        var DocumentName = GetData[i].DocumentName == null ? "" : GetData[i].DocumentName;
+                        var Description = GetData[i].Description == null ? "" : GetData[i].Description;
+                        var DateOfUpload = GetData[i].DateOfUpload == null ? "" : GetData[i].DateOfUpload;
+                        var TransID = GetData[i].TransID == null ? "" : GetData[i].TransID;
+
+                        str += "<tr>"
+                        str += "<td style='display:none;'>" + + "</td>";
+                        // str += "<td id='DeleveryDocIDEdit_" + i + "' title='Edit Record' style='cursor:pointer;' class='expand fa fa-pencil'><i class='fa fa-pencil' onclick=ShowEditPopup('" + DDocumentId + "')></i></td>";
+                        //str += "<td id='DeleveryDocIDEdit_" + i + "' title='Edit Record' style='cursor:pointer;' class='expand fa fa-pencil' rowNumberId='" + DDocumentId + "' onclick=OpeEditPopup('" + DDDocumentID + "','" + DocumentName + "')></td>";
+                        str += "<td id=" + DDocumentId + " title='Click here for Edit' style='cursor:pointer;' DDescription='" + Description + "'><i class='fa fa-pencil' onclick=OpeEditPopup('" + DDocumentId + "','" + DocumentName + "')></i></td>";
+                        str += "<td id='DeleveryDocIDDelete_" + i + "' title='Delete' style='cursor:pointer;'><i class='fa fa-trash' onclick=ShowDeletePopup('" + DDocumentId + "')></i></td>";
+
+                        //str += "<td id='JobId_" + i + "' style='text-align:center;'><input type='Radio' name='JonSelected' class='ChkJobIdID' JobId_='" + JobId + "'/></td>"
+
+                        str += "<td>" + Description + "</td>"
+                        str += "<td>" + DateFormat(DateOfUpload) + "</td>"
+                        //str += "<td id='DeleveryDocID_" + i + "' title='View Record Record' style='cursor:pointer;'><input type="button" id="tbnView" onclick=ViewRecord('" + DDocumentId + "')/><i class='fa fa-pencil' onclick=ViewRecord('" + DDocumentId + "')></i></td>";
+                        str += "<td id='DeleveryDocID_" + i + "' title='View Record Record' style='cursor:pointer;'><button type='button' id='tbnView' Class='w3-btn w3-teal' onclick=ViewRecord('" + DDocumentId + "') ><i class='fa fa-search'></i>&nbsp;View</button></td>";
+                        str += "</tr>"
+                    }
+
+                    $('#tbodyTblDeliveryDocketDoc').append(str);
+                }
+                    $('#LoadingPanel1').hide();
+                    table = $('#tblDeliveryDocketDocument').DataTable({
+                        "bSort": false,
+                        "processing": true,
+                        searching: true,
+                        "bLengthChange": false,
+                        "bInfo": false,
+                        autoWidth: false,
+                        scrollX: true,
+                        scrollCollapse: true,
+                        scrollY: "60vh",
+                        "paging": false,
+                        "ordering": false,
+                        "info": false
+                    });
+
+            }
+        });
+    }
+
+    function ShowDeletePopup(DDDocumentId) {
+        $('#hdnDocumentId').val(DDDocumentId);
+        $("#confmodal").css("display", "block");
+    }
+    function btnno_Click() {
+        $("#confmodal").css("display", "none");
+    }
+    function btnyes_Click() {
+        $('#LoadingPanel1').show();
+        var id = getParameterByName('id');
+        var DocumentId = $('#hdnDocumentId').val();
+        $("#confmodal").css("display", "none");
+        $.ajax({
+            url: '/DeliveryDocketDocument/DeleteDocument',
+            type: 'post',
+            data: { id: id, DocumentId: DocumentId },
+            async: false,
+            success: function (response) {
+                var Result = response;
+                if (Result > 0) {
+                    var Response = { Result: "Success", Message: "Record Delete Successfully." };
+                     CustomAlert(Response);
+                    deliveryDocketDoc();
+                } else {
+                    var Response = { Result: "Failed", Message: "Record Not Delete." };
+                    CustomAlert(Response);
+                }
+            }
+        });
+    }
+    function ViewRecord(DDocumentId) {
+        var id = getParameterByName('id');
+        var DocumentId = DDocumentId;
+        $.ajax({
+            url: '/DeliveryDocketDocument/ViewDocument',
+            type: 'post',
+            data: { id: id, DocumentId: DocumentId },
+            async: false,
+            success: function (response) {
+                var Result = response;
+                if (response.result == "Success") {
+
+                    var Path = response.Message;
+                    // window.open('" +Path  + "', '_blank');
+                    window.open(Path);
+                    //$('#art1').addClass("w3-section w3-card-12  j-close j-alertBox-Success").css('display', 'block');
+                    //$('#alertlabel1').text("Success ! Record Deleted Successfully.");
+                    //location.reload();
+                } else {
+
+                }
+            }
+        });
+    }
+
+
+    //function OpeEditPopup(DDDocumentID, Description, DocumentName) {
+    function OpeEditPopup(DDDocumentID, DocumentName) {
+        $('#EditPopup').css("display", "block");
+
+        var Description = $('#' + DDDocumentID).attr("DDescription");
+
+        $('#hdnDocumentId').val(DDDocumentID);
+        $('#txtdescription').val(Description);
+        $('#hdnDocumentName').val(DocumentName);
+    }
+
+
+    function btneditSave() {
+
+        $('#LoadingPanel1').css('display', 'block');
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var hdnDDDocumentID = $('#hdnDocumentId').val();
+        var txtdescription = $('#txtdescription').val();
+        var hdnDocumentName = $('#hdnDocumentName').val();
+
+        $.ajax({
+            url: '/DeliveryDocketDocument/btnEditSave',
+            type: 'POST',
+            data: JSON.stringify({ id: id, UID: UID, hdnDDDocumentID: hdnDDDocumentID, txtdescription: txtdescription, hdnDocumentName: hdnDocumentName }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+
+            success: function (response) {
+                var gat = response;
+                if (response == "Success") {
+
+                    $('#EditPopup').css("display", "none");
+
+                    var Response = { Result: "Success", Message: "Record Saved Successfully." };
+                    CustomAlert(Response);
+                    deliveryDocketDoc();
+                    $('#LoadingPanel1').css('display', 'none');
+                }
+            }
+        });
+    }
+    function btnCancel() {
+        $('#EditPopup').css("display", "none");
+    }
+
+
+</script>
+
+<div class="row">
+    <input type="hidden" id="hdnDocumentId" />
+    <input type="hidden" id="hdnDocumentName" />
+
+
+
+    <div class="col-lg-7 col-md-8 col-sm-8 col-xs-8">
+        <h4 class="heading" style="color: #0070ba">
+            <i class="fa fa-book"></i>
+            <label id="lblclient" Style="color: #0070ba !important ; font-size:16px!important"></label>
+        </h4>
+
+    </div>
+    @*<div class="col-lg-1 col-md-2 col-sm-2">
+            <button type="button" class="btn btn-dark" onclick="btnCAncel_Click()"; style="background-color:#009688 !important;"><i class="fa fa-backward" aria-hidden="true"></i>&nbsp;Back</button>
+        </div>*@
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+        <div class="row" @*style="float:right"*@>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <br />
+                <button type="button" class="btn btn-dark" style="background-color:#009688 !important; border-color:none !important" onclick="$('#Adddocs').show();"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Add Document</button>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <br />
+                <button type="button" class="btn btn-md"  style="background-color:brown !important; border-color:none !important; width:135px;" onclick="btnCAncel_Click()"><i class="fa fa-backward" aria-hidden="true"></i>&nbsp;Back</button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div id="DeliveryDocketDocumentId" style="color: black; width: 100%">
+        <table id="tblDeliveryDocketDocument" class="table table-striped ">
+            <thead style="background-color: #efefef; color: #716262; font-weight:bold;">
+                <tr>
+                    <td style="display:none;"></td>
+                    <td></td>
+                    <td></td>
+                    <td>Description</td>
+                    <td>Date Of Upload</td>
+                    <td>View</td>
+                </tr>
+            </thead>
+            <tbody id="tbodyTblDeliveryDocketDoc"></tbody>
+        </table>
+    </div>
+</div>
+
+    
+@*<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>*@
+
+
+
+
+@*<div id="Adddocs" class="w3-modal">*@
+<div id="Adddocs" class="w3-modal">
+    <div class="w3-modal-content w3-round-medium w3-animate-input" style="margin-top: 4%; width: 40%; color: black;">
+        <header class="w3-container nln-gray-bg">
+            <div class="row">
+                <div class="col-lg-9 col-sm-9 col-md-9 col-xs-9">
+                    <h5 class="w3-text-white">Add Document</h5>
+                </div>
+                <div class="col-lg-3 col-sm-3 col-md-3 col-xs-3">
+                    <button type="button" onclick="hide()" style="background-color: #686e78 !important;
+        float: right;
+        border: none;
+        color: red;
+        font-weight: bold;
+        font-size: 32px;
+        height: 40px;
+        margin-top: 1px;" data-dismiss="modal">
+                        &times;
+                    </button>
+                </div>
+            </div>
+
+        </header>
+        <div class="w3-container">
+            <div class="row w3-padding-top">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <label>Description<span style="color: red">&nbsp*</span></label>
+                    @*<asp:TextBox TextMode="MultiLine" Style="padding: 0px" runat="server" Width="100%" ID="txtdesc"></asp:TextBox>
+                        <asp:RequiredFieldValidator ID="rfv" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtdesc" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+                    <br />
+                    <textarea id="txtdesc" cols="30" rows="1" style="margin:0px; width:100%;"></textarea>
+                </div>
+            </div>
+            <div class="row w3-padding-top">
+                <div class="nonsafari">
+                    <div class="desktopApp">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-6">
+                            @*<asp:FileUpload Style="display: none;" onchange="filepath(); return ValidateFileUpload(this)" AllowMultiple="true" ForeColor="Black" runat="server" ID="fileuplod" />
+                                <asp:LinkButton runat="server" Width="100%" CausesValidation="false" OnClientClick="upload()" ID="btnbrowse" CssClass="w3-btn w3-indigo w3-padding-small"><i class="fa fa-paperclip"></i>&nbsp;Browse</asp:LinkButton>*@
+                            <button type="button" class="w3-btn w3-indigo w3-padding-small" style="width: 100%; height: 29px;" onclick="OpenBrowse();"><i class="fa fa-paperclip" aria-hidden="true"></i>&nbsp;Browse</button>
+                            <input type="file" style="display:none;" class="InpFile" id="fileuplod" />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-4">
+                            @*<button type="button" id="getCamera" style="width: 100%; height: 29px;" class="btn w3-btn w3-ripple w3-blue-grey imagesize">Capture</button>*@
+                            <button type="button" id="getCamera" style="width: 100%; height: 29px;" class="btn w3-btn w3-ripple w3-blue-grey imagesize">Capture</button>
+                            <input type="hidden" ID="hdncapture" Value="" />
+                            <input type="hidden" ID="nameget" Value="" />
+                            <input type="hidden" id="tempimg" name="tempimg" />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-4">
+                            <button type="button" id="getCamera" style="width: 100%; height: 29px;" onclick="filepath();" class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                        </div>
+                    </div>
+                    <div class="mobileApp" style="display: none; margin-left: 11px;">
+                        @*<%--<div runat="server" id="mob_ImageBlock" style="display: none; width: 50%;">
+                                <asp:Image runat="server" src="" ID="mobImage" CssClass="img-responsive img-thumbnail chngeimg" />
+                            </div>--%>*@
+                        <label for="mob_file_image" class="custom-file-upload" style="display: none;">
+                            <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                        </label>
+                        <input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn" accept="image/*;capture=camera" />
+                    </div>
+                    @*<asp:Image ID="imagetruck" Style="display: none" runat="server" Width="510px" Height="360px" CssClass="img-thumbnail img-responsive" src="../images/noimg.jpg" />*@
+                    <img id="imagetruck" Style="display: none;Width:510px; Height:360px;" Class="img-thumbnail img-responsive" src="~/images/noimg.jpg" />
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-4">
+                        @*<asp:LinkButton Width="100%" Style="height: 29px; margin: 2px" runat="server" ValidationGroup="Save" ID="btnsave1" OnClick="btnsave_Click" OnClientClick="ButtonClient();" CssClass=" w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</asp:LinkButton>*@
+
+                    </div>
+                    <div runat="server" id="Imageblock" class="hdnCamerabefore" style="display: none; width: 50%;">
+                        @*<asp:Image runat="server" src="" ID="imga" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                    </div>
+                </div>
+                <div class="safari">
+                    <div runat="server" id="safariImageBlock" style="display: none; width: 50%;">
+                        @*<asp:Image runat="server" src="" ID="Image3" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                        <img scr="" id="Image3" Class="img-responsive img-thumbnail chngeimg" />
+                    </div>
+                    <label for="file_video" class="custom-file-upload" style="display: none;">
+                        <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                    </label>
+                    <input type="file" name="file" id="file_video" class="file_video custombtn" accept="image/*;capture=camera" />
+
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-4">
+                        @*<asp:LinkButton Width="100%" Style="height: 29px;" runat="server" ValidationGroup="Save" ID="btnsave2" OnClick="btnsave_Click" OnClientClick="ButtonClient();" CssClass=" w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</asp:LinkButton>*@
+                        <button Width="100%" Style="height: 29px;" ValidationGroup="Save" id="btnsave2" OnClick="btnsave_Click" OnClientClick="ButtonClient();" Class=" w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-4">
+                    @*<asp:LinkButton Width="100%" Style="height: 29px;" runat="server" ValidationGroup="Save" ID="btnsave" OnClick="btnsave_Click" OnClientClick="ButtonClient();" CssClass=" w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</asp:LinkButton>*@
+
+                </div>
+                <div runat="server" id="Photoblock" class="hdnCamerabefore" style="display: none; width: 200px;">
+                    <canvas id="canvas" width="640" height="480" style="width: 316px; height: 180px; margin-left: 14px; margin-top: 10px;"></canvas>
+                </div>
+            </div>
+            <div class="row w3-padding-top">
+                <div class="col-lg-6 col-sm-6 col-md-6">
+                </div>
+                <div class="col-lg-6 col-sm-6 col-md-6" style="display: none">
+                    <label id="lblfilename"></label>
+
+                </div>
+            </div>
+            <br />
+        </div>
+
+    </div>
+</div>
+
+<div id="confmodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                @*<asp:LinkButton runat="server" ID="btnyes" CausesValidation="false" CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click"> <i class=" glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+
+                @*<asp:LinkButton runat="server" CausesValidation="false" ID="btnno" CssClass="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnno_Click"><i class=" glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div id="btnOpenModel" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4" runat="server">Capture Your Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <video id="video" style="width:100%; height:auto" autoplay></video>
+                <div class="row">
+                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+                    </div>
+                    <div class="col-lg-5 col-md-6 col-sm-3 col-xs-3"></div>
+                    <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="cancelsnap" class="btn btn-danger" onclick="Cancel();">Cancel</button>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="EditPopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Edit Record</h4>
+        </header>&nbsp;
+        <div class="row">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                <label id="lbldescription" style="font-size: 15px">Description<span style="color: red">&nbsp*</span></label>
+            </div>
+            <div class="col-xs-8 col-lg-8 col-md-8 col-sm-8">
+                <input type="text" id="txtdescription" class="form-control" required />
+            </div>
+
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <button id="btneditSave" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btneditSave()"> <i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Save</button>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                <button id="btnCancel" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="btnCancel()"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

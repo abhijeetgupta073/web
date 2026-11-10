@@ -1,0 +1,473 @@
+﻿
+@{
+    ViewBag.Title = "InspectionList";
+}
+<link href="~/Content/Css/jquery.datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<script src="~/Content/js/InspectionList.js?V1=11"></script>
+<script src="~/Content/js/jquery.datetimepicker.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#LiInspection').removeClass('active').addClass('active');
+        $('#hdnTimeOffSet').val(new Date().getTimezoneOffset());  // Get Time OffSet
+        @*if ('@ViewBag.OffSystemInspection' == 'True') {
+       $('#btnDeplank').css('display', 'none');
+       $ ('#btnadddocs').css('display', 'none');
+       }*@
+        if ('@ViewBag.CycloneManagement' == 'False') {
+            $('#btnDeplank').css('display', 'none');
+        }
+
+        ShowJobInfoDetails();
+        BindallDropdown();
+        GetInspectionListData();
+
+        var today = new Date();
+
+        //$('#rdpInspectiondate').val(getDateTime());
+        //$('#dateInspection').val(getDateTime());
+        $('#rdpInspectiondate').datetimepicker({
+            // datepicker: false,
+            format: 'd-M-Y H:i A',
+            //format: 'D M-d-Y g:i a',
+            //formatTime: 'g:i a',
+            // dateFormat: "mm/dd/yy",
+            // timeFormat: "hh:mm:ss",
+            maxDate: today,
+            //maxTime: '18:00'
+            // maxTime: Hours    // UTC + 12 Hours
+        });
+        $('#dateInspection').datetimepicker({
+            // datepicker: false,
+            format: 'd-M-Y H:i A',
+            maxDate: today,
+            //maxTime: '18:00'
+            // maxTime: Hours    // UTC + 12 Hours
+        });
+        $('.calendar-icon').click(function () {
+            $('#rdpInspectiondate').focus();
+        });
+        $('.calendar-icon').click(function () {
+            $('#dateInspection').focus();
+        });
+    });
+</script>
+
+<script>
+
+        $(document).ready(function () {
+
+            //    $("#ulalwaysactive").css("display", "none");
+            var screensize = $(window).width();
+            if (screensize < 1150 && screensize > 650) {
+                ($BODY.hasClass('nav-md'))
+                $('#CreateNewDropDown').css("margin-top", "2px");
+                $BODY.removeClass('nav-md').addClass('nav-sm');
+                $LEFT_COL.removeClass('scroll-view');
+                //$('#BlackSection').css('display', 'block');
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "38px");
+                $('#leftbarsection').css('margin-top', '0px');
+
+
+            }
+
+
+            else {
+                if (screensize < (650)) {
+                    $BODY.removeClass('nav-sm')
+                    $('#imgLogo').parent().css('display', 'none');
+                    $('#imgLogo1').css('display', 'block').css("height", "52px");
+                    $('.xsfieldset').css('margin-left', '-22px').css("width", "100%");
+                    $('.xsgridwidth').css("width", "110%");
+                }
+                else {
+                    $('#CreateNewDropDown').css("margin-top", "6px");
+                    $BODY.removeClass('nav-sm').addClass('nav-md');
+                    //$('#BlackSection').css('display', 'none');
+                    $('#imgLogo').parent().css('display', 'block');
+                    $('#imgLogo1').css('display', 'none');
+                    $('#leftbarsection').css('margin-top', '40px');
+                }
+
+            }
+        });
+
+        function hide() {
+        $('#Adddocs').css('display', 'none');
+
+        }
+        function hide2() {
+            $('#divDeplank').css('display', 'none');
+    }
+ 
+
+    function btnDeplank_Click() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        if ($('#lblNewstatus').val() == "Completed") {
+            $('#divDeplank').css('display', 'none');
+            var Response = { Result: "Failed", Message: "Since Job has been Completed so no further action allowed." };
+            CustomAlert(Response);
+        }
+        else {
+            BindallDropdown();
+            if ($('#hdnLoginUserId').val() != "") {
+                $('#ddlInspecdeplank').val($('#hdnLoginUserId').val());
+            }
+            $('#divDeplank').css('display', 'block');
+            //divDeplank.Style.Add("display", "block");
+            // dateInspection.SelectedDate =DateTime.Now;
+            //dateInspection.SelectedDate = Convert.ToDateTime(hdnCurrentDate.Value);
+            $('#txtcomm').val('');
+            $('#dateInspection').val(getDateTime());
+        }
+        ShowJobInfoDetails();
+
+    }
+</script>
+<style>
+
+    .input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+        .input-container input {
+            width: 100%;
+            padding-right: 30px; /* Adjust to provide space for the icon */
+            box-sizing: border-box;
+        }
+
+        .input-container .calendar-icon {
+            position: absolute;
+            right: 10px; /* Adjust to position the icon correctly */
+            cursor: pointer;
+        }
+
+            .input-container .calendar-icon i {
+                font-size: 16px;
+            }
+
+     .requiredColumn{
+    border-color:red;
+    }
+    .setWidth1 {
+        min-width: 5px !important;
+    }
+
+    .setWidth3 {
+        min-width: 70px !important;
+    }
+
+    .setWidth2, .setWidth4, .setWidth5, .setWidth10 {
+        min-width: 130px !important;
+    }
+
+    .setWidth6 {
+        min-width: 180px !important;
+    }
+
+    .setWidth7, .setWidth8, .setWidth9 {
+        min-width: 70px !important;
+    }
+</style>
+
+<input type="hidden" id="hdnCurrentDate" />
+<input type="hidden" id="hdnTimeOffSet" value="0" />
+<input type="hidden" id="hdnCheckListID" />
+<input type="hidden" id="hdnLoginUserId" value="@ViewBag.UserId" />
+<input type="hidden" id="hdnInspectionID" />
+
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-industry"></i>&nbsp;<span id="lblclient" style="font-size:16px;" Font-Bold="true">Inspection List</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+    </div>
+
+</div>
+@Html.Partial("_RegisterPartiaView")
+@*<script>  $('#txtSiteName').css('display', 'none');</script>*@
+<div class="clearfix"></div>
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        @*<div class="col-sm-6 col-md-8 col-lg-8"></div>*@
+        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-2">
+            <input type="checkbox" OnClick="GetInspectionListData()" id="HistInspList" />
+            <label style="margin-left: 3px;" for="HistInspection">Show All Historical Inspections</label>
+        </div>
+        <div class="col-lg-5 col-md-5 col-sm-2"></div>
+
+        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12" id="DivAddDePlanked">
+            @*<asp:LinkButton Width="150px" runat="server" ID="btnDeplank" CausesValidation="false" CssClass="w3-btn w3-teal w3-text-white" OnClick="btnDeplank_Click" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add De-Plank</asp:LinkButton>*@
+            <button style="Width: 220px; display: block; " id="btnDeplank" Class="w3-btn w3-teal w3-text-white" OnClick="btnDeplank_Click()"><i class="fa fa-plus-circle"></i>&nbsp;Add 'De-Planked' / 'Tied-Down'</button>  &nbsp;&nbsp;&nbsp;
+        </div>
+      
+        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-2 " id="DivAddInspection">
+            @*<asp:LinkButton Width="150px" runat="server" ID="btnadddocs" CausesValidation="false" CssClass="w3-btn w3-teal w3-text-white" OnClick="btnadddocs_Click" CommandName="Add"><i class="fa fa-plus-circle"></i>&nbsp;Add Inspection</asp:LinkButton>*@
+            <button style="Width:150px" id="btnadddocs" Class="w3-btn w3-teal w3-text-white" OnClick="btnAddInspection()"><i class="fa fa-plus-circle"></i>&nbsp;Add Inspection</button>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div id="InspectionList" style="color: black; width: 100%;margin-top:5px;">
+                <table id="tblInspectionList" class="table table-striped ">
+                    <thead style="background-color: #efefef; color: #716262;">
+                        <tr>
+                            <th class="setWidth0" style="display:none;"></th>
+                            <th class="setWidth1" id="UniqueDelete"></th>
+                            <th class="setWidth2">Inspection Status</th>
+                            <th class="setWidth3">Insp. Offline</th>
+                            <th class="setWidth3">Insp. OffSystem</th>
+                            <th class="setWidth4">Scheduled/Acknowledge Date</th>
+                            <th class="setWidth5">Inspected By</th>
+                            <th class="setWidth6">Inspection Comments</th>
+                            <th class="setWidth7" id="UniqueOpen">Inspection Record</th>
+                            <th class="setWidth8" id="UniqueView">View</th>
+                            <th class="setWidth9" id="UniqueEmail">Email</th>
+                            <th class="setWidth10">Email Sent On</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyInspectionList" style="width:100%"></tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div id="divDeplank" class="w3-modal">
+    <div class="w3-modal-content w3-round-medium w3-animate-input" style="margin-top: 4%; width: 620px; color: black; height: auto;">
+        <header class="w3-container nln-gray-bg">
+            <div class="row">
+                <div class="col-lg-9 col-sm-9 col-md-9 col-xs-9">
+                    <h5 class="w3-text-white">Add 'De-Planked' / 'Tied-Down'</h5>
+                </div>
+                <div class="col-lg-3 col-sm-3 col-md-3 col-xs-3">
+                    <button type="button" onclick="hide2()" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 40px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                </div>
+            </div>
+        </header>
+        <div class="w3-container" >
+            <div class="row w3-padding-top" >
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="text-align: center; padding: 5px">
+                       <label id="cycloneactionStatus"> </label>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="numberofhours" style="display:none;text-align:center;justify-content:space-around;padding:15px">
+                      <label style="color:white !important;background-color:red;font-size:15px !important">No. Of Hours Have Not Been Filled</label>
+                    </div>
+                   
+                    <div class="col-xs-6 col-sm-3 col-md-3 col-lg-3">
+                        <label id="lblstatus">Status</label>
+                        @*<input type="text" id="txtdeplanl" value="De-Plank" disabled Style="width:100%;" Class="form-control" />*@
+                        @*<input type="text" id="txtdeplanl" value="De-Planked" disabled Style="width:100%;" Class="form-control" />*@
+                        <select id="txtdeplanl" style="width: 100%;" class="form-control">
+                            <option id="DePlank" value="De-Plank">De-Planked</option>
+                            <option id="TieDown" value="Tie-Down">Tied-Down</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-4 col-sm-4 col-md-4 col-xs-6 dateclass ">
+                        <label class="listyle">Scheduled Inspection Date<span style="color: red">&nbsp*</span></label>
+                        @*<Telerik:RadDateTimePicker ID="dateInspection" Width="100%" DateInput-DateFormat="dd-MMM-yyyy hh:mm tt" runat="server" Height="22px"></Telerik:RadDateTimePicker>*@
+                        @*<input type="text" style="width: 100%;" class="form-control" id="dateInspection" readonly />
+                        <span class="calendar-icon">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                        </span>*@
+                        <div class="input-container">
+                            <input type="text" style="width: 100%" id="dateInspection" class="form-control" readonly />
+                            <span class="calendar-icon">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                        <label class="listyle">Inspected By<span style="color: red">&nbsp*</span></label>
+
+                        @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" Style="width: 100% !important; margin-top: 0px;" DataTextField="Name" DataSourceID="SqlDataSource1" DataValueField="UserId" EmptyMessage="Select---" CausesValidation="false" runat="server" ID="ddlInspecdeplank" MarkFirstMatch="true"></Telerik:RadComboBox>
+            <asp:RequiredFieldValidator runat="server" ID="RequiredFieldValidator2" ValidationGroup="deplankSave" ControlToValidate="ddlInspecdeplank" ErrorMessage="* Required" CssClass="rdf-text rdf-initial"></asp:RequiredFieldValidator>*@
+                        <select id="ddlInspecdeplank" style="width: 100%;" class="form-control"></select>
+                    </div>
+                </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <label class="listyle">Comments</label>
+                            <textarea id="txtcomm" rows="2" style="width: 100%;"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+                        <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4">
+                            <button id="btndeplanksave" OnClick="btndeplanksave_Click()" style="width: 100%;" Class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                        </div>
+                        <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<div id="divdelete" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="c1">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="emailConfirm" class="w3-modal">
+    <div class="w3-modal-content w3-round-medium w3-animate-zoom" style="margin-top: -86px; width: 750px; color: black;">
+        <header class="w3-container nln-gray-bg">
+            <h5 class="w3-text-white">Email Form</h5>
+        </header>
+        <div class="w3-container">
+            <fieldset>
+                <legend>
+                    <label><b>Email Client</b></label>
+                </legend>
+
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                        <label>To </label>
+                    </div>
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+                        @*<asp:TextBox runat="server" ID="txtClientEmail" CssClass="form-control"></asp:TextBox>
+                        <asp:TextBox runat="server" ID="txtcc" Style="display: none" CssClass="form-control"></asp:TextBox>
+                        <asp:RequiredFieldValidator runat="server" ID="rdftxtClientEmail" ControlToValidate="txtClientEmail" CssClass="rdf-initial" ErrorMessage="<i class='fa fa-exclamation-triangle'></i>" ValidationGroup="emailValidate"></asp:RequiredFieldValidator>*@
+                        <input type="text" id="txtClientEmail" Class="form-control" />
+                        <input type="text" id="txtcc" Style="display: none" Class="form-control"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                        <label>Subject </label>
+                    </div>
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+                        @*<asp:TextBox runat="server" ID="txtsubject" CssClass="form-control"></asp:TextBox>
+                        <asp:RequiredFieldValidator runat="server" ID="rdftxtsubject" ControlToValidate="txtsubject" CssClass="rdf-initial" ErrorMessage="<i class='fa fa-exclamation-triangle'></i>" ValidationGroup="emailValidate"></asp:RequiredFieldValidator>*@
+                        <input type="text" id="txtsubject" Class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                        <label>File </label>
+                    </div>
+                    <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+                        @*<asp:TextBox runat="server" ID="txttempfile" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                        <asp:TextBox runat="server" ID="txtFile" Style="display: none;" CssClass="form-control" ReadOnly="true"></asp:TextBox>*@
+                       <input type="text" id="txttempfile" Class="form-control" disabled>
+                       <input type="text" id="txtFile" Style="display: none;" Class="form-control" disabled />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        @*<asp:TextBox runat="server" ID="txtEmailMSg" TextMode="MultiLine" Rows="18" Width="100%" CssClass="w3-padding-small">
+
+                        </asp:TextBox>*@
+                        <textarea rows="18" id="txtEmailMSg" style="width:100%" class="w3-padding-small"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-4">
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2">
+                        @*<asp:LinkButton runat="server" ID="btnSend" CssClass="w3-btn w3-green w3-small w3-padding-small" Width="100%" ValidationGroup="emailValidate" OnClientClick="validate()" OnClick="btnSend_Click"> <i class="fa fa-share"></i> Send</asp:LinkButton>*@
+                        <button id="btnSend" Class="w3-btn w3-green w3-small w3-padding-small" style="Width:100%"  OnClientClick="validate()" OnClick="btnSend_Click()"> <i class="fa fa-share"></i> Send</button>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2">
+                        @*<asp:LinkButton runat="server" ID="btnCancel" CausesValidation="false" CssClass="w3-btn w3-red w3-small w3-padding-small" Style="width: 100%" OnClick="btnCancel_Click"><i class="fa fa-recycle"></i>&nbsp;Cancel</asp:LinkButton>*@
+                        <button id="btnCancel" Class="w3-btn w3-red w3-small w3-padding-small" Style="width: 100%" OnClick="btnCancel_Click()"><i class="fa fa-recycle"></i>&nbsp;Cancel</button>
+                    </div>
+                </div>
+            </fieldset>
+            <br />
+        </div>
+    </div>
+</div>
+
+<div id="Adddocs" class="w3-modal" style="display:none;">
+    <div class="w3-modal-content w3-round-medium w3-animate-input" style="margin-top: 4%; width: 303px; color: black; height: 280px;">
+        <header class="w3-container nln-gray-bg">
+            <div class="row">
+                <div class="col-lg-9 col-sm-9 col-md-9 col-xs-9">
+                    <h5 class="w3-text-white">Add Inspection</h5>
+                </div>
+
+                <div class="col-lg-3 col-sm-3 col-md-3 col-xs-3">
+                    <button type="button" onclick="hide()" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 40px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                </div>
+            </div>
+
+        </header>
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <label id="lblChecklist">Scaffold Inspection List</label>
+                <select id="ddlChecklistInsp" class="form-control" style="width:100%"></select>
+                @*<asp:DropDownList ID="ddlChecklistInsp" runat="server" AppendDataBoundItems="true" CssClass="form-control">
+                </asp:DropDownList>*@
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 dateclass ">
+                @*<%-- <label class="listyle">Inspection Date<span style="color: red">&nbsp*</span></label>--%>*@
+                <label class="listyle">Scheduled Inspection Date<span style="color: red">&nbsp*</span></label>
+                @*<asp:RequiredFieldValidator ID="reqInspectiondate" runat="server" ControlToValidate="rdpInspectiondate" ValidationGroup="Save" ErrorMessage="* Required" CssClass="rdf-initial rdf-text"></asp:RequiredFieldValidator>*@
+            </div>
+            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 dateclass ">
+                @*<%-- <Telerik:RadDatePicker ID="rdpInspectiondate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy" runat="server"></Telerik:RadDatePicker>--%>*@
+                @*<Telerik:RadDateTimePicker ID="rdpInspectiondate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy hh:mm tt" runat="server"></Telerik:RadDateTimePicker>*@
+                @*<input type="text" id="rdpInspectiondate" class="form-control input-wrapper" style="width:100%" readonly />
+                <span class="calendar-icon">
+                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                </span>*@
+                <div class="input-container">
+                    <input type="text" id="rdpInspectiondate" class="form-control" readonly />
+                    <span class="calendar-icon">
+                        <i class="fa fa-calendar"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <label class="listyle">Inspected By<span style="color: red">&nbsp*</span></label>
+                @*<asp:LinkButton ToolTip="Add Inspe" OnClick="btnAddInspection_Click" ID="btnAddInspection" runat="server" Style="color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000; font-size:smaller"></i>Add</asp:LinkButton>*@
+                <label ToolTip="Add Inspection" onclick="btnAddInspection_Click()" id="btnAddInspection" Style="color: #800000 !important; font-size: smaller !important;cursor:pointer;"><i class="fa fa-plus" style="color:#800000 !important; font-size:smaller !important"></i>Add</label>
+
+                @*<Telerik:RadComboBox Width="100%" DataTextField="Name" Skin="Simple" RenderMode="Lightweight" DataSourceID="SqlDataSource1" DataValueField="UserId" EmptyMessage="Select---" CausesValidation="false" runat="server" ID="ddlddlInspectedByadd" MarkFirstMatch="true"></Telerik:RadComboBox>*@
+                <select id="ddlddlInspectedByadd" class="form-control input-wrapper" style="width:100%"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                <label></label>
+                <button style="Width:100%" id="btnsave" OnClick="btnsave_Click()" Class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+ 

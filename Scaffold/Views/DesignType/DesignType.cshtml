@@ -1,0 +1,464 @@
+﻿
+@{
+    ViewBag.Title = "DesignType";
+    //  Layout = null;
+}
+
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #gridesign_length {
+    margin-top: -16px;
+    }
+      @@media(max-width:667px) {
+        #btnExport {
+            margin-top: 10px;
+
+        }
+        #btnCancel {
+              margin-top: 10px;
+        }
+        #UniqueDelete{
+      width: 27px!important;
+      }
+    }
+    @@media (min-width: 1200px)
+ {
+ #UniqueDelete{
+      width: 44px!important;
+ }
+    #UniqueEdit {
+     width: 30px!important;
+    }
+  
+}
+</style>
+
+<script>
+
+    $(document).ready(function () {
+        
+        if (getParameterByName('RID') != null) {
+            $('#btnCAncel').css('display', 'block');
+        }
+        
+        //    $("#ulalwaysactive").css("display", "none");
+        var screensize = $(window).width();
+        if (screensize < 1150 && screensize > 650) {
+            ($BODY.hasClass('nav-md'))
+            $('#CreateNewDropDown').css("margin-top", "2px");
+            $BODY.removeClass('nav-md').addClass('nav-sm');
+            $LEFT_COL.removeClass('scroll-view');
+            //$('#BlackSection').css('display', 'block');
+            $('#imgLogo').parent().css('display', 'none');
+            $('#imgLogo1').css('display', 'block').css("height", "38px");
+            $('#leftbarsection').css('margin-top', '0px');
+
+
+        }
+
+
+        else {
+            if (screensize < (650)) {
+                $BODY.removeClass('nav-sm')
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "52px");
+            }
+            else {
+                $('#CreateNewDropDown').css("margin-top", "6px");
+                $BODY.removeClass('nav-sm').addClass('nav-md');
+                //$('#BlackSection').css('display', 'none');
+                $('#imgLogo').parent().css('display', 'block');
+                $('#imgLogo1').css('display', 'none');
+                $('#leftbarsection').css('margin-top', '40px');
+            }
+
+        }
+    });
+
+    function btnCAncel_Click()
+    {
+        // Response.Redirect("Register.aspx?UID="+Request.QueryString["UID"]+"&UserRole="+Request.QueryString["UserRole"]+"&id="+Request.QueryString["id"]+"&RID="+Request.QueryString["RID"], false);
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var id = getParameterByName('id');
+        var RID = getParameterByName('RID');
+
+        window.location.href = '/Register/Register?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&RID=' + RID;
+    }
+
+    $(function () {
+
+        if (getParameterByName('RID') == null) {
+            $('#btnCAncel').css('', 'none');
+        }
+        GetDesignType();
+    });
+    let ddlDifficultyRating = '';
+    let Status = '';
+    function GetDesignType() {
+
+        $("#LoadingPanel1").css("display", "block");
+        var str = "";
+
+        str += '<table id="gridesign" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+        str += "<th style='width:3%;padding: 0px;' id='UniqueEdit' class='ClassbtnEdit'></th>";
+        str += "<th style='width:3%;padding: 0px;' id='UniqueDelete' class='ClassbtnDelete'></th>";
+        str += "<th  style='text-align:center;display:none'>DesignId</th>";
+        str += "<th  style='text-align:left;width:50%'>Design Type</th>";
+        str += "<th  style='text-align:center;width:20%'>Status</th>";
+        str += "<th  style='text-align:center;width:20%'>Difficulty Rating</th></tr></thead><tbody>";
+
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/DesignType/GetDesignTypeData',
+            type: 'POST',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getdata = response;
+              
+                str += "<tr id='row_9999' style='display:none'><td  style='width:5%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                    str += "<td  style='text-align:center;display:none'></td>";
+                    str += "<td  style='text-align:center;display:none'>0</td>";
+                    str += "<td  style='text-align:left;width:20%'></td>";
+                    str += "<td  style='text-align:center;width:10%'></td>";
+                    str += "<td  style='text-align:center;width:10%'></td></tr>";
+              
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var DesignId = getdata[i].DesignId == null ? "" : getdata[i].DesignId;
+                        var DesignType = getdata[i].DesignType == null ? "" : getdata[i].DesignType;
+                        var DesignStatus = getdata[i].DesignStatus == null ? "" : getdata[i].DesignStatus;
+                        var DifficultyRating = getdata[i].DifficultyRating == null ? "" : getdata[i].DifficultyRating;
+
+                        //str += "<td style='width:5%;display:inline-flex;'><a id='rowpencil' class='expand fa fa-pencil'></a>&nbsp;&nbsp;<a id='rowdelete' class='fa fa-trash'></a></td>";
+                        str += "<td style='width:3%;' class='ClassbtnEdit'><a id='rowpencil' class='expand fa fa-pencil'></a></td>";
+                        str += "<td style='width:3%;' class='ClassbtnDelete'><a id='rowdelete' class='fa fa-trash'></a></td>";
+                        str += "<td  style='text-align:center;display:none'>" + DesignId + "</td>";
+                        str += "<td  style='text-align:left;width:50%'>" + DesignType + "</td>";
+                        str += "<td  style='text-align:center; width:20%'>" + DesignStatus + "</td>";
+                        str += "<td  style='text-align:center;width:20%'>" + DifficultyRating + "</td></tr>";
+                    }
+                 
+                }
+               
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+                $("#LoadingPanel1").css("display", "none");
+
+                $(".fa-trash").click(function () {
+                    //var designType = $(this).parent().parent().children()[2].innerText;
+                    var designType = $(this).parent().parent().children()[2].innerText;
+                    $("#hdnDesignTypeId").val(designType);
+                    $("#Deletemodal").css("display", "block");
+                });
+
+                $(".fa-pencil").click(function () {
+                    var visible = $(this).parent().parent().hasClass("Edit");
+                    var tr = $(this).closest('tr');
+                    var row = table.row(tr);
+                    if (visible == true) {
+                        $(this).parent().parent().next('tr').remove();
+                        $(this).parent().parent().removeClass('Edit');
+                    }
+                    else {
+                        row.child(Editing(row.data())).show();
+                        $('#ddlDifficultyRating').val(ddlDifficultyRating);
+                        $('#ddlStatus').val(Status);
+                        row.child.show();
+                        tr.addClass('Edit');
+
+                    }
+
+                });
+
+                var table = $('#gridesign').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    info: false,
+                    //paging: false,
+                    "pageLength": 50,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    fixedHeader: true,
+                    fixedColumns: {
+                        leftColumns: 11,
+                    },
+
+                    dom: 'lBfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Design Type',
+                            exportOptions: {
+                                columns: [3, 4, 5]
+                            }
+                        }
+                    ],
+
+
+                    initComplete: function () {
+                        $("#gridesign_length").children().html('<button id="btnaddDesign"  type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:-34px;">&nbsp;Add New Design Type</button><button id="btnExport" type="button" class="w3-btn w3-teal Export" style="margin-left:185px;margin-top: -5px;;height:27px;padding-top:3px;"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>');
+
+                        $("#btnaddDesign").click(function () {
+                            $("#LoadingPanel1").css("display", "block");
+                            var trow1 = $(this).parent().parent().siblings();
+                            var trow = $(this).parent().parent().siblings()[2].childNodes[0];
+                            // var trow = $(this).parent().parent().siblings()[2].children[1].children[0].children[1].childNodes[0];
+                            var row = table.row(trow);
+                            var c = 0;
+                            row.child(Editing(c)).show();
+                            $("#LoadingPanel1").css("display", "none");
+                        });
+
+                        $(".Export").click(function () {
+                            //$("#LoadingPanel1").css("display", "block");
+                            /*fnExcelReport();*/
+                            $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+                        });
+                    },
+
+                    "columnDefs": [
+                        { "width": "100px", "targets": 'fullsize' }
+                    ],
+
+                    "drawCallback": function () {
+
+                        $('.fa-angle-right').click(function (eve) {
+                            eve.stopImmediatePropagation();
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+                            var visible = $(this).parent().parent().hasClass("shown");
+                            var anglechange = $(this).hasClass("fa-angle-right");
+                            if (anglechange == true) {
+                                var x = tr.children()[0];
+                                $(this).removeClass("fa-angle-right");
+                                $(this).addClass("fa-angle-down");
+                            }
+                            else {
+                                $(this).addClass("fa-angle-right");
+                                $(this).removeClass("fa-angle-down");
+                            }
+                            if (visible == true) {
+                                // This row is already open - close it
+                                $(this).parent().parent().next('tr').remove();
+                                $(this).parent().parent().removeClass('shown');
+                            }
+                            else {
+                                // Open this row
+                                row.child(format(row.data())).show();
+                                row.child.show();
+                                tr.addClass('shown');
+                            }
+                        });
+                        GridButtonHideShow(table, "gridesign");
+                    }
+
+                });
+
+                // scrolling Top when Click On Next Button
+
+                table.on('page.dt', function () {
+                    $('.dataTables_scrollBody').animate({
+                        scrollTop: 0
+                    }, 300);
+                });
+
+                // Hide Show For DataTable Column And Buttons Start Here
+
+                 GridButtonHideShow(table, "gridesign");
+                // Hide Show For DataTable Column And Buttons End Here
+            }
+        });
+    }
+
+    function Editing(d) {
+
+        var id = getParameterByName('id');
+        $.ajax({
+
+            success: function (response) {
+
+            },
+            complete: function () {
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#savechange").click(function () {
+                    
+                    // var desigyTypeId = $(this).parent().parent().parent().parent().prev('tr').children()[1].innerText;
+                    var desigyTypeId = $(this).parent().parent().parent().parent().prev('tr').children()[2].innerText;
+                    var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+                    var sropdownval = $(this).parent().parent().prev('div').children().find('select');
+
+                    var DesignType = firstrow[0].value;
+                    var Status = sropdownval[0].value;
+                    var DifficultyRating = sropdownval[1].value;
+
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+
+                    if (DesignType != "") {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/DesignType/DesignTypeSaveData",
+                            data: JSON.stringify({ "desigyTypeId": desigyTypeId, "DesignType": DesignType, "DifficultyRating": DifficultyRating, "Status": Status, "id": id, "UID": UID }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response;
+                                if (result.Result == 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    GetDesignType();
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                                // $('#hdnOldQty').val("");
+                            }
+                        })
+                    } else {
+                        $("#LoadingPanel1").css("display", "none");
+                        $('#txtDesignType').css('border-color', 'red');
+                    }
+                });
+            }
+        });
+        if (d == 0) {
+            return '<div class="col-lg-12">'
+                + '<div class="col-lg-4">'
+                + ' Design Type <a style="color:red">*</a><input id="txtDesignType" type="text" class="form-control" style="width:100%" required>'
+                + '</div><div class="col-lg-4">'
+                + 'Status<select id="ddlStatus" style="width:100%" class="form-control" required><option value="Active">Active</option><option value="InActive">InActive</option></select>'
+                + '</div><div class="col-lg-4">'
+                + 'Difficulty Rating<select id="ddlDifficultyRating" style="width:100%" class="form-control" required><option value="1">1(Low)</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5(High)</option></select>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-2">'
+                + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-2">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+                + '</div></div>'
+
+        }
+        else {
+
+            ddlDifficultyRating = d[5];
+            Status = d[4];
+            return '<div class="col-lg-12">'
+                + '<div class="col-lg-4">'
+                + ' Design Type <a style="color:red">*</a><input  id="txtDesignType" type="text" class="form-control" value="' + d[3] + '" style="width:100%" required>'
+                + '</div><div class="col-lg-4">'
+                + 'Status<select id="ddlStatus" style="width:100%" class="form-control" required><option value="Active">Active</option><option value="InActive">InActive</option></select>'
+                + '</div><div class="col-lg-4">'
+                + 'Difficulty Rating<select id="ddlDifficultyRating" style="width:100%" class="form-control" required><option value="1">1(Low)</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5(High)</option></select>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-2">'
+                + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-2">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+                + '</div></div>'
+
+        }
+
+    }
+
+ 
+    function btnyes_Click() {
+        $("#LoadingPanel1").css("display", "block");
+        var DesignTypeId = $('#hdnDesignTypeId').val();
+
+        $.ajax({
+            url: '/DesignType/DeleteDesignType',
+            type: 'post',
+            data: { DesignTypeId: DesignTypeId },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                CustomAlert(response);
+                GetDesignType();
+            }
+        });
+    }
+
+
+
+
+</script>
+<input type="hidden" id="hdnTableData" />
+<input type="hidden" id="hdnDesignTypeId" />
+@*<div class="row">
+    <div class=" col-lg-12 col-md-12 col-sm-12">
+        <h4 class="heading" style="color: #0070ba;font-size:15px;"><b><i class="fa fa-paint-brush"></i>&nbsp;Design List</b></h4>
+    </div>
+</div>*@
+<div class="row">
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-5">
+        <h4 class="heading" style="color: #0070ba;font-size:15px;"><b><i class="fa fa-paint-brush"></i>&nbsp;Design List</b></h4>
+    </div>
+   
+    @*<div class="col-lg-2 col-md-3 col-sm-4 col-xs-7">
+        <button id="btnaddDesign" type="button" class="w3-btn w3-teal fa fa-plus" style="height:24px;padding-top:3px">&nbsp;Add New Design Type</button>
+     </div>
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+            <button id="btnExport" type="button" class="w3-btn w3-teal Export" style="height:24px;padding-top:3px">&nbsp;Export to CSV</button>
+    </div>*@
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+        @*<asp:LinkButton runat="server" ID="btnCAncel" Style="height: 24px; padding-top: 3px" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnCAncel_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</asp:LinkButton>*@
+        <button id="btnCAncel" Style="height: 24px; padding-top: 3px;display:none" Class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnCAncel_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</button>
+    </div>
+    </div>
+
+<div class="row">
+    <div id="divbuttonID"></div>
+    <div class="col-xs-12 col-lg-7 col-md-9 col-sm-12">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,983 @@
+﻿@{
+    ViewBag.Title = "ManHrs";
+}
+
+@*<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>*@
+
+<script>
+
+      function OnRadioClick(rb) {
+            var grid = $find("<%=JobRadGrid.ClientID %>");
+            var element = grid.get_element();
+            var rbs = element.getElementsByTagName("input");
+            for (var i = 0; i < rbs.length; i++) {
+                if (rbs[i].type == "radio") {
+                    if (rbs[i].checked && rbs[i] != rb) {
+                        rbs[i].checked = false;
+                        break;
+                    }
+                }
+            }
+        }
+        var count = 0;
+        var NumRows = 0;
+
+
+        $(document).ready(function () {
+            dropdownSiteLocation();
+            dropdownResource();
+
+            var today = new Date();
+
+            $("#txtDate").val(today.DateMonthFormat());
+
+            $("#txtDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            maxDate: new Date(),
+            closeText: 'Close',
+
+            });
+
+            $("#NewEntryDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            maxDate: new Date(),
+            closeText: 'Close',
+
+            });
+
+             
+            var ResourceId = getParameterByName('ResourceId');
+            var EntryDate = getParameterByName('EntryDate');
+            if (ResourceId != "" && ResourceId != undefined && EntryDate != "" && EntryDate != undefined){
+                $('#hdnResourceId').val(ResourceId);
+                $('#hdnEntryDate').val(EntryDate);
+
+                $('#resourceDropDown').val(ResourceId);
+                $("#NewEntryDate").val(EntryDate);
+                $("#LinkButton1").css("width", "30%");
+                $("#divreconcile").css("display", "block");
+                $("#divmanHrs").css("display", "none");
+                BtnManHrs_ClickNew();
+            }
+            else{
+
+                $("#divreconcile").css("display", "none");
+                $("#divmanHrs").css("display", "block");
+                $("#txtDate").val(today.DateMonthFormat());
+            }
+
+                          
+        });
+
+       
+
+        $(document).ready(function () {
+            //    $("#ulalwaysactive").css("display", "none");
+            var screensize = $(window).width();
+            if (screensize < 1150 && screensize > 650) {
+                ($BODY.hasClass('nav-md'))
+                $('#CreateNewDropDown').css("margin-top", "2px");
+                $BODY.removeClass('nav-md').addClass('nav-sm');
+                $LEFT_COL.removeClass('scroll-view');
+                //$('#BlackSection').css('display', 'block');
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "38px");
+                $('#leftbarsection').css('margin-top', '0px');
+
+
+            }
+
+
+            else {
+                if (screensize < (650)) {
+                    $BODY.removeClass('nav-sm')
+                    $('#imgLogo').parent().css('display', 'none');
+                    $('#imgLogo1').css('display', 'block').css("height", "52px");
+                }
+                else {
+                    $('#CreateNewDropDown').css("margin-top", "6px");
+                    $BODY.removeClass('nav-sm').addClass('nav-md');
+                    //$('#BlackSection').css('display', 'none');
+                    $('#imgLogo').parent().css('display', 'block');
+                    $('#imgLogo1').css('display', 'none');
+                    $('#leftbarsection').css('margin-top', '40px');
+                }
+
+            }
+        });
+
+        $(document).ready(function () {
+            Hidealert();
+        });
+
+        function Hidealert() {
+            setTimeout(function () {
+                $(".fadeOut").fadeOut(2000);
+            }, 2000);
+        }
+
+    $(document).on("keydown",".EnterQuantity",function(eve) { 
+         //$('.EnterQuantity').keydown(function (eve) {
+                            if (eve.keyCode != 8) {
+                                var value = eve.key
+                                var regex = /^[-_!':.,;"/|<>?+=@@#$%^&*({})a-zA-Z[]]+$/;
+                                if (value.match(regex)) {
+                                    eve.preventDefault();
+                                }
+                                if (eve.keyCode == 189) {
+                                    eve.preventDefault();
+                                }
+                            }
+          //  });
+
+    });
+
+    function dropdownSiteLocation() {
+    var id = getParameterByName('id');
+    var UID = getParameterByName('UID');
+    //$('#LoadingPanel1').css('display', 'block');
+    $.ajax({
+        type: "POST",
+        url: "/ManHrs/dropdownSiteLocation",
+
+        data: JSON.stringify({ id: id, UID: UID }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: false,
+        success: function (response) {
+
+            var SiteData = response;
+            if (SiteData.length > 0) {
+                $("#ddlSite").append('<option value="">Select Site</option>');
+                for (var i = 0; i < SiteData.length; i++) {
+                    $("#ddlSite").append("<option value='" + SiteData[i].SiteLocID + "'>" + SiteData[i].SiteLocation + "</option>");
+                }
+            }
+
+        }
+
+    })
+  }
+
+ function dropdownResource(){
+  var id = getParameterByName('id');
+
+    $.ajax({
+        type: "POST",
+        url: "/ManHrs/dropdownResource",
+
+        data: JSON.stringify({ id: id }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: false,
+        success: function (response) {
+
+            var GetData = response;
+
+            if (GetData.length > 0) {
+                $("#resourceDropDown").empty();
+               // $("#resourceDropDown").append('<option value=""></option>');
+                for (var i = 0; i < GetData.length; i++) {
+                    $("#resourceDropDown").append("<option value='" + GetData[i].UserId + "'>" + GetData[i].resource + "</option>");
+                }
+            }
+        }
+     });
+
+  }
+
+
+ function ddlSite_SelectedIndexChanged(){
+  var SiteID = $('#ddlSite').val();
+  SiteJobDropdownBind();
+  // if (SiteID == ""){
+       $("#divbuttonsave").css("display", "none");
+    // }
+   $('#tblManHrsList').DataTable().clear();
+   $('#tblManHrsList').DataTable().destroy();
+
+ }
+
+function resourceDropDown_Changed(){
+   var ResourceId = $('#resourceDropDown').val();
+   $('#hdnResourceId').val(ResourceId);
+   $("#divbuttonsave").css("display", "none");
+
+   $('#tblManHrsList').DataTable().clear();
+   $('#tblManHrsList').DataTable().destroy();
+
+ }
+
+ function SiteJobDropdownBind(){
+     var id = getParameterByName('id');
+     var SiteID = $('#ddlSite').val();
+     if (SiteID == ""){
+      SiteID= "0";
+      $("#ddlJob").empty();
+     }
+     else{
+      $.ajax({
+        type: "POST",
+        url: "/ManHrs/SiteJobDropdownBind",
+
+        data: JSON.stringify({ id: id, SiteID: SiteID }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: true,
+        success: function (response) {
+
+            var GetData = response;
+
+            if (GetData.length > 0) {
+                $("#ddlJob").empty();
+               // $("#ddlJob").append('<option value="">All</option>');
+                for (var i = 0; i < GetData.length; i++) {
+                    $("#ddlJob").append("<option value='" + GetData[i].RegisterId + "'>" + GetData[i].ScaffRef + "</option>");
+                }
+            }
+        }
+     });
+
+    }
+
+  }
+
+function BtnManHrs_ClickNew(){
+  BtnManHrs_Click();
+}
+
+ var table = "";
+ function BtnManHrs_Click(){
+    var SiteID = "";
+    var RegisterId = "";
+    var id = getParameterByName('id');
+    var SiteID = $('#ddlSite').val();
+    RegisterId = $('#ddlJob').val();
+    if(RegisterId == null){
+      RegisterId= "" ;
+    }
+    var EntryDate = $('#txtDate').val();
+    var ResourceId="";   
+    var hdnResourceID = $('#hdnResourceId').val();
+    var nothdnResourceId = $('#resourceDropDown').val();
+
+    if(hdnResourceID != ""){
+      ResourceId= hdnResourceID ;
+      SiteID= "0";
+    } 
+    else{
+      ResourceId= nothdnResourceId ;
+    }
+    var NewEntryDate = $('#NewEntryDate').val();
+    $('#LoadingPanel1').show();
+
+   // if (hdnResourceID = ""){
+ 
+     if (SiteID != "") {
+        $.ajax({
+            type: "POST",
+            url: "/ManHrs/GetManHrsData",
+            data: JSON.stringify({ id: id,SiteID:SiteID,RegisterId:RegisterId,EntryDate:EntryDate, ResourceId:ResourceId, NewEntryDate:NewEntryDate }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+
+                var GetData = response;
+                $('#tblManHrsList').DataTable().clear();
+                $('#tblManHrsList').DataTable().destroy();
+             
+                if (GetData.length > 0) {
+                     $("#divbuttonsave").css("display", "block");
+
+                    var str = "";
+                    for (var i = 0; i < GetData.length; i++) {
+                        str = "";
+                        var ManHrsId = GetData[i].ManHrsId == null ? "" : GetData[i].ManHrsId;
+                        var SiteLocId = GetData[i].SiteLocId == null ? "" : GetData[i].SiteLocId;
+                        var SiteLocation = GetData[i].SiteLocation == null ? "" : GetData[i].SiteLocation;
+
+                        var UserId = GetData[i].UserId == null ? "" : GetData[i].UserId;
+                        var Resource = GetData[i].name == null ? "" : GetData[i].name;
+                        var RegisterID = GetData[i].RegisterID == null ? "" : GetData[i].RegisterID;
+                        var Description = GetData[i].Description == null ? "" : GetData[i].Description;
+                        var EntryDate = GetData[i].EntryDate == null ? "" : DateFormat(GetData[i].EntryDate);
+                        var AdditionalHrs = GetData[i].AdditionalHrs == null ? "" : GetData[i].AdditionalHrs.toFixed(2);
+                        var TypeofVariation = GetData[i].TypeofVariation == null ? "" : GetData[i].TypeofVariation;
+                        var VariationDesc = GetData[i].VariationDesc == null ? "" : GetData[i].VariationDesc;
+                        var IncludedInDayDocket = GetData[i].IncludedInDayDocket == null ? "" : GetData[i].IncludedInDayDocket;
+                        var VariationComments = GetData[i].VariationComments == null ? "" : GetData[i].VariationComments;
+                        var ErectionHrs = GetData[i].ErectionHrs == null ? "" : GetData[i].ErectionHrs.toFixed(2);
+                        var DismantleHrs = GetData[i].DismantleHrs == null ? "" : GetData[i].DismantleHrs.toFixed(2);
+                        var ModificationHrs = GetData[i].ModificationHrs == null ? "" : GetData[i].ModificationHrs.toFixed(2);
+
+                        var SiteHrs = GetData[i].NoOfHrs == null ? "" : GetData[i].NoOfHrs.toFixed(2);
+                        var AllocatedHrs = GetData[i].AllocatedHrs == null ? "" : GetData[i].AllocatedHrs.toFixed(2);
+                        var Category = GetData[i].Category == null ? "" : GetData[i].Category;
+
+
+                        str += "<tr id='tblManHrsList_tr_"+i+"'>"
+                        str += "<td class='setWidth0' id='ManHrsId_" + i + "' style='display:none'>" + ManHrsId + "</td>"
+                        str += "<td class='setWidth0' title='Click here for Delete' style='cursor:pointer;'><i class='fa fa-trash setWidth0' onclick=ShowDeletePopup('" + ManHrsId + "')></i></td>";
+                        str += "<td class='setWidth1' id='SiteLocation_" + i + "'>" + SiteLocation + "</td>"
+                        str += "<td class='setWidth2' id='Description_" + i + "'>" + Description + "</td>"
+                        str += "<td class='setWidth3' id='Resource_" + i + "'>" + Resource + "</td>"
+                        str += "<td class='setWidth4' id='Category_" + i + "'>" + Category + "</td>"
+                        str += "<td class='setWidth5' id='SiteHrs_" + i + "'>" + SiteHrs + "</td>"
+
+                        str += "<td class='setWidth6' id='AllocatedHrs_" + i + "'>" +AllocatedHrs + "</td>"
+                        str += "<td class='setWidth7' style='background-color: LightCyan;'><input id='ErectionHrs_" + i + "' min='0' type='number' class='changeborder EnterQuantity appendDigitDecimal form-control' value= '"+ErectionHrs+ "' /></td>"
+                        str += "<td class='setWidth8' style='background-color: LightCyan;'><input id='DismantleHrs_" + i + "' min='0' type='number' class='changeborder EnterQuantity appendDigitDecimal form-control' value= '"+DismantleHrs+ "' /></td>"
+                        str += "<td class='setWidth9' style='background-color: LightCyan;'><input id='ModificationHrs_" + i + "' min='0' type='number' class='changeborder EnterQuantity appendDigitDecimal form-control' value= '"+ModificationHrs+ "' /></td>"
+                        str += "<td class='setWidth10' style='background-color: LightCyan;'><input id='AdditionalHrs_" + i + "' min='0' type='number' class='changeborder EnterQuantity appendDigitDecimal form-control' value= '"+AdditionalHrs+ "' /></td>"
+
+                        str += "<td class='setWidth11' style='background-color: LightCyan;'><select id='TypeofVariation_" + i + "'class='changeborder form-control' > <option value='' ></option> <option value='Delay' >Delay</option> <option value='Inclem. Weather' >Inclem. Weather</option> <option value='Modification' >Modification</option> </select> </td>"
+                        str += "<td class='setWidth12' style='background-color: LightCyan;'><input id='VariationDesc_" + i + "' type='text' class='changeborder form-control' value= '"+VariationDesc+ "' /></td>"
+                        str += "<td class='setWidth13' style='background-color: LightCyan;'><select id='IncludedInDayDocket_" + i + "'class='changeborder form-control' > <option value='' ></option> <option value='No' >No</option><option value='Yes' >Yes</option> </select> </td>"
+                        str += "<td class='setWidth14' style='background-color: LightCyan;'><input id='VariationComments_" + i + "' type='text' class='changeborder form-control' value= '"+VariationComments+ "' /></td>"
+
+
+                        str += "<td class='setWidth15' id='EntryDate_" + i + "'>" + EntryDate+ "</td>"
+                        str += "<td class='setWidth16' id='UserId_" + i + "' style='display:none'>" + UserId + "</td>"
+                        str += "<td class='setWidth17' id='RegisterID_" + i + "' style='display:none'>" + RegisterID + "</td>"
+                        str += "<td class='setWidth18' id='SiteLocId_" + i + "' style='display:none'>" + SiteLocId + "</td>"
+                        str += "</tr>"
+                          
+                          $('#tbodyManHrsList').append(str);  // append done here for making select dropdowns values.
+                          $('#TypeofVariation_'+ i ).val(TypeofVariation);
+                          $('#IncludedInDayDocket_'+ i ).val(IncludedInDayDocket);
+
+                   }
+                    //$('#tbodyManHrsList').append(str);
+
+                     $('.changeborder').change(function () {
+                        event.stopImmediatePropagation();
+                          $(this).css('border','1px solid Red');
+                          $(this).addClass('colorBorderChange');
+
+                    });
+
+                     $('.appendDigitDecimal').change(function () {
+
+                        $(this).val(parseInt(this.value).toFixed(2));
+
+                    });
+
+                    $('#LoadingPanel1').hide();
+                }
+
+                $('#LoadingPanel1').hide();
+
+                table = $('#tblManHrsList').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    "language": {
+                       "emptyTable":  "Please go to Site Man Hours and Assign Resources for the Selected Date"
+                     } ,
+                    searching: true,
+                    "bLengthChange": true,
+                    "bInfo": false,
+                    autoWidth: false,
+                    scrollX: true,
+                    scrollY: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    "lengthMenu": [10, 25, 50, 100, 200],
+                    "pageLength": 50,
+
+                    dom: 'Bfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Daily Job Hours Allocation List',
+                            exportOptions: {
+                              columns: [2,3, 4, 5, 6, 7]
+                            },
+                        }
+                    ],
+ 
+
+                });
+              
+                if (hdnResourceID != ""){
+                   //table.column(6).visible(false);
+                   table.column(7).visible(false);
+                } 
+
+
+
+            }
+         })
+
+        }
+        else {
+                var response = { Result: "Failed", Message: "Please Select Site ." }
+                 CustomAlert(response);
+                 $("#LoadingPanel1").css("display", "none");
+
+         }
+    }
+
+ function btnSaveManHrs_Click(){
+       $('#LoadingPanel1').show();
+
+        ManHrsDataArr = [];
+        //var tablemanhrs= $('#tblManHrsList').dataTable(); //Get the total rows
+        //var TablLength= tablemanhrs.fnGetData().length;
+
+       var SiteID = "";
+       var txtDate = "";
+       var TablLength=$('#tblManHrsList tbody tr').length;
+       var ChkUpdateAllflag = false;
+       var hdnResourceID = $('#hdnResourceId').val();
+       SiteID = $('#ddlSite').val();
+       txtDate=$('#txtDate').val();
+       if(hdnResourceID != ""){
+          SiteID= "0";
+          txtDate= $('#NewEntryDate').val();
+       } 
+
+       if (SiteID != "") {
+         for (var i = 0; i < TablLength; i++) {
+         var flagrow=false;
+
+         $('#tblManHrsList_tr_'+i+' input').each(function(){ 
+                 //if($(this).hasClass('changeborder')){  
+                  if($(this).hasClass('colorBorderChange')){  
+                  flagrow=true;
+                       
+                        }
+               })
+               
+           if(flagrow)
+           {
+                //ChkUpdateAllflag=true;
+  
+                             var indexNumber = i ;
+                             var AdditionalHrs = $("#AdditionalHrs_" + indexNumber).val();
+                             var TypeofVariation = $("#TypeofVariation_" + indexNumber).val();
+                             if(AdditionalHrs != "" && TypeofVariation == "" || AdditionalHrs == "" && TypeofVariation != "") {
+                                  var response = { Result: "Failed", Message: "'Additional Hours' must be filled with 'Type of variation' " }
+                                  CustomAlert(response);
+                                  $('#LoadingPanel1').hide();
+                             }
+                             else{
+                             ChkUpdateAllflag=true;
+                             var ManHrsId = $("#ManHrsId_" + indexNumber).text();
+                             var UserId = $("#UserId_" + indexNumber).text();
+                             var Resource = $("#Resource_" + indexNumber).text();
+                             var Category = $("#Category_" + indexNumber).text();
+                             var AllocatedHrs = $("#AllocatedHrs_" + indexNumber).text();
+                             var SiteHrs = $("#SiteHrs_" + indexNumber).text();
+                             var EntryDate = $("#EntryDate_" + indexNumber).text();
+                             var SiteLocation = $("#SiteLocation_" + indexNumber).text();
+                             var DismantleHrs = $("#DismantleHrs_" + indexNumber).val();
+                             var ModificationHrs = $("#ModificationHrs_" + indexNumber).val();
+                             var ErectionHrs = $("#ErectionHrs_" + indexNumber).val();
+                             //var AdditionalHrs = $("#AdditionalHrs_" + indexNumber).val();
+                             //var TypeofVariation = $("#TypeofVariation_" + indexNumber).val();
+                             var VariationDesc = $("#VariationDesc_" + indexNumber).val();
+                             var IncludedInDayDocket = $("#IncludedInDayDocket_" + indexNumber).val();
+                             var VariationComments = $("#VariationComments_" + indexNumber).val();
+
+                             var ClientID = getParameterByName('id');
+                             var UID = getParameterByName('UID');
+                             //var SiteID = $('#ddlSite').val();
+                             //var RegisterID = $('#ddlJob').val();
+                             var RegisterID = $("#RegisterID_" + indexNumber).text();
+                             var SiteID = $("#SiteLocId_" + indexNumber).text();
+                            // var txtDate=$('#txtDate').val();
+
+                            var ArryVal = { SiteLocId: SiteID, RegisterID:RegisterID, ManHrsId:ManHrsId, AllocatedHrs:AllocatedHrs, NoOfHrs: SiteHrs, DismantleHrs:DismantleHrs, ModificationHrs:ModificationHrs,
+                                           ErectionHrs:ErectionHrs, AdditionalHrs:AdditionalHrs, TypeofVariation:TypeofVariation, VariationDesc:VariationDesc, IncludedInDayDocket:IncludedInDayDocket,
+                                            VariationComments:VariationComments, UserId:UserId, EntryDate:txtDate ,UID:UID };
+                            ManHrsDataArr.push(ArryVal);
+                           }
+              }
+         }
+
+                if (ChkUpdateAllflag == true) {
+                        $.ajax({
+                            type: 'post',
+                            url: '/ManHrs/btnSaveManHrs_Click',
+                            data: JSON.stringify({ model: ManHrsDataArr }),
+                              //data:{modal:ManHrsDataArr},
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            async: false,
+                            success: function (response) {
+                                var GetData = response;
+                                CustomAlert(response);
+
+                                BtnManHrs_Click();
+
+                            }
+                        });
+                      }
+                 else {
+                    
+                    $('#LoadingPanel1').show();
+               }     
+
+                } else {
+                    var response = { Result: "Failed", Message: "Please Select Site." }
+                    CustomAlert(response);
+                    $('#LoadingPanel1').hide();
+               }
+
+    $('#LoadingPanel1').hide();
+  }
+
+
+  function btnCancelManHrs_Click(){
+   BtnManHrs_Click();
+ }
+
+
+ function btnback_Click(){
+      var EntryDate = getParameterByName('EntryDate');
+      var UID = getParameterByName('UID');
+      var UserRole = getParameterByName('UserRole');
+      var ClientId = getParameterByName('id');
+     //Response.Redirect("ManHrsReconcile?UID=" + databaseCon.Encrypt(UID.ToString()) + "&UserRole=" + databaseCon.Encrypt(UserRole.ToString()) + "&id=" + databaseCon.Encrypt(Clientid.ToString()) + "&EntryDate=" + databaseCon.Encrypt(EntryDate) + "");
+      window.location.href = '/ManHrsReconcile/ManHrsReconcile?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientId + '&EntryDate=' + EntryDate ;
+ }
+
+
+ function ShowDeletePopup(ManHrsId) {
+    $('#hdnManHrsId').val(ManHrsId);
+    $('#divDelete').show();
+}
+
+function btnDeleteYes_Click() {
+    var id = getParameterByName('id');
+    var UID = getParameterByName('UID');
+    var ManHrsId = $('#hdnManHrsId').val();
+
+   $.ajax({
+        type: "POST",
+        url: "/ManHrs/btndeleteyes_Click",
+
+        data: JSON.stringify({ id: id, ManHrsId: ManHrsId }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: true,
+        success: function (response) {
+
+            var GetData = response;
+            CustomAlert(response);
+
+            BtnManHrs_Click();
+
+        }
+    })
+    $('#divDelete').hide();
+}
+
+function btnDeleteNo_Click() {
+  $('#divDelete').hide();
+}
+
+
+
+</script>
+<style>
+
+    .dt-button.buttons-csv.buttons-html5 {
+    display: none;
+    }
+
+    .rgFilterBox {
+        border-radius: 4px;
+    }
+    #txtDate_dateInput
+    {
+        border-color: #e5e5e5 !important;
+        border-radius: 4px !important;
+        height:25px;
+    }
+    .RadComboBoxDropDown_Simple .rcbHovered {
+        background-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbInner {
+        border-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbActionButton {
+        border-color: #ffffff !important;
+        background-color: #ffffff !important;
+
+    }
+    .RadComboBox_Simple .rcbReadOnly.rcbFocused {
+        background-color: #ffffff !important;
+    }
+
+    html .RadComboBox .rcbInner, html .RadComboBox .rcbActionButton {
+        border-radius: 4px;
+
+    }
+
+
+    .invalidCol1 {
+        background-color: #ff0000 !important;
+        color: white !important;
+    }
+    .invalidCol2 {
+        background-color: #ff0000 !important;
+        color: white !important;
+    }
+    .invalidCol3 {
+        background-color: #ff0000 !important;
+        color: white !important;
+    }
+    .invalidCol4 {
+        background-color: #ff0000 !important;
+        color: white !important;
+    }
+
+    .RadGrid_Metro .rgSave {
+        background-position: 3px -1825px;
+        position: absolute;
+        margin-left: 0px !important;
+        margin-top: 5px !important;
+    }
+
+    .RadGrid_Metro .rgCommandRow .rgCancel {
+        background-position: -1px -1850px;
+        position: absolute;
+        margin-left: 2px !important;
+        margin-top: 5px !important;
+    }
+    li.rcbItem.rcbTemplate:hover {
+        background-color: #ddd;
+        cursor: pointer;
+    }
+
+    .rdf-initial {
+        margin: 0 30px 0 0;
+    }
+
+    .rdf-initial {
+        right: 34px !important;
+    }
+
+    .rdf-text {
+        padding: 5px 0 0 0 !important;
+    }
+
+    #BtnManHrs {
+        display: inline-block;
+        width: 50%;
+        float: left;
+    }
+
+    #ManHrsGrid_GridData {
+        max-height: 650px !important;
+        height: auto !important;
+    }
+
+    .double-scroll {
+        width: auto;
+    }
+
+
+    #label#lblJob {
+        margin-left: 50px;
+    }
+
+    #label#lblDtae {
+        margin-left: 50px;
+    }
+
+    .rgCommandTable td:nth-child(1) {
+        display: block !important;
+    }
+
+
+    li.rlbItem .rlbText {
+        color: red;
+    }
+
+    .message {
+        line-height: 37px;
+    }
+
+    .RadGrid .rgRow,
+    .RadGrid .rgAltRow {
+        height: 30px;
+    }
+
+    .RadGrid_Silk .rgRow,
+    .RadGrid_Silk .rgAltRow,
+    .RadGrid_Glow .rgRow,
+    .RadGrid_Glow .rgAltRow {
+        height: 36px;
+    }
+
+    .RadGrid_MetroTouch .rgRow,
+    .RadGrid_MetroTouch .rgAltRow,
+    .RadGrid_BlackMetroTouch .rgRow,
+    .RadGrid_BlackMetroTouch .rgAltRow {
+        height: 46px;
+    }
+
+    @@media (max-width:991px) {
+        .dropdownMargin {
+            margin: 0px 0 20px 0;
+        }
+
+        #BtnManHrs {
+            width: 25%;
+            display: inline-block;
+        }
+
+        .btnreconcilego {
+            width: 20% !important;
+        }
+        #BtnManHrs{
+            width:50% !important;
+                margin-left: 11px;
+        }
+    }
+    @@media (min-width:991px) and (max-width:2000px){
+        #lblJob {
+            margin-left: 14px !important;
+        }
+    }
+    #ddlJob_DropDown {
+        display: none !important;
+    }
+
+    .setWidth15  {
+    min-width: 20px !important;
+}
+
+   .setWidth7,.setWidth8,.setWidth9,.setWidth10,.setWidth13  {
+    max-width: 60px !important;
+}
+</style>
+
+<input type="hidden" id="hdnManHrsId" />
+<input type="hidden" id="hdnResourceId" Value="" />
+<input type="hidden" id="hdnEntryDate" Value="" />
+
+     @*<div runat="server" style="display: none" id="art1">
+<span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+<asp:Label ID="alertlabel" runat="server"></asp:Label>
+</div>*@
+
+<div class="row">
+<div class="title_left col-lg-12 col-md-12 col-sm-12 col-xs-12">
+<h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span ID="lblRigister"  Font-Size="16px" Font-Bold="true">Daily Job Hours Allocation</span></b></h4>
+</div>
+</div>
+
+<div class="row">
+<div id="divmanHrs" style="display:block;">
+<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 dropdownMargin">
+<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 sitemargin">
+<label id="lblSiteddl">Site </label>
+</div>
+<div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                    @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlSite" AutoPostBack="true" runat="server" AppendDataBoundItems="true" OnSelectedIndexChanged="ddlSite_SelectedIndexChanged" Width="100%" EmptyMessage="Select---" EnableLoadOnDemand="true">
+</Telerik:RadComboBox>
+
+<asp:RequiredFieldValidator ID="rfvtxtddlSite" runat="server" CssClass="rdf-initial rdf-text"
+                            ControlToValidate="ddlSite" ValidationGroup="Save" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+<select id="ddlSite" onchange="ddlSite_SelectedIndexChanged()" style="Width:100%" Class="form-control"></select>
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dropdownMargin">
+<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 jobmargin">
+<label id="lblJob">Job</label>
+</div>
+
+<div class="col-lg-7 col-md-6 col-sm-4 col-xs-6">
+                    @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlJob" runat="server" MarkFirstMatch="true" AutoPostBack="true" CausesValidation="false" DataValueField="RegisterId" DataTextField="ScaffRef" EnableLoadOnDemand="true" DropDownWidth="0%" AppendDataBoundItems="true" Width="100%">
+</Telerik:RadComboBox>
+<asp:RequiredFieldValidator ID="rdFiledjob" runat="server" CssClass="rdf-initial rdf-text"
+                            ControlToValidate="ddlJob" ValidationGroup="Save" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+<select id="ddlJob" style="Width:100%" Class="form-control"></select>
+</div>
+<div class="col-lg-3 col-md-4 col-sm-4 col-xs-4">
+                    @*<asp:LinkButton ID="btnSelect" runat="server" CssClass="btn btn-primary" Style="border: 1px solid #82CAFA; width: 100%;height: 23px; padding-top: 1px; margin-left: -38px;" OnClick="btnSelect_Click">Select</asp:LinkButton>*@
+<button id="btnSelect" Style="border: 1px solid #82CAFA; width: 100%;height: 27px; padding-top: 1px; margin-left: -15px; display:none; " Width="100%" Class="btn btn-primary" onclick="btnSelect_Click()">Select</button>
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 dropdownMargin">
+<div class="col-lg-2 col-md-3 col-sm-2 col-xs-2 Datemargin">
+<label id="lblDate">Date</label>
+</div>
+<div class="col-lg-8 col-md-9 col-sm-8 col-xs-10">
+                    @*<Telerik:RadDatePicker ID="DatePicker" DateInput-DateFormat="dd-MMM-yyyy" runat="server" Width="100%"></Telerik:RadDatePicker>
+<asp:RequiredFieldValidator ID="rdFileddate" runat="server" CssClass="rdf-initial rdf-text"
+                            ControlToValidate="DatePicker" ValidationGroup="Save" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+<input type="text" id="txtDate" style="width:100%;color:black;" />
+</div>
+
+</div>
+
+<div class="col-lg-2 col-md-1 col-sm-6 col-xs-12 dropdownMargin" style="text-align: center;">
+                @*<asp:LinkButton CssClass="w3-btn w3-teal w3-animate-zoom" Style="height:25px; padding-top:4px; width:100%" ValidationGroup="Save" OnClick="BtnManHrs_Click" runat="server" CausesValidation="true" ID="BtnManHrs">GO</asp:LinkButton>*@
+<button id="BtnManHrs" Style="height:27px; padding-top:4px;" Width="100%" Class="w3-btn w3-teal w3-animate-zoom" onclick="BtnManHrs_Click()">GO</button>
+
+</div>
+</div>
+
+<div id="divreconcile" style="display:none;">
+<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 dropdownMargin">
+<div class="col-lg-4 col-md-4 col-sm-2 col-xs-3 sitemargin">
+<label id="Label1">Resource </label>
+</div>
+<div class="col-lg-8 col-md-8 col-sm-10 col-xs-9">
+                    @*<asp:DropDownList ID="resourceDropDown" runat="server" AppendDataBoundItems="true" Width="100%" CssClass="form-control">
+</asp:DropDownList>
+<asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" CssClass="rdf-initial rdf-text"
+                            ControlToValidate="resourceDropDown" ValidationGroup="Save1" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+<select id="resourceDropDown" onchange="resourceDropDown_Changed()"style="Width:100%" Class="form-control"></select>
+</div>
+
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 dropdownMargin">
+<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 Datemargin">
+<label id="Label2">Date</label>
+</div>
+<div class="col-lg-8 col-md-8 col-sm-10 col-xs-10">
+                    @*<Telerik:RadDatePicker ID="NewEntryDate" DateInput-DateFormat="dd-MMM-yyyy" runat="server" Width="100%"></Telerik:RadDatePicker>
+<asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" CssClass="rdf-initial rdf-text"
+                            ControlToValidate="NewEntryDate" ValidationGroup="Save1" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+<input type="text" id="NewEntryDate" style="width:100%;color:black;" />
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 dropdownMargin">
+                @*<asp:LinkButton CssClass="w3-btn w3-teal btnreconcilego" ValidationGroup="Save1" Width="100%" OnClick="BtnManHrs_Click" runat="server" CausesValidation="true" ID="LinkButton1">GO</asp:LinkButton>
+<asp:LinkButton CssClass="w3-btn w3-small  nln-bg w3-text-white" runat="server" OnClick="btnback_Click" CausesValidation="true" ID="btnback"><i class="fa fa-backward"></i>&nbsp;Back To Reconcile</asp:LinkButton>*@
+<button id="LinkButton1" Width="100%" Class="w3-btn w3-teal btnreconcilego" onclick="BtnManHrs_ClickNew()">GO</button>
+<button id="btnback" Width="100%" Class="w3-btn w3-small  nln-bg w3-text-white" onclick="btnback_Click()"><i class="fa fa-backward"></i>&nbsp;Back To Reconcile</button>
+</div>
+</div>
+</div>
+
+
+   @*<div class="col-lg-2 col-md-2 col-sm-12 col-xs-12"></div>*@
+
+<div class="row" id="divbuttonsave" style="display:none;">
+<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+<button ID="btnsave" ForeColor="White" Width="100%" Class="w3-btn w3-green" OnClick="btnSaveManHrs_Click()" Style="background-color: green; float: left; font-weight: bold;"><i class="fa fa-save"></i>&nbsp;Save Changes</button>
+</div>
+<div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+<button ID="btncancel" ForeColor="White" Width="100%" Class="w3-btn w3-small  nln-bg w3-text-white " OnClick="btnCancelManHrs_Click()" Style="font-weight: bold;"><i class="fa fa-remove" style="display:inline-block;"></i>&nbsp;Cancel</button>
+</div>
+
+                @*<div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+<button type="button" Class="btn w3-btn w3-teal" id="ExportToCsvButton" Style="margin-top: 0px; color:white;    width: 100%;" onclick="ExportToCsvButton_Click()">Export to CSV</button>
+</div>*@
+</div>
+
+<div class="clearfix"></div>
+<div class="row">
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="mainDivDataTable">
+<div id="ManHrsList" style="color: black; width: 100%;margin-top:5px;">
+<table id="tblManHrsList" class="table table-striped ">
+<thead style="background-color: #efefef; color: #716262;width:100%">
+<tr>
+<th class="setWidth0" style="display:none"></th>
+<th class="setWidth0">#</th>
+<th class="setWidth1">Site</th>
+<th class="setWidth2">Job</th>
+<th class="setWidth3">Resource</th>
+<th class="setWidth4">Category</th>
+<th class="setWidth5">Site Hours</th>
+<th class="setWidth6">Allocated Hrs Other Jobs</th>
+<th class="setWidth7">Erection Hours</th>
+<th class="setWidth8">Dismantle Hours</th>
+<th class="setWidth9">Mods. Hours</th>
+<th class="setWidth10">Addit. Hours</th>
+<th class="setWidth11">Type of variation</th>
+<th class="setWidth12">Reason/Description of Variation</th>
+<th class="setWidth13">Included In DayDocket</th>
+<th class="setWidth14">Variation Comments</th>
+<th class="setWidth15">Entry Date</th>
+<th class="setWidth16" style="display:none"></th>
+<th class="setWidth17" style="display:none"></th>
+<th class="setWidth18" style="display:none"></th>
+
+</tr>
+</thead>
+<tbody id="tbodyManHrsList" style="width:100%"></tbody>
+</table>
+
+</div>
+</div>
+</div>
+
+<div id="divDelete" class="w3-modal" style="display: none">
+<div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+<header class="w3-container w3-dark-grey">
+<h4 class="w3-text-white" id="h2"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+</header>
+<div class="w3-container">
+<p class="w3-padding-top w3-text-grey">
+<label id="lblchild">Are you sure you want to Delete the Record?</label>
+</p>
+</div>
+<div class="row" style="padding-bottom: 20px">
+<div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+<div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+<button id="btnDeleteYes" Class="w3-btn w3-green w3-hover-dark-grey" onclick="btnDeleteYes_Click()"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+</div>
+<div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+<button id="btnDeleteNo" Class="w3-btn nln-bg w3-hover-dark-grey" onclick="btnDeleteNo_Click()"><i class="glyphicon glyphicon-remove-circle "></i> No</button>
+</div>
+</div>
+</div>
+</div>
+
+ @*<div class="row">
+
+
+<div id="myModal" runat="server" class="w3-modal" style="display: none">
+<div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 600px; width: 600px;">
+<div class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; text-align: right;">
+<asp:Button runat="server" CssClass="btn btn-primary" Style="border: 1px solid #82CAFA; margin-right: 4px;" Text="Select" Width="100px" ID="btnSelectJob" OnClick="btnSelectJob_Click" />
+
+<asp:LinkButton ID="btnclose" runat="server" CssClass="fa fa-close" Style="color: black" OnClick="btnclose_Click"></asp:LinkButton>
+</div>
+<div class="w3-container">
+<asp:HiddenField ID="hdfieldId" runat="server" />
+<Telerik:RadGrid ID="JobRadGrid" runat="server" AllowPaging="true" PageSize="12" Skin="Metro" OnNeedDataSource="JobRadGrid_NeedDataSource" GroupingSettings-CaseSensitive="false" AutoGenerateColumns="false" AllowFilteringByColumn="true" MasterTableView-AllowSorting="true" ClientSettings-EnableAlternatingItems="true">
+<MasterTableView DataKeyNames="RegisterId" CommandItemDisplay="Top">
+
+<CommandItemSettings ShowAddNewRecordButton="false" ShowExportToCsvButton="false" />
+<Columns>
+<Telerik:GridTemplateColumn HeaderText="Select" ItemStyle-Width="10%" AllowFiltering="false" UniqueName="UNRadSelect" Display="true" ReadOnly="true" ItemStyle-HorizontalAlign="Left" HeaderStyle-HorizontalAlign="Left">
+<ItemTemplate>
+<asp:RadioButton ID="RadioSelectJob" runat="server" onclick="javascript:OnRadioClick(this);"></asp:RadioButton>
+</ItemTemplate>
+</Telerik:GridTemplateColumn>
+<Telerik:GridTemplateColumn HeaderText="Scaf Ref" HeaderStyle-Width="30%" FilterControlWidth="100%" FilterDelay="1500" DataField="ScaffRef" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+<ItemTemplate>
+<asp:Label ID="lblScaffReff" runat="server" Text='<%#Eval("ScaffRef") %>'></asp:Label>
+</ItemTemplate>
+</Telerik:GridTemplateColumn>
+<Telerik:GridTemplateColumn HeaderText="Reason for Access" HeaderStyle-Width="30%" FilterControlWidth="100%" FilterDelay="1500" DataField="Description" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+<ItemTemplate>
+<asp:Label ID="lblDescription" runat="server" Text='<%#Eval("Description") %>'></asp:Label>
+</ItemTemplate>
+</Telerik:GridTemplateColumn>
+</Columns>
+</MasterTableView>
+</Telerik:RadGrid>
+
+</div>
+</div>
+</div>*@

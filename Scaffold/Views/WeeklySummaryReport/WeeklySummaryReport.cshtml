@@ -1,0 +1,1624 @@
+﻿
+@{
+    ViewBag.Title = "WeeklySummaryReport";
+}
+
+    @*<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+    <script src="https://rawgithub.com/laff/technical-indicators/master/technical-indicators.src.js"></script>
+    <script src="https://rawgithub.com/phpepe/highcharts-regression/master/highcharts-regression.js?8"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>*@
+	<script src="/Content/js/highcharts.js"></script>
+    <script src="/Content/js/highcharts-3d.js"></script>
+    <script src="/Content/js/exporting.js"></script>
+    <script src="/Content/js/highcharts-more.js"></script>
+    <script src="/Content/js/export-data.js"></script>
+    <script src="/Content/js/no-data-to-display.js"></script>
+    <script src="/Content/js/technical-indicators.src.js"></script>
+    <script src="/Content/js/highcharts-regression.js"></script>
+    <script src="/Content/js/canvasjs.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            $("[id$=exportButton]").click(function (e) {
+                //window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('div[id$=divTableDataHolder]').html()));
+                //e.preventDefault();
+                var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+                  base64 = function (s) {
+                      return window.btoa(unescape(encodeURIComponent(s)))
+                  },
+            format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            }
+
+                var toExcel = "Locked in Scaffolds for " + $("#lblLockedSite").text();
+                toExcel += document.getElementById("tbDetailsLockedIn").innerHTML;
+                var ctx = {
+                    worksheet: name || '',
+                    table: toExcel
+                };
+                var link = document.createElement("a");
+                link.download = "Locked In Scaffolds for " + $("#lblLockedSite").text() + ".xls";
+                link.href = uri + base64(format(template, ctx))
+                link.click();
+            });
+
+        });
+
+        $(document)
+                   .ajaxStart(function () {
+                       $('#LoadingPanel1').css('display', 'block');
+                   })
+                 .ajaxStop(function () {
+                     $('#LoadingPanel1').css('display', 'none');
+                 });
+        var siteLocid = 0;
+        var locaid = 0;
+
+        $(document).ready(function () {
+           
+            $('#imgLogoWeeklySummryReport').attr('src', '@ViewBag.ClientImage');
+
+            var CurrentData = new Date();
+
+            $('#picweekdate').val(CurrentData.DateMonthFormat());
+
+            $("#picweekdate").datepicker({
+                dateFormat: 'dd-M-yy',
+                // maxDate: 0,
+                closeText: 'Close',
+
+            });
+
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+
+
+            var ClientID = $("#hdnClientID").val();
+            // $("#ContentPlaceHolder1_hdnClientID").val(ClientID);
+
+            var screensize = $(window).width();
+            if (screensize < 1150 && screensize > 650) {
+                ($BODY.hasClass('nav-md'))
+                $('#CreateNewDropDown').css("margin-top", "2px");
+                $BODY.removeClass('nav-md').addClass('nav-sm');
+                $LEFT_COL.removeClass('scroll-view');
+                //$('#BlackSection').css('display', 'block');
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "52px");
+                $('#leftbarsection').css('margin-top', '0px');
+                $('.smbysite').css('margin-top', '32px');
+                //$('.smshow').css('margin-top', '-128px');
+                $('.smhireshow').css('margin-top', '-152px');
+                $('.smwidth').css('margin-top', '0px');
+                $('.smallsite').css('margin-top', '13px');
+            }
+            else {
+                if (screensize < (650)) {
+                    $BODY.removeClass('nav-sm')
+                    $('#imgLogo').parent().css('display', 'none');
+                    $('.summaryData').parent().css('font-size', '10px');
+                    $('.smalllocation').parent().css('font-size', '10px');
+                    $('.smhireshow').css('margin-top', '7px');
+                }
+                else {
+                    $('#CreateNewDropDown').css("margin-top", "6px");
+                    $BODY.removeClass('nav-sm').addClass('nav-md');
+                    //$('#BlackSection').css('display', 'none');
+                    $('#imgLogo').parent().css('display', 'block');
+                    $('#imgLogo1').css('display', 'none');
+                    $('#leftbarsection').css('margin-top', '40px');
+                }
+            }
+
+
+            $('#container1').dblclick(function (e) {
+                $('#btnOpenModel').click();
+            });
+
+            $('#container2').dblclick(function (e) {
+                $('#btnOpenModel1').click();
+            });
+
+            //$('#Chart3container').dblclick(function (e) {
+            //    $('#btnOpenModel3').click();
+            //});
+
+
+            var combo = $("#ddlSite");
+            var Siteid = combo.val();
+            ddlSitebind(ClientID);
+            //var getnewdate = $("#ctl00_ContentPlaceHolder1_picweekdate_dateInput").val();
+            //chart3(ClientID, "All", "All");
+
+
+
+            $("#ddlSite").on("change", function () {
+                var combo = $("#ddlSite");
+                var Siteid = combo.val();
+                var Sitelocation = document.getElementById("ddlSite");
+                var getsitename = Sitelocation.options[Sitelocation.selectedIndex].text;
+                LocationBySite(Siteid, ClientID);
+                SiteData(Siteid, ClientID);
+                $("#hdnSiteID").val(Siteid);
+                $("#lblLockedSite").text(getsitename);
+                // var getnewdate = $("#ctl00_ContentPlaceHolder1_picweekdate_dateInput").val();
+                var getnewdate = $("#picweekdate").val();
+                chart3(ClientID, Siteid, "All", getnewdate);
+            });
+
+            generateActualPlanningWeek();
+        });
+
+        function generateActualPlanningWeek() {
+            var id = getParameterByName('id');
+            var UID = getParameterByName('UID');
+            $.ajax({
+                type: "POST",
+                url: "/WeeklySummaryReport/generateActualWeekPlan",
+                data: JSON.stringify({ id: id, UID: UID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var generate = response;
+                }
+            });
+        }
+
+          function exporttopdf_Click() {
+
+        $("#LoadingPanel1").css("display", "block");
+
+        var siteID = $('#hdnSiteID').val();
+
+        var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var EncryptData = [siteID];
+        var encry = Encrypt(EncryptData);
+        siteID = encry[0];
+        window.open('/LockedInChartReport/showLockedInChartReport?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientID + '&siteId=' + siteID);
+
+        $(".modal-content").css("display", "none");
+        $("#LoadingPanel1").css("display", "none");
+
+
+        @*string siteId = hdnSiteID.Value;
+        string clientid = hdnClientID.Value;
+        Response.Write("<script> window.open('LockedInChartReport?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + databaseCon.Encrypt(clientid) + "&siteId=" + databaseCon.Encrypt(siteId) + "&btn=prv','_blank');</script>");*@
+    }
+
+
+        //Sitedropdownbind Start
+
+        function ddlSitebind(id) {
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/ddlsitedropdownbindquery",
+                url: "/WeeklySummaryReport/ddlsitedropdownbindquery",
+                data: JSON.stringify({ id: id}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var ddlSitedropdownbind = response;
+                    var Siteid = "";
+                    var SiteLocatext = "";
+                    $("#ddlSite").html("");
+                    for (var i = 0; i < ddlSitedropdownbind.length; i++) {
+                        Siteid = ddlSitedropdownbind[0].SiteLocID;
+                        SiteLocatext = ddlSitedropdownbind[0].SiteLocation;
+                        $("#ddlSite").append('<option value="' + ddlSitedropdownbind[i].SiteLocID + '">' + ddlSitedropdownbind[i].SiteLocation + '</option>');
+                    }
+                    var ClientID = $("#hdnClientID").val();
+                    SiteData(Siteid, ClientID);
+                    LocationBySite(Siteid, ClientID);
+                    $("#hdnSiteID").val(Siteid);
+                    $("#lblLockedSite").text(SiteLocatext);
+                    //var getnewdate = $("#ctl00_ContentPlaceHolder1_picweekdate_dateInput").val();
+                    var getnewdate = $("#picweekdate").val();
+                    chart3(ClientID, Siteid, "All", getnewdate);
+                }
+            });
+
+        }
+
+        //Sitedropdownbind End
+
+
+
+        // All Sites Data - chart 1 starts
+
+        function SiteData(Siteid, ClientID) {
+            //$('.forRemoveData3').remove();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/SiteDetails",
+                url: "/WeeklySummaryReport/SiteDetails",
+                data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //var SitedataDetails = response.d;
+                    var SitedataDetails = response;
+                    $("#ErrectedScaffolds").val(SitedataDetails[0]["ErectedDate1"]);
+                    $("#TextBox1").val(SitedataDetails[0]["ScaffoldsStanding1"]);
+                    $("#TextBox2").val(SitedataDetails[0]["TonnageErected1"]);
+                    $("#TextBox3").val(SitedataDetails[0]["TonnageStanding1"]);
+                    $("#TextBox4").val(SitedataDetails[0]["AverageTonnage1"]);
+                    $("#TextBox5").val(SitedataDetails[0]["HireDays1"]);
+                    Allsites("all", ClientID);
+                }
+
+            });
+        }
+
+        // All Sites Data - chart 1 End
+
+        //Tonnage Scaffold All Sites - Chart 2 starts
+
+        function Allsites(Siteid, ClientID) {
+            //$(".AllsitenameLabel1").css("display", "none");
+            //$(".AllsitesPricelabel1").css("display", "none");
+            //$(".AllsitenameLabel1").text("");
+            //$(".AllsitesPricelabel1").text("");
+            //$('.forRemoveData').remove();
+
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/AllSitesDashboard",
+                url: "/WeeklySummaryReport/AllSitesDashboard",
+                data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //TonnageAllsites = response.d;
+                    TonnageAllsites = response;
+                    var ScaffoldData = [];
+                    var nooftimes = 20;
+                    if (TonnageAllsites.length > 0) {
+                        $(".AllsitenameLabel1").css("display", "none");
+                        $(".AllsitesPricelabel1").css("display", "none");
+                        $(".AllsitenameLabel1").text("");
+                        $(".AllsitesPricelabel1").text("");
+                        $('.forRemoveData').remove();
+                        if (TonnageAllsites.length <= nooftimes) {
+                            nooftimes = TonnageAllsites.length;
+                        }
+                        //alert(ScaffoldAllsites.length);
+
+                        for (var i = 0; i < nooftimes; i++) {
+
+                            var TobePush = true;
+                            for (var k = 0; k < ScaffoldData.length; k++) {
+                                if (ScaffoldData[k].name == TonnageAllsites[i].MaterialType) {
+                                    TobePush = false;
+                                }
+                            }
+
+                            if (TobePush) {
+                                ScaffoldData.push({ name: TonnageAllsites[i].MaterialType, y: TonnageAllsites[i].TonnageStanding, z: (TonnageAllsites[i].PctAllSite * 100).toFixed(2), sliced: true });
+
+                                //alert(ScaffoldAllsites[i].MaterialType);
+                                var j = i + 1;
+
+                                if (j <= 3) {
+                                    var des1 = (TonnageAllsites[i].TonnageStanding).toFixed(2);
+
+                                    $("#AllsitenameLabel" + j).css("display", "block");
+                                    $("#AllsitesPricelabel" + j).css("display", "block");
+
+                                    $("#AllsitenameLabel" + j).text(TonnageAllsites[i].MaterialType);
+                                    $("#AllsitesPricelabel" + j).text(des1);
+                                }
+                                //$("#AllsitenameLabel" + i).text(ScaffoldAllsites[i].MaterialType);
+
+                            }
+                        }
+                    }
+                    // alert(JSON.stringify(ScaffoldData));
+                    //var pieColors = (function () {
+                    //    var colors = [],
+                    //        base = Highcharts.getOptions().colors[0],
+                    //        i;
+
+                    //    for (i = 0; i < 10; i += 1) {
+                    //        colors.push(Highcharts.Color(base).brighten((i - 2) / 12).get());
+                    //    }
+                    //    return colors;
+                    //}());
+                    Highcharts.chart('container1', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            type: 'line',
+                            backgroundColor: '#f2f2f2',
+                            // height: 223,
+                            type: 'pie',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+                        title: {
+                            text: ''
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                //size: 100,
+                                slicedOffset: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.y}({point.z}%)',
+                                    style: {
+                                        fontWeight: 'Normal'
+                                    }
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                                x: 9,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: false
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All',
+
+                                }
+                            }
+
+
+                        },
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: 'Tonnage Standing',
+                            data: ScaffoldData,
+                            showInLegend: true
+                        }]
+                    });
+                    function redrawchart() {
+                        var chart = $('#container1').highcharts();
+
+                        console.log('redraw');
+                        var w = $('#container1').closest(".wrapper").width()
+                        // var h = $('#container1').closest(".wrapper").height(190)
+                        // setsize will trigger the graph redraw
+                        chart.setSize(
+                            w, w * (2.3 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart);
+                        redrawchart();
+                    });
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                    //Append Data in table to show data source
+                    var row = '';
+                    var selectedSiteLocation = $("#ddlSite").val()
+
+                    //var AllSitestotalTonnage = $("#ContentPlaceHolder1_TextBox3").val();
+
+                    //alert(AllSitestotalTonnage);
+                    //  $.each(response.d, function (index1, obj1) {
+                    $.each(response, function (index1, obj1) {
+                        var num;
+
+                        num = (obj1.PctAllSite * 100);
+                        percentage = num.toFixed(2);
+
+                        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj1.MaterialType + "</td><td style='text-align: center;'>" + obj1.TonnageStanding + "</td><td style='text-align: center;'>" + percentage + "%" + "</td></tr>";
+                    });
+                    $("#tbDetails tbody").append(row);
+
+
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+        // Tonnage Scaffold All Sites - chart 2 End
+
+        function ScaffoldLockedIn(Siteid, ClientID) {
+            $('.forRemoveDataAction').remove();
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/LockedInClick",
+                url: "/WeeklySummaryReport/LockedInClick",
+                data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //var CycloneAction = response.d;
+                    var CycloneAction = response;
+                    var CycloneData = [];
+                    if (CycloneAction.length > 0) {
+                        for (var i = 0; i < CycloneAction.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                CycloneData.push({ name: CycloneAction[i].ScaffRefAction, y: CycloneAction[i].DescriptionAction, z: CycloneAction[i].Location, s: CycloneAction[i].BuildingNo, r: CycloneAction[i].assetId, x: CycloneAction[i].FloorLevel, a: CycloneAction[i].DesignType, b: CycloneAction[i].MaterialType, sliced: true });
+                            }
+                        }
+                    }
+                    $('#btnOpenModelAllDetails').click();
+                    //$("#lblAction").text(CycloneActionName);
+                    //$("#ContentPlaceHolder1_labelaction").val(CycloneActionName);
+                    var row1 = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        row1 += "<tr class='forRemoveDataAction'><td style='text-align: center;font-size: 12px;'>" + obj.ScaffRefAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DescriptionAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.Location + "</td><td style='text-align: center;font-size: 12px;'>" + obj.BuildingNo + "</td><td style='text-align: center;font-size: 12px;'>" + obj.assetId + "</td><td style='text-align: center;font-size: 12px;'>" + obj.FloorLevel + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DesignType + "</td><td style='text-align: center;font-size: 12px;'>" + obj.MaterialType + "</td></tr>";
+                    });
+                    $("#tbDetailsLockedIn tbody").append(row1);
+                }
+            });
+
+        }
+
+        //LockedIn - Chart 3 Starts
+
+        function LocationBySite(Siteid, ClientID) {
+            //$(".BysitenameLabel").css("display", "none");
+            $(".BysitesPricelabel").css("display", "none");
+
+            //$(".BysitenameLabel").text("");
+            $(".BysitesPricelabel").text("");
+            $('.forRemoveData1').remove();
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/GetBySitesDashboard",
+                url: "/WeeklySummaryReport/GetBySitesDashboard",
+                data: JSON.stringify({ Siteid: Siteid, ClientID: ClientID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                   // LocationBySites = response.d;
+                    LocationBySites = response;
+                    var ScaffoldData2 = [];
+                    var percentlocked = [];
+                    var nooftimes = 20;
+                    if (LocationBySites.length > 0) {
+                        if (LocationBySites.length <= nooftimes) {
+                            nooftimes = LocationBySites.length;
+                        }
+                        for (var i = 0; i < LocationBySites.length; i++) {
+
+                            var TobePush = true;
+                            for (var k = 0; k < ScaffoldData2.length; k++) {
+                                if (ScaffoldData2[k].name == LocationBySites[i].TotalRegisterforsite) {
+                                    TobePush = false;
+                                }
+                            }
+
+                            if (TobePush) {
+
+
+                                ScaffoldData2.push({ name: LocationBySites[i].TotalRegisterforsite, y: LocationBySites[i].LockedinReg, x: LocationBySites[i].LockedPerct, sliced: true });
+                                percentlocked.push(parseFloat(LocationBySites[0].LockedPerct));
+
+                                //alert(percentlocked[0]);
+                                //alert(ScaffoldAllsites[i].MaterialType);
+                                var j = i + 1;
+
+                                //if (j <= 3) {
+                                var des1 = LocationBySites[i].TotalRegisterforsite;
+                                var des2 = LocationBySites[i].LockedinReg;
+                                var des3 = LocationBySites[i].LockedPerct;
+                                //$("#ContentPlaceHolder1_BysitenameLabel" + j).css("display", "block");
+                                $("#BysitesPricelabel1").css("display", "block").css("margin-top", "19px;");
+                                $("#BysitesPricelabel2").css("display", "block");
+                                $("#BysitesPricelabel3").css("display", "block");
+                                $("#BysitesPricelabel1").text(des1);
+                                $("#BysitesPricelabel2").text(des2);
+                                $("#BysitesPricelabel3").text(des3);
+                                // }
+                            }
+                        }
+                    }
+
+
+                    //alert(JSON.stringify(percentlocked));
+
+                    //alert(percentlocked);
+                    Highcharts.chart('container2', {
+                        chart: {
+                            //borderColor: '#D3D3D3',
+                            borderWidth: 0,
+                            //width:600,
+                            // type: 'line',
+
+                            backgroundColor: '#f2f2f2',
+                            type: 'gauge',
+                            plotBackgroundColor: '#f2f2f2',
+                            plotBackgroundImage: '/images/LockedimgDashboard.png',
+                            //plottext:'the following are optimised?',
+                            //height: 203,
+                            plotBorderWidth: 0,
+                            plotShadow: false,
+                            //events: {
+                            //    click: function () {
+                            //        ScaffoldLockedIn(Siteid, ClientID);
+                            //    }
+                            //}
+                        },
+                        title: false,
+                        //title: {
+                        //    text: 'Scaffolds "Locked In" Gauge',
+                        //    BackgroundColor: '#f2f2f2'
+                        //},
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                                x: 9,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+
+                                contextButton: {
+                                    enabled: false,
+                                    //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                                },
+
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        ScaffoldLockedIn(Siteid, ClientID);
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+                        },
+                        pane: {
+                            startAngle: -105,
+                            endAngle: 105,
+                            //center:['50%','100%'],
+                            background: [],
+                            //background: [{
+                            //    backgroundColor: {
+                            //        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            //        stops: [
+                            //            [0, '#FFF'],
+                            //            [1, '#333'],
+                            //            [2, '#FFF']
+                            //        ]
+                            //    },
+
+                            //    borderWidth: 0,
+                            //    outerRadius: null
+                            //}, {
+                            //    backgroundColor: {
+                            //        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            //        stops: [
+                            //            [0, '#333'],
+                            //            [1, '#FFF'],
+                            //            [2, '#333']
+                            //        ]
+                            //    },
+                            //    borderWidth: 0,
+                            //    outerRadius: null
+                            //}, {
+                            //    // default background
+                            //}, {
+                            //    backgroundColor: '#DDD',
+                            //    borderWidth: 0,
+                            //    outerRadius: '105%',
+                            //    innerRadius: '103%',
+
+                            //}]
+                        },
+
+                        // the value axis
+                        yAxis: {
+                            min: -10,
+                            max: 110,
+                            //width:600,
+                            lineWidth: 0,
+                            minorTickInterval: 10,
+                            //minorTickWidth: 1,
+                            minorTickLength: 5,
+                            minorTickPosition: 'inside',
+                            //minorticklabel:true,
+                            //minorTickColor: null,
+
+                            //tickPixelInterval: 50,
+                            tickInterval: 10,
+                            tickWidth: 2,
+                            //tickPosition: 'outside',
+                            tickLength: 0,
+                            //tickColor: null,
+
+                            tickPosition: 'outside',
+                            tickpositions: [-10, 0, 20, 40, 60, 80, 100, 110],
+
+                            labels: {
+                                //step: 2,
+                                //rotation: 'auto'
+                                formatter: function () {
+                                    //position3d: 'offset',
+                                    if (this.value == -10) return 'Low Optimisation';
+                                    if (this.value == 110) return 'High Optimisation';
+                                    if (this.value % 20 == 0) return this.value;
+                                    return '';
+                                },
+                                distance: 10
+                                // y: 10,
+                                //align:'right',
+
+                            },
+
+                            title: {
+                                text: ''
+                            },
+
+                            plotBands: [{
+                                from: 0,
+                                to: 20,
+                                color: '#DF5353', // green
+                                thickness: '20%'
+                            },
+                                {
+                                    from: 20,
+                                    to: 40,
+                                    color: '#DDDF0D', // yellow
+                                    thickness: '20%'
+                                }, {
+                                    from: 40,
+                                    to: 60,
+                                    color: '#f37101',// red
+                                    thickness: '20%'
+                                }, {
+                                    from: 60,
+                                    to: 80,
+                                    color: '#1057e6', // yellow
+                                    thickness: '20%'
+                                }, {
+                                    from: 80,
+                                    to: 100,
+                                    color: '#55BF3B',
+                                    thickness: '20%'
+                                }]
+                        },
+
+                        series: [{
+                            name: 'Locked In ',
+                            data: [percentlocked[0]],
+                            tooltip: {
+                                valueSuffix: ' % <br/>The following are optimised. <br/> 1: Material Use.    <br/>    2: Man Hours. <br/> 3: Design Type.     <br/>   4: Hierarchy of Access Choice.'
+                            }
+                        }]
+
+                    },
+                    //function(chart) { // on complete
+                    //    var textX = chart.plotLeft + (chart.plotWidth  * 0.25);
+                    //    var textY = chart.plotTop  + (chart.plotHeight * 0.25);
+
+                    //    var span = '<span id="pieChartInfoText" style="position:absolute; text-align:center;">';
+                    //    span += '<span style="font-size: 32px">Upper</span><br>';
+                    //    span += '<span style="font-size: 16px">Lower</span>';
+                    //    span += '</span>';
+
+                    //    $("#addText").append(span);
+                    //    span = $('#pieChartInfoText');
+                    //    span.css('left', textX + (span.width() * -0.25));
+                    //    span.css('top', textY + (span.height() * -0.25));
+                    //},
+                    function redrawchart() {
+                        var chart = $('#container2').highcharts();
+
+                        console.log('redraw');
+                        var w = $('#container2').closest(".wrapper").width()
+                        //chart.renderer.text('Low Optimisation', 10, 117)
+                        //.css({
+                        //    color: 'black',
+                        //    fontSize: '13px'
+                        //})
+                        //.add();
+                        //chart.renderer.text('High Optimisation', 225, 117)
+                        //.css({
+                        //    color: 'black',
+                        //    fontSize: '13px'
+                        //})
+                        //.add();
+
+                        // var h = $('#container1').closest(".wrapper").height(190)
+                        // setsize will trigger the graph redraw
+                        chart.setSize(
+                            w, w * (2.3 / 4), false
+                        );
+                        $('#menu_toggle').on('click', function () {
+                            $(window).resize(redrawchart);
+                            redrawchart();
+                        });
+
+                    },
+                    function (chart) {
+                        if (!chart.renderer.forExport) {
+                            setInterval(function () {
+                                var point = chart.series[0].points[0],
+                                    newVal,
+                                    inc = Math.round((Math.random() - 0.5) * 20);
+
+                                newVal = point.y + inc;
+                                if (newVal < 0 || newVal > 200) {
+                                    newVal = point.y - inc;
+                                }
+
+                                //point.update(newVal);
+
+                            }, 3000);
+                        }
+                    });
+
+
+
+                    //$(window).resize(redrawchart);
+                    //redrawchart();
+                    ////Append Data in table to show data source
+                    //var row1 = '';
+                    //var selectedSiteLocation = $("#ddlSite").val()
+                    //var AllLocaTonnageTotal = $("#ContentPlaceHolder1_TextBox3").val();
+                    ////alert(AllLocaTonnageTotal);
+                    //$.each(response.d, function (index2, obj2) {
+
+                    //    var num1 = ((obj2.TonnageStanding / (AllLocaTonnageTotal)) * 100);
+                    //    percentage1 = num1.toFixed(2);
+                    //    //alert(percentage);
+                    //    //if (selectedSiteLocation == "All") {
+                    //    //    $("#sitenamemodal").css("display", "none");
+                    //    //    $(".bysitecolumnmodal").css("width", "33%");
+                    //    row1 += "<tr class='forRemoveData1'><td style='text-align: center;'>" + obj2.MaterialType + "</td><td style='text-align: center;'>" + obj2.TonnageStanding + "</td><td style='text-align: center;'>" + percentage1 + "%" + "</td></tr>";
+                    //    //} else {
+                    //    //    $("#sitenamemodal").css("display", "block");
+                    //    //    $(".bysitecolumnmodal").css("width", "25%");
+                    //    //    row1 += "<tr class='forRemoveData1'><td style='text-align: center;'>" + selectedSiteLocation + "</td><td style='text-align: center;'>" + obj1.MaterialType + "</td><td style='text-align: center;'>" + obj1.TonnageStanding + "</td><td style='text-align: center;'>" + percentage1 + "%" + "</td></tr>";
+                    //    //}
+
+                    //});
+                    //$("#tbDetails1 tbody").append(row1);
+
+
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+        //LockedIn - Chart 3 End
+
+        function chart3(ClientID, Siteid, jobval, getnewdate) {
+            $('.forRemoveData3').remove();
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/WeeklyProgress",
+                url: "/WeeklySummaryReport/WeeklyProgress",
+                data: JSON.stringify({ id: ClientID, site: Siteid, jobid: jobval, getnewdate: getnewdate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // WRegister = response.d;
+                    WRegister = response;
+                    var Week = [];
+                    var WRegisterDataErect = [];
+                    var WRegisterDataDismantle = [];
+                    var week1Register = 0;
+                    var weeks = [];
+                    var start = "";
+                    var end = "";
+                    var erect = 0;
+                    var week10Register = 0;
+                    var lastWeekNo = WRegister[WRegister.length - 1].WeekNo;
+                    var firstWeekNo = lastWeekNo - 9;
+                    if (WRegister.length > 0) {
+                        for (var i = 0; i < WRegister.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                WRegisterDataErect.push({ name: WRegister[i].WeekNo, y: WRegister[i].TotErectedRegister, sliced: true });
+                                WRegisterDataDismantle.push({ name: WRegister[i].WeekNo, y: WRegister[i].TotDismantleRegister, sliced: true });
+                                //week1Register = WRegister[0].TotErectedRegister;
+                                //week10Register = WRegister[9].TotErectedRegister;
+                                Week.push('Week ' + WRegister[i].WeekNo);
+                                weeks.push([WRegister[i].WeekNo - firstWeekNo, WRegister[i].TotErectedRegister]);
+                                //alert(weeks);
+                                if (WRegister[i].WeekNo == lastWeekNo) {
+                                    start = WRegister[i].WeekStartDate;
+                                    end = WRegister[i].WeekEndDate;
+                                }
+                            }
+
+
+                        }
+
+                    }
+                    Highcharts.chart('Chart3container', {
+                        chart: {
+                            backgroundColor: "#f2f2f2"
+                        },
+                        title: {
+                            text: 'Scaffold Builds Vs Dismantles',
+                            x: -20,
+                        },
+                        subtitle: {
+                            text: '(Week '+lastWeekNo+' => ' + start + ' to ' + end + ')',
+                            x: -20,
+                        },
+                        yAxis: {
+                            allowDecimals: false,
+                            title: {
+                                text: ''
+                            }
+                        },
+
+                        xAxis: {
+                            categories: Week,
+                            //tickInterval: 1, // Ensure ticks align with categories
+                            //startOnTick: true, // Force alignment with the first category
+                            //endOnTick: true, // Force alignment with the last category
+                            //min: 0, // Start at the first category
+                            //max: Week.length - 1 // End at the last category,
+                        },
+                        labels: {
+                            items: [{
+                                html: '',
+                                style: {
+                                    left: '50px',
+                                    top: '18px',
+                                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                                }
+                            }]
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel3').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        series: [{
+                            type: 'column',
+                            regression: true,
+                            regressionSettings: {
+                                name: 'Linear (Built)',
+                                dashStyle: 'ShortDot',
+                                color: '#76C3FD',
+                            },
+                            name: 'Built',
+                            id: 'primary',
+                           data: weeks
+                        }, {
+                            type: 'line',
+                            color: '#D5333E',
+                            marker: {
+                                enabled: false,
+                                radius: 3
+                            },
+                            name: ' Dismantled',
+                            data: WRegisterDataDismantle
+                        }, {
+                            name: '2 per. Mov. Avg.(Built)',
+                            linkedTo: 'primary',
+                            dashStyle: 'ShortDot',
+                            color: '#5A79F5',
+                            showInLegend: true,
+                            type: 'trendline',
+                            algorithm: 'SMA',
+                            periods: 2
+                            //    }
+                            //{
+                            //    type: 'line',
+                            //    dashStyle: 'ShortDot',
+                            //    color: '#76C3FD',
+                            //    width: 1,
+                            //    marker: {
+                            //        enabled: false,
+                            //        radius: 3
+                            //    },
+                            //    //yAxis: 2,
+                            //    name: 'Linear (Built)',
+                            //    data: [[0, week1Register + 0.1], [9, week10Register + 0.1]
+                            //    ]
+                            //    //marker: {
+                            //    //    lineWidth: 2,
+                            //    //    lineColor: Highcharts.getOptions().colors[3],
+                            //    //    fillColor: 'white'
+                            //    //}
+                        }]
+
+                    });
+
+
+                    function redrawchart() {
+                        var chart = $('#Chart3container').highcharts();
+
+                        var w = $('#Chart3container').closest(".wrapper").width();
+                        var size = $(window).width();
+                        if (size < 1150 && size > 650) {
+                            chart.setSize(
+                           w, w * (1.0 / 4), false
+                        );
+                        } else {
+                            if (size < (650)) {
+                                chart.setSize(
+                                 w, w * (3.0 / 4), false
+                              );
+                            } else {
+                                chart.setSize(
+                         w, w * (1.0 / 4), false
+                         );
+                            }
+
+
+                        }
+                    }
+
+
+
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                    var row3 = '';
+                    // $.each(response.d, function (index, obj) {
+                    //$.each(response, function (index, obj) {
+                    $.each(WRegister, function (index, obj) {
+                        //var num;
+                        //num = (obj.PctAllSite1 * 100);
+                        //alert(obj.WeekNo);
+                        //row3 += "<tr class='forRemoveData3'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedRegister + "</td><td style='text-align: center;'>" + obj.TotDismantleRegister + "</td></tr>";
+
+                    
+                            row3 += "<tr class='forRemoveData3'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedRegister + "</td><td style='text-align: center;'>" + obj.TotDismantleRegister + "</td></tr>";
+
+                        
+                    });
+                    $("#tbDetails3 tbody").append(row3);
+                }
+
+            });
+        }
+
+
+    </script>
+    <style>
+        .smalllocation {
+            color: black;
+        }
+
+        .right_col {
+            min-height: 700px;
+            height: auto;
+        }
+
+        #tbDetails tr td {
+            color: #808080;
+        }
+
+        #tbDetails1 tr td {
+            color: #808080;
+        }
+
+
+        .page-title {
+            width: 100%;
+            height: auto;
+            padding: 10px 0;
+        }
+
+
+        td#sitenamemodal {
+            width: 25%;
+            border-right: none;
+            text-align: center;
+            word-wrap: unset;
+        }
+
+        body .container.body .right_col {
+            background: #ffffcc;
+        }
+
+        .page-title {
+            width: 100%;
+            height: auto;
+            padding: 0px 0;
+        }
+
+        hr.mainHeadhr {
+            margin: 0 0;
+            border: 1px solid grey !important;
+        }
+
+        text.highcharts-credits {
+            display: none;
+        }
+
+
+        /*Chart 3 starts*/
+
+        #tbDetails2 tr td {
+            color: #808080;
+        }
+
+        span#Label6 {
+            margin: 0 0 0 250px;
+        }
+        /*Chart 3 Ends*/
+
+        /*Chart 4 Starts*/
+
+        #tbDetails4 tr td {
+            color: #808080;
+        }
+
+        /*chart 4 Ends*/
+
+        /*Chart 5 Starts*/
+        #tbDetails5 tr td {
+            color: #808080;
+        }
+
+
+
+        /*Chart 5 Ends*/
+        /************************Dashboard css starts****************/
+        .siteInfo {
+            margin: 0 0 10px;
+            font-size: 14px;
+        }
+
+        hr.pageDivi {
+            border: 2px dotted #000;
+            border-style: none none dotted;
+            color: #fff;
+            background-color: #fff;
+            margin: 0 0 0 0;
+        }
+
+        .row.chartfrstrow {
+            margin: 0px 0 0px 0 !important;
+        }
+
+        .container.DshbrdBack {
+            background-color: #ffffcc;
+        }
+
+        .summaryData {
+            color: #000;
+        }
+
+        div#container1, div#container2 {
+            margin: 3px 0 0 0;
+        }
+
+
+        h3.summaryHead {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 15px 0 6px 0px;
+            color: #000000;
+        }
+
+
+
+        .txtsummaryData {
+            width: 20%;
+            border: 1px solid #D3D3D3 !important;
+            background-color: #ddecee;
+            float: right;
+        }
+
+
+
+        .summaryData p {
+            margin: 6px 0 12px 0;
+        }
+
+        /*Chart 1 starts*/
+
+
+
+        .siteList1 {
+            height: 70px;
+        }
+
+        .AllsitesPricelabel1 {
+            margin-top: -10px;
+        }
+
+        span#Label1 {
+            font-size: 15px;
+            font-weight: 400;
+            float: right;
+            margin: 4px 0 0 0;
+        }
+
+        /*Chart 1 Ends*/
+
+        /*Chart 2 starts*/
+        .siteList2 {
+            height: 64px;
+        }
+
+        .BysitesPricelabel {
+            margin-top: -10px;
+        }
+
+        div#ddlSite {
+            width: 238px !important;
+            white-space: normal;
+            float: right;
+            margin: 0px 0 0px 0;
+        }
+
+        div#RadComboBox1 {
+            width: 229px !important;
+            white-space: normal;
+            float: right;
+            margin: -5px 0 0 0;
+        }
+
+        div#RadComboBox2 {
+            width: 229px !important;
+            white-space: normal;
+            float: right;
+            margin: -5px 0 0 0;
+        }
+
+        @@media (min-width:200px) and (max-width:667px) {
+
+            .smwidth {
+                margin-top: 0px !important;
+            }
+
+            .smbysite {
+                margin-top: 0px !important;
+            }
+
+            .smhireshow {
+                margin-top: -207px !important;
+            }
+
+            div#ddlSite {
+                width: 138px !important;
+            }
+
+        }
+
+        span#Label2 {
+            font-size: 15px;
+            font-weight: 400;
+            float: right;
+            margin: 4px 0 0 0;
+        }
+
+        /*Chart 2 Ends*/
+
+
+        /*Chart 3 starts*/
+        #tonnageAllstandinglbl {
+            font-size: 14px;
+            font-weight: 400;
+            float: right;
+            margin: 7px 0 0 0;
+        }
+
+        .siteList3 {
+            height: 160px;
+            margin: 10px 0 0 0;
+        }
+
+        span#grandTotal3Price {
+            float: right;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .TonnageAllsitesPricelabel {
+            margin-top: -16px;
+            float: right;
+            display: block;
+        }
+
+        div#container3 {
+            margin: 20px 0 10px 0;
+        }
+
+        span#Label7 {
+            font-size: 14px;
+            font-weight: 400;
+            float: right;
+            margin: 5px 0 0 0;
+        }
+
+        .TonnageByjobPricelabel {
+            margin-top: -16px;
+            float: right;
+            display: block;
+        }
+
+        span#grandTotal4Price {
+            float: right;
+        }
+
+
+        .siteList4 {
+            height: 190px;
+        }
+
+
+        div#container4 {
+            margin: 20px 0 10px 0;
+        }
+        .siteList5 {
+            height: 188px;
+        }
+
+
+
+        .HirePerjobPriceLabel {
+            margin: -16px 0px;
+            float: right;
+            display: block;
+        }
+
+        span#Label6 {
+            margin: 1px;
+            float: right;
+        }
+
+        }
+
+        span#Label9 {
+            font-size: 14px;
+            font-weight: 400;
+            float: right;
+            margin: 5px 0 0 0;
+        }
+
+        div#container5 {
+            margin: 20px 0 10px 0;
+        }
+        /*Chart 5 Ends*/
+        .smallsite {
+            color: black;
+        }
+
+        #lblLockedSite {
+            text-decoration: underline;
+        }
+    </style>
+
+    <input type="hidden" id="hdnClientID" />
+
+    <input type="hidden"  id="hdnSiteID" />
+
+    <div class="container DshbrdBack">
+        <div id='myChart'></div>
+        <div class="row">
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-5">
+                @*<%--  change on 15 Nov 2019 not Set In Logo--%>
+                <%--                <div class="dashLogo">
+                    <img src="/images/logo.png" runat="server" id="imgLogo" class="img-responsive scafLogo" />
+                </div>--%>*@
+                <div class="dashLogo scafLogo">
+                    @*<img src="/images/logo.png" id="imgLogo" class="img-responsive " />*@
+                    @*<img src="/images/logo.png" id="imgLogoWeeklySummryReport" class="img-responsive " />*@
+                    <img src="/images/logo.png" id="imgLogoWeeklySummryReport" class="img-responsive "/>
+                </div>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2">
+                <label id="lblsite" Style="font-size: 14px; color: #808080; margin-left: 18px; font-weight: bold;" Text="Site">Site</label>
+            </div>
+            <div class="col-lg-4 col-md-3 col-sm-4 col-xs-5">
+                <select id="ddlSite" style="width: 100%; font-size: 14px; border-radius: 4px; height: 21px; color: #8a8787;"></select>
+                @*<Telerik:RadDatePicker ID="picweekdate" Style="display:none" runat="server" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                <input type="text" id="picweekdate" class="form-control" style="display:none" />
+            </div>
+        </div>
+        <div class="row chartfrstrow">
+            <div class="col-lg-4 col-sm-12 col-xs-12">
+
+                <label id="lblbysite" Style="font-size: 16px; margin-top: -18px; color: #615f5f; font-weight: bold;" Text="Scaffolds by Site">Scaffolds by Site</label>
+                <div class="summaryData">
+
+                    <p>
+                        Total Number of Scaffolds Built to Date&nbsp;&nbsp;&nbsp;
+                        @*<asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtsummaryData" runat="server"
+                                     ID="ErrectedScaffolds"></asp:TextBox>*@
+                        <input type="text" Style="text-align: center;" disabled Class="txtsummaryData"
+        id="ErrectedScaffolds" />
+                    </p>
+
+                    @*<%-- <div class="row"></div>--%>*@
+                    <p>
+                        Total Number of Scaffolds Standing&nbsp;&nbsp;&nbsp;
+                        @*<asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtsummaryData" runat="server"
+                                     ID="TextBox1"></asp:TextBox>*@
+                        <input type="text" Style="text-align: center;" disabled Class="txtsummaryData"
+        id="TextBox1" />
+                    </p>
+                     <p>
+                        Total Tonnage Built to Date&nbsp;&nbsp;&nbsp;
+                        @*<asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtsummaryData" runat="server"
+                                     ID="TextBox2"></asp:TextBox>*@
+                        <input type="text" Style="text-align: center;" disabled Class="txtsummaryData" 
+        id="TextBox2"/>
+                    </p>
+                    <p>
+                        Total Tonnage Standing&nbsp;&nbsp;&nbsp;
+                        @*<asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtsummaryData" runat="server"
+                                     ID="TextBox3"></asp:TextBox>*@
+                        <input type="text" Style="text-align: center;" disabled Class="txtsummaryData"
+        id="TextBox3"/>
+                    </p>
+                    
+                    <p>
+                        Avg Tonnage Per Scaffold (Built to Date)&nbsp;&nbsp;&nbsp;
+                        @*<asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtsummaryData" runat="server"
+                                     ID="TextBox4"></asp:TextBox>*@
+                        <input type="text" Style="text-align: center;" disabled Class="txtsummaryData"
+        id="TextBox4"/>
+                    </p>
+                    <p>
+                        Avg Standing Days Per Scaffold (Built to Date)&nbsp;&nbsp;&nbsp;
+                        @*<asp:TextBox Style="text-align: center;" ReadOnly="true" CssClass="txtsummaryData" runat="server"
+                                     ID="TextBox5"></asp:TextBox>*@
+                        <input type="text" Style="text-align: center;" disabled Class="txtsummaryData"
+        ID="TextBox5"/>
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-12 col-xs-12 smwidth" style="margin-top: -103px">
+                <h6>
+                    <label  ID="mat1StandingAll" Style="font-size: 16px; margin-top: -18px; font-weight: bold;" Text="Standing Tonnage Breakdown (All Sites)">Standing Tonnage Breakdown (All Sites)</label>
+                    @*<%--<asp:TextBox runat="server" ID="lblstandtonn" Enabled="false" Style="font-size: 16px; background-color: white; border: solid 2px; border-color: #aaaaaa; color: #000052; height: 29px; width: 238px;" Text="Standing Tonnage Breakdown"></asp:TextBox>--%>*@
+
+                </h6>
+                <div class="siteList1">
+                    <h6>
+                        <div class="siteInfo">
+                            <label ID="AllsitenameLabel1" Style="display: none; color: black" Class="AllsitenameLabel1" Text="AT-PAC">AT-PAC</label>
+                            <label ID="AllsitesPricelabel1" Style="float: right; display: none; color: black" CssClass="AllsitesPricelabel1" Text="13"></label>
+                        </div>
+
+                        <div class="siteInfo">
+                            <label  ID="AllsitenameLabel2" Style="display: none; color: black" Class="AllsitenameLabel1" Text="AT-PAC">AT-PAC</label>
+                            <label ID="AllsitesPricelabel2" Style="float: right; display: none; color: black" CClass="AllsitesPricelabel1" Text="13">13</label>
+                        </div>
+
+                        <div class="siteInfo">
+                            <label ID="AllsitenameLabel3" Style="display: none; color: black" Class="AllsitenameLabel1" Text="AT-PAC"></label>
+                            <label ID="AllsitesPricelabel3" Style="float: right; display: none; color: black" Class="AllsitesPricelabel1" Text="13">13</label>
+                        </div>
+                        <div class="siteInfo">
+                            <label ID="AllsitenameLabel4" Style="display: none; color: black" Class="AllsitenameLabel1" Text="AT-PAC">AT-PAC</label>
+                            <label ID="AllsitesPricelabel4" Style="float: right; display: none; color: black" Class="AllsitesPricelabel1" Text="13">13</label>
+                        </div>
+
+                        <div class="siteInfo">
+                            <label Style="display: none; color: black" ID="AllsitenameLabel5" Class="AllsitenameLabel1" Text="AT-PAC">AT-PAC</label>
+                            <label ID="AllsitesPricelabel5" Style="float: right; display: none; color: black;" Class="AllsitesPricelabel1" Text="13">13</label>
+                        </div>
+                    </h6>
+                </div>
+                <div class="wrapper">
+                    <div id="container1" style="width: 100%;"></div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-4 col-sm-12 col-xs-12 smbysite" style="margin-top: -99px">
+              <h6>
+                    <label ID="Label11" Style="font-size: 16px; margin-top: -18px; font-weight: bold;" >Scaffolds Locked In %</label>
+
+                </h6>
+                <div class="siteList2">
+                    <h6>
+                        <div class="siteInfo">
+                            <label ID="BysitenameLabel1" Class="BysitenameLabel" Style="color: black; font-size: 14px;" Text="Total Scaffolds Built To Date">Total Scaffolds Built To Date</label>
+                            <label ID="BysitesPricelabel1" Style="display: none; float: right; margin-top: 2px; color: black; font-size: 14px;" Class="BysitesPricelabel"></label>
+                        </div>
+
+                        <div class="siteInfo">
+                            <label ID="BysitenameLabel2" Class="BysitenameLabel" Style="color: black; font-size: 14px;" Text="Locked In Scaffolds">Locked In Scaffolds</label>
+                            <label  ID="BysitesPricelabel2" Style="float: right; margin-top: 2px; display: none; color: black; font-size: 14px;" Class="BysitesPricelabel" Text="13">13</label>
+                        </div>
+
+                        <div class="siteInfo">
+                            <label  ID="BysitenameLabel3" Class="BysitenameLabel" Style="color: black; font-size: 14px;" Text="Locked In Scaffold %">Locked In Scaffold %</label>
+                            <label ID="BysitesPricelabel3" Style="float: right; margin-top: 2px; display: none; color: black; font-size: 14px;" Class="BysitesPricelabel" Text="13">13</label>
+                        </div>
+                        <div class="siteInfo">
+                            <label ID="BysitenameLabel4" Style="display: none;" Class="BysitenameLabel" Text="AT-PAC">AT-PAC</label>
+                            <label ID="BysitesPricelabel4" Style="float: right; display: none;" Class="BysitesPricelabel" Text="13">13</label>
+                        </div>
+
+                        <div class="siteInfo">
+                            <label  Style="display: none;" ID="BysitenameLabel5" Class="BysitenameLabel" Text="AT-PAC">AT-PAC</label>
+                            <label ID="BysitesPricelabel5" Style="float: right; display: none;" Class="BysitesPricelabel" Text="13">13</label>
+                        </div>
+                    </h6>
+                </div>
+                <div class="wrapper">
+                    <div id="container2" style="width: 100%;"></div>
+                </div>
+                @*<%-- <div id="container2"></div>--%>*@
+            </div>
+
+        </div>
+
+        <hr class="pageDivi" />
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="Chart3container" class="wrapper"></div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Scaffold Mat'l Standing - All Sites--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Scaffold Material Standing - All Sites</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>Tonnage Standing</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>% Of Tonnage Standing</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Scaffold Mat'l Standing - All Sites--%>*@
+  <div class="container">
+        <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+
+        <div class="modal fade" id="myModals1" role="dialog">
+
+            <div class="row" style="padding-top: 90px;">
+                <div class="col-lg-2 col-md-1"></div>
+                <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12">
+                    <div class="modal-content" style="width: 100%">
+
+                        <div class="modal-header row">
+                            <div class="col-lg-9 col-md-8 col-sm-6 col-xs-6">
+                                <h4 class="modal-title">
+                                    Locked In Scaffolds for
+                                    <label id="lblLockedSite" style="font-size: 17px"></label>
+                                    @*<asp:HiddenField ID="labelaction" runat="server" />*@
+                                    <input type="hidden" id="labelaction" />
+                                </h4>
+                            </div>
+                            <div class="col-lg-1 col-md-2 col-sm-3 col-xs-3">
+                                @*<asp:LinkButton ID="exporttopdf" runat="server" Style="height: 28px; padding-left: 5px; padding-top: 5px;" OnClick="exporttopdf_Click" CssClass="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                                <button id="exporttopdf" Style="height: 28px; padding-left: 5px; padding-top: 5px;" OnClick="exporttopdf_Click()" Class="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</button>
+                            </div>
+
+                            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+
+                                @*<asp:LinkButton ID="exportButton" runat="server" Style="height: 28px; padding-top: 5px;" CssClass="btn btn-primary w3-btn w3-teal" Text="Export">Export</asp:LinkButton>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>*@
+                                <button ID="exportButton" runat="server" Style="height: 28px; padding-top: 5px;" Class="btn btn-primary w3-btn w3-teal" Text="Export">Export</button>
+                               <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-body" id="divTableDataHolder">
+                            <div style="overflow: auto">
+                                <table class="table table-bordered" id="tbDetailsLockedIn" style="width: 100%; color: black">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Scaf Ref #</b></td>
+                                            <td style="width: 25%; text-align: center; font-size: 12px;"><b>Reason for Access</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Location</b></td>
+                                            <td style="width: 15%; text-align: center; font-size: 12px;"><b>Building / Module No.</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Asset # / Func. Loc</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Floor Level</b></td>
+                                            <td style="width: 15%; text-align: center; font-size: 12px;"><b>Design Type</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-1"></div>
+            </div>
+
+        </div>
+    </div>
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+        <div class="modal fade" id="myModal3" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Scaffold Build and Dismantles </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Week</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Scaffolds Builds</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Scaffolds Dismantles</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+

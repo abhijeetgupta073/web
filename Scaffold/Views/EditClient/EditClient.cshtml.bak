@@ -1,0 +1,2265 @@
+﻿
+@{
+    ViewBag.Title = "EditClient";
+}
+
+<script src="https://maps.googleapis.com/maps/api/js?key=@(Session["googlemapapi"])&libraries=places" type="text/javascript"></script>
+<script src="~/Content/js/EditClient.js?V1=29"></script>
+
+<style>
+    .requiredColumn {
+        border-color: red;
+    }
+    /*#SitePopup{
+     z-index: 3 !important;
+    }*/
+    #DivAlertBox {
+        z-index: 4 !important;
+    }
+
+    @@media only screen and (min-width: 900px) and (max-width: 1605px) {
+        .clsSitePopupDialog {
+            width: 950px;
+        }
+    }
+</style>
+<script>
+        $(document).ready(function () {
+            if (('@ViewBag.checkboxManHoursManagement') != "") {
+                $('#checkboxManHoursManagement').prop('disabled',true);
+            }
+            if (('@ViewBag.btnFloorLevelImage') == "0") {
+                $('#btnFloorLevelImage').css('display', 'none');
+            }
+            if (('@ViewBag.PlannedStandingDuration') == 'True') {
+                $('#txtplnstandDur').prop('disabled',true);
+            }
+            $('#hdnManHoursManagementCheck').val('@ViewBag.ManHoursManagement');
+
+            var InventoryChecked='@ViewBag.InventoryChecked';
+            var HireInventory='@ViewBag.HireInventory';
+            if (HireInventory == "True")
+            {
+                if (InventoryChecked != "0")
+                {
+                    $('#chkHireInventory').prop('disabled', true);
+                    HireInventoryMessage();
+                     @*chkHireInventory.Enabled = false;
+                     ScriptManager.RegisterStartupScript(this.Page, this.GetType(), "HireInventory", "<script>HireInventoryMessage();</script>", false);*@
+
+                }
+              }
+                else
+                {
+                    if (InventoryChecked != "0")
+                    {
+                        $('#chkHireInventory').prop('disabled', true);
+                        HireInventoryOldDataMessage();
+                        @*chkHireInventory.Enabled = false;
+                        ScriptManager.RegisterStartupScript(this.Page, this.GetType(), "HireInventory1", "
+                         <script>HireInventoryOldDataMessage();</script>", false);*@
+                    }
+                }
+
+                $("#radUpdogImg").change(function () {
+                    var urlImage = readURL(this);
+                    $('#hdnUploadImage').val(urlImage);
+                });
+            var UserRole = getParameterByName('UserRole');
+            var DecryptUserRole = Decrypt([UserRole])
+            if (DecryptUserRole == "10") {
+                $("#BtnDeleteInactiveSite").show();
+                $("#btnDeleteInactiveClient").show();
+                $("#btnCheckMissingBlob").show();
+            } else {
+                $("#BtnDeleteInactiveSite").hide();
+                $("#btnDeleteInactiveClient").hide();
+                $("#btnCheckMissingBlob").hide();
+            }
+
+        });
+        function HireInventoryOldDataMessage() {
+            $('.HireInventoryMessage').hover(function () {
+                //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                //$('#ContentPlaceHolder1_art1').css("display", "block");
+                //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>You must set up the ‘Sub Category’ Master before ‘Hire Inventory’ can be Enabled');
+                //hideAlert();
+                //var Response = { Result: "Failed", Message: "You must set up the ‘Sub Category’ Master before ‘Hire Inventory’ can be Enabled." };
+                var Response = { Result: "Failed", Message: "You must set up the ‘Sub Category’ Master before ‘Hire: Standing (With Surge Rates)’ can be Enabled." };
+                CustomAlert(Response);
+
+            });
+        }
+        function HireInventoryMessage() {
+            $('.HireInventoryMessage').hover(function () {
+                //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                //$('#ContentPlaceHolder1_art1').css("display", "block");
+                //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Inventory has been already loded  you cannot enabled it.');
+                //hideAlert();
+                var Response = { Result: "Failed", Message: "Inventory has been already loded  you cannot enabled it." };
+                CustomAlert(Response);
+            });
+        }
+
+            function hideCheckBox() {
+
+                $(".divMaintainInventory").css("display", "none");
+                $(".divCycloneManagement").css("display", "none");
+                $(".divManHourMngAtSite").css("display", "none");
+                $(".divMaintainInventoryAtJob").css("display", "none");
+                // $(".divGpsSitePin").css("display", "none");
+            }
+            function hidedivGpsSitePin() {
+                $('#divgpsandfloorlevel').css('margin-top',20);
+                $(".divGpsSitePin").css("display", "none");
+                $(".divCaptureGps").css("display", "none");  // Add Code on 30/march/2020
+                $(".divOffSystemInspection").css("display", "none");
+            }
+            function hideManHour() {
+                // $("#ctl00_ContentPlaceHolder1_gridsitelocation_ctl00_ctl02_ctl04_divManHourMngAtSite").css("display", "none");
+                $(".divManHourMngAtSite").css("display", "none");
+            }
+            function ByDefaultClient() {
+                //$("#ctl00_ContentPlaceHolder1_gridsitelocation_ctl00_ctl02_ctl04_chkboxManHoursManagement").prop('checked', true);
+                $("#chkboxManHoursManagement").prop('checked', true);
+            }
+
+            function btnlatlongAlertNo() {
+                $("#DivAlertBox").css("display", "none");
+            }
+            // Change Lat Long Values If User Want To change After Yes Button Click.
+            function AlertButtonYesClickGetlatlaongBysite() {
+                var geocoder = new google.maps.Geocoder();
+              //  var hideen = $('.rgEditForm').find('.Address').val() + ',' + $('.rgEditForm').find('.City').val() + ',' + $('.rgEditForm').find('.State').val() + ',' + $('.rgEditForm').find('.PostCode').val();
+                var hideen = $("#txtaddress").val() + ',' + $("#txtcity").val() + ',' + $("#ddlstates").val() + ',' + $('.PostCode').val();
+
+               var address = hideen;
+                geocoder.geocode({ 'address': address }, function (results, status) {
+
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        var latitude = results[0].geometry.location.lat();
+                        var longitude = results[0].geometry.location.lng();
+                        //$(".rgEditForm").find(".Lattitude").val(latitude);
+                        //$(".rgEditForm").find(".Longitude").val(longitude);
+                        $("#txtlat").val(latitude);
+                        $("#txtlong").val(longitude);
+                    }
+                });
+                $("#DivAlertBox").css("display", "none");
+            }
+            function GetlatlaongBysite() {
+
+                var latval = $('.Lattitude').val();
+                var longval = $('.Longitude').val();
+                if (latval == "" && longval == "") {
+                    var geocoder = new google.maps.Geocoder();
+                    //  var hideen = $('.rgEditForm').find('.Address').val() + ',' + $('.rgEditForm').find('.City').val() + ',' + $('.rgEditForm').find('.State').val() + ',' + $('.rgEditForm').find('.PostCode').val();
+                    var hideen = $("#txtaddress").val() + ',' + $("#txtcity").val() + ',' + $("#ddlstates").val() + ',' + $('.PostCode').val();
+
+                    var address = hideen;
+                    geocoder.geocode({ 'address': address }, function (results, status) {
+
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            var latitude = results[0].geometry.location.lat();
+                            var longitude = results[0].geometry.location.lng();
+                            // $(".rgEditForm").find(".Lattitude").val(latitude);
+                            // $(".rgEditForm").find(".Longitude").val(longitude);
+                            $("#txtlat").val(latitude);
+                            $("#txtlong").val(longitude);
+                        }
+                    });
+                }
+                else {
+                    $("#DivAlertBox").css("display", "block");
+                }
+                //var geocoder = new google.maps.Geocoder();
+                //var hideen = $('.rgEditForm').find('.Address').val() + ',' + $('.rgEditForm').find('.City').val() + ',' + $('.rgEditForm').find('.State').val() + ',' + $('.rgEditForm').find('.PostCode').val();
+                //var address = hideen;
+                //geocoder.geocode({ 'address': address }, function (results, status) {
+
+                //    if (status == google.maps.GeocoderStatus.OK) {
+                //        var latitude = results[0].geometry.location.lat();
+                //        var longitude = results[0].geometry.location.lng();
+                //        $(".rgEditForm").find(".Lattitude").val(latitude);
+                //        $(".rgEditForm").find(".Longitude").val(longitude);
+                //    }
+                //});
+            }
+            function filterhide() {
+                $(".rgFilterRow").css("display", "none");
+            }
+            function hideAlert() {
+                //alert();
+                setTimeout(function () {
+                    $(".fadeOut").fadeOut(2000);
+                }, 3000);
+            }
+            function hide() {
+                //document.getElementById('<%=Adddocs.ClientID%>').style.display = 'none';
+                $('#Adddocs').css('display', 'none');
+            }
+            $(document).ready(function () {
+                hideAlert();
+                var GetisSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && !navigator.userAgent.match('CriOS');
+                if (GetisSafari == false) {
+                    $(".nonsafari").css("display", "block");
+                    $(".safari").css("display", "none");
+                    var ismobile = /iPhone|iPod|iPad|Android/i.test(navigator.userAgent);
+                    if (ismobile) {
+                        $(".mobileApp").css("display", "block");
+                        $(".desktopApp").css("display", "none");
+                    } else {
+                        $(".mobileApp").css("display", "none");
+                        $(".desktopApp").css("display", "block");
+                    }
+                }
+                else {
+                    $(".nonsafari").css("display", "none");
+                    $(".safari").css("display", "block");
+                }
+
+                $(document).on("change", ".mob_file_image", function (evt) {
+                    var base64mobImagedata;
+                    var reader = new FileReader();
+                    reader.readAsDataURL(this.files[0]);
+                    reader.onloadend = function () {
+                        base64mobImagedata = reader.result;
+                        $("#imga").attr('src', base64mobImagedata);
+                        // $("#<%=imagename.ClientID%>").val(base64mobImagedata);
+                        $("#imagename").val(base64mobImagedata);
+                    }
+                });
+                $(document).on("change", "#mobApp_file", function (evt) {
+                    var base64mobImagedata;
+                    var reader = new FileReader();
+                    reader.readAsDataURL(this.files[0]);
+                    reader.onloadend = function () {
+                        base64mobImagedata = reader.result;
+                        $("#imga").attr('src', base64mobImagedata);
+                        // $("#<%=imagename.ClientID%>").val(base64mobImagedata);
+                        $("#imagename").val(base64mobImagedata);
+                    }
+                });
+            });
+            $(document).ready(function () {
+                //    $("#menu_toggle").click(function () {
+
+                //        $("#ulalwaysactive").css("display", "none");
+
+                //        //$("#LiSetup").removeClass("active");
+                //    });
+
+                //    $("#ulalwaysactive").css("display", "none");
+                //});
+                var screensize = $(window).width();
+                if (screensize < 1150 && screensize > 650) {
+                    ($BODY.hasClass('nav-md'))
+                    $('#CreateNewDropDown').css("margin-top", "2px");
+                    $BODY.removeClass('nav-md').addClass('nav-sm');
+                    $LEFT_COL.removeClass('scroll-view');
+                    //$('#BlackSection').css('display', 'block');
+                    $('#imgLogo').parent().css('display', 'none');
+                    $('#imgLogo2').css('display', 'block').css("height", "38px");
+                    $('#leftbarsection').css('margin-top', '0px');
+                    //$('#ContentPlaceHolder1_btnCAncel').css('font-size', '10px').css('padding-left', '1px');
+                    //$('#ContentPlaceHolder1_btnback').css('display', 'block').css('width', '100%').css('padding-left', '2px');
+
+
+
+                }
+
+
+                else {
+                    if (screensize < (650)) {
+                        $BODY.removeClass('nav-sm')
+                        $('#imgLogo').parent().css('display', 'none');
+                        $('#imgLogo2').css('display', 'block').css("height", "52px");
+                    }
+                    else {
+                        $('#CreateNewDropDown').css("margin-top", "6px");
+                        $BODY.removeClass('nav-sm').addClass('nav-md');
+                        //$('#BlackSection').css('display', 'none');
+                        $('#imgLogo').parent().css('display', 'block');
+                        $('#imgLogo2').css('display', 'none');
+                        $('#leftbarsection').css('margin-top', '40px');
+                        $('#btnCAncel').css('font-size', '10px').css('padding-left', '1px');
+                    }
+
+                }
+            });
+
+            function readURL(input) {
+                var radUpdogImg = $('#radUpdogImg').val();
+                var fileUpload = $('#radUpdogImg').get(0);
+                var file = fileUpload.files;
+                var FileName = '';
+                if (file.length != 0) {
+
+                    FileName = file[0].name;
+                    var extension = FileName.substring(FileName.lastIndexOf('.') + 1);
+
+                    if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "ico" || extension == "gif" || extension == "bmp" || extension == "JPG" || extension == "JPEG" || extension == "PNG" || extension == "ICO" || extension == "GIF" || extension == "BMP") {
+
+                        if (input.files && input.files[0]) {
+                            var reader = new FileReader();
+
+                            reader.onload = function (e) {
+                                $('#imga').attr('src', e.target.result);
+                            }
+
+                            reader.readAsDataURL(input.files[0]); // convert to base64 string
+                            $('#divdeleteimag').css('display', 'block');
+                        }
+                    }
+                    else {
+                        var response = { Result: "Failed", Message: "<strong>Failed to upload Image! </strong>Valid File Extensions Are jpg, jpeg, png, gif, bmp" };
+                        CustomAlert(response)
+                        $("#imga").attr("src", "/images/noimg.jpg");
+                    }
+
+                }
+                return FileName;
+            }
+
+            //function OnClientFileRemoved(sender, args) {
+            //    var a = $('.ruUploadProgress').text();
+            //    if (a == "") {
+            //        var img = document.getElementById("imga");
+            //        var source = $('#ContentPlaceHolder1_getimage').val();
+            //        if (source != "") {
+            //            img.src = "images/clientlogo/" + source + "";
+            //            //$('#ContentPlaceHolder1_getimage').val("");
+            //            $('#ContentPlaceHolder1_divdeleteimag').css('display', 'block');
+            //        }
+            //        else {
+            //            img.src = "images/noimg.jpg";
+            //            $('#ContentPlaceHolder1_divdeleteimag').css('display', 'none');
+            //        }
+            //    }
+
+            //};
+
+
+            //function OnClientFileSelected(sender, args) {
+            //    var progress = $('.ruUploadProgress').text();
+            //    if (progress != "") {
+            //        $('#ContentPlaceHolder1_divdeleteimag').css('display', 'block');
+            //    }
+            //    document.getElementById('<%=imga.ClientID%>').src = '';
+            //    if ($telerik.isIE9 || $telerik.isIE8 || $telerik.isIE7) {
+            //        var input = args.get_fileInputField();
+            //        if (sender.isExtensionValid(input.value)) {
+            //            var img = document.getElementById("imga");
+
+            //            //var thumbnail = document.getElementById("thumbnail");
+            //            //thumbnail.appendChild(img);
+            //            if (img) {
+            //                img.style.visibility = "";
+            //                img.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = input.value;
+            //            }
+
+            //        }
+            //    }
+            //    else {
+            //        var file = args.get_fileInputField().files.item(args.get_rowIndex()),
+            //           index = 0;
+            //        var filename = file.name;
+            //        var dotscount = filename.split('.').length - 1;
+            //        $("#ContentPlaceHolder1_hdfile").val(dotscount);
+            //        if (dotscount <= 1) {
+            //            var fileexe = filename.split('.');
+            //            var extension = fileexe[1];
+            //            if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "ico" || extension == "gif" || extension == "bmp" || extension == "JPG" || extension == "JPEG" || extension == "PNG" || extension == "ICO" || extension == "GIF" || extension == "BMP") {
+            //                showThumbnail(file);
+            //                // alert("Image verified");
+            //            }
+            //            else {
+
+            //                $('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+            //                $('#ContentPlaceHolder1_art1').css("display", "block");
+            //                $('#ContentPlaceHolder1_alertlabel').html('<strong>Failed to upload Image! </strong>Valid File Extensions Are jpg, jpeg, png, gif, bmp');
+            //                $("#imga").attr("src", "images/noimg.jpg");
+            //                hideAlert();
+            //                //$("#imga").attr("src", imageSrc);
+            //            }
+            //            var file = args.get_fileInputField().files.item(args.get_rowIndex()),
+            //                index = 0;
+            //            while (!file) {
+            //                file = args.get_fileInputField().files.item(index);
+            //                index++;
+            //            }
+            //            showThumbnail(file);
+            //        }
+            //        else {
+            //            $('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+            //            $('#ContentPlaceHolder1_art1').css("display", "block");
+            //            $('#ContentPlaceHolder1_alertlabel').html('<strong>Failed to upload Image! </strong>File name should not have a dot (.)');
+            //            // $("#imga").attr("src", imageSrc);
+            //            $("#imga").attr("src", "images/noimg.jpg");
+            //            hideAlert();
+            //        }
+            //    }
+            //}
+
+
+            //function onRequestStartevnt(sender, args) {
+
+            //    if (args.EventTarget.indexOf("btnadddocs") != -1 || args.EventTarget.indexOf("btnview") != -1 || args.EventTarget.indexOf("btnsave") != -1) {
+            //        args.EnableAjax = false;
+            //    }
+            //}
+
+
+            //function showThumbnail(file) {
+            //    var image = document.getElementById("imga"),
+            //      thumbnail = document.getElementById("imga");
+            //    image.file = file;
+
+            //    var reader = new FileReader()
+            //    reader.onload = (function (aImg) {
+            //        return function (e) {
+            //            aImg.src = e.target.result;
+            //        };
+            //    }(image))
+            //    var ret = reader.readAsDataURL(file),
+            //        canvas = document.createElement("canvas");
+
+            //    ctx = canvas.getContext("2d");
+            //    image.onload = function () {
+            //        ctx.drawImage(image, 100, 100);
+            //    }
+            //    var MAX_WIDTH = 200,
+            //        MAX_HEIGHT = 100,
+            //        width = image.width,
+            //        height = image.height;
+            //    if (width > height) {
+            //        if (width > MAX_WIDTH) {
+            //            height *= MAX_WIDTH / width;
+            //            width = MAX_WIDTH;
+            //        }
+
+            //    } else {
+            //        if (height > MAX_HEIGHT) {
+            //            width *= MAX_HEIGHT / height;
+            //            height = MAX_HEIGHT;
+            //        }
+            //    }
+
+            //    canvas.width = width;
+            //    canvas.height = height;
+
+            //    ctx.drawImage(image, 0, 0, width, height);
+
+            //    var dataurl = canvas.toDataURL("image/png");
+            //}
+
+            function myfunction(key) {
+                //getting key code of pressed key
+                var keycode = (key.which) ? key.which : key.keyCode;
+                var phn = $("#ContentPlaceHolder1_txtContact").val();
+
+                //comparing pressed keycodes
+                if ((keycode < 48 || keycode > 57)) {
+                    return false;
+                }
+                else {
+                    //    //Condition to check textbox contains ten numbers or not
+                    if (phn.length < 10) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }
+
+            $(function () {
+                var Href = window.location.href.split('?');
+                if (Href.length == 1) {
+                    $('#UlNavTabSeciton li').css('display', 'none');
+                    $('#liCompany').css('display', 'block');
+                }
+                $('#UlNavTabSeciton a').css('cursor', 'pointer');
+                $('#UlNavTabSeciton a').click(function (e) {
+                    $('#LoadingPanel1').css('display', 'block');
+                    var ClickAcnhorID = e.currentTarget.id;
+                    if (ClickAcnhorID == 'AnchorCompanyInfo') {
+                        $('#LoadingPanel1').css('display', 'none');
+                    }
+
+
+                    if (ClickAcnhorID == 'AnchorAttachedFiles') {
+                        window.location.href = '/Client_Documents.aspx?' + Href[1];
+                    }
+
+                });
+            });
+            $(document).ready(function () {
+                $("select.chosen-select").select2();
+            });
+            //function Emailvalidate(s) {
+            //    var value = validate(s);
+            //    var emailidBlanck = $('#txtemail').val();
+            //    if (value == true) {
+            //        var emailid = $('#txtemail').selector;
+            //        if (emailid == "#txtemail") {
+            //            $('#txtemail').removeClass('w3-pale-red w3-border-red  rdf-inupt-glow');
+            //        }
+            //    }
+            //    if (emailidBlanck == "") {
+            //        $('#txtemail').removeClass('w3-pale-red w3-border-red  rdf-inupt-glow');
+            //    }
+            //    var EmailAddress = $('#txtemail').val();
+
+
+            //    return value
+            //}
+
+            function deletecheck() {
+                var green = $('.ruUploadSuccess').text();
+                if (green == "") {
+                    var Progress = $('.ruUploadProgress').text();
+                    if (Progress != "") {
+                        $('.ruCancel').click();
+                        $('.ruButton').click();
+                    }
+                    else {
+                        $('#divImage').css('display', 'block');
+                    }
+                }
+                else {
+                    $('.ruButton').click();
+                }
+            }
+</script>
+<style>
+    .lblName {
+        font-size: 11px;
+    }
+
+    .tdbtnExpend {
+        background: #c9c9c9 none;
+    }
+
+    .paging_simple_numbers {
+        display: none !important;
+    }
+
+    .setWidth0, .setWidth1, .setWidth2 {
+        min-width: 17px;
+    }
+
+    .setWidth3, .setWidth4, .setWidth5, .setWidth6, .setWidth7, .setWidth8, .setWidth9 {
+        min-width: 117px;
+    }
+
+    #txtzip_wrapper {
+        /*width: 104px !important;*/
+        height: 40px !important;
+    }
+
+    #txtzip {
+        height: 25px;
+        border: 1px solid;
+    }
+
+    #txtpostcodeuk {
+        /*width:104px !important;*/
+        height: 28px !important;
+    }
+
+    .form-control {
+        height: 28px !important;
+    }
+
+    .input-group {
+        margin-bottom: 0px;
+    }
+
+    #FormSection label {
+        color: gray !important;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .nav-sm span.fa, .nav-sm .menu_section h3 {
+        display: block !important;
+    }
+
+    .w3-card-4, .w3-hover-shadow:hover {
+        box-shadow: 0 0px 0px 0 rgba(0,0,0,0.2),0 0px 0px 0 rgba(0,0,0,0.19) !important;
+    }
+
+    .rgCommandTable td:nth-child(1) {
+        display: block !important;
+    }
+
+    @@media (min-width:768px) and (max-width:1500px) {
+        .clientDefault {
+            height: auto;
+        }
+    }
+
+    @@media (min-width:350px) and (max-width:950px) {
+        #btnCAncel {
+            font-size: 10px !important;
+            padding-left: 2px !important;
+        }
+    }
+
+    @@media only screen and (max-width: 600px) and (min-width: 290px) {
+
+
+        .clientDefault {
+            height: auto;
+        }
+    }
+
+    #txtContact, #txtzip,
+    #txtStandardWorkingHrs, #txtplnstandDur, #txtUK, #txtManHrsRatio {
+        border-color: #e5e5e5 !important;
+        border-radius: 4px !important;
+    }
+</style>
+
+@*<div runat="server" style="display: none" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <asp:Label ID="alertlabel" runat="server"></asp:Label>
+    </div>*@
+
+<input type="hidden" id="TxtAddSite" value="@ViewBag.AddSite" />
+<input type="hidden" id="TxtAddLocation" value="@ViewBag.AddLocation" />
+<input type="hidden" id="TxtAddBuilding" value="@ViewBag.AddBuilding" />
+<input type="hidden" id="TxtAddAsset" value="@ViewBag.AddAsset" />
+<div id="divhideContent">
+    <div class="row">
+        <div class="title_left col-lg-5 col-md-5 col-sm-5">
+            <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-industry"></i>&nbsp;<span id="lblclient" Font-Size="16px" Font-Bold="true"></span></b></h4>
+        </div>
+        <div class="col-lg-7 col-sm-7 col-md-7">
+
+            <div class="col-lg-2 col-md-2 col-sm-2">
+            </div>
+
+            <div class="col-lg-4 col-md-6 col-sm-6">
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                 <button class="btn btn-danger" id="btnDeleteInactiveClient" style="display:none;"
+                    onclick="DeleteInactiveClient()"
+                    title="Deletes Client Data from Database.">
+                <i class="fa fa-trash"></i> Delete Client
+            </button>
+                @*<asp:LinkButton runat="server" ID="btnaddnew" Width="100%" CausesValidation="false" CssClass="w3-btn w3-teal" OnClick="btnaddnew_Click"><i class="fa fa-plus"></i>&nbsp;Add New Company</asp:LinkButton>*@
+                <button id="btnaddnew" sstyle="Width:100%" Class="w3-btn w3-teal" OnClick="btnaddnew_Click()"><i class="fa fa-plus"></i>&nbsp;Add New Company</button>
+            </div>
+
+        </div>
+    </div>
+    <div class="clearfix"></div>
+    <div id="FormSection" class="row">
+        <div class="col-xs-12" style="padding-left: 1px;">
+            <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+                <li id="liCompany" class="active">
+                    <a id="AnchorCompanyInfo" href="#custDetails" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-user"></i>&nbsp; Company Information</span>
+                    </a>
+                </li>
+
+            </ul>
+            <div class="tab-content">
+                <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+                    <div class="row w3-margin-top">
+                        <div class="col-lg-12 col-md-12 col-sm-12 ">
+                            <div class="x_panel w3-padding-0 w3-card-4">
+                                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                    <div class="row">
+                                        <div class="col-lg-9 col-md-9 col-sm-9">
+                                            <h4 style="margin-top: 6px; font-size: 15px" id="lblVaccinations"><i class="fa fa-list"></i>&nbsp;General <span style="margin-left: 5px;" id="VacCount"></span></h4>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2">
+                                            @*<asp:LinkButton runat="server" ID="btnSave" Width="100%" Style="float: right;" CssClass="w3-btn w3-small w3-green  btnheight" OnClientClick="validate()" ValidationGroup="ClientSave" OnClick="btnSave_Click"><i class="fa fa-save"> </i>&nbsp;Save</asp:LinkButton>*@
+                                            <button id="btnSave" Width="100%" Style="float: right;" Class="w3-btn w3-small w3-green  btnheight" OnClick="btnSave_Click()"><i class="fa fa-save"> </i>&nbsp;Save</button>
+                                        </div>
+                                        <div class="col-lg-1 col-md-1 col-sm-1">
+                                            <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-right: -11px;">
+
+                                                <li>
+                                                    <a style="float: right;" class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content" style="margin-bottom: 3px!important;">
+                                    <div class="row">
+                                        <div class="col-xs-12 col-lg-9 col-md-12 col-sm-12">
+                                            <div class="row" style="margin-top: 10px;">
+                                                <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+                                                    <label>Company Name<span style="color: red">&nbsp*</span></label>
+                                                    <input type="text" id="txtclientName" Class="form-control" />
+                                                    @*<asp:TextBox ID="txtclientName" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                    @*<asp:RequiredFieldValidator ID="rfvtxtcompanyname" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="txtclientName" ValidationGroup="ClientSave" ErrorMessage="* Required" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                                                </div>
+                                                <div class="col-lg-5 col-md-4 col-sm-4 col-xs-12">
+                                                    <label>Company Email</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon "><span class="fa fa-envelope"></span></span>
+                                                        <input type="text" id="txtemail" Class="form-control" />
+                                                        @*<asp:TextBox ID="txtemail" runat="server" CssClass="form-control" onchange="return Emailvalidate('ClientSave')"></asp:TextBox>
+                                                            <asp:RegularExpressionValidator ID="validateEmail1"
+                                                                                            runat="server" ErrorMessage="Invalid email address." CssClass="rdf-initial"
+                                                                                            ControlToValidate="txtemail" ValidationGroup="ClientSave"
+                                                                                            ValidationExpression="^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$" />*@
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                                    <label>Status</label>
+                                                    <select id="ddlClientstatus" class="form-control" onchange="ddlClientstatus_SelectedIndexChanged()">
+                                                        <option value="Active">Active</option>
+                                                        <option value="InActive">InActive</option>
+                                                    </select>
+                                                    @*<asp:DropDownList ID="ddlClientstatus" runat="server" CssClass="form-control" OnSelectedIndexChanged="ddlClientstatus_SelectedIndexChanged" AutoPostBack="true" AppendDataBoundItems="true" Width="100%">
+                                                            <asp:ListItem Text="Active" Value="Active">                                                   </asp:ListItem>
+
+                                                            <asp:ListItem Text="InActive" Value="InActive" />
+                                                            <%--<asp:ListItem Text="Intrested" Value="Intrested" />
+                                                            <asp:ListItem Text="Lead" Value="Lead" />
+                                                            <asp:ListItem Text="Vendor/Partner" Value="Vendor/Partner" />--%>
+                                                        </asp:DropDownList>*@
+                                                </div>
+                                            </div>
+
+                                            <div class="row ">
+                                                <div class="col-lg-7 col-md-6 col-sm-6 col-xs-12">
+                                                    <label>Address</label>
+                                                    <input type="text" id="txtAddress" Class="form-control" />
+                                                    @*<asp:TextBox ID="txtAddress" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                </div>
+                                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                                    <label>Inventory Mailing List</label>
+                                                    <input type="text" id="txtClientInventoryMailingList" Class="form-control" />
+                                                    @*<asp:TextBox ID="txtAddress" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                </div>
+
+                                                <div class="col-lg-2 col-md-6 col-sm-6 col-xs-12">
+                                                    <label>LandLine Number</label>
+                                                    <input type="text" id="txtContact" style="width:100%;display:none;" Class="form-control input-sm" />
+                                                    <input type="text" id="txtUK" style="width:100%;display:none;" Class="form-control input-sm" />
+                                                    @*<Telerik:RadMaskedTextBox ID="txtContact" Visible="false" Width="100%" Height="50" Mask="(##) #### ####" runat="server" CssClass="form-control input-sm"></Telerik:RadMaskedTextBox>
+                                                        <Telerik:RadMaskedTextBox ID="txtUK" Visible="false" Width="100%" Height="50" Mask="(#####) ######" runat="server" CssClass="form-control input-sm"></Telerik:RadMaskedTextBox>*@
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                                    <label>City</label>
+                                                    <input type="text" id="txtcity" Class="form-control" />
+                                                    @*<asp:TextBox ID="txtcity" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                </div>
+
+                                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                                    <label type="text" id="lblcounty" Style="color: #908080; font-size: 12px;">County<span style="color: red">&nbsp*</span></label>
+                                                    <label id="lblstate" Style="color: #908080; font-size: 12px;">State<span style="color: red">&nbsp*</span></label>
+                                                    @*<asp:DropDownList ID="ddlstate" AppendDataBoundItems="true" ValidationGroup="ClientSave" AutoPostBack="true" runat="server" CssClass="form-control" Width="100%">
+
+                                                        </asp:DropDownList>*@
+                                                    <select id="ddlstate" Class="form-control" style="width:100%;" required>
+                                                    </select>
+                                                    @*<asp:Label ID="lblcounty" runat="server" Visible="false" Style="color: #908080; font-size: 12px;">County<span style="color: red">&nbsp*</span></asp:Label>
+                                                        <asp:Label ID="lblstate" runat="server" Visible="false" Style="color: #908080; font-size: 12px;">State<span style="color: red">&nbsp*</span></asp:Label>
+                                                        <asp:DropDownList ID="ddlstate" AppendDataBoundItems="true" ValidationGroup="ClientSave" AutoPostBack="true" runat="server" CssClass="form-control" Width="100%">
+
+                                                            <%--<asp:ListItem Text="Select--"></asp:ListItem>--%>
+                                                        </asp:DropDownList>*@
+                                                    @*<asp:RequiredFieldValidator ID="StateRequiredFieldValidator" runat="server" ErrorMessage="* Required" ControlToValidate="ddlstate" ValidationGroup="ClientSave" CssClass="rdf-initial rdf-initial" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                                                </div>
+
+
+                                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                                    <label>Country<span style="color: red">&nbsp*</span></label>
+                                                    <select id="ddlCountry" onchange="ddlCountry_SelectedIndexChanged()" disabled Class="form-control"></select>
+                                                    @*<asp:DropDownList ID="ddlCountry" runat="server" AutoPostBack="true" Enabled="false" CssClass="form-control" OnSelectedIndexChanged="ddlCountry_SelectedIndexChanged" AppendDataBoundItems="true">
+                                                            <%-- <asp:ListItem Text="Select--"></asp:ListItem>--%>
+                                                        </asp:DropDownList>
+                                                        <asp:RequiredFieldValidator ID="rqdfilevalidator" runat="server" ErrorMessage="* Required" ControlToValidate="ddlCountry" ValidationGroup="ClientSave" CssClass="rdf-initial rdf-initial" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                                                </div>
+
+
+                                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                                    <label>Postcode</label>
+                                                    <input type="text" id="txtzip" style="Width:100%;display:none;" />
+                                                    @*<Telerik:RadMaskedTextBox RenderMode="Lightweight" Visible="false" ID="txtzip" Width="100%" runat="server" Mask="####"></Telerik:RadMaskedTextBox>*@
+                                                    @*<%-- <Telerik:RadNumericTextBox ID="txtzip" Visible="false" MaxLength="4" Width="100%" runat="server"></Telerik:RadNumericTextBox>--%>*@
+                                                    @*<asp:TextBox ID="txtpostcodeuk" Visible="false" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                    <input type="text" id="txtpostcodeuk" style="Width:100%;display:none;" Class="form-control" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row " id="DefaultValue" runat="server">
+
+                                                <fieldset class="clientDefault">
+                                                    <legend>
+                                                        <label><i class="fa fa-flickr "></i>&nbsp;Default Settings</label>
+                                                    </legend>
+
+
+
+                                                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-12">
+                                                        <label>Standard Working Hrs</label>
+                                                        @*<Telerik:RadNumericTextBox ID="txtStandardWorkingHrs" Width="100%" runat="server" CssClass="form-control"></Telerik:RadNumericTextBox>*@
+                                                        <input type="number" id="txtStandardWorkingHrs" style="width:100%" class="form-control" />
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-12">
+
+                                                        <label>Inspection Time</label>
+                                                        <select id="ddlInspectionTimeFrame" Class="form-control">
+                                                            <option value="07 Days">07 Days</option>
+                                                            <option value="14 Days">14 Days</option>
+                                                            <option value="21 Days">21 Days</option>
+                                                            <option value="28 Days">28 Days</option>
+                                                            <option value="30 Days">30 Days</option>
+
+                                                        </select>
+                                                        @*<asp:DropDownList ID="ddlInspectionTimeFrame" runat="server" CssClass="form-control">
+                                                                <asp:ListItem Text="07 Days" Value="07 Days"></asp:ListItem>
+                                                                <asp:ListItem Text="14 Days" Value="14 Days"></asp:ListItem>
+                                                                <asp:ListItem Text="21 Days" Value="21 Days"></asp:ListItem>
+                                                                <asp:ListItem Text="28 Days" Value="28 Days"></asp:ListItem>
+                                                                <asp:ListItem Text="30 Days" Value="30 Days"></asp:ListItem>
+                                                            </asp:DropDownList>*@
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-12">
+                                                        <label>Week Start Day</label>
+                                                        <select id="ddlweekstartday" Class="form-control" onchange="checkActualPlanningWeek();">
+                                                            <option value="2">Monday</option>
+                                                            <option value="3">Tuesday</option>
+                                                            <option value="4">Wednesday</option>
+                                                            <option value="5">Thursday</option>
+                                                            <option value="6">Friday</option>
+                                                            <option value="7">Saturday</option>
+                                                            <option value="1">Sunday</option>
+                                                        </select>
+                                                        @*<asp:DropDownList ID="ddlweekstartday" runat="server" CssClass="form-control">
+                                                                <asp:ListItem Text="Monday" Value="2"></asp:ListItem>
+                                                                <asp:ListItem Text="Tuesday" Value="3"></asp:ListItem>
+                                                                <asp:ListItem Text="Wednesday" Value="4"></asp:ListItem>
+                                                                <asp:ListItem Text="Thursday" Value="5"></asp:ListItem>
+                                                                <asp:ListItem Text="Friday" Value="6"></asp:ListItem>
+                                                                <asp:ListItem Text="Saturday" Value="7"></asp:ListItem>
+                                                                <asp:ListItem Text="Sunday" Value="1"></asp:ListItem>
+                                                            </asp:DropDownList>*@
+                                                    </div>
+
+                                                    <div class="col-lg-4 col-md-3 col-sm-4 col-xs-12">
+                                                        <label>Planned Standing Days</label>
+                                                        <input type="text" id="txtplnstandDur" style="width:100%" class="form-control" min="0" />
+                                                        @*<Telerik:RadNumericTextBox ID="txtplnstandDur" runat="server" Width="100%" CssClass="form-control" MinValue="0">
+                                                                <numberformat decimaldigits="0" allowrounding="false" />
+                                                            </Telerik:RadNumericTextBox>*@
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-3 col-sm-4 col-xs-12">
+                                                        <label>Man Hrs Erect/Dismantle Ratio</label>
+                                                        <input type="text" id="txtManHrsRatio" style="Width:100%" Class="form-control" MinValue="0" MaxValue="1" />
+                                                        @*<Telerik:RadNumericTextBox ID="txtManHrsRatio" runat="server" Width="100%" CssClass="form-control" MinValue="0" MaxValue="1">
+                                                            </Telerik:RadNumericTextBox>*@
+                                                    </div>
+                                                    @*<%-- Changes On 10 July 2019--%>*@
+
+                                                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-12" id="divManHoursAtClient" style="margin-top: 23px; display: inline-flex; padding-left: 10px;">
+                                                        @*<asp:CheckBox runat="server" ID="checkboxManHoursManagement" />*@
+                                                        <input type="checkbox" id="checkboxManHoursManagement" />
+                                                        <label style="margin-left: 10px;">Man Hours Management</label>
+                                                    </div>
+
+                                                    <div class="col-lg-4 col-md-2 col-sm-5 col-xs-8" id="divOfflineClient" style="margin-top:23px;margin-left:1px; display: inline-flex; ">
+                                                        @*<asp:CheckBox runat="server" ID="checkOfflineEnabled" />*@
+                                                        <input type="checkbox" id="checkOfflineEnabled" />
+                                                        <label style="margin-left: 8px;">Offline Job Enabled</label>
+                                                    </div>
+
+                                                    <div class="col-lg-4 col-md-2 col-sm-5 col-xs-8" id="divOfflineInspection" style="margin-top:23px; display:               inline-flex; padding-left:10px;">
+                                                        <input type="checkbox" id="chkOfflineInspection" />
+                                                        <label style="margin-left: 8px;">Offline Inspection Enabled</label>
+                                                    </div>
+
+
+
+                                                    <div class="col-lg-3 col-md-3 col-sm-5 col-xs-8 " id="divHireInventory" style="margin-top:23px; display: inline-flex; padding-left:10px;">
+                                                        <input type="checkbox" Class="HireInventoryMessage" id="chkHireInventory" />
+                                                        @*<label style="margin-left: 8px;">Hire Inventory</label>*@
+                                                        @*Added by Pooja Rai on 06 Dec 2024 as requested to rename Hire Inventory to Hire: Standing (With Surge Rates)*@
+                                                        <label style="margin-left: 8px;">Hire: Standing (With Surge Rates)</label>
+                                                    </div>
+
+                                                    <div class="col-lg-4 col-md-2 col-sm-5 col-xs-8 " id="divComparisonDashboard" style="margin-top:23px; display: inline-flex; padding-left:10px;">
+                                                        <input type="checkbox" Class="" id="chkComparisonDashboard" />
+                                                        <label style="margin-left: 8px;">Enable Comparison Dashboard</label>
+                                                    </div>
+
+                                                    <div class="col-lg-4 col-md-2 col-sm-5 col-xs-8 " id="divchkGenerate" style="margin-top:23px;               display: inline-flex; padding-left:10px;">
+                                                        <input type="checkbox" Class="" id="chkNOGenerate" />
+                                                        <label style="margin-left: 8px;">
+                                                            Enable Multiple Scaf Ref #
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 " id="divLongTerm" style="margin-top:15px; display: inline-flex; padding-left:10px;">
+                                                        <label id="lblLongTermStructure">Long Term Structure</label>
+                                                    </div>
+
+                                                    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-4" style="margin-top: 0px;padding: 10px;width:102px;">
+                                                        <select id="ddlLongTermStructure" Class="form-control">
+                                                            <option Value="0">NO</option>
+                                                            <option Value="1">YES</option>
+                                                        </select>
+
+                                                    </div>
+
+                                                    <div class="col-lg-4 col-md-2 col-sm-5 col-xs-8 " id="divMainDepotInventory" style="margin-top:23px; display: inline-flex; padding-left:10px;">
+                                                        <input type="checkbox" Class="" id="chkMainDepotInventory" />
+                                                        <label style="margin-left: 8px;">Enable Main Depot Inventory</label>
+                                                    </div>
+
+                                                    @*<div class="col-lg-4 col-md-2 col-sm-5 col-xs-8" id="divOfflineInspection" style="margin-top:7px; display:               inline-flex; padding-left:32px;">
+                                                            <input type="checkbox" id="chkOfflineInspection" />
+                                                            <label style="margin-left: 8px;">Offline Inspection Enabled</label>
+                                                        </div>*@
+                                                    @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019  Start--%>*@
+                                                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="width: 1px; opacity: 0">
+                                                        <label></label>
+                                                        <input type="text" id="txtpsudouserid" Class="form-control" />
+                                                        @*<asp:TextBox ID="txtpsudouserid" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                    </div>
+                                                    @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019  End--%>
+                                                        <%--  Code Changes On 12 Aug 2019 Start--%>
+                                                        <%-- Hide All Funclity On 10 Sep 2019 For All User And Super user--%>*@
+                                                    <div id="divMainClient" style="display: none;">
+                                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" style="margin-top: 23px; display: inline-flex; padding-left: 10px">
+                                                            @*<asp:CheckBox runat="server" ID="isMainClient" />*@
+                                                            <input type="CheckBox" id="isMainClient" />
+                                                            <label style="margin-left: 10px;">Is Main Client</label>
+                                                        </div>
+                                                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+                                                            <label>Sub Client</label>
+
+                                                            <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -34px;">
+                                                                <li>
+                                                                    <a class="collapse-link"><i class="fa fa-chevron-up" style="color: white !important"></i></a>
+                                                                </li>
+                                                            </ul>
+                                                            <div class="clearfix"></div>
+                                                            @*<asp:ListBox runat="server" ID="lstSubClient" SelectionMode="Multiple" Height="22px" class="requiredfield2 chosen-select form-control" Style="width: 99%;"></asp:ListBox>*@
+                                                        </div>
+                                                    </div>
+                                                    @*<%--add Code on 15 Jan 2020.--%>*@
+                                                    @*<%--Code Changes On 12 Aug 2019 End--%>*@
+                                                </fieldset>
+                                            </div>
+                                            @*<%-- Hide All Funclity On 10 Sep 2019 For All User And Super user--%>*@
+                                            <div class="row " id="InventoryPlans" style="display: none;">
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <fieldset class="clientPlans" style="height: 100Px; width: 102%">
+                                                        <legend>
+                                                            <label><i class="fa fa-flickr "></i>&nbsp;Client Plans</label>
+                                                        </legend>
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display: inline-flex">
+                                                            @*<asp:RadioButton ID="Plan1" runat="server" GroupName="Plan" OnCheckedChanged="Plan_CheckedChanged" />*@
+                                                            <input type="radio" id="Plan1" GroupName="Plan" OnCheckedChanged="Plan_CheckedChanged()" />
+                                                            <label style="margin-left: 10px;">Plan 1 -Scaffold Material List Capture</label>
+                                                        </div>
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display: inline-flex">
+                                                            @*<asp:RadioButton ID="Plan2" runat="server" GroupName="Plan" OnCheckedChanged="Plan_CheckedChanged" />*@
+                                                            <input type="radio" id="Plan2" GroupName="Plan" OnCheckedChanged="Plan_CheckedChanged()" />
+                                                            <label style="margin-left: 10px;">Plan 2 -Includes Man Hours and Inventory Management</label>
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <fieldset class="clientSecurity" style="height: 100Px; width: 102%">
+                                                        <legend>
+                                                            <label><i class="fa fa-flickr "></i>&nbsp;Security</label>
+                                                        </legend>
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            @*<asp:CheckBox ID="chkIPAuthentication" runat="server" />*@
+                                                            <input type="checkbox" id="chkIPAuthentication" />
+                                                            <label>Need IP Authentication</label>
+                                                        </div>
+                                                    </fieldset>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-8 col-lg-3 col-md-6 col-sm-6" style="margin-top: 10px;">
+                                            <label>Company Logo</label>
+
+                                            <div class="row " id="divupload">
+
+                                                <div class="col-xs-11 col-lg-11 col-md-7 col-sm-10 nonsafari" style="display: none;">
+                                                    <div class="desktopApp" style="display: none;">
+                                                        <input type="file" id="radUpdogImg" accept="JPG,gif,png,jpg,tif,tiff,jpeg,JPEG,ico,bmp" />
+                                                        @*<input type="" Size="10 !important" runat="server" ID="radUpdogImg"
+                                                            MultipleFileSelection="Disabled" AllowedFileExtensions="JPG,gif,png,jpg,tif,tiff,jpeg,JPEG,ico,bmp" OnClientFileSelected="OnClientFileSelected" MaxFileInputsCount="1" OnClientFileUploadRemoved="OnClientFileRemoved" Skin="Metro" EnableInlineProgress="false" DisableChunkUpload="true" ChunkSize="2" EnableViewState="true" />*@
+                                                        <input type="hidden" id="clientid" />
+                                                        <input type="hidden" id="getimage" Value="" />
+                                                        <input type="hidden" id="imagename" Value="" />
+                                                        <input type="hidden" id="hdfile" Value="" />
+                                                        <input type="hidden" id="hdnimgname" />
+                                                        <input type="hidden" id="hdndeleteID" />
+                                                        <input type="hidden" id="hdnDeleteFlag" />
+                                                        <input type="hidden" id="hdnSiteLocationID" />
+                                                        <input type="hidden" id="hdnLocationID" />
+                                                        <input type="hidden" id="hdnBuildingID" />
+                                                        <input type="hidden" id="hdnAssetID" />
+                                                        <input type="hidden" id="hdnManHoursManagementCheck" />
+
+                                                        @* <Telerik:RadAsyncUpload Width="100%" Size="10 !important" runat="server" ID="radUpdogImg"
+                                                            MultipleFileSelection="Disabled" AllowedFileExtensions="JPG,gif,png,jpg,tif,tiff,jpeg,JPEG,ico,bmp" OnClientFileSelected="OnClientFileSelected" MaxFileInputsCount="1" OnClientFileUploadRemoved="OnClientFileRemoved" Skin="Metro" EnableInlineProgress="false" DisableChunkUpload="true" ChunkSize="2" EnableViewState="true" />
+                                                             <asp:HiddenField ID="clientid" runat="server" />
+                                                             <asp:HiddenField ID="getimage" Value="" runat="server" />
+                                                             <asp:HiddenField ID="imagename" Value="" runat="server" />
+                                                             <asp:HiddenField ID="hdfile" Value="" runat="server" />*@
+                                                    </div>
+                                                    <div class="mobileApp" style="display: none;">
+                                                        <input type="file" name="file" id="mobApp_file" class="mob_file_image custombtn" accept="image/*;capture=camera" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-11 col-md-7 col-sm-4 col-xs-11 safari" style="display: none;">
+                                                    <input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn" accept="image/*;capture=camera" />
+                                                </div>
+
+                                                <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1" id="divdeleteimag" runat="server" style="display: none">
+                                                    <a id="btndeleteImage" onclick="deletecheck();" class="glyphicon glyphicon-trash xyz"></a>
+                                                    @*<%--<asp:LinkButton runat="server" ToolTip="Delete" ID="btndeleteImage" CommandName="Delete" OnClick="btndeleteImage_Click"><i class="glyphicon glyphicon-trash"></i></asp:LinkButton>--%>*@
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <fieldset class="imageframe" style="height: 158px; border:none; max-width: 235px;">
+                                                    <legend>
+                                                        @*<%-- <label><i class="fa fa-file-image-o "></i>&nbsp;Company Logo  </label>--%>
+                                                            <%--  <label>Company Logo  </label>--%>*@
+                                                    </legend>
+
+                                                    @*<%--   Client Img Logo Height  change on 11 Nov 2019--%>
+                                                        <%--         <asp:Image runat="server" ID="imga" Height="129px" Width="100%" CssClass="img-thumbnail img-responsive changeimg" src="../images/noimg.jpg" ClientIDMode="Static" />--%>*@
+                                                    <image id="imga" style="Width:100%" Class="img-responsive changeimg" src="../images/noimg.jpg" />
+
+                                                </fieldset>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    @*<%--<asp:HiddenField id="hdnfield" runat="server" />--%>*@
+                    <div class="row w3-margin-top">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="x_panel w3-padding-0 w3-card-4">
+                                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                    <div class="col-lg-12 col-md-8 col-sm-7 col-xs-7">
+                                        <h4 style="margin-top: 6px; font-size: 15px" id="H1"><i class="fa fa-list"></i>&nbsp;Client Sites <span style="margin-left: 5px;" id="Span1"></span></h4>
+                                    </div>
+
+
+                                    <div class="col-lg-8 col-md-8 col-sm-8"></div>
+
+                                    <div class="col-lg-2 col-md-2 col-sm-2">
+                                        <button id="btnCAncel" style="Width:100%" Class="w3-btn w3-small w3-dark-grey" OnClick="btnCAncel_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</button>
+                                        @*<asp:LinkButton runat="server" ID="btnCAncel" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnCAncel_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</asp:LinkButton>*@
+
+                                    </div>
+                                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+
+                                        <button id="btnFloorLevelImage" style="Width:100%" Class="w3-btn w3-teal" OnClick="btnFloorLevelImage_Click()"><i class="fa fa-plus"></i>&nbsp;Add Floor Image</button>
+                                        @*<asp:LinkButton runat="server" ID="btnFloorLevelImage" Width="100%" CausesValidation="false" CssClass="w3-btn w3-teal" OnClick="btnFloorLevelImage_Click"><i class="fa fa-plus"></i>&nbsp;Add Floor Image</asp:LinkButton>*@
+
+                                    </div>
+                                    @*<%--<div class="col-lg-3 col-md-3 col-sm-3 w3-padding-left">
+                                            <asp:LinkButton CssClass="w3-btn w3-teal" CausesValidation="false" ID="btnaddSiteLocation" Width="60%" OnClientClick="AddButtonClickOfGrid('#ctl00_ContentPlaceHolder1_ctl00_ContentPlaceHolder1_gridsitelocationPanel'); return false;" runat="server"><i class="fa fa-plus "></i>&nbsp;Add Site</asp:LinkButton>
+                                        </div>--%>*@
+                                    <div class="col-lg-1 col-md-1 col-sm-1">
+                                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-right: -11px;">
+                                            <li>
+                                                <a style="float: right;" class="collapse-link"><i class="fa fa-chevron-up" style="display: none;"></i></a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                                            <div id="SiteGrid" style="color: black; width: 100%;margin-top:5px;">
+                                                <table id="tblSiteGrid" class="table table-striped ">
+                                                    <thead style="background-color: darkblue;color: white;">
+                                                        <tr>
+                                                            <th style="display:none"></th>
+                                                            <th class='setWidth0'></th>
+                                                            <th class='setWidth1'></th>
+                                                            <th class='setWidth2'></th>
+                                                            <th class='setWidth3'>Owner Name</th>
+                                                            <th class='setWidth4'>Site/Project Name</th>
+                                                            <th class='setWidth5'>Address</th>
+                                                            <th class='setWidth6'>City</th>
+                                                            <th class='setWidth7'>State/County</th>
+                                                            <th class='setWidth8'>Postcode</th>
+                                                            <th class='setWidth9'>Status</th>
+                                                            <th style="display:none">DistributionList</th>
+                                                            <th style="display:none">SiteLat</th>
+                                                            <th style="display:none">SiteLong</th>
+                                                            <th style="display:none">ManHoursAvailable</th>
+                                                            <th style="display:none">MaintainInventory</th>
+                                                            <th style="display:none">MaintainInventoryAtJob</th>
+                                                            <th style="display:none">CycloneManagement</th>
+                                                            <th style="display:none">ManHoursManagement</th>
+                                                            <th style="display:none">GPS</th>
+                                                            <th style="display:none">FloorLevel</th>
+                                                            <th style="display:none">EnabledGPSSitePin</th>
+                                                            <th style="display:none">EnabledCaptureGps</th>
+                                                            <th style="display:none">OffSystemInspection</th>
+                                                            <th style="display:none">Inventory Mailing List</th>
+                                                            <th style="display:none">Skip Material List</th>
+                                                            <th style="display:none">Enable Pipeline Inventory</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tbodySiteGrid"></tbody>
+                                                </table>
+
+                                            </div>
+
+                                            @*<Telerik:RadGrid ID="gridsitelocation" OnItemCreated="gridsitelocation_ItemCreated" runat="server" AllowPaging="true" PageSize="12" Skin="Metro" OnNeedDataSource="gridsitelocation_NeedDataSource" OnItemCommand="gridsitelocation_ItemCommand" MasterTableView-CommandItemSettings-ShowAddNewRecordButton="true" MasterTableView-CommandItemSettings-AddNewRecordText=" Add New Sites" OnDetailTableDataBind="gridsitelocation_DetailTableDataBind" OnItemDataBound="gridsitelocation_ItemDataBound" GroupingSettings-CaseSensitive="false" AutoGenerateColumns="false" AllowFilteringByColumn="true" MasterTableView-AllowSorting="true" ClientSettings-EnableAlternatingItems="true">
+                                                    <clientsettings scrolling-allowscroll="true" scrolling-scrollheight="500px" allowrowsdragdrop="true"></clientsettings>
+                                                    <mastertableview name="SiteMaster" datakeynames="ID" commanditemdisplay="Top">
+                                                        <CommandItemSettings ShowAddNewRecordButton="true" ExportToCsvText="Sitelocctionlist" ShowExportToCsvButton="false" />
+                                                        <Columns>
+                                                            <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-Width="10px" AllowFiltering="false" UniqueName="UniqueEdit">
+                                                                <ItemTemplate>
+                                                                    <asp:LinkButton ID="btnedit" runat="server" ToolTip="edit" Text="edit" CommandName="Edit"><i class="glyphicon glyphicon-pencil"></i></asp:LinkButton>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-Width="10px" AllowFiltering="false">
+                                                                <ItemTemplate>
+                                                                    <asp:LinkButton ID="btndelete" runat="server" ToolTip="delete" Text="delete" CommandName="Delete"><i class="fa fa-trash"></i></asp:LinkButton>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn HeaderText="Owner Name" HeaderStyle-Width="90px" FilterControlWidth="100px" FilterDelay="1500" DataField="OwnerName" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lblOwnerName" runat="server" Text='<%#Eval("OwnerName") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn HeaderText="Site/Project Name" HeaderStyle-Width="90px" FilterControlWidth="100px" FilterDelay="1500" DataField="SiteLocation" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lblsitelocation" runat="server" Text='<%#Eval("SiteLocation") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn HeaderText="Address" HeaderStyle-Width="90px" FilterControlWidth="100px" FilterDelay="1500" DataField="Address" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lbladdress" runat="server" Text='<%#Eval("Address") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn HeaderText="City" HeaderStyle-Width="90px" FilterControlWidth="100px" FilterDelay="1500" DataField="City" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lblcity" runat="server" Text='<%#Eval("City") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn UniqueName="State" SortExpression="State" HeaderStyle-Width="90px" FilterControlWidth="100px" HeaderText="State/County" FilterDelay="1500" DataField="State" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lblstate" runat="server" Text='<%#Eval("State") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                                <FilterTemplate>
+                                                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlgridstate" Width="150px" Height="250px" runat="server" DataSourceID="dsddlState" DataTextField="State" DataValueField="State" MarkFirstMatch="true" AppendDataBoundItems="true" SelectedValue='<%#((GridItem)Container).OwnerTableView.GetColumn("State").CurrentFilterValue %>' OnClientSelectedIndexChanged="onchanged3">
+                                                                        <Items>
+                                                                            <Telerik:RadComboBoxItem Text="All" />
+                                                                        </Items>
+                                                                    </Telerik:RadComboBox>
+
+                                                                    <Telerik:RadScriptBlock ID="scipt" runat="server">
+                                                                        <script type="text/javascript">
+                                                                            function onchanged3(sender, args) {
+                                                                                var state = $find("<%# ((GridItem)Container).OwnerTableView.ClientID%>")
+                                                                                state.filter("State", args.get_item().get_value(), "EqualTo");
+                                                                            }
+                                                                        </script>
+                                                                    </Telerik:RadScriptBlock>
+                                                                </FilterTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn HeaderStyle-Width="90px" FilterControlWidth="100px" HeaderText="Postcode" FilterDelay="1500" DataField="Zip" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lblzip" runat="server" Text='<%#Eval("Zip") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <Telerik:GridTemplateColumn UniqueName="SiteLocationStatus" HeaderStyle-Width="90px" FilterControlWidth="100px" SortExpression="SiteLocationStatus" HeaderText="Status" FilterDelay="1500" DataField="SiteLocationStatus" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lblsitelocstatus" runat="server" Width="58%" Text='<%#Eval("SiteLocationStatus") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                                <FilterTemplate>
+                                                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlStatus" runat="server" Width="100px" MarkFirstMatch="true" AppendDataBoundItems="true" SelectedValue='<%#((GridItem)Container).OwnerTableView.GetColumn("SiteLocationStatus").CurrentFilterValue %>' OnClientSelectedIndexChanged="onchanged1">
+                                                                        <Items>
+                                                                            <Telerik:RadComboBoxItem Text="All" />
+                                                                            <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                            <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                        </Items>
+                                                                    </Telerik:RadComboBox>
+                                                                    <Telerik:RadScriptBlock ID="script" runat="server">
+                                                                        <script type="text/javascript">
+                                                                            function onchanged1(sender, args) {
+                                                                                var status = $find("<%#((GridItem)Container).OwnerTableView.ClientID%>")
+                                                                                status.filter("SiteLocationStatus", args.get_item().get_value(), "EqualTo");
+                                                                            }
+                                                                        </script>
+                                                                    </Telerik:RadScriptBlock>
+                                                                </FilterTemplate>
+                                                            </Telerik:GridTemplateColumn>
+                                                            <%--   <Telerik:GridTemplateColumn ItemStyle-Width="10%" HeaderText="View Inventory" HeaderStyle-Width="8%" AllowFiltering="false" AllowSorting="false" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    --%>
+                                                                    <%-- <a id="btnviewdoc" class="w3-btn w3-teal" onclick="ShowPdf();"<i class="fa fa-search"></i>&nbsp;View</a>--%>
+                                                                    <%--   <asp:LinkButton runat="server" ID="btnview" CausesValidation="false" OnClick="btnview_Click" CssClass="w3-btn w3-teal" CommandName="View"><i class="fa fa-search"></i>&nbsp;View</asp:LinkButton>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>--%>
+                                                            <%--<Telerik:GridTemplateColumn HeaderText="Area" DataField="Area" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                <ItemTemplate>
+                                                                    <asp:Label ID="lblsiteArea" runat="server" Text='<%# Eval("Area") %>'></asp:Label>
+                                                                </ItemTemplate>
+                                                            </Telerik:GridTemplateColumn>--%>
+                                                        </Columns>
+                                                        <EditFormSettings EditFormType="Template">
+                                                            <FormTemplate>
+                                                                <div class="row w3-padding-top">
+                                                                    <div class="col-xs-8  col-lg-12 col-md-12 col-sm-12">
+                                                                        <div class="row ">
+                                                                            <div class=" col-lg-3 col-md-3 col-xs-12 col-sm-4">
+                                                                                <label>Owner Name</label>
+                                                                                <Telerik:RadTextBox ID="txtOwnerName" runat="server" Width="100%" Text='<%#Eval("OwnerName") %>'></Telerik:RadTextBox>
+                                                                                <%--<asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="Save" ControlToValidate="txtsitelocation" ErrorMessage="* Required"></asp:RequiredFieldValidator>--%>
+                                                                            </div>
+                                                                            <div class="col-lg-3 col-md-3 col-xs-12 col-sm-4 ">
+                                                                                <label>Status</label>
+                                                                                <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlStatuss" Width="100%" runat="server" MarkFirstMatch="true" SelectedValue='<%#Eval("SiteLocationStatus") %>'>
+                                                                                    <Items>
+                                                                                        <%--<Telerik:RadComboBoxItem Text="All" />--%>
+                                                                                        <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                                        <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                                    </Items>
+                                                                                </Telerik:RadComboBox>
+                                                                                <asp:RequiredFieldValidator ID="rfvddlStatuss" runat="server" CssClass="valid rdf-initial rdf-text" ControlToValidate="ddlStatuss" ValidationGroup="EditSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                            </div>
+
+                                                                            <%--<div class="row">
+                                                                                --%>
+                                                                                <div class=" col-lg-6 col-md-6 col-xs-12 col-sm-4">
+                                                                                    <label>Site/Project Name<span style="color: red">&nbsp*</span></label>
+                                                                                    <Telerik:RadTextBox ID="txtsitelocation" runat="server" Width="100%" Text='<%#Eval("SiteLocation") %>'></Telerik:RadTextBox>
+                                                                                    <asp:RequiredFieldValidator ID="rfvtxtsitelocation" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="EditSave" ControlToValidate="txtsitelocation" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                                </div>
+                                                                                <%--
+                                                                            </div>--%>
+                                                                        </div>
+
+
+                                                                        <div class="row ">
+                                                                            <div class="col-lg-6 col-md-6 col-xs-12 col-sm-12">
+                                                                                <label>Address<span style="color: red">&nbsp*</span></label>
+                                                                                <Telerik:RadTextBox ID="txtaddress" CssClass="Address" runat="server" Width="100%" Text='<%#Eval("Address") %>'></Telerik:RadTextBox>
+                                                                                <asp:RequiredFieldValidator ID="rfvtxtaddress" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="EditSave" ControlToValidate="txtaddress" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                            </div>
+
+                                                                            <%--<div class="row ">
+                                                                                --%>
+                                                                                <div class="col-lg-2 col-md-2 col-xs-12 col-sm-4">
+                                                                                    <label>City<span style="color: red">&nbsp*</span></label>
+                                                                                    <Telerik:RadTextBox ID="txtcity" runat="server" CssClass="City" Width="100%" Text='<%#Eval("City") %>'></Telerik:RadTextBox>
+                                                                                    <asp:RequiredFieldValidator ID="rfvtxtcity" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="EditSave" ControlToValidate="txtcity" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                                </div>
+                                                                                <%-- <div class="col-lg-2 col-md-3 col-xs-12 col-sm-4">
+                                                                                    <label>Country</label>
+                                                                                    <Telerik:RadComboBox ID="ddlgridcountry" runat="server" Width="100%" DataSourceID="ddlcountryID" AutoPostBack="true" DataTextField="Country" DataValueField="Country" MarkFirstMatch="true" OnSelectedIndexChanged="ddlgridcountry_SelectedIndexChanged" AppendDataBoundItems="true" SelectedValue='<%# Eval("Country")%>' EmptyMessage="All" Enabled="false">
+                                                                                    </Telerik:RadComboBox>
+                                                                                </div>--%>
+                                                                                <div class="col-lg-2 col-md-3 col-xs-12 col-sm-4">
+                                                                                    <label id="lblstate" runat="server">State/County</label>
+                                                                                    <%--<label id="lblcounty" runat="server" visible="true">County</label>--%>
+                                                                                    <Telerik:RadComboBox Skin="Simple" CssClass="State" RenderMode="Lightweight" ID="ddlstates" runat="server" Width="100%" DataSourceID="dsddlstate" DataTextField="state" DataValueField="State" MarkFirstMatch="true" AppendDataBoundItems="true" SelectedValue='<%#Eval("State")%>' EmptyMessage="All" Enabled="true" Height="250px">
+                                                                                        <Items>
+                                                                                            <Telerik:RadComboBoxItem Text="" />
+                                                                                        </Items>
+                                                                                    </Telerik:RadComboBox>
+                                                                                    <%-- <asp:RequiredFieldValidator ID="rfvddlstates" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="Save" ControlToValidate="ddlstates" ErrorMessage="* Required"></asp:RequiredFieldValidator>--%>
+                                                                                </div>
+                                                                                <div class="col-lg-2 col-md-1 col-xs-12 col-sm-4">
+                                                                                    <label>Postcode</label>
+                                                                                    <Telerik:RadMaskedTextBox ID="txtzip" CssClass="PostCode" runat="server" Mask="####" Visible="false" MaxLength="4" Width="100%" Text='<%#Eval("Zip") %>'></Telerik:RadMaskedTextBox>
+                                                                                    <Telerik:RadTextBox ID="txtukpost" CssClass="PostCode" runat="server" Visible="false" Width="100%" Text='<%#Eval("Zip") %>'></Telerik:RadTextBox>
+                                                                                    <%--                                            <telerik:RadMaskedTextBox RenderMode="Lightweight" Visible="true" ID="txtzip" Width="100%" runat="server" Mask="####"></telerik:RadMaskedTextBox>
+                                                                                    <asp:TextBox ID="txtpostcodeuk" Visible="true" Width="100%" runat="server"></asp:TextBox>--%>
+                                                                                </div>
+                                                                            </div>
+
+
+                                                                            <%--
+                                                                        </div>--%>
+                                                                        <div class="row">
+                                                                            <div class="col-lg-4 col-md-6 col-xs-12 col-sm-6">
+                                                                                <label>Distribution List</label>
+                                                                                <Telerik:RadTextBox ID="txtdistriList" runat="server" Width="100%" Text='<%#Eval("DistributionList") %>'></Telerik:RadTextBox>
+                                                                            </div>
+                                                                            <div class="col-lg-2 col-md-7 col-sm-4 col-xs-6" style="margin-top: 16px;">
+                                                                                <button type="button" id="gpssitebutton" onclick="GetlatlaongBysite();" style="width: 100%">Set GPS by Address</button>
+                                                                            </div>
+                                                                            <div class="col-lg-2 col-md-2 col-xs-12 col-sm-3">
+                                                                                <label>Latitude<span style="color: red">&nbsp*</span></label>
+                                                                                <%--<Telerik:RadTextBox ID="txtlat" runat="server" Width="100%" Text='<%#Eval("SiteLat") %>'></Telerik:RadTextBox>--%>
+                                                                                <Telerik:RadNumericTextBox ID="txtlat" runat="server" Width="100%" Text='<%#Eval("SiteLat") %>' NumberFormat-DecimalDigits="11" CssClass="form-control Lattitude"></Telerik:RadNumericTextBox>
+                                                                                <asp:RequiredFieldValidator ID="rdfLat" runat="server" CssClass="valid rdf-initial rdf-text" ControlToValidate="txtlat" ValidationGroup="EditSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                            </div>
+                                                                            <div class="col-lg-2 col-md-2 col-xs-12 col-sm-3">
+                                                                                <label>Longitude<span style="color: red">&nbsp*</span></label>
+                                                                                <%--<Telerik:RadTextBox ID="txtlong" runat="server" Width="100%" Text='<%#Eval("SiteLong") %>'></Telerik:RadTextBox>--%>
+                                                                                <Telerik:RadNumericTextBox ID="txtlong" runat="server" Width="100%" Text='<%#Eval("SiteLong") %>' NumberFormat-DecimalDigits="11" CssClass="form-control Longitude">
+                                                                                </Telerik:RadNumericTextBox>
+                                                                                <asp:RequiredFieldValidator ID="rdfLong" runat="server" CssClass="valid rdf-initial rdf-text" ControlToValidate="txtlong" ValidationGroup="EditSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                            </div>
+                                                                            <div class="col-lg-2 col-md-2 col-xs-6 col-sm-3">
+                                                                                <label>Man Hours Available</label>
+                                                                                <Telerik:RadNumericTextBox ID="txtManHrsAvai" runat="server" Enabled="false" Width="100%" Text='<%#Eval("ManHoursAvailable") %>' CssClass="form-control txtManHoursAvailable ">
+                                                                                </Telerik:RadNumericTextBox>
+                                                                            </div>
+
+                                                                            <%-- Changes On 10 July 2019--%>
+                                                                            <div id="divMaintainInventory" runat="server" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 divMaintainInventory" style="margin-top: 8px; display: inline-flex; padding-left: 10px">
+                                                                                <asp:CheckBox runat="server" ID="checkboxMaintainInventory" Checked='<%#Eval("MaintainInventory").ToString()=="False" ?false:true %>' />
+                                                                                <label style="margin-left: 10px;">Maintain Inventory At Site</label>
+                                                                            </div>
+                                                                            <div id="divMaintainInventoryAtJob" runat="server" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 divMaintainInventoryAtJob" style="margin-top: 8px; display: inline-flex; padding-left: 10px">
+
+                                                                                <%--  Changes on 12 Sep 2019  for Test And Prod --%>
+                                                                                <%--   <asp:CheckBox runat="server" ID="checkboxMaintainInventoryAtJob" Checked='<%#Eval("MaintainInventoryAtJob").ToString()=="True" ?true:false %>' />--%>
+
+                                                                                <%--  Changes on 12 Sep 2019  for Inpex Only--%>
+                                                                                <asp:CheckBox runat="server" ID="checkboxMaintainInventoryAtJob" Checked='<%#Eval("MaintainInventoryAtJob").ToString()=="False" ?false:true %>' />
+                                                                                <label style="margin-left: 10px;">Maintain Inventory At Job</label>
+                                                                            </div>
+                                                                            <div id="divCycloneManagement" runat="server" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 divCycloneManagement" style="margin-top: 8px; display: inline-flex; padding-left: 10px">
+
+                                                                                <%--  Changes on 12 Sep 2019  for Test And Prod --%>
+                                                                                <%--                <asp:CheckBox runat="server" ID="checkboxCycloneManagement" Checked='<%#Eval("CycloneManagement").ToString()=="True" ?true:false %>' />--%>
+
+                                                                                <%--  Changes on 12 Sep 2019  for Inpex Only--%>
+                                                                                <asp:CheckBox runat="server" ID="checkboxCycloneManagement" Checked='<%#Eval("CycloneManagement").ToString()=="False" ?false:true %>' />
+                                                                                <label style="margin-left: 10px;">Cyclone Management</label>
+                                                                            </div>
+                                                                            <div id="divManHourMngAtSite" runat="server" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divManHourMngAtSite" style="margin-top: 8px; display: inline-flex; padding-left: 10px">
+
+                                                                                <asp:CheckBox runat="server" ID="chkboxManHoursManagement" Checked='<%#Eval("ManHoursManagement").ToString()=="True" ?true:false %>' />
+                                                                                <label style="margin-left: 10px;">Man Hours Management</label>
+                                                                            </div>
+                                                                            <div id="divGpsSitePin" runat="server" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divGpsSitePin" style="margin-top:9px; display: inline-flex; padding-left: 10px">
+                                                                                <asp:CheckBox runat="server" ID="chkboxEnabledGPSSitePin" Checked='<%#Eval("EnabledGPSSitePin").ToString()=="True" ?true:false %>' />
+                                                                                <label style="margin-left: 10px;">Enabled GPS Site Pin</label>
+                                                                            </div>
+
+                                                                            <%--Add Code on 30/march/2020--%>
+                                                                            <div id="divCaptureGps" runat="server" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divCaptureGps" style="margin-top:9px; display: inline-flex; padding-left: 10px">
+                                                                                <asp:CheckBox runat="server" ID="chkboxEnabledCaptureGps" Checked='<%#Eval("EnabledCaptureGps").ToString()=="True" ?true:false %>' />
+                                                                                <label style="margin-left: 10px;">Enabled GPS Capture</label>
+                                                                            </div>
+
+                                                                            <%-- add code on 23-Feb-2020--%>
+                                                                            <div class="col-lg-3 col-md-3 col-xs-12 col-sm-3 ">
+                                                                                <label>P <b>&</b> I Man Hours Available </label>
+                                                                                <Telerik:RadNumericTextBox ID="txtPI" runat="server" Width="100%" CssClass="txtPIVal" onChange="ManHoursValuesCalculate()" Text='<%#Eval("PIManHrs") %>'>
+                                                                                </Telerik:RadNumericTextBox>
+                                                                            </div>
+                                                                            <div class="col-lg-3 col-md-3 col-xs-12 col-sm-3">
+                                                                                <label>Maintenance Man Hours Available</label>
+                                                                                <Telerik:RadNumericTextBox ID="txtMaintenance" runat="server" Width="100%" CssClass="txtMaintenanceManHrs" onChange="ManHoursValuesCalculate()" Text='<%#Eval("MaintenanceManHrs") %>'>
+                                                                                </Telerik:RadNumericTextBox>
+                                                                            </div>
+
+                                                                        </div>
+                                                                        <%--    //24-Oct-2019--start--%>
+                                                                        <div class="row w3-padding-top">
+                                                                            <div id="divgpsandfloorlevel" runat="server" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 " style="margin-top: 1px; display: inline-flex;display:block; padding-left: 10px; border: 1px solid #009688;">
+                                                                                <asp:RadioButton runat="server" Checked='<%#Eval("GPS").ToString()=="False" ?false:true %>' GroupName="GpsTracker" id="btngps" /><label id="lblgps" style="margin-right:30px!important; margin-left:5px!important">GPS</label>
+
+                                                                                <asp:RadioButton runat="server" Checked='<%#Eval("FloorLevel").ToString()=="True" ?true:false %>' GroupName="GpsTracker" id="btnfloorlevel" />
+                                                                                <label id="lblfloorlvl" style="margin-left:5px!important;">Floor Level</label>
+
+                                                                            </div>
+                                                                            <%-- //24-Oct-2019---End--%>
+                                                                        </div>
+                                                                        <div class="row w3-padding-top">
+                                                                            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4 ">
+                                                                                <asp:Button ID="btnsave" runat="server" Width="100%" style="margin-left: -4px;" CssClass="btn btn-primary" ValidationGroup="EditSave" Text="Save" CommandName='<%#(Container is GridEditFormInsertItem)?"PerformInsert":"Update" %>' />
+                                                                            </div>
+                                                                            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+                                                                                <asp:Button ID="btnCancel" runat="server" Width="100%" CssClass="btn btn-white" Text="Cancel" CommandName="Cancel" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </FormTemplate>
+                                                        </EditFormSettings>
+                                                        <DetailTables>
+                                                            <Telerik:GridTableView Name="DetailTable" CommandItemSettings-ShowAddNewRecordButton="true" CommandItemSettings-AddNewRecordText=" Add New Location" CommandItemDisplay="Top" AutoGenerateColumns="false" HeaderStyle-Width="50px" DataKeyNames="ID" Width="100%">
+                                                                <Columns>
+                                                                    <%--Nested Button Section Start--%>
+                                                                    <Telerik:GridTemplateColumn Exportable="false" UniqueName="btnedit" HeaderStyle-Width="4%" FilterControlWidth="5%" AllowFiltering="false">
+                                                                        <ItemTemplate>
+                                                                            <asp:LinkButton ID="btnedit" runat="server" ToolTip="edit" Text="edit" CommandName="Edit"><i class="glyphicon glyphicon-pencil"></i></asp:LinkButton>
+                                                                        </ItemTemplate>
+                                                                    </Telerik:GridTemplateColumn>
+                                                                    <Telerik:GridTemplateColumn UniqueName="btndelete" Exportable="false" HeaderStyle-Width="4%" FilterControlWidth="5%" AllowFiltering="false">
+                                                                        <ItemTemplate>
+                                                                            <asp:LinkButton ID="btndelete" runat="server" ToolTip="delete" Text="delete" CommandName="Delete"><i class="fa fa-trash"></i></asp:LinkButton>
+                                                                        </ItemTemplate>
+                                                                    </Telerik:GridTemplateColumn>
+                                                                    <Telerik:GridTemplateColumn HeaderText="Location" HeaderStyle-Width="30%" FilterControlWidth="100%" FilterDelay="1500" DataField="Area" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                        <ItemTemplate>
+                                                                            <asp:Label ID="lblarea" runat="server" Text='<%#Eval("Area") %>'></asp:Label>
+
+                                                                        </ItemTemplate>
+
+                                                                    </Telerik:GridTemplateColumn>
+
+                                                                    <Telerik:GridTemplateColumn UniqueName="AreaStatus" HeaderStyle-Width="50px" FilterControlWidth="100%" SortExpression="AreaStatus" HeaderText="Status" FilterDelay="1500" DataField="AreaStatus" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                        <ItemTemplate>
+                                                                            <asp:Label ID="lblarestatus" runat="server" Width="30%" Text='<%#Eval("AreaStatus") %>'></asp:Label>
+                                                                        </ItemTemplate>
+                                                                        <FilterTemplate>
+                                                                            <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlStatus" runat="server" MarkFirstMatch="true" Width="50%" AppendDataBoundItems="true" SelectedValue='<%#((GridItem)Container).OwnerTableView.GetColumn("AreaStatus").CurrentFilterValue %>' OnClientSelectedIndexChanged="onchanged1">
+                                                                                <Items>
+                                                                                    <Telerik:RadComboBoxItem Text="All" />
+                                                                                    <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                                    <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                                </Items>
+                                                                            </Telerik:RadComboBox>
+                                                                            <Telerik:RadScriptBlock ID="scipt" runat="server">
+                                                                                <script type="text/javascript">
+                                                                                    function onchanged1(sender, args) {
+                                                                                        var status = $find("<%#((GridItem)Container).OwnerTableView.ClientID%>")
+                                                                                        status.filter("AreaStatus", args.get_item().get_value(), "EqualTo");
+                                                                                    }
+                                                                                </script>
+                                                                            </Telerik:RadScriptBlock>
+                                                                        </FilterTemplate>
+                                                                    </Telerik:GridTemplateColumn>
+                                                                </Columns>
+
+                                                                <EditFormSettings EditFormType="Template">
+                                                                    <FormTemplate>
+                                                                        <div class="row w3-padding-top">
+                                                                            <div class="col-xs-4">
+                                                                                <label>Location<span style="color: red">&nbsp*</span></label>
+                                                                                <Telerik:RadTextBox ID="txtarea" runat="server" Width="100%" Text='<%#Eval("Area") %>'></Telerik:RadTextBox>
+                                                                                <asp:RequiredFieldValidator CssClass="rdf-initial rdf-text" ID="rfvaildtxtarea" runat="server" ControlToValidate="txtarea" ValidationGroup="LocationSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                            </div>
+                                                                            <div class="col-xs-4">
+                                                                                <label>Status</label>
+                                                                                <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlStatuss" Width="90%" runat="server" MarkFirstMatch="true" SelectedValue='<%#Eval("AreaStatus") %>'>
+                                                                                    <Items>
+                                                                                        <%--<Telerik:RadComboBoxItem Text="All" />--%>
+                                                                                        <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                                        <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                                    </Items>
+                                                                                </Telerik:RadComboBox>
+
+                                                                                <asp:RequiredFieldValidator ID="rfvaildstatuss" runat="server" ControlToValidate="ddlStatuss" ValidationGroup="LocationSave" CssClass="rfvstatus rdf-initial rdf-text" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row w3-padding-top">
+                                                                            <div class="col-lg-3 col-md-3 col-sm-2">
+                                                                                <asp:Button ValidationGroup="LocationSave" ID="btnsave" runat="server" Width="100%" CssClass="btn btn-primary" Text="Save" CommandName='<%#(Container is GridEditFormInsertItem)?"PerformInsert":"Update" %>' />
+                                                                            </div>
+                                                                            <div class="col-lg-3 col-md-3 col-sm-2">
+                                                                                <asp:Button ID="btnCancel" runat="server" Width="100%" CssClass="btn btn-white" ForeColor="Black" Text="Cancel" CommandName="Cancel" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </FormTemplate>
+                                                                </EditFormSettings>
+                                                                <DetailTables>
+                                                                    <Telerik:GridTableView Name="DetailTable1" CommandItemSettings-ShowAddNewRecordButton="true" CommandItemSettings-AddNewRecordText=" Add New Building / Module No." CommandItemDisplay="Top" AutoGenerateColumns="false" DataKeyNames="ID" Width="100%">
+                                                                    <Columns>
+                                                                        <Telerik:GridTemplateColumn Exportable="false" UniqueName="btnedit" HeaderStyle-Width="4%" FilterControlWidth="5%" AllowFiltering="false">
+                                                                            <ItemTemplate>
+                                                                                <asp:LinkButton ID="btnedit" runat="server" ToolTip="edit" Text="edit" CommandName="Edit"><i class="glyphicon glyphicon-pencil"></i></asp:LinkButton>
+                                                                            </ItemTemplate>
+                                                                        </Telerik:GridTemplateColumn>
+                                                                        <Telerik:GridTemplateColumn UniqueName="btndelete" Exportable="false" HeaderStyle-Width="4%" FilterControlWidth="5%" AllowFiltering="false">
+                                                                            <ItemTemplate>
+                                                                                <asp:LinkButton ID="btndelete" runat="server" ToolTip="delete" Text="delete" CommandName="Delete"><i class="fa fa-trash"></i></asp:LinkButton>
+                                                                            </ItemTemplate>
+                                                                        </Telerik:GridTemplateColumn>
+                                                                        <Telerik:GridTemplateColumn HeaderText="Building / Module No." HeaderStyle-Width="30%" FilterControlWidth="100%" FilterDelay="1500" DataField="BuildingNo" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                            <ItemTemplate>
+                                                                                <asp:Label ID="lblBuilding" runat="server" Text='<% #Eval("BuildingNo") %>'> </asp:Label>
+                                                                            </ItemTemplate>
+                                                                        </Telerik:GridTemplateColumn>
+
+                                                                        <Telerik:GridTemplateColumn UniqueName="BuildingStatus" HeaderStyle-Width="50px" FilterControlWidth="100%" SortExpression="BuildingStatus" HeaderText="Status" FilterDelay="1500" DataField="BuildingStatus" DataType="System.String" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                            <ItemTemplate>
+                                                                                <asp:Label ID="lblBuildstatus" runat="server" Width="30%" Text='<%#Eval("BuildingStatus") %>'></asp:Label>
+                                                                            </ItemTemplate>
+                                                                            <FilterTemplate>
+                                                                                <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlStatus" runat="server" MarkFirstMatch="true" Width="50%" AppendDataBoundItems="true" SelectedValue='<%#((GridItem)Container).OwnerTableView.GetColumn("BuildingStatus").CurrentFilterValue %>' OnClientSelectedIndexChanged="onchanged2">
+                                                                                    <Items>
+                                                                                        <Telerik:RadComboBoxItem Text="All" />
+                                                                                        <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                                        <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                                    </Items>
+                                                                                </Telerik:RadComboBox>
+                                                                                <Telerik:RadScriptBlock ID="scipt" runat="server">
+                                                                                    <script type="text/javascript">
+                                                                                            function onchanged2(sender, args) {
+                                                                                                var status = $find("<%#((GridItem)Container).OwnerTableView.ClientID%>")
+                                                                                                status.filter("BuildingStatus", args.get_item().get_value(), "EqualTo");
+                                                                                            }
+                                                                                    </script>
+                                                                                </Telerik:RadScriptBlock>
+                                                                            </FilterTemplate>
+                                                                        </Telerik:GridTemplateColumn>
+                                                                    </Columns>
+                                                                    <EditFormSettings EditFormType="Template">
+                                                                        <FormTemplate>
+                                                                            <div class="row w3-padding-top">
+                                                                                <div class="col-xs-4">
+                                                                                    <label>Building / Module No.<span style="color: red">&nbsp*</span></label>
+                                                                                    <Telerik:RadTextBox ID="txtBuilding" runat="server" Width="100%" Text='<%#Eval("BuildingNo") %>'></Telerik:RadTextBox>
+                                                                                    <asp:RequiredFieldValidator CssClass="rdf-initial rdf-text" ID="rfvaildtxtbuilding" runat="server" ControlToValidate="txtBuilding" ValidationGroup="BuildSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                                                                                </div>
+                                                                                <div class="col-xs-4">
+                                                                                    <label>Status</label>
+                                                                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlStatuss1" Width="90%" runat="server" MarkFirstMatch="true" SelectedValue='<%#Eval("BuildingStatus") %>'>
+                                                                                        <Items>
+
+                                                                                            <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                                            <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                                        </Items>
+                                                                                    </Telerik:RadComboBox>
+
+                                                                                    <asp:RequiredFieldValidator ID="rfvaildstatuss" runat="server" ControlToValidate="ddlStatuss1" ValidationGroup="BuildSave" CssClass="rfvstatus rdf-initial rdf-text" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="row w3-padding-top">
+                                                                                <div id="divSave">
+                                                                                    <div class="col-lg-3 col-md-3 col-sm-2">
+                                                                                        <asp:Button ValidationGroup="BuildSave" ID="btnsave" runat="server" Width="100%" CssClass="btn btn-primary" Text="Save" CommandName='<%# (Container is GridEditFormInsertItem)? "PerformInsert":"Update" %>' />
+
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-lg-3 col-md-3 col-sm-2">
+                                                                                    <asp:Button ID="btnCancel" runat="server" Width="100%" CssClass="btn btn-white" ForeColor="Black" Text="Cancel" CommandName="Cancel" />
+                                                                                </div>
+                                                                            </div>
+
+                                                                        </FormTemplate>
+                                                                    </EditFormSettings>
+                                                                    <DetailTables>
+                                                                        <Telerik:GridTableView Name="DetailTable2" CommandItemSettings-ShowAddNewRecordButton="true" CommandItemSettings-AddNewRecordText=" Add New Asset" CommandItemDisplay="Top" AutoGenerateColumns="false" DataKeyNames="ID" Width="100%">
+                                                                            <Columns>
+                                                                                <Telerik:GridTemplateColumn Exportable="false" UniqueName="btnedit" HeaderStyle-Width="4%" FilterControlWidth="5%" AllowFiltering="false">
+                                                                                    <ItemTemplate>
+                                                                                        <asp:LinkButton runat="server" ID="btnedit" ToolTip="edit" Text="edit" CommandName="Edit"><i class="glyphicon glyphicon-pencil"></i></asp:LinkButton>
+                                                                                    </ItemTemplate>
+                                                                                </Telerik:GridTemplateColumn>
+                                                                                <Telerik:GridTemplateColumn UniqueName="btndelete" Exportable="true" HeaderStyle-Width="4%" FilterControlWidth="5%" AllowFiltering="false">
+                                                                                    <ItemTemplate>
+                                                                                        <asp:LinkButton ID="btndelete" runat="server" ToolTip="delete" Text="delete" CommandName="Delete"><i class="fa fa-trash"></i></asp:LinkButton>
+                                                                                    </ItemTemplate>
+                                                                                </Telerik:GridTemplateColumn>
+                                                                                <Telerik:GridTemplateColumn HeaderText="# Asset No" DataField="AssetNo" UniqueName="AssetNo" SortExpression="AssetNo" DataType="System.String" AllowFiltering="true" AllowSorting="true" FilterDelay="1500" ShowFilterIcon="false">
+                                                                                    <ItemTemplate>
+                                                                                        <asp:Label ID="lblAssetNo" runat="server" Text='<%# Eval("AssetNo") %>'></asp:Label>
+                                                                                    </ItemTemplate>
+                                                                                </Telerik:GridTemplateColumn>
+                                                                                <Telerik:GridTemplateColumn HeaderText="Asset Description" DataField="AssetDesc" UniqueName="AssetDesc" SortExpression="AssetDesc" DataType="System.String" FilterDelay="1500" AllowFiltering="true" AllowSorting="true" ShowFilterIcon="false">
+                                                                                    <ItemTemplate>
+                                                                                        <asp:Label ID="lblAssetDesc" runat="server" Text='<%# Eval("AssetDesc") %>'></asp:Label>
+                                                                                    </ItemTemplate>
+                                                                                </Telerik:GridTemplateColumn>
+                                                                                <Telerik:GridTemplateColumn UniqueName="AssetStatus" HeaderStyle-Width="50%" FilterDelay="1500" DataField="AssetStatus" DataType="System.String" AllowFiltering="true" AllowSorting="false" ShowFilterIcon="false" SortExpression="AssetStatus" FilterControlWidth="100%">
+                                                                                    <ItemTemplate>
+                                                                                        <asp:Label ID="lblAssetStatus" runat="server" Width="30%" Text='<%# Eval("AssetStatus") %>'></asp:Label>
+                                                                                    </ItemTemplate>
+                                                                                    <FilterTemplate>
+                                                                                        <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlstatus2" runat="server" MarkFirstMatch="true" Width="50%" AppendDataBoundItems="true" SelectedValue='<%# ((GridItem)Container).OwnerTableView.GetColumn("AssetStatus").CurrentFilterValue %>' OnClientSelectedIndexChanged="onchenged3">
+                                                                                            <Items>
+                                                                                                <Telerik:RadComboBoxItem Text="All" />
+                                                                                                <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                                                <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                                            </Items>
+                                                                                        </Telerik:RadComboBox>
+                                                                                        <Telerik:RadScriptBlock ID="scipt" runat="server">
+                                                                                            <script type="text/javascript">
+                                                                                                    function onchenged3(sender, args) {
+                                                                                                        var status = $find("<%#((GridItem)Container).OwnerTableView.ClientID%>")
+                                                                                                        status.filter("AssetStatus", args.get_item().get_value(), "EqualTo");
+                                                                                                    }
+                                                                                            </script>
+                                                                                        </Telerik:RadScriptBlock>
+                                                                                    </FilterTemplate>
+                                                                                </Telerik:GridTemplateColumn>
+                                                                            </Columns>
+                                                                            <EditFormSettings EditFormType="Template">
+                                                                                <FormTemplate>
+                                                                                    <div class="row w3-padding-top">
+                                                                                        <div class="col-lg-3">
+                                                                                            <label># Asset No<span style="color: red">&nbsp*</span></label>
+                                                                                            <Telerik:RadTextBox ID="txtAssetNo" runat="server" Width="100%" Text='<%# Eval("AssetNo") %>'></Telerik:RadTextBox>
+                                                                                            <asp:RequiredFieldValidator CssClass="rdf-initial rdf-text" ID="rfvaildtxtbuilding" runat="server" ControlToValidate="txtAssetNo" ValidationGroup="AssetSave" ErrorMessage="* Required" Style="margin-top: -4px"></asp:RequiredFieldValidator>
+                                                                                        </div>
+                                                                                        <div class="col-lg-4">
+                                                                                            <label>Asset Description</label>
+                                                                                            <Telerik:RadTextBox ID="txtAssetDesc" runat="server" Width="100%" Text='<%# Eval("AssetDesc") %>'></Telerik:RadTextBox>
+                                                                                            <%--<asp:RequiredFieldValidator ID="rfvtxtcompanyname" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="txtAssetDesc" ErrorMessage="* Required" ValidationGroup="Save" ForeColor="Red" Style="margin-top: -4px"></asp:RequiredFieldValidator>--%>
+                                                                                        </div>
+                                                                                        <div class="col-lg-2">
+                                                                                            <label>Status</label>
+                                                                                            <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlstatuss2" runat="server" Width="100%" MarkFirstMatch="true" SelectedValue='<%# Eval("AssetStatus") %>'>
+                                                                                                <Items>
+                                                                                                    <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                                                                                    <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                                                                                </Items>
+                                                                                            </Telerik:RadComboBox>
+
+                                                                                        </div>
+
+                                                                                    </div>
+                                                                                    <div class="row w3-padding-top">
+                                                                                        <div class="col-lg-2 col-md-3 col-sm-2">
+                                                                                            <asp:Button ID="btnsave" runat="server" Width="100%" CssClass="btn btn-primary" Text="Save" ValidationGroup="AssetSave" CommandName='<%# (Container is GridEditFormInsertItem)?"PerformInsert":"Update" %>' />
+                                                                                        </div>
+                                                                                        <div class="col-lg-3 col-md-3 col-sm-2">
+                                                                                            <asp:Button ID="btnCancel" runat="server" CssClass="btn btn-white" ForeColor="Black"
+                                                                                                        Text="Cancel" CommandName="Cancel" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </FormTemplate>
+                                                                            </EditFormSettings>
+                                                                        </Telerik:GridTableView>
+                                                                    </DetailTables>
+                                                            </Telerik:GridTableView>
+
+                                                        </DetailTables>
+                                                        </Telerik:GridTableView>
+                                                        </DetailTables>
+                                                    </mastertableview>
+                                                </Telerik:RadGrid>*@
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade table-bordered w3-padding w3-white" id="tabnotes" style="border-top: initial;">
+                    <div class="row w3-margin-top">
+                        <div class="col-lg-12 col-sm-12 col-md-12">
+                            <div class="x_panel w3-padding-0 w3-card-4">
+                                <div class="x_title w3-light-grey w3-small" style="height: 34px; margin-bottom: 0px;">
+                                    <h4 style="margin-top: 6px; font-size: 15px" id="H2"><i class="fa fa-list"></i>&nbsp;Notes/Comments<span style="margin-left: 5px;" id="Span2"></span></h4>
+
+                                    <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                        <li>
+                                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content">
+                                    <div class="row" style="margin-top: 10px!important;">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin-bottom: -6px !important;">
+                                            <textarea id="txtnotes_comments" style="Width:100%" TextMode="MultiLine" Rows="20"></textarea>
+                                            @*<asp:TextBox ID="txtnotes_comments" runat="server" Width="100%" TextMode="MultiLine" Rows="20"></asp:TextBox>*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade table-bordered w3-padding w3-white" id="tabActivity" style="border-top: initial;">
+                    Activity
+                </div>
+                <div class="tab-pane fade table-bordered w3-padding w3-white" id="tabInvoice" style="border-top: initial;">
+                    Invoice
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="divdelete" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h3"><i class="fa fa-exclamation-circle w3-text-yellow"></i>Delete Record</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="c1">Are you sure you want to Delete the Record?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" id="btndeleteyes"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" id="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divImage" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label1">Are you sure you want to Delete the Image?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteImageYes" OnClick="btndeleteImageYes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeleteImageYes" runat="server" OnClick="btndeleteImageYes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteImageNo" OnClick="btndeleteImageNo_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndeleteImageNo" runat="server" OnClick="btndeleteImageNo_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="divActive" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 165px; width: 468px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h4"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label2">On changing from InActive to Active ( All users of the company will be made Active and no one will be able to log in. Are you sure you want to make this Company Active?)</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnActiveyes" OnClick="btnStatusyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnActiveyes" runat="server" OnClick="btnStatusyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnActiveNo" OnClick="btnStatusNo_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnActiveNo" runat="server" OnClick="btnStatusNo_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divInActive" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 165px; width: 468px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h5"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label3">On changing from Active to InActive ( All users of the company will be made InActive and no one will be able to log in. Are you sure you want to make this Company InActive?)</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnInactiveyes" OnClick="btnStatusyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnInactiveyes" runat="server" OnClick="btnStatusyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnInactiveno" OnClick="btnStatusNo_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnInactiveno" runat="server" OnClick="btnStatusNo_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="Adddocs" class="w3-modal">
+        <div class="w3-modal-content w3-round-medium w3-animate-input" style="margin-top: 4%; width: 303px; color: black; height: 280px;">
+            <header class="w3-container nln-gray-bg">
+                <div class="row">
+                    <div class="col-lg-9 col-sm-9 col-md-9 col-xs-9">
+                        <h5 class="w3-text-white">Company Info</h5>
+                    </div>
+
+                    <div class="col-lg-3 col-sm-3 col-md-3 col-xs-3">
+                        <button type="button" onclick="hide()" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 40px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+            </header>
+            @*<asp:Button runat="server" ID="btnc" OnClick="btnc_Click" Style="display: none;" />*@
+            <button id="btnc" OnClick="btnc_Click()" Style="display: none;"></button>
+            <div class="w3-container">
+
+                <div class="row w3-padding-top">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <label id="lblcountryname">Company Name<span style="color: red">&nbsp*</span></label>
+                            <input type="text" id="txtCompanyName" Class="form-control" required />
+                            @* <asp:TextBox ID="txtCompanyName" runat="server" CssClass="form-control"></asp:TextBox>
+                                <asp:RequiredFieldValidator ID="RequiredFieldValidator1" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="txtCompanyName" ValidationGroup="PopSave" ErrorMessage="* Required" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                        </div>
+
+                    </div>
+
+
+
+
+                    <div class="row">
+                        @*<%--<div class="col-lg-2">
+                                <label>Offline</label>
+                                <asp:CheckBox ID="chkOffline" runat="server" Checked="false" />
+                            </div>--%>*@
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+
+                            <label id="lblChecklist">Country<span style="color: red">&nbsp*</span></label>
+                            <select id="ddlpopCountry" style="Width:100%" class="form-control"></select>
+                            @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlpopCountry" DataSourceID="dsddlPopCountry" EmptyMessage="Select---" DataValueField="Country" DataTextField="Country" runat="server" Width="100%" AutoPostBack="true" MarkFirstMatch="true"></Telerik:RadComboBox>
+                                <asp:RequiredFieldValidator ID="rdfCheckcounty" runat="server" ValidationGroup="PopSave" ControlToValidate="ddlpopCountry" ErrorMessage="* Required" CssClass="rdf-initial rdf-text"></asp:RequiredFieldValidator>*@
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                            <label></label>
+                            <button style="Width:100%" id="savepopAddnewcompany" OnClick="savepopAddnewcompany_Click()" Class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                            @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ValidationGroup="PopSave" ID="savepopAddnewcompany" OnClick="savepopAddnewcompany_Click" CssClass=" w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</asp:LinkButton>*@
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                <br />
+            </div>
+        </div>
+    </div>
+
+    @*<%--Add New Alert Box For Lat And Long When values is fill--%>*@
+    <div id="DivAlertBox" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 144px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h7"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label4">Are you sure you want to Change The Latitude And Longitude Values ?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnlatlongAlertYes" OnClientClick="AlertButtonYesClickGetlatlaongBysite(); return false;" runat="server" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnlatlongAlertYes" onclick="AlertButtonYesClickGetlatlaongBysite();"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnlatlongAlertNo" onclick="btnlatlongAlertNo(); return false;"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnlatlongAlertNo" OnClientClick="btnlatlongAlertNo(); return false;" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*Site Save and Edit Popup Start*@
+
+<div class="modal fade" id="SitePopup" role="dialog" aria-hidden="true">
+    @*<div class="modal-dialog clsSitePopupDialog"role="document">*@
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+            <button id="btnback" type="button" class="close" onclick="btnCancel(0)" data-dismiss="modal">&times;</button>
+            <button id="btngoback" type="button" class="close" onclick="btnCancel(1)" data-dismiss="modal" style="display:none">&times;</button>
+            <h4 class="modal-title" id="addTitle">Add Site</h4>
+            @*<h4 class="modal-title" id="editTitle">Machine - <span id="SpnHdrTool"></span></h4>*@
+        </div>
+        <div class="modal-body" style="height:400px">
+            <div class="col-xs-12  col-lg-12 col-md-12 col-sm-12">
+                <div class="row ">
+                    <div class="col-lg-3 col-md-3 col-xs-12 col-sm-4">
+                        <label class="lblName">Owner Name</label>
+                        @*<Telerik:RadTextBox ID="txtOwnerName" runat="server" Width="100%" Text='<%#Eval("OwnerName") %>'></Telerik:RadTextBox>*@
+                        <input type="text" id="txtOwnerName" class="form-control" style="Width:100%" />
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-xs-12 col-sm-4 ">
+                        <label class="lblName">Status</label>
+                        <select id="ddlStatuss" class="form-control">
+                            <option value="Active">Active</option>
+                            <option value="InActive">InActive</option>
+                        </select>
+                        @*<Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlStatuss" Width="100%" runat="server" MarkFirstMatch="true" SelectedValue='<%#Eval("SiteLocationStatus") %>'>
+                                <Items>
+                                    <%--<Telerik:RadComboBoxItem Text="All" />--%>
+                                    <Telerik:RadComboBoxItem Text="Active" Value="Active" />
+                                    <Telerik:RadComboBoxItem Text="InActive" Value="InActive" />
+                                </Items>
+                            </Telerik:RadComboBox>
+                            <asp:RequiredFieldValidator ID="rfvddlStatuss" runat="server" CssClass="valid rdf-initial rdf-text" ControlToValidate="ddlStatuss" ValidationGroup="EditSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-xs-12 col-sm-4">
+                        <label class="lblName">Site/Project Name<span style="color: red">&nbsp*</span></label>
+                        <input type="text" id="txtsitelocation" class="form-control" style="width:100%" required />
+                        @*<Telerik:RadTextBox ID="txtsitelocation" runat="server" Width="100%" Text='<%#Eval("SiteLocation") %>'></Telerik:RadTextBox>
+                                <asp:RequiredFieldValidator ID="rfvtxtsitelocation" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="EditSave" ControlToValidate="txtsitelocation" ErrorMessage="* Required"></asp:RequiredFieldValidator>
+                            </div>*@
+
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-xs-12 col-sm-12">
+                            <label class="lblName">Address<span style="color: red">&nbsp*</span></label>
+                            <input type="text" id="txtaddress" style="width:100%" class="form-control Address" required />
+                            @*<Telerik:RadTextBox ID="txtaddress" CssClass="Address" runat="server" Width="100%" Text='<%#Eval("Address") %>'></Telerik:RadTextBox>
+                                <asp:RequiredFieldValidator ID="rfvtxtaddress" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="EditSave" ControlToValidate="txtaddress" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-xs-12 col-sm-4">
+                            <label class="lblName">City<span style="color: red">&nbsp*</span></label>
+                            <input type="text" id="txtSitecity" style="width:100%" class="form-control City" required />
+                            @*<Telerik:RadTextBox ID="txtcity" runat="server" CssClass="City" Width="100%" Text='<%#Eval("City") %>'></Telerik:RadTextBox>
+                                <asp:RequiredFieldValidator ID="rfvtxtcity" runat="server" CssClass="rdf-initial rdf-text" ValidationGroup="EditSave" ControlToValidate="txtcity" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-xs-12 col-sm-4">
+                            <label class="lblName" id="lblstate">State/County</label>
+                            <select class="form-control" id="ddlstates"></select>
+                            @*<Telerik:RadComboBox Skin="Simple" CssClass="State" RenderMode="Lightweight" ID="ddlstates" runat="server" Width="100%" DataSourceID="dsddlstate" DataTextField="state" DataValueField="State" MarkFirstMatch="true" AppendDataBoundItems="true" SelectedValue='<%#Eval("State")%>' EmptyMessage="All" Enabled="true" Height="250px">
+                                    <Items>
+                                  <Telerik:RadComboBoxItem Text="" />
+                                 </Items>
+                                </Telerik:RadComboBox>
+                            *@
+
+                        </div>
+                        <div class="col-lg-2 col-md-1 col-xs-12 col-sm-4">
+                            <label class="lblName">Postcode</label>
+                            <input type="text" id="txtSitezip" Class="PostCode form-control" Mask="####" MaxLength="4" style="width:100%;display:none;" />
+                            <input type="text" id="txtukSitepost" Class="PostCode form-control" style="width:100%;display:none;" />
+
+                            @*<Telerik:RadMaskedTextBox ID="txtzip" CssClass="PostCode" runat="server" Mask="####" Visible="false" MaxLength="4" Width="100%" Text='<%#Eval("Zip") %>'></Telerik:RadMaskedTextBox>
+                                <Telerik:RadTextBox ID="txtukpost" CssClass="PostCode" runat="server" Visible="false" Width="100%" Text='<%#Eval("Zip") %>'></Telerik:RadTextBox>*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-6 col-xs-12 col-sm-6">
+                            <label class="lblName">Hand Over & Inspection Distribution List</label>
+                            <input type="text" id="txtdistriList" class="form-control" style="Width:90%" />
+                            @*<Telerik:RadTextBox ID="txtdistriList" runat="server" Width="100%" Text='<%#Eval("DistributionList") %>'></Telerik:RadTextBox>*@
+                        </div>
+                        <div class="col-lg-2 col-md-7 col-sm-4 col-xs-6" style="margin-top: 16px;">
+                            <button type="button" id="gpssitebutton" onclick="GetlatlaongBysite();" style="margin-left: -11px;width: 110%;font-size: 13px;color:black">Set GPS by Address</button>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-xs-12 col-sm-3">
+                            <label class="lblName">Latitude<span style="color: red">&nbsp*</span></label>
+                            <input type="number" id="txtlat" class="form-control Lattitude" style="Width:100%" required />
+                            @*<Telerik:RadNumericTextBox ID="txtlat" runat="server" Width="100%" Text='<%#Eval("SiteLat") %>' NumberFormat-DecimalDigits="11" CssClass="form-control Lattitude"></Telerik:RadNumericTextBox>
+            <asp:RequiredFieldValidator ID="rdfLat" runat="server" CssClass="valid rdf-initial rdf-text" ControlToValidate="txtlat" ValidationGroup="EditSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-xs-12 col-sm-3">
+                            <label class="lblName">Longitude<span style="color: red">&nbsp*</span></label>
+                            <input type="number" id="txtlong" class="form-control Longitude" style="Width:100%" required />
+                            @*<%--<Telerik:RadTextBox ID="txtlong" runat="server" Width="100%" Text='<%#Eval("SiteLong") %>'></Telerik:RadTextBox>--%>
+            <Telerik:RadNumericTextBox ID="txtlong" runat="server" Width="100%" Text='<%#Eval("SiteLong") %>' NumberFormat-DecimalDigits="11" CssClass="form-control Longitude">
+            </Telerik:RadNumericTextBox>
+            <asp:RequiredFieldValidator ID="rdfLong" runat="server" CssClass="valid rdf-initial rdf-text" ControlToValidate="txtlong" ValidationGroup="EditSave" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-xs-6 col-sm-3">
+                            <label class="lblName">Man Hours Available</label>
+                            <input type="text" id="txtManHrsAvai" style="Width:100%" Class="form-control txtManHoursAvailable " />
+                            @*<Telerik:RadNumericTextBox ID="txtManHrsAvai" runat="server" Enabled="false" Width="100%" Text='<%#Eval("ManHoursAvailable") %>' CssClass="form-control txtManHoursAvailable ">
+            </Telerik:RadNumericTextBox>*@
+                        </div>
+
+                        @*<%-- Changes On 10 July 2019--%>*@
+                        <div id="divMaintainInventory" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 divMaintainInventory" style="margin-top: 8px; display: inline-flex;display:none !important; padding-left: 10px">
+                            @*<asp:CheckBox runat="server" ID="checkboxMaintainInventory" Checked='<%#Eval("MaintainInventory").ToString()=="False" ?false:true %>' />*@
+                            <input type="checkbox" id="checkboxMaintainInventory" />
+                            <label class="lblName" style="margin-left: 10px;">Maintain Inventory At Site</label>
+                        </div>
+                        <div id="divMaintainInventoryAtJob" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 divMaintainInventoryAtJob" style="margin-top: 8px; display: inline-flex; padding-left: 10px">
+
+                            @*<%--  Changes on 12 Sep 2019  for Inpex Only--%>*@
+                            @*<asp:CheckBox runat="server" ID="checkboxMaintainInventoryAtJob" Checked='<%#Eval("MaintainInventoryAtJob").ToString()=="False" ?false:true %>' />*@
+                            <input type="checkbox" id="checkboxMaintainInventoryAtJob" />
+                            <label class="lblName" style="margin-left: 10px;">Maintain Inventory At Job</label>
+                        </div>
+                        <div id="divCycloneManagement" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 divCycloneManagement" style="margin-top: 8px; display: inline-flex; padding-left: 10px">
+
+                            @*<%--  Changes on 12 Sep 2019  for Inpex Only--%>*@
+                            @*<asp:CheckBox runat="server" ID="checkboxCycloneManagement" Checked='<%#Eval("CycloneManagement").ToString()=="False" ?false:true %>' />*@
+                            <input type="checkbox" id="checkboxCycloneManagement" />
+                            <label class="lblName" style="margin-left: 10px;">Cyclone Management</label>
+                        </div>
+                        <div id="divManHourMngAtSite" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divManHourMngAtSite" style="margin-top: 8px; display: inline-flex; padding-left: 10px">
+
+                            @*<asp:CheckBox runat="server" ID="chkboxManHoursManagement" Checked='<%#Eval("ManHoursManagement").ToString()=="True" ?true:false %>' />*@
+                            <input type="checkbox" id="chkboxManHoursManagement" />
+                            <label class="lblName" style="margin-left: 10px;">Man Hours Management</label>
+                        </div>
+                        <div id="divGpsSitePin" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divGpsSitePin" style="margin-top:9px; display: inline-flex; padding-left: 10px">
+                            @*<asp:CheckBox runat="server" ID="chkboxEnabledGPSSitePin" Checked='<%#Eval("EnabledGPSSitePin").ToString()=="True" ?true:false %>' />*@
+                            <input type="checkbox" id="chkboxEnabledGPSSitePin" />
+                            <label class="lblName" style="margin-left: 10px;">Enabled GPS Site Pin</label>
+                        </div>
+
+
+                        @*<%--Add Code on 30/march/2020--%>*@
+                        <div id="divCaptureGps" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divCaptureGps" style="margin-top:9px; display: inline-flex; padding-left: 10px">
+                            <input type="checkbox" id="chkboxEnabledCaptureGps" />
+
+                            @*<asp:CheckBox runat="server" ID="chkboxEnabledCaptureGps" Checked='<%#Eval("EnabledCaptureGps").ToString()=="True" ?true:false %>' />*@
+                            <label class="lblName" style="margin-left: 10px;">Enabled GPS Capture</label>
+                        </div>
+                        <div id="divOffSystemInspection" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divOffSystemInspection" style="margin-top:9px; display: inline-flex; padding-left: 10px">
+                            @*<asp:CheckBox runat="server" ID="chkOffSystemInspection" Checked='<%#Eval("OffSystemInspection").ToString()=="True" ?true:false %>' />*@
+                            <input type="checkbox" id="chkOffSystemInspection" />
+                            <label style="margin-left: 10px;">Off System Inspection</label>
+                        </div>
+                        @*<%--    //24-Oct-2019--start--%>*@
+                        @*<div class="row w3-padding-top">*@
+                        <div id="divgpsandfloorlevel" class="col-lg-3 col-md-3 col-xs-12 col-sm-3 " style="margin-top: 10px; display: inline-flex;display:block; padding-left: 10px; border: 1px solid #009688;">
+                            @*<asp:RadioButton runat="server" Checked='<%#Eval("GPS").ToString()=="False" ?false:true %>' GroupName="GpsTracker" id="btngps" />*@
+                            <input type="radio" name="GpsTracker" id="btngps" />
+                            <label class="lblName" id="lblgps" style="margin-right:30px!important; margin-left:5px!important">GPS</label>
+
+                            @*<asp:RadioButton runat="server" Checked='<%#Eval("FloorLevel").ToString()=="True" ?true:false %>' GroupName="GpsTracker" id="btnfloorlevel" />*@
+                            <input type="radio" name="GpsTracker" id="btnfloorlevel" />
+                            <label class="lblName" id="lblfloorlvl" style="margin-left:5px!important;">Floor Level</label>
+
+                        </div>
+                        @*</div>*@
+
+
+                        <div class="col-lg-3 col-md-3 col-xs-12 col-sm-3">
+                            <label class="lblName">Inventory Mailing List</label>
+                            <input type="text" id="txtMailingList" class="form-control" style="Width:100%" />
+
+                        </div>
+
+                        <div id="divSkipMat" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  clsSkipMat" style="margin-top:9px; display: inline-flex; padding-left: 10px">
+                            <input type="checkbox" id="chkboxSkipMaterial" />
+
+                            @*<asp:CheckBox runat="server" ID="chkboxEnabledCaptureGps" Checked='<%#Eval("EnabledCaptureGps").ToString()=="True" ?true:false %>' />*@
+                            <label class="lblName" style="margin-left: 10px;">Skip Material List For Selected Job</label>
+                        </div>
+                        <div id="divPipelineInv" class="col-lg-3 col-md-3 col-xs-12 col-sm-3  divPipelineInv" style="margin-top:9px; display: inline-flex; padding-left: 10px">
+                            <input type="checkbox" id="chkPipelineInv" />
+                            <label class="lblName" style="margin-left: 10px;">Enable Pipeline Inventory</label>
+                        </div>
+
+                        <div id="BtnDeleteInactiveSite" style="display:none;">
+                            <button type="button" id="btnCheckMissingBlob" class="btn btn-success" style="margin:2px" onclick="CheckMissingBlobFiles();"><i class="fa fa-search"></i> Check Missing Blob</button>
+                            <button class="btn btn-danger"
+                                    onclick="DeleteInactiveSiteDocuments();"
+                                    title="Deletes Register Documents and Inspection Documents.">
+                                <i class="fa fa-trash"></i>
+                                Delete Documents
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-danger"
+                                    onclick="DeleteSiteImages();"
+                                    title="Deletes Site Images, Gallery Images, Inspection Images, Signatures, Delivery Images & Documents.">
+                                <i class="fa fa-trash"></i> Delete Site Images
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <div id="divsavesite" class="col-lg-2 col-md-2 col-sm-3 col-xs-4 ">
+                @*<asp:Button ID="btnsave" runat="server" Width="100%" style="margin-left: -4px;" CssClass="btn btn-primary" ValidationGroup="EditSave" Text="Save" CommandName='<%#(Container is GridEditFormInsertItem)?"PerformInsert":"Update" %>' />*@
+                <button id="btnsave" style="Width:100%" Class="btn btn-primary" onclick="btnCheckChangeUser()"><i class="fa fa-save"> </i>&nbsp;Save</button>
+            </div>
+            <div id="divsaveandbacksite" class="col-lg-2 col-md-2 col-sm-3 col-xs-4" style="display: none;">
+                <button id="btnsaveandbacksite" style="Width:100%;" Class="btn btn-primary " onclick="btnCheckChangeUser(1)"><i class="fa fa-save"> </i>&nbsp;Save & Go Back</button>
+            </div>
+            <div id="divCancel" class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+                @*<asp:Button ID="btnCancel" runat="server" Width="100%" CssClass="btn btn-white" Text="Cancel" CommandName="Cancel" />*@
+                <button id="btnCancel" style="Width:100%" data-dismiss="modal" class="btn btn-white" onclick="btnCancel(0)"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel</button>
+            </div>
+            <div id="divCancelandgoback" class="col-lg-2 col-md-2 col-sm-3 col-xs-4" style="display:none;">
+                <button id="btnCancelandgoback" style="Width:100%" data-dismiss="modal" class="btn btn-white" onclick="btnCancel(1)"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel & Go Back</button>
+            </div>
+        </div>
+    </div>
+    @*</div>*@
+</div>
+
+@*Site Save and Edit Popup End*@
+
+@*Location Save And Edit Popup Start*@
+
+<div id="divLocationSavePopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 200px; width: 350px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h8"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Location<a id="close" class="close" style="float: right; color: white" onclick="btnLocationclose(0);">X</a></h4>
+            <h4 class="w3-text-white" id="h8andgoback" style="display:none;"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Location<a id="close" class="close" style="float: right; color: white" onclick="btnLocationclose(1);">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                @*<label id="lblLocation" style="font-size: 15px">Location<span style="color: red">&nbsp*</span></label>*@
+                <label>Location<span style="color: red">&nbsp*</span></label>
+                <input type="text" id="txtarea" Class="form-control" required />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                <label id="lblSratus" style="font-size: 15px">Status<span style="color: red">&nbsp*</span></label>
+                <select id="ddlAreaStatus" class="form-control">
+                    <option value="Active">Active</option>
+                    <option value="InActive">InActive</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div id="divSaveLocation" class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnSaveLocation" style="width:100%; height:32px;" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSaveLocation(0)"><i class="fa fa-save"> </i>&nbsp;Save</button>
+            </div>
+            <div id="divSaveandBackLocation" class="col-xs-6 col-lg-6 col-md-6 col-sm-6" style="display:none;">
+                <button style="width:100%; height:32px;" Class="w3-btn w3-small w3-grey btnheight imagesize" OnClick="btnSaveLocation(1)"><i class="fa fa-save"></i>&nbsp;Save & Go Back</button>
+            </div>
+            <div id="divClose" class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnClose" onclick="btnLocationclose(0);" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel</button>
+            </div>
+            <div id="divCloseandgoback" class="col-xs-6 col-lg-6 col-md-6 col-sm-6" style="display:none;">
+                <button id="btnCloseandgoback" onclick="btnLocationclose(1);" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel & Go Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Location Save And Edit Popup End here*@
+
+@*Building Save And Edit Popup Start*@
+
+<div id="divBuildingSavePopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 200px; width: 350px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="btnclose"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Building<a id="close" class="close" style="float: right; color: white" onclick="btnBuildingclose(0);">X</a></h4>
+            <h4 class="w3-text-white" id="btncloseback" style="display:none;"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Building<a id="close" class="close" style="float: right; color: white" onclick="btnBuildingclose(1);">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                @*<label id="lblbuilding" style="font-size: 15px">Building<span style="color: red">&nbsp*</span></label>*@
+                <label>Building / Module No.<span style="color: red">&nbsp*</span></label>
+                <input type="text" id="txtBuilding" Class="form-control" required />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                <label style="font-size: 15px">Status<span style="color: red">&nbsp*</span></label>
+                <select id="ddlBuildingStatus" class="form-control">
+                    <option value="Active">Active</option>
+                    <option value="InActive">InActive</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div id="divSaveBuilding" class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnSaveBuilding" style="width:100%;height:32px;" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSaveBuilding(0)"><i class="fa fa-save"> </i>&nbsp;Save</button>
+            </div>
+            <div id="divSaveandBackBuilding" class="col-xs-6 col-lg-6 col-md-6 col-sm-6" style="display: none;">
+                <button style="width:100%; height:32px;" Class="w3-btn w3-small w3-grey btnheight imagesize" OnClick="btnSaveBuilding(1)"><i class="fa fa-save"></i>&nbsp;Save & Go Back</button>
+            </div>
+            <div id="divBuildingClose" class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnBuildingClose" onclick="btnBuildingclose(0);" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel</button>
+            </div>
+            <div id="divBuildingCloseandback" class="col-xs-6 col-lg-6 col-md-6 col-sm-6" style="display: none;">
+                <button id="btnBuildingCloseandback" onclick="btnBuildingclose(1);" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel & Go Back </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Building Save And Edit Popup End here*@
+
+@*Asset Save And Edit Popup Start*@
+
+<div id="divAssetSavePopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 300px; width: 350px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="btnclose1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Asset<a id="btnAssetclose" class="close" style="float: right; color: white" onclick="btnAssetclose(0);">X</a></h4>
+            <h4 class="w3-text-white" id="btncloseandback" style="display:none;"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Asset<a id="btnAssetclose" class="close" style="float: right; color: white" onclick="btnAssetclose(1);">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                @*<label id="lbldescription" style="font-size: 15px"># Asset No<span style="color: red">&nbsp*</span></label>*@
+                <label># Asset No<span style="color: red">&nbsp*</span></label>
+                <input type="text" id="txtAssetNo" Class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                <label>Asset Description</label>
+                <input type="text" id="txtAssetDesc" Class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                <label style="font-size: 15px">Status<span style="color: red">&nbsp*</span></label>
+                <select id="ddlAssetStatus" class="form-control">
+                    <option value="Active">Active</option>
+                    <option value="InActive">InActive</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div id="divSaveAsset" class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnSaveAsset" style="width:100%;height:32px;" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSaveAsset(0)"><i class="fa fa-save"> </i>&nbsp;Save</button>
+            </div>
+            <div id="divSaveandBackAsset" class="col-xs-6 col-lg-6 col-md-6 col-sm-6" style="display: none;">
+                <button style="width:100%; height:32px;" Class="w3-btn w3-small w3-grey btnheight imagesize" OnClick="btnSaveAsset(1)"><i class="fa fa-save"></i>&nbsp;Save & Go Back</button>
+            </div>
+            <div id="divAssetClose" class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnAssetClose" onclick="btnAssetclose(0);" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel</button>
+            </div>
+            <div id='divAssetCloseandback' class="col-xs-6 col-lg-6 col-md-6 col-sm-6" style="display:none;">
+                <button id="btnAssetCloseandback" onclick="btnAssetclose(1);" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp; Cancel & Go Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ChangeUserconfirm" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label2"></label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnChangeUsernyes" OnClick="btnChangeUsernyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnChangeUsernno" OnClick="btnChangeUsernno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*Asset Save And Edit Popup End here*@

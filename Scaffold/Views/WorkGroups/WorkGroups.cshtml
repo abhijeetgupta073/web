@@ -1,0 +1,903 @@
+﻿
+@{
+    ViewBag.Title = "FloorLevel";
+}
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #dataforgrid_length {
+        margin-top: -16px;
+    }
+    /*Window Size 67 %*/
+    @@media (min-width: 1900px) and (max-width: 2050px) {
+        #btnExport {
+            margin-bottom: -43px;
+        }
+    }
+    /*.dataTables_length {
+    display: none !important;
+    }*/
+</style>
+
+<script>
+    $(function () {
+        var from = getParameterByName('from');
+        if (from != null) // check Come From Job From
+        {
+            //btnbacktoFloorGallery.Visible = true;
+            $('#btnbacktoFloorGallery').css('display', 'block');
+        }
+        var registerid = getParameterByName('RID');
+
+        if (registerid != null && registerid != "" && registerid != "0") {
+            $('#btnBack').show();
+        } else {
+            $('#btnBack').hide();
+        }
+        var sitelocid = getParameterByName('SiteLocId');
+        ddlSiteDropdown(sitelocid);
+        GetWorkGroup();
+    });
+    $(document).on("click", ".Export", function (e) {
+        e.preventDefault();
+
+        var siteLocId = $("#ddlSitesLoc").val();
+        var id = getParameterByName('id');
+
+        if (!siteLocId) {
+            alert("Please select site location first");
+            return;
+        }
+
+        window.location.href =
+            "/WorkGroups/ExportWorkGroupAndSubGroupCSV?siteLocId=" + siteLocId + "&id=" + id;
+    });
+    function ddlSitesLocation() {
+        GetWorkGroup();
+    }
+
+    function ddlSiteDropdown(sitelocid) {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/WorkGroups/ddlSiteDropdown',
+            type: 'POST',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                data = response;
+                var optionAppend = "<option value='0'>Select Site</option>";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.SiteLocID + ">" + obj.SiteLocation + "</option>";
+                });
+                $('#ddlSitesLoc').empty().append(optionAppend);
+                if (sitelocid && sitelocid !== "0") {
+                    $('#ddlSitesLoc').val(sitelocid);
+                }
+            }
+        });
+    }
+
+    let Status = '';
+
+    function GetWorkGroup() {
+        var str = "";
+        str += '<table id="dataforgrid" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+        str += "<th style='text-align:center;width:5%;'></th>";
+        str += "<th style=''>#</th>";
+        str += "<th style='text-align:center;display:none'>WorkGrouplId</th>";
+        str += "<th style='text-align:center;display:none'>SiteLocID</th>";
+        str += "<th>Work Groups</th>";
+        str += "<th>Status</th>";
+        str += "</tr></thead><tbody>";
+        var id = getParameterByName('id');
+        let siteId = $('#ddlSitesLoc').val();
+        siteId = siteId == null ? '' : siteId;
+
+        $.ajax({
+            url: '/WorkGroups/GetWorkGroupData',
+            type: 'POST',
+            data: JSON.stringify({ id: id, SiteID: siteId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                var getdata = response;
+
+                str += "<tr id='row_9999' style='display:none'>";
+                str += "<td style='width:5%;text-align:center'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                str += "<td></td><td></td><td></td><td></td><td></td>";
+                str += "</tr>";
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var WorkGroupID = getdata[i].WorkGroupID == null ? "" : getdata[i].WorkGroupID;
+                        var SiteLocID = getdata[i].SiteLocID == null ? "" : getdata[i].SiteLocID;
+                        var WorkGroup = getdata[i].WorkGroup == null ? "" : getdata[i].WorkGroup;
+                        var Status = getdata[i].Status == null ? "" : getdata[i].Status;
+                        var statusText = Status == 1 ? "Active" : "InActive";
+
+                        str += "<tr>";
+                        str += '<td class="tdbtnExpend" style="width:5%;text-align:center">';
+                        str += '<a class="expand fa fa-angle-right" style="font-size:19px;"></a>';
+                        str += '</td>';
+                        str += "<td>";
+                        str += "<a class='fa fa-pencil wg-edit'></a>&nbsp;&nbsp;";
+                        str += "<a class='fa fa-trash wg-delete'></a>";
+                        str += "</td>";
+
+                        str += "<td style='text-align:center;display:none' class='workgroup-id'>" + WorkGroupID + "</td>";
+                        str += "<td style='text-align:center;display:none'>" + SiteLocID + "</td>";
+                        str += "<td>" + WorkGroup + "</td>";
+                        str += "<td>" + statusText + "</td>";
+
+                        str += "</tr>";
+                    }
+
+                    $("#LoadingPanel1").css("display", "none");
+                }
+
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+
+                var table = $('#dataforgrid').DataTable({
+                    bSort: false,
+                    processing: true,
+                    searching: true,
+                    info: false,
+                    pageLength: 50,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    fixedHeader: true,
+                    fixedColumns: {
+                        leftColumns: 2
+                    },
+                    dom: 'lBfrtip',
+                    buttons: [{
+                        extend: 'csvHtml5',
+                        title: 'Work Group',
+                        exportOptions: {
+                            columns: [4, 5]
+                        }
+                    }],
+                    initComplete: function () {
+                        $("#dataforgrid_length").children().html(
+                            '<button id="btnaddFloorLevel" type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:-43px;">&nbsp;Add New Work Groups</button>'
+
+                        );
+
+                        $("#btnaddFloorLevel").click(function () {
+                            if (ValidateInactiveSite()) return false;
+                            if ($('#ddlSitesLoc').val() != 0) {
+                                var trow = $(this).parent().parent().siblings()[2].childNodes[0];
+                                var row = table.row(trow);
+                                row.child(Editing(0)).show();
+                            } else {
+                                CustomAlert({ Result: "Failed", Message: "Please Select Site ." });
+                            }
+                        });
+
+                        //$(".Export").click(function () {
+                        //    var siteLocId = $("#ddlSitesLoc").val();
+                        //    var id = getParameterByName('id');
+                        //    window.location.href =
+                        //        "/WorkGroups/ExportWorkGroupAndSubGroupCSV?siteLocId=" + siteLocId;
+                        //});
+
+                        $('#dataforgrid tbody').on('click', '.wg-delete', function () {
+                            if (ValidateInactiveSite()) return false;
+                            var tr = $(this).closest('tr');
+                            var rowData = table.row(tr).data();
+                            var WorkGroupId = rowData[2];
+
+                            $("#hdnWorkGroupId").val(WorkGroupId);
+                            $("#Deletemodal").css("display", "block");
+                        });
+
+                        $('#dataforgrid tbody').on('click', '.wg-edit', function () {
+                            if (ValidateInactiveSite()) return false;
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+                            var visible = tr.hasClass("Edit");
+
+                            if (visible) {
+                                row.child.hide();
+                                tr.removeClass('Edit');
+                            } else {
+                                row.child(Editing(row.data())).show();
+                                tr.addClass('Edit');
+                                var Status = row.data()[5];
+                                var StatusValue = (Status.toLowerCase() === "active") ? "1" : "0";
+                                tr.next('tr').find('#ddlWorkgroupStatus').val(StatusValue);
+                            }
+                        });
+
+                        $('#dataforgrid tbody').on('click', 'td.tdbtnExpend .expand', function (e) {
+                            e.stopPropagation();
+
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+
+                            if (row.child.isShown()) {
+                                row.child.hide();
+                                tr.removeClass('shown');
+                                $(this).removeClass('fa-angle-down').addClass('fa-angle-right');
+                                return;
+                            }
+
+                            var workGroupId = row.data()[2];
+                            var childDivId = 'subgroup_container_' + workGroupId;
+
+                            row.child('<div id="' + childDivId + '"></div>').show();
+                            tr.addClass('shown');
+                            $(this).removeClass('fa-angle-right').addClass('fa-angle-down');
+
+                            GetSubGroup(workGroupId, '#' + childDivId);
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function Editing(d) {
+        var id = getParameterByName('id');
+        $.ajax({
+            success: function (response) {
+            },
+            complete: function () {
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#savechange").click(function () {
+                    var $prevTr = $(this).closest('tr').prev('tr');
+                    var WorkGroupID = 0;
+
+                    if ($prevTr.length > 0) {
+                        WorkGroupID = parseInt($prevTr.find('.workgroup-id').text().trim()) || 0;
+                    }
+                    var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+                    var secondrow = $(this).parent().parent().prev('div').children().find('input[type=number]');
+                    var sropdownval = $(this).parent().parent().prev('div').children().find('select');
+
+                    var WorkGroups = firstrow[0].value;
+                    var Status = sropdownval[0].value;
+                    let ddlSitesLoc = $('#ddlSitesLoc').val();
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+
+                    if (WorkGroups != "") {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/WorkGroups/SaveWorkGroupData",
+                            data: JSON.stringify({ "WorkGroupID": WorkGroupID, "WorkGroups": WorkGroups, "ddlStatuss": Status, "id": id, "UID": UID, "ddlSitesLoc": ddlSitesLoc }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response;
+                                if (result.Result == 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    GetWorkGroup();
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                            }
+                        })
+                    } else {
+                        var Response = { Result: "Failed", Message: "Please Enter Work group." };
+                        CustomAlert(Response);
+                        $("#LoadingPanel1").css("display", "none");
+                        $("#btnsubmit").click();
+                    }
+                });
+            }
+        });
+
+        if (d == 0) {
+            return '<div class="col-lg-12">' +
+                '<div class="col-lg-4">' +
+                'Work Group <a style="color:red">*</a><input type="text" class="form-control" style="width:100%" required>' +
+                '</div><div class="col-lg-4">' +
+                'Status<select id="ddlStatus" style="width:100%" class="form-control" required><option value="1">Active</option><option value="0">InActive</option></select>' +
+                '</div></div>' +
+                '<div class="col-lg-12">' +
+                '<div class="col-lg-2">' +
+                '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>' +
+                '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>' +
+                '</div><div class="col-lg-2">' +
+                '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>' +
+                '</div><div class="col-lg-6"></div><div class="col-lg-2">' +
+                '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />' +
+                '</div></div>';
+        }
+        else {
+            var Status = d[5];
+            return '<div class="col-lg-12">' +
+                '<div class="col-lg-4">' +
+                'Work Group <a style="color:red">*</a><input type="text" class="form-control" value="' + d[4] + '" style="width:100%" required>' +
+                '</div><div class="col-lg-4">' +
+                'Status<select id="ddlWorkgroupStatus" style="width:100%" class="form-control" required>' +
+                '<option value="1">Active</option><option value="0">InActive</option></select>' +
+                '</div></div>' +
+                '<div class="col-lg-12">' +
+                '<div class="col-lg-2">' +
+                '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>' +
+                '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>' +
+                '</div><div class="col-lg-2">' +
+                '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>' +
+                '</div><div class="col-lg-6"></div><div class="col-lg-2">' +
+                '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />' +
+                '</div></div>';
+        }
+    }
+
+    var currentWorkGroupId;
+    var currentContainerSelector;
+
+    function GetSubGroup(WorkGroupID, containerSelector) {
+        currentWorkGroupId = WorkGroupID;
+        currentContainerSelector = containerSelector;
+
+        var str = "";
+        var tableId = 'subGroupGrid_' + WorkGroupID;
+
+        str += '<table id="' + tableId + '" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+        str += "<th style='text-align:center;width:5%;'></th>";
+        str += "<th>#</th>";
+        str += "<th style='text-align:center;display:none'>SubGroupId</th>";
+        str += "<th style='text-align:center;display:none'>WorkGroupId</th>";
+        str += "<th style='text-align:center;display:none'>SiteLocID</th>";
+        str += "<th>Sub Groups</th>";
+        str += "<th>Status</th>";
+        str += "</tr></thead><tbody>";
+
+        var id = getParameterByName('id');
+        let siteId = $('#ddlSitesLoc').val();
+        siteId = siteId == null ? '' : siteId;
+
+        $.ajax({
+            url: '/WorkGroups/GetSubGroupData',
+            type: 'POST',
+            data: JSON.stringify({ id: id, SiteID: siteId, WorkGroupID: WorkGroupID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                var getdata = response;
+                str += "<tr id='row_9999' style='display:none'>";
+                str += "<td style='width:20%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                str += "<td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var SubGroupId = getdata[i].SubGroupId == null ? "" : getdata[i].SubGroupId;
+                        var WGID = getdata[i].WorkGroupID == null ? "" : getdata[i].WorkGroupID;
+                        var SiteLocID = getdata[i].SiteLocID == null ? "" : getdata[i].SiteLocID;
+                        var SubGroupName = getdata[i].SubGroupName == null ? "" : getdata[i].SubGroupName;
+                        var Status = getdata[i].Status == null ? "" : getdata[i].Status;
+                        var statusText = Status == 1 ? "Active" : "InActive";
+
+                        str += "<tr>";
+                        str += '<td class="tdbtnExpendSub" style="width:5%;text-align:center">';
+                        str += '<a id="SubGroupId_' + SubGroupId + '" class="" style="font-size:19px;"></a>';
+                        str += '</td>';
+                        str += "<td>";
+                        str += "<a class='fa fa-pencil sg-edit'></a>&nbsp;&nbsp;";
+                        str += "<a class='fa fa-trash sg-delete' data-subgroupid='" + SubGroupId + "' data-sitelocid='" + SiteLocID + "'></a>";
+                        str += "</td>";
+                        str += "<td style='display:none'>" + SubGroupId + "</td>";
+                        str += "<td style='display:none'>" + WGID + "</td>";
+                        str += "<td style='display:none'>" + SiteLocID + "</td>";
+                        str += "<td>" + SubGroupName + "</td>";
+                        str += "<td>" + statusText + "</td>";
+                        str += "</tr>";
+                    }
+                    $("#LoadingPanel1").css("display", "none");
+                }
+
+                str += "</tbody></table>";
+                $(containerSelector).html(str);
+
+                var table = $('#' + tableId).DataTable({
+                    bSort: false, processing: true, searching: false, info: false, paging: false,
+                    pageLength: 50, autoWidth: true, dom: 't', buttons: [],
+                    initComplete: function () {
+                        var htmlBtn = '<button id="btnAddSubGroup_' + WorkGroupID + '" type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:5px;">&nbsp;Add Sub Group</button>';
+                        $(containerSelector).prepend(htmlBtn);
+
+                        $('#btnAddSubGroup_' + WorkGroupID).click(function () {
+                            if (ValidateInactiveSite()) return false;
+                            if ($('#ddlSitesLoc').val() != 0) {
+                                var dummyRow = table.row('#row_9999');
+                                dummyRow.child(EditingSubGroup(0, WorkGroupID, containerSelector)).show();
+                            } else {
+                                CustomAlert({ Result: "Failed", Message: "Please Select Site." });
+                            }
+                        });
+                    }
+                });
+                $('#' + tableId + ' tbody').on('click', '.sg-edit', function () {
+                    if (ValidateInactiveSite()) return false;
+                    var tr = $(this).closest('tr');
+                    var row = table.row(tr);
+                    var visible = tr.hasClass("Edit");
+                    if (visible) {
+                        row.child.hide();
+                        tr.removeClass('Edit');
+                    } else {
+                        row.child(EditingSubGroup(row.data(), WorkGroupID, containerSelector)).show();
+                        tr.addClass('Edit');
+                        var statusText = row.data()[6];
+                        var StatusValue = (statusText.toLowerCase() === "active") ? "1" : "0";
+                        tr.next('tr').find('.ddlSubGroupStatus').val(StatusValue);
+                    }
+                });
+
+                $('#' + tableId + ' tbody').on('click', '.sg-delete', function () {
+                    if (ValidateInactiveSite()) return false;
+                    var subGroupId = $(this).data('subgroupid');
+                    var siteLocId = $(this).data('sitelocid');
+                    var clientId = getParameterByName('id');
+
+                    $("#hdnSubGroupId").val(subGroupId);
+                    $("#hdnSiteLocId").val(siteLocId);
+                    $("#hdnClientId").val(clientId);
+
+                    $("#DeleteSubGroupModal").css("display", "block");
+                });
+
+            }
+        });
+    }
+
+    function DeleteSubGroup() {
+        var SubGroupId = $("#hdnSubGroupId").val();
+        var SitelocId = $("#hdnSiteLocId").val();
+        var ClientId = $("#hdnClientId").val();
+        $.ajax({
+            url: '/WorkGroups/DeleteSubGroup',
+            type: 'POST',
+            data: { SubGroupId: SubGroupId, SitelocId: SitelocId, ClientId: ClientId },
+            dataType: "json",
+            success: function (response) {
+                $("#DeleteSubGroupModal").css("display", "none");
+                if (response.Result === "Success") {
+                    CustomAlert({ Result: "Success", Message: response.Message });
+                    GetSubGroup(currentWorkGroupId, currentContainerSelector);
+                } else {
+                    CustomAlert({ Result: "Failed", Message: response.Message });
+                }
+            },
+            error: function () {
+                CustomAlert({ Result: "Failed", Message: "Error deleting Sub Group." });
+            }
+        });
+    }
+
+
+
+
+
+    function EditingSubGroup(d, WorkGroupID, containerSelector) {
+        var id = getParameterByName('id');
+
+        $.ajax({
+            success: function (response) {
+            },
+            complete: function () {
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#saveSubGroup").click(function () {
+                    var $prevTr = $(this).closest('tr').prev('tr');
+                    var SubGroupID = 0;
+                    var WorkGroupId = WorkGroupID;
+
+                    if ($prevTr.length > 0 && $prevTr.children().length > 1) {
+                        var cellText = $prevTr.children().eq(2).text().trim();
+                        SubGroupID = cellText !== '' ? parseInt(cellText) || 0 : 0;
+                    }
+
+                    var subGroupInput = $(this).parent().parent().prev('div').find('.subGroupName');
+                    var statusSelect = $(this).parent().parent().prev('div').find('.ddlSubGroupStatus');
+                    var hdnSubGroupId = $(this).parent().parent().prev('div').find('.hdnSubGroupId');
+                    var hdnWorkGroupID = $(this).parent().parent().prev('div').find('.hdnWorkGroupID');
+
+                    var SubGroupName = subGroupInput.val();
+                    var Status = statusSelect.val();
+                    SubGroupID = hdnSubGroupId.length > 0 ? parseInt(hdnSubGroupId.val()) || 0 : SubGroupID;
+                    WorkGroupId = hdnWorkGroupID.length > 0 ? parseInt(hdnWorkGroupID.val()) || 0 : WorkGroupID;
+
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+                    let ddlSitesLoc = $('#ddlSitesLoc').val();
+
+                    if (SubGroupName != "") {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/WorkGroups/SaveSubGroupData",
+                            data: JSON.stringify({
+                                "SubGroupID": SubGroupID,
+                                "SubGroupName": SubGroupName,
+                                "Status": Status,
+                                "WorkGroupID": WorkGroupId,
+                                "id": id,
+                                "UID": UID,
+                                "ddlSitesLoc": ddlSitesLoc
+                            }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response;
+                                if (result.Result == 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    GetSubGroup(WorkGroupId, containerSelector);
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                            }
+                        });
+                    } else {
+                        var Response = { Result: "Failed", Message: "Please Enter Sub Group." };
+                        CustomAlert(Response);
+                        $("#LoadingPanel1").css("display", "none");
+                        $("#btnsubmit").click();
+                    }
+                });
+            }
+        });
+
+        if (d == 0) {
+            return '<div class="col-lg-12">' +
+                '<div class="col-lg-4">' +
+                'Sub Group <a style="color:red">*</a><input type="text" class="form-control subGroupName" style="width:100%" required>' +
+                '</div><div class="col-lg-4">' +
+                'Status<select class="ddlSubGroupStatus form-control" style="width:100%" required><option value="1">Active</option><option value="0">InActive</option></select>' +
+                '</div></div>' +
+                '<div class="col-lg-12">' +
+                '<div class="col-lg-2">' +
+                '<input type="button" id="saveSubGroup" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>' +
+                '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>' +
+                '</div><div class="col-lg-2">' +
+                '<input type="button" id="cancelSubGroup" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>' +
+                '</div><div class="col-lg-6"></div><div class="col-lg-2">' +
+                '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />' +
+                '</div></div>' +
+                '<input type="hidden" class="hdnWorkGroupID" value="' + WorkGroupID + '">';
+        } else {
+            var SubGroupId = d[2];
+            var WorkGroupId = d[3];
+            var SubGroupName = d[5];
+            var Status = d[6];
+            var statusOption = Status == "1" ? '<option value="1" selected>Active</option><option value="0">InActive</option>' :
+                '<option value="1">Active</option><option value="0" selected>InActive</option>';
+
+            return '<div class="col-lg-12">' +
+                '<div class="col-lg-4">' +
+                'Sub Group <a style="color:red">*</a><input type="text" class="form-control subGroupName" value="' + SubGroupName + '" style="width:100%" required>' +
+                '</div><div class="col-lg-4">' +
+                'Status<select class="ddlSubGroupStatus form-control" style="width:100%" required>' + statusOption + '</select>' +
+                '</div></div>' +
+                '<div class="col-lg-12">' +
+                '<div class="col-lg-2">' +
+                '<input type="button" id="saveSubGroup" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>' +
+                '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>' +
+                '</div><div class="col-lg-2">' +
+                '<input type="button" id="cancelSubGroup" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>' +
+                '</div><div class="col-lg-6"></div><div class="col-lg-2">' +
+                '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />' +
+                '</div></div>' +
+                '<input type="hidden" class="hdnSubGroupId" value="' + SubGroupId + '">' +
+                '<input type="hidden" class="hdnWorkGroupID" value="' + WorkGroupId + '">';
+        }
+    }
+
+
+    $(document).on('click', '.CancelChangeClass', function () {
+        var $thisRow = $(this).closest('tr');
+        var $prevTr = $thisRow.prev('tr');
+
+        $prevTr.removeClass('Edit');
+        $thisRow.remove();
+    });
+
+
+    //function Editing(d) {
+
+    //    var id = getParameterByName('id');
+    //    $.ajax({
+
+    //        success: function (response) {
+
+    //        },
+    //        complete: function () {
+    //            $(".CancelChangeClass").click(function () {
+    //                $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+    //                $(this).parent().parent().parent().parent().remove();
+    //            });
+
+    //            $("#savechange").click(function () {
+    //                var $prevTr = $(this).closest('tr').prev('tr');
+    //                var WorkGroupID = 0;
+
+    //                if ($prevTr.length > 0 && $prevTr.children().length > 1) {
+    //                    var cellText = $prevTr.children().eq(1).text().trim();
+    //                    WorkGroupID = cellText !== '' ? parseInt(cellText) || 0 : 0;
+    //                }
+    //                var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+    //                var secondrow = $(this).parent().parent().prev('div').children().find('input[type=number]');
+    //                var sropdownval = $(this).parent().parent().prev('div').children().find('select');
+
+    //                var WorkGroups = firstrow[0].value;
+    //                var Status = sropdownval[0].value;
+    //                let ddlSitesLoc = $('#ddlSitesLoc').val();
+    //                var id = getParameterByName('id');
+    //                var UID = getParameterByName('UID');
+
+    //                if (WorkGroups != "") {
+    //                    $("#LoadingPanel1").css("display", "block");
+
+    //                    $.ajax({
+    //                        type: "POST",
+    //                        url: "/WorkGroups/SaveWorkGroupData",
+    //                        data: JSON.stringify({ "WorkGroupID": WorkGroupID, "WorkGroups": WorkGroups, "ddlStatuss": Status, "id": id, "UID": UID, "ddlSitesLoc": ddlSitesLoc }),
+    //                        contentType: "application/json; charset=utf-8",
+    //                        dataType: "json",
+    //                        success: function (response) {
+    //                            var result = response;
+    //                            if (result.Result == 'Success') {
+    //                                $("#LoadingPanel1").css("display", "none");
+    //                                CustomAlert(response);
+    //                                GetWorkGroup();
+    //                            }
+    //                            else {
+    //                                $("#LoadingPanel1").css("display", "none");
+    //                                CustomAlert(response);
+    //                            }
+    //                        }
+    //                    })
+    //                } else {
+    //                    var Response = { Result: "Failed", Message: "Please Enter Work group." };
+    //                    CustomAlert(Response);
+    //                    $("#LoadingPanel1").css("display", "none");
+    //                    $("#btnsubmit").click();
+    //                }
+    //            });
+    //        }
+    //    });
+    //    if (d == 0) {
+    //        return '<div class="col-lg-12">'
+    //            + '<div class="col-lg-4">'
+    //            + 'Work Group <a style="color:red">*</a><input type="text" class="form-control" style="width:100%" required>'
+    //            + '</div><div class="col-lg-4">'
+    //            + 'Status<select id="ddlStatus" style="width:100%" class="form-control" required><option value="1">Active</option><option value="0">InActive</option></select>'
+    //            + '</div></div>'
+    //            + '<div class="col-lg-12">'
+    //            + '<div class="col-lg-2">'
+    //            + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+    //            + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+    //            + '</div><div class="col-lg-2">'
+    //            + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+    //            + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+    //            + '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />'
+    //            + '</div></div>'
+
+    //    }
+    //    else {
+    //        Status = d[5];
+    //        return '<div class="col-lg-12">'
+    //            + '<div class="col-lg-4">'
+    //            + 'Work Group <a style="color:red">*</a><input type="text" class="form-control" value="' + d[3] + '" style="width:100%" required>'
+    //            + '</div><div class="col-lg-4">'
+    //            + 'Status<select id="ddlWorkgroupStatus" style="width:100%" class="form-control" required><option value="1">Active</option><option value="0">InActive</option></select>'
+    //            + '</div></div>'
+    //            + '<div class="col-lg-12">'
+    //            + '<div class="col-lg-2">'
+    //            + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+    //            + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+    //            + '</div><div class="col-lg-2">'
+    //            + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+    //            + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+    //            + '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />'
+    //            + '</div></div>'
+
+    //    }
+
+    //}
+
+
+    function btnyes_Click() {
+
+        var WorkgroupId = $('#hdnWorkGroupId').val();
+        var SitelocId = $('#ddlSitesLoc').val();
+        var ClientId = getParameterByName('id');
+        $.ajax({
+            url: '/WorkGroups/DeleteWorkGroup',
+            type: 'post',
+            data: { WorkgroupId: WorkgroupId, SitelocId: SitelocId, ClientId: ClientId },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response.Result == 'Success') {
+                    CustomAlert(response);
+                    GetWorkGroup();
+                } else {
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+    function goBack() {
+        var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var RegisterId = getParameterByName('RID');
+        if (RegisterId != "") {
+            window.location.href = '/Register/Register?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientID + '&RID=' + RegisterId;
+        }
+    }
+
+    function ValidateInactiveSite() {
+        var siteName = $('#ddlSitesLoc option:selected').text();
+
+        if (siteName && siteName.toLowerCase().includes("(inactive)")) {
+            CustomAlert({
+                Result: "Failed",
+                Message: "This site is InActive. You cannot make any changes."
+            });
+            return true;
+        }
+
+        return false;
+    }
+
+</script>
+
+
+<input type="hidden" id="hdnWorkGroupId" />
+
+<div class="row">
+    <div class="col-lg-4 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba; font-size: 15px;">
+            <b>
+                <i class="fa fa-shopping-cart"></i>&nbsp;Work Groups & Sub Groups
+            </b>
+        </h4>
+    </div>
+    <div class="col-lg-2 col-md-1 col-sm-1 col-xs-12 text-right p-0">
+        @*<button id="btnBack" class="w3-btn w3-small  nln-bg w3-text-white" onclick="goBack();" style="display:none;">
+            <i class="fa fa-arrow-left"></i> Back
+        </button>*@
+
+        <button id="btnBack" Style="height: 24px; padding-top: 3px;display:none" Class="w3-btn w3-small  nln-bg w3-text-white" OnClick="goBack()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2 p-0">
+        <label id="siteddl">Site:</label>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-10 p-0">
+        <select id="ddlSitesLoc" onchange="ddlSitesLocation();" style="width:100%" class="form-control"></select>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-10 p-0" style="padding-left: 40px; ">
+        <button id="btnExport" type="button" class="w3-btn w3-teal Export" style="height:26px;padding-top:3px; margin-bottom:-7px;">
+            <i class="fa fa-file-excel-o"></i>&nbsp;Work Group and Sub Group Export
+        </button>
+    </div>
+    @*<div class="col-lg-2 col-md-3 col-sm-3 col-xs-10 p-0" style="padding-left:5px;">
+        </div>*@
+
+</div>
+
+
+<div class="row">
+    <div class="col-xs-6 col-lg-6 col-md-12 col-sm-12">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<input type="hidden" id="hdnSubGroupId" />
+<input type="hidden" id="hdnSiteLocId" />
+<input type="hidden" id="hdnClientId" />
+
+@*<div id="DeleteSubGroupModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 140px; width: 380px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey" style="padding: 8px 16px;">
+                <span class="w3-button w3-large w3-display-topright" onclick="$('#DeleteSubGroupModal').hide()" style="margin-right: -12px;">&times;</span>
+                <h4 class="w3-text-white" style="margin: 0; padding: 0;"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Sub Group</h4>
+            </header>
+            <div class="w3-container" style="padding: 16px;">
+                <p class="w3-padding-top w3-text-grey" style="margin: 0;">
+                    <label>Are you sure you want to Delete the Sub Group Record?</label>
+                </p>
+            </div>
+            <footer class="w3-container w3-padding" style="text-align: center;">
+                <button id="btnConfirmDeleteSubGroup" class="w3-btn w3-green w3-hover-dark-grey w3-margin-right" style="margin-right: 15px;">
+                    <i class="glyphicon glyphicon-ok-circle"></i> Yes
+                </button>
+                <button id="btnNoSubGroup" class="w3-btn w3-red w3-hover-dark-grey" onclick="$('#DeleteSubGroupModal').hide();">
+                    <i class="glyphicon glyphicon-remove-circle"></i> No
+                </button>
+            </footer>
+        </div>
+    </div>*@
+
+
+
+<div id="DeleteSubGroupModal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnConfirmDeleteSubGroup" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="DeleteSubGroup()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnNoSubGroup" Class="w3-btn nln-bg w3-hover-border-dark-grey" onclick="$('#DeleteSubGroupModal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+

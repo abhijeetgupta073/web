@@ -1,0 +1,1575 @@
+﻿
+@{
+    ViewBag.Title = "ItemUtilizeDashboard";
+}
+
+@*<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>*@
+<script src="/Content/js/highcharts.js"></script>
+<script src="/Content/js/highcharts-3d.js"></script>
+<script src="/Content/js/exporting.js"></script>
+<script src="/Content/js/export-data.js"></script>
+
+
+
+<style>
+    #tblJobList_length {
+        display: none;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    .chosen-container-single .chosen-search {
+        color: black !important;
+    }
+
+
+    .highcharts-credits {
+        display: none;
+    }
+
+    .container .DshbrdBack {
+        background-color: #ffffcc;
+        height: 1023px;
+    }
+
+
+    /*Window Size 67 %*/
+    @@media (min-width: 1900px) and (max-width: 2050px) {
+
+        #txtTotalQuantity {
+            margin-top: 8px;
+            margin-left: 12px;
+            width: 90%;
+        }
+
+        #iblQty {
+            margin-top: 10px;
+        }
+
+        .setWidththWithScroll {
+            width: 137px !important;
+        }
+
+        .setWidththWithoutScroll {
+            width: 165px !important;
+        }
+    }
+
+    @@media (min-width: 1281px)and (max-width: 1499px) {
+
+        #txtTotalQuantity {
+            width: 90%;
+            margin-top: 8px;
+        }
+
+        #iblQty {
+            margin-top: 10px;
+        }
+
+        .setWidththWithScroll {
+            width: 71px !important;
+        }
+
+        .setWidththWithoutScroll {
+            width: 92px !important;
+        }
+    }
+
+    /*
+      ##Device = Laptops, Desktops
+      ##Screen = B/w 1025px to 1280px
+    */
+
+    @@media (min-width: 1024px) and (max-width: 1280px) {
+
+        #txtTotalQuantity {
+            margin-left: -44px;
+            width: 91px;
+            margin-top: 8px;
+        }
+
+        #iblQty {
+            margin-top: 10px;
+        }
+
+        .setWidththWithScroll {
+            width: 144px !important;
+        }
+
+        .setWidththWithoutScroll {
+            width: 68px !important;
+        }
+    }
+
+    /*
+      ##Device = Tablets, Ipads (portrait)
+      ##Screen = B/w 768px to 1024px
+    */
+
+    @@media (min-width: 768px) and (max-width: 1023px) {
+        #txtTotalQuantity {
+            margin-top: 8px;
+            margin-left: -55px;
+            width: 130% !important;
+        }
+
+        #iblQty {
+            margin-top: 10px;
+        }
+
+        .setWidththWithScroll {
+            width: 252px !important;
+        }
+
+        .setWidththWithoutScroll {
+            width: 160px !important;
+        }
+    }
+</style>
+<script>
+
+    function ajaxload() {
+        $('#LoadingPanel1').css('display', 'block');
+    }
+    $(document)
+        .ajaxStart(function () {
+            ajaxload();
+        })
+        .ajaxStop(function () {
+
+            $('#LoadingPanel1').css('display', 'none');
+        });
+    $(document).ready(function () {
+        $("[id$=myButtonControlID]").click(function (e) {
+
+            var uri = 'data:application/vnd.ms-excel;base64,';
+
+            var template =
+                '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+                'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
+                'xmlns="http://www.w3.org/TR/REC-html40">' +
+                '<head>' +
+                '<!--[if gte mso 9]><xml>' +
+                '<x:ExcelWorkbook>' +
+                '<x:ExcelWorksheets>' +
+                '<x:ExcelWorksheet>' +
+                '<x:Name>{worksheet}</x:Name>' +
+                '<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+                '</x:ExcelWorksheet>' +
+                '</x:ExcelWorksheets>' +
+                '</x:ExcelWorkbook>' +
+                '</xml><![endif]-->' +
+
+                '<style>' +
+                'table{border-collapse:collapse;font-size:11px;}' +
+                'th,td{' +
+                'font-size:11px;' +
+                'padding:4px;' +
+                'white-space:normal;' +
+                'word-wrap:break-word;' +
+                'vertical-align:top;' +
+                '}' +
+                'th{font-weight:bold;}' +
+
+                'td:nth-child(3),th:nth-child(3){min-width:300px;}' +
+
+                'td:nth-child(4),td:nth-child(5),td:nth-child(6){text-align:right;}' +
+                '</style>' +
+
+                '</head>' +
+                '<body><table>{table}</table></body>' +
+                '</html>';
+
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)));
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                });
+            };
+
+            var toExcel = "Scaffolds Material " + $("#lblAction").text();
+            toExcel += document.getElementById("tblScaffoldDetails").innerHTML;
+
+            var ctx = {
+                worksheet: 'Scaffolds',
+                table: toExcel
+            };
+
+            var link = document.createElement("a");
+            link.download = "Scaffolds_Material_" + $("#lblAction").text() + ".xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        });
+    });
+    $(document).ready(function () {
+        //ajax();
+        SiteDropdownBind();
+        MaterialTypeDropdownBind();
+        ItemCodeDropdownBind();
+        ItemCodeDescriptionDropdownBind();
+        ddlitemdesc_SelectedIndexChanged();
+
+        var ddlmatval = $('#ddlSite').val();
+
+        Chart1(ddlmatval);
+        Chart2(ddlmatval);
+        // $('#ddlitemcode').chosen({ search_contains: true });
+        $('#ddlitemcode').select2({});
+    });
+
+    //$(window).resize(function () {
+    //    // abc($find('<%= MatDetail.ClientID %>')); // resize the grid on Window resize
+    //    abc($find('MatDetail')); // resize the grid on Window resize
+    // });
+
+    //    function abc() {
+    //        var browserZoomLevel = Math.round(window.devicePixelRatio * 100);
+    //        //alert(browserZoomLevel);
+    //        if (browserZoomLevel == 67) {                        // 67%
+    //            $('#ctl00_ContentPlaceHolder1_MatDetail_GridData').addClass('check67');
+    //        }
+    //        if (browserZoomLevel == 75) {                        // 67%
+    //            $('#ctl00_ContentPlaceHolder1_MatDetail_GridData').addClass('check75');
+    //        }
+    //        if (browserZoomLevel == 80) {                        // 67%
+    //            $('#ctl00_ContentPlaceHolder1_MatDetail_GridData').addClass('check80');
+    //        }
+    //        if (browserZoomLevel == 90) {                        // 67%
+    //            $('#ctl00_ContentPlaceHolder1_MatDetail_GridData').addClass('check90');
+    //        }
+    //        if (browserZoomLevel == 100) {                        // 67%
+    //            $('#ctl00_ContentPlaceHolder1_MatDetail_GridData').addClass('check100');
+    //        }
+
+
+    //    }
+
+
+    function SiteDropdownBind() {
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: '/ItemUtilizeDashboard/SiteDropdownBind',
+            async: false,
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // var ddSite = "<option value='All'>All</option>";
+                var ddSite = "";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                    }
+                });
+
+                $('#ddlSite').empty().append(ddSite);
+                // ddlSite_SelectedIndexChanged();
+            }
+        });
+
+
+    }
+
+    function MaterialTypeDropdownBind() {
+        ajaxload();
+        var SiteID = $('#ddlSite').val();
+        $.ajax({
+            type: "POST",
+            url: '/ItemUtilizeDashboard/ddlSite_SelectedIndexChanged',
+            async: false,
+            data: JSON.stringify({ SiteID: SiteID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+
+                data = response;
+
+                var ddlMattype = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlMattype += '<option value="' + obj.MaterialType + '">' + obj.MaterialType + '</option>';
+                    }
+                });
+
+                $('#ddlMattype').empty().append(ddlMattype);
+
+                // ddlMattype_SelectedIndexChanged();
+
+                var ddlmatval = $('#ddlSite').val();
+                Chart1(ddlmatval);
+                Chart2(ddlmatval);
+            }
+
+        });
+        //ddlMattype_SelectedIndexChanged();
+
+        //var ddlmatval = $('#ddlSite').val();
+        //Chart1(ddlmatval);
+        //Chart2(ddlmatval);
+    }
+
+    function ItemCodeDropdownBind() {
+        ajaxload();
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        $.ajax({
+            type: "POST",
+            url: '/ItemUtilizeDashboard/ddlMattype_SelectedIndexChanged',
+            async: false,
+            data: JSON.stringify({ SiteID: SiteID, ddlMattype: ddlMattype }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+
+                data = response;
+
+                var ddlitemcode = "";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlitemcode += '<option value="' + obj.InventoryId + '">' + obj.ItemCodeItemDesc + '</option>';
+                    }
+                });
+
+                // $('#ddlitemcode').empty().append(ddlitemcode);
+                $('#ddlitemcode').empty().append(ddlitemcode).trigger('chosen:updated');
+                //ddlitemcode_SelectedIndexChanged();
+                // ddlitemdesc_SelectedIndexChanged();
+            }
+        });
+
+        // GetJobListData();
+
+    }
+
+    function ItemCodeDescriptionDropdownBind() {
+        ajaxload();
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        var InventoryID = $('#ddlitemcode').val();
+        var itemCodeDescVal = $('#ddlitemcode option:selected').text();
+        var itemDesc = "";
+        if (itemCodeDescVal != "All") {
+            var arr = itemCodeDescVal.substring(itemCodeDescVal.indexOf('-') + 1)
+            itemDesc = arr;
+        }
+        $.ajax({
+            type: "POST",
+            url: '/ItemUtilizeDashboard/ddlitemcode_SelectedIndexChanged',
+            async: false,
+            data: JSON.stringify({ SiteID: SiteID, ddlMattype: ddlMattype, InventoryID: InventoryID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+
+                data = response;
+
+                var ddlitemdesc = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlitemdesc += '<option value="' + obj.ItemDesc + '" title="' + obj.ItemDesc + '">' + obj.ItemDesc + '</option>';
+                    }
+                });
+
+                $('#ddlitemdesc').empty().append(ddlitemdesc);
+                if (itemDesc != "") {
+                    //$('#ddlitemdesc').val(itemDesc.trim());
+                    $('#ddlitemdesc option:selected').text(itemDesc.trim());
+                }
+
+            }
+        });
+        // ddlitemdesc_SelectedIndexChanged();
+
+    }
+
+    function ddlSite_SelectedIndexChanged() {
+        ajaxload();
+        MaterialTypeDropdownBind();
+        ItemCodeDropdownBind();
+        ItemCodeDescriptionDropdownBind();
+        ddlitemdesc_SelectedIndexChanged();
+
+        var ddlmatval = $('#ddlSite').val();
+        Chart1(ddlmatval);
+        Chart2(ddlmatval);
+    }
+
+    function ddlMattype_SelectedIndexChanged() {
+        ajaxload();
+        ItemCodeDropdownBind();
+        ItemCodeDescriptionDropdownBind();
+        ddlitemdesc_SelectedIndexChanged();
+    }
+
+    function ddlitemcode_SelectedIndexChanged() {
+        ajaxload();
+        ItemCodeDescriptionDropdownBind();
+        ddlitemdesc_SelectedIndexChanged();
+    }
+
+    //function ddlSite_SelectedIndexChanged() {
+    //    ajaxload();
+    //    var  SiteID=$('#ddlSite').val();
+    //    $.ajax({
+    //        type: "POST",
+    //        url: '/ItemUtilizeDashboard/ddlSite_SelectedIndexChanged',
+    //        async: false,
+    //        data: JSON.stringify({ SiteID: SiteID }),
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        success: function (response) {
+
+    //            data = response;
+
+    //            var ddlMattype = "<option value=''>All</option>";
+    //            $.each(response, function (idx, obj) {
+    //                if (obj != null) {
+    //                    ddlMattype += '<option value="' + obj.MaterialType + '">' + obj.MaterialType + '</option>';
+    //                }
+    //            });
+
+    //            $('#ddlMattype').empty().append(ddlMattype);
+
+    //            ddlMattype_SelectedIndexChanged();
+
+    //            var ddlmatval = $('#ddlSite').val();
+    //            Chart1(ddlmatval);
+    //            Chart2(ddlmatval);
+    //        }
+
+    //    });
+    //    //ddlMattype_SelectedIndexChanged();
+
+    //    //var ddlmatval = $('#ddlSite').val();
+    //    //Chart1(ddlmatval);
+    //    //Chart2(ddlmatval);
+    //}
+
+    //function ddlMattype_SelectedIndexChanged() {
+    //    ajaxload();
+    //    var SiteID = $('#ddlSite').val();
+    //    var ddlMattype = $('#ddlMattype').val();
+    //    $.ajax({
+    //        type: "POST",
+    //        url: '/ItemUtilizeDashboard/ddlMattype_SelectedIndexChanged',
+    //        async: false,
+    //        data: JSON.stringify({ SiteID: SiteID, ddlMattype: ddlMattype }),
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        success: function (response) {
+
+    //            data = response;
+
+    //            var ddlitemcode = "";
+    //            $.each(response, function (idx, obj) {
+    //                if (obj != null) {
+    //                    ddlitemcode += '<option value="' + obj.ItemCode + '">' + obj.ItemCodeItemDesc + '</option>';
+    //                }
+    //            });
+
+    //            // $('#ddlitemcode').empty().append(ddlitemcode);
+    //            $('#ddlitemcode').empty().append(ddlitemcode).trigger('chosen:updated');
+    //            ddlitemcode_SelectedIndexChanged();
+    //           // ddlitemdesc_SelectedIndexChanged();
+    //        }
+    //    });
+
+    //    // GetJobListData();
+
+    //}
+
+    //function ddlitemcode_SelectedIndexChanged() {
+    //    ajaxload();
+    //    var SiteID = $('#ddlSite').val();
+    //    var ddlMattype = $('#ddlMattype').val();
+    //    var ddlitemcode = $('#ddlitemcode').val();
+    //    var itemCodeDescVal = $('#ddlitemcode option:selected').text();
+    //    var itemDesc = "";
+    //    if (itemCodeDescVal != "All") {
+    //        var arr = itemCodeDescVal.substring(itemCodeDescVal.indexOf('-') + 1)
+    //        itemDesc = arr;
+    //    }
+    //    $.ajax({
+    //        type: "POST",
+    //        url: '/ItemUtilizeDashboard/ddlitemcode_SelectedIndexChanged',
+    //        async: false,
+    //        data: JSON.stringify({ SiteID: SiteID, ddlMattype: ddlMattype, ddlitemcode: ddlitemcode }),
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        success: function (response) {
+
+    //            data = response;
+
+    //            var ddlitemdesc = "<option value=''>All</option>";
+    //            $.each(response, function (idx, obj) {
+    //                if (obj != null) {
+    //                    ddlitemdesc += '<option value="' + obj.ItemDesc + '" title="' + obj.ItemDesc + '">' + obj.ItemDesc + '</option>';
+    //                 }
+    //            });
+
+    //            $('#ddlitemdesc').empty().append(ddlitemdesc);
+    //            if (itemDesc != "") {
+    //                //$('#ddlitemdesc').val(itemDesc.trim());
+    //                $('#ddlitemdesc option:selected').text(itemDesc.trim());
+    //            }
+
+    //        }
+    //    });
+    //   // ddlitemdesc_SelectedIndexChanged();
+
+    //}
+
+    function ddlitemdesc_SelectedIndexChanged() {
+        ajaxload();
+        var ddlSite = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        // var ddlitemdesc = $('#ddlitemdesc').val();
+        //var ddlitemdesc = $('#ddlitemdesc option:selected').text();
+        //if (ddlitemdesc == "All") {
+        //    ddlitemdesc = "";
+        //}
+        var InventoryID = $('#ddlitemcode').val();
+        $.ajax({
+            type: "POST",
+            url: '/ItemUtilizeDashboard/ddlitemdesc_SelectedIndexChanged',
+            async: false,
+            data: JSON.stringify({ ddlMattype: ddlMattype, InventoryID: InventoryID, ddlSite: ddlSite }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+
+                var GetData = response;
+
+                $('#txtqtyonsite').val(numberWithCommas(response.txtqtyonsite));
+                $('#txtqtystanding').val(numberWithCommas(response.txtqtystanding));
+                $('#txtNotstarted').val(numberWithCommas(response.txtNotstarted));
+                $('#txtqtyAvaliable').val(numberWithCommas(response.txtqtyAvaliable));
+                $('#txtqtyDamaged').val(numberWithCommas(response.txtqtyDamaged));
+
+            }
+        });
+
+        GetJobListData();
+    }
+
+
+    function GetJobListData() {
+        $('#LoadingPanel1').show();
+        var ddlSite = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        // var ddlitemdesc = $('#ddlitemdesc').val();
+        //var ddlitemdesc = $('#ddlitemdesc option:selected').text();
+        //if (ddlitemdesc == "All") {
+        //    ddlitemdesc = "";
+        //}
+        var InventoryID = $('#ddlitemcode').val();
+        var id = getParameterByName('id');
+        var InventoryID = $('#ddlitemcode').val();
+        var EncryptData = [ddlSite, ddlMattype, InventoryID];
+        var encryData = Encrypt(EncryptData);
+        ddlSite = encryData[0];
+        ddlMattype = encryData[1];
+        InventoryID = encryData[2];
+        $.ajax({
+            type: "POST",
+            url: "/ItemUtilizeDashboard/GetJobListData",
+            data: JSON.stringify({ ddlSite: ddlSite, ddlMattype: ddlMattype, InventoryID: InventoryID, id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var str = "";
+                var GetData = response;
+                $('#tblJobList').DataTable().clear();
+                $('#tblJobList').DataTable().destroy();
+                // $('#JobList').css('display', 'block');
+                $('#divTotalAvailableQuantity').css('display', 'none');
+                var TotalAvailableQuantity = 0;
+                if (GetData.length > 0) {
+                    $('#divTotalAvailableQuantity').css('display', 'block');
+                    for (var i = 0; i < GetData.length; i++) {
+
+                        var FromId = GetData[i].FromId == null ? "" : GetData[i].FromId;
+                        var ToId = GetData[i].ToId == null ? "" : GetData[i].ToId;
+                        var TotalWeight = GetData[i].TotalWeight == null ? "" : GetData[i].TotalWeight;
+                        var ScaffRef = GetData[i].ScaffRef == null ? "" : GetData[i].ScaffRef;
+                        var Location = GetData[i].Location == null ? "" : GetData[i].Location;
+                        var BuildingNo = GetData[i].BuildingNo == null ? "" : GetData[i].BuildingNo;
+                        var AssetNo = GetData[i].AssetNo == null ? "" : GetData[i].AssetNo;
+                        var AvailableQuantity = GetData[i].AvailableQuantity == null ? "" : GetData[i].AvailableQuantity;
+
+                        TotalAvailableQuantity += parseInt(AvailableQuantity);
+
+
+                        str += "<tr>"
+                        str += "<td class='setWidth0' style='display:none'></td>"
+                        str += "<td class='setWidth1'>" + ScaffRef + "</td>"
+                        str += "<td class='setWidth2'>" + Location + "</td>"
+                        str += "<td class='setWidth3'>" + BuildingNo + "</td>"
+                        str += "<td class='setWidth4'>" + AssetNo + "</td>"
+                        str += "<td class='setWidth5'>" + numberWithCommas(AvailableQuantity) + "</td>"
+
+                        str += "</tr>";
+
+
+                    }
+                    $('#tbodyJobList').append(str);
+                    $('#LoadingPanel1').hide();
+                }
+
+                if (TotalAvailableQuantity != 0 || TotalAvailableQuantity != '') {
+                    $('#txtTotalQuantity').val(numberWithCommas(TotalAvailableQuantity));
+                }
+                else {
+                    $('#txtTotalQuantity').val('');
+                }
+
+                $('<caption/>').html('This Material is on these Jobs:').appendTo('#tblJobList');
+                var table = $('#tblJobList').DataTable({
+                    searching: false,
+                    "bLengthChange": false,
+                    "bInfo": false,
+                    scrollY: true,
+                    scrollCollapse: true,
+                    scrollY: "30vh",
+                    paging: false,
+                    "bSort": false,
+
+                    dom: 'Bfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Material List On Job',
+                        }
+                    ],
+
+                });
+
+                var tableLenght = $('#tblJobList tbody tr').length;
+                if (tableLenght >= 8) {
+                    $('.setWidth5').addClass('setWidththWithScroll');
+                    $('.setWidth5').removeClass('setWidththWithoutScroll');
+
+                } else {
+
+                    $('.setWidth5').addClass('setWidththWithoutScroll');
+                    $('.setWidth5').removeClass('setWidththWithScroll');
+                }
+
+            }
+        })
+    }
+
+    function ExportToCsvButton_Click() {
+        // $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+
+        $('#LoadingPanel1').show();
+        var id = getParameterByName('id');
+        var ddlSite = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        /* var ddlitemdesc = $('#ddlitemdesc option:selected').text();*/
+        //var ddlitemcode = $('#ddlitemcode').val();
+        //if (ddlitemdesc == "All") {
+        //    ddlitemdesc = "";
+        //}
+        var InventoryID = $('#ddlitemcode').val();
+        var EncryptData = [ddlSite, ddlMattype, InventoryID];
+        var encryData = Encrypt(EncryptData);
+        ddlSite = encryData[0];
+        ddlMattype = encryData[1];
+        InventoryID = encryData[2];
+
+        window.location.href = '/ItemUtilizeDashboard/ExportToCsvButton_Click?ddlSite=' + ddlSite + '&ddlMattype=' + ddlMattype + '&InventoryID=' + InventoryID + '&id=' + id;
+        $('#LoadingPanel1').hide();
+
+    }
+
+
+    function ExportToCsvButton_Click12() {
+        // $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+
+        $('#LoadingPanel1').show();
+        var id = getParameterByName('id');
+        var ddlSite = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        //var ddlitemdesc = $('#ddlitemdesc option:selected').text();
+        //if (ddlitemdesc == "All") {
+        //    ddlitemdesc = "";
+        //}
+        var InventoryID = $('#ddlitemcode').val();
+        var EncryptData = [ddlSite, ddlMattype, InventoryID];
+        var encryData = Encrypt(EncryptData);
+        ddlSite = encryData[0];
+        ddlMattype = encryData[1];
+        InventoryID = encryData[2];
+
+        window.location.href = '/ItemUtilizeDashboard/ExportToCsvButton_Click12?ddlSite=' + ddlSite + '&ddlMattype=' + ddlMattype + '&InventoryID=' + InventoryID + '&id=' + id;
+        $('#LoadingPanel1').hide();
+
+    }
+    /// Chart 1 On Site Material Break-Down (Tonnes)
+    function Chart1(ddlmatval) {
+        $('.forRemoveData1').remove();
+        $.ajax({
+            type: "POST",
+            // url: "../WebApi/Dashboard.asmx/ItemUtilizeFirst",
+            url: "/ItemUtilizeDashboard/ItemUtilizeFirst",
+            data: JSON.stringify({ Siteid: ddlmatval }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // ItemDetail = response.d;
+                ItemDetail = response;
+                var Item = [];
+                var ItemData = [];
+                var itemton = [];
+                var percentage = [];
+                for (var i = 0; i < ItemDetail.length; i++) {
+                    var TobePush = true;
+                    if (TobePush) {
+                        ItemData.push({ name: ItemDetail[i].Material, y: ItemDetail[i].TotalTonnes, z: ((ItemDetail[i].PctTonnage) * 100).toFixed(2), sliced: true });
+                        Item.push(ItemDetail[i].Material);
+                        itemton.push(ItemDetail[i].TotalTonnes);
+                        percentage.push((ItemDetail[i].PctTonnage) * 100);
+                    }
+
+                }
+                var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                theExportOptions.splice(0, 1);
+                //theExportOptions.splice(1, 5);
+
+                //var pieColors = (function () {
+                //    var colors = [],
+                //        base = Highcharts.getOptions().colors[0],
+                //        i;
+
+                //    for (i = 0; i < 10; i += 1) {
+                //        colors.push(Highcharts.Color(base).brighten((i - 2) / 12).get());
+                //    }
+                //    return colors;
+                //}());
+
+                Highcharts.chart('container1', {
+                    chart: {
+                        type: 'pie',
+                        backgroundColor: '#f2f2f2',
+                        options3d: {
+                            enabled: true,
+                            alpha: 45,
+                            beta: 0
+                        }
+                    },
+                    title: {
+                        align: 'left',
+                        text: 'On Site-Material Break-Down (Tonnes)'
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: {point.y}'
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            depth: 35,
+                            slicedOffset: 1,
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.name} ({point.y} {series.name},{point.z}%)'
+                            }
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+
+                        buttons: {
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                            },
+                            exportButton: {
+                                //x: -5,
+                                onclick: function () {
+                                    $('#btnOpenModel1').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All',
+
+                            }
+                        }
+
+
+                    },
+                    series: [{
+                        type: 'pie',
+                        name: ' Tonnes',
+                        data: ItemData
+                    }]
+                });
+                function redrawchart1() {
+                    var chart = $('#container1').highcharts();
+
+                    var w = $('#container1').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (2 / 4), false
+                    );
+                }
+
+                $(window).resize(redrawchart1);
+                redrawchart1();
+
+                var row = '';
+                //var totalTonnage = $("#ContentPlaceHolder1_TextBox3").val();
+                //$.each(response.d, function (index, obj) {
+                $("#tbDetails1 tbody").empty();
+                $.each(response, function (index, obj) {
+                    var num;
+                    // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                    num = (obj.PctTonnage * 100);
+
+                    percentage = num.toFixed(2);
+                    //alert(percentage);
+                    row += "<tr class='forRemoveData1'><td style='text-align: center;'>" + obj.Material + "</td><td style='text-align: center;'>" + obj.TotalTonnes + "</td> <td style='text-align: center;'>" + percentage + "%" + "</td></tr>";
+                });
+                $("#tbDetails1 tbody").append(row);
+            }
+        })
+    }
+
+    // Chart Change On 28 June 2019
+
+    ///// Chart 2 Scaffold Material Available Vs Standing
+    //function Chart2(ddlmatval) {
+    //    $('.forRemoveData2').remove();
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "../WebApi/Dashboard.asmx/ItemUtilizeSecond",
+    //        data: JSON.stringify({ Siteid: ddlmatval }),
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        success: function (response) {
+    //            ItemDetail = response.d;
+    //            //console.log(ItemDetail);
+    //            var Item = [];
+    //            var itemton = [];
+    //            var ItemData = [];
+    //            var percent = [];
+    //            for (var i = 0; i < ItemDetail.length; i++) {
+    //                var TobePush = true;
+    //                if (TobePush) {
+    //                    ItemData.push({ name: ItemDetail[i].TypeList1, y: ItemDetail[i].TotalTonnes1, z: (ItemDetail[i].Material1 * 100).toFixed(2), sliced: true });
+    //                    ItemData.push({ name: ItemDetail[i].TypeList2, y: ItemDetail[i].TotalTonnes2, z: (ItemDetail[i].Material2 * 100).toFixed(2), sliced: true });
+    //                    //ItemData.push({ name: "Abc"+i+"", y: ItemDetail[i].Material1, sliced: true });
+    //                    //Item.push(ItemDetail[i].Material1);
+    //                    //itemton.push(ItemDetail[i].TotalTonnes1);
+
+    //                    // percent.push((ItemDetail[i].PctStanding*100));
+    //                }
+
+    //            }
+    //            //console.log(ItemData);
+    //            var pieColors = (function () {
+    //                var colors = [],
+    //                    base = Highcharts.getOptions().colors[0],
+    //                    i;
+
+    //                for (i = 0; i < 10; i += 1) {
+    //                    colors.push(Highcharts.Color(base).brighten((i - 2) / 12).get());
+    //                }
+    //                return colors;
+    //            }());
+    //            Highcharts.chart('container2', {
+    //                chart: {
+    //                    type: 'pie',
+    //                    backgroundColor: '#f2f2f2',
+    //                    options3d: {
+    //                        enabled: true,
+    //                        alpha: 45,
+    //                        beta: 0
+    //                    }
+    //                },
+    //                title: {
+    //                    align: 'left',
+    //                    text: 'Scaffold Material Available Vs Standing'
+    //                },
+    //                tooltip: {
+    //                    pointFormat: '{series.name}: {point.y}'
+    //                },
+    //                plotOptions: {
+    //                    pie: {
+    //                        allowPointSelect: true,
+    //                        cursor: 'pointer',
+    //                        depth: 35,
+    //                        slicedOffset: 1,
+    //                        dataLabels: {
+    //                            enabled: true,
+    //                            format: '{point.name} ({point.y} {series.name},{point.z}%)'
+    //                        }
+    //                    }
+    //                },
+    //                navigation: {
+    //                    buttonOptions: {
+    //                        verticalAlign: 'top',
+    //                        y: -12,
+    //                    }
+    //                },
+    //                exporting: {
+
+    //                    buttons: {
+    //                        contextButton: {
+    //                            enabled: true,
+    //                            x:9,
+    //                        },
+    //                        exportButton: {
+    //                            //x: -5,
+    //                            onclick: function () {
+    //                                $('#btnOpenModel2').click();
+    //                            },
+    //                            //symbol: 'circle'
+    //                            text: 'Show All',
+
+    //                        }
+    //                    }
+
+
+    //                },
+    //                series: [{
+    //                    type: 'pie',
+    //                    name: 'Tonnes',
+    //                    data: ItemData
+    //                }]
+    //            });
+    //            function redrawchart1() {
+    //                var chart = $('#container2').highcharts();
+
+    //                var w = $('#container2').closest(".wrapper").width()
+    //                chart.setSize(
+    //                    w, w * (2 / 4), false
+    //                );
+    //            }
+
+
+    //            $(window).resize(redrawchart1);
+    //            redrawchart1();
+    //            var row = '';
+    //            //var totalTonnage = $("#ContentPlaceHolder1_TextBox3").val();
+    //            $.each(response.d, function (index, obj) {
+    //                var num1;
+    //                //var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+    //                num1 = (obj.Material1 * 100);
+
+    //                num1 = num1.toFixed(2);
+    //                //alert(percentage);
+    //                var num2;
+    //                num2 = (obj.Material2 * 100);
+
+    //                num2 = num2.toFixed(2);
+    //                row += "<tr class='forRemoveData2'><td style='text-align: center;'>" + obj.TypeList1 + "</td><td style='text-align: center;'>" + obj.TotalTonnes1 + "</td><td style='text-align: center;'>" + num1 + "%</td></tr>";
+    //                row += "<tr class='forRemoveData2'><td style='text-align: center;'>" + obj.TypeList2 + "</td><td style='text-align: center;'>" + obj.TotalTonnes2 + "</td><td style='text-align: center;'>" + num2 + "%</td></tr>";
+    //            });
+    //            $("#tbDetails2 tbody").append(row);
+    //        }
+    //    })
+    //}
+
+    // Chart @@2 Start
+
+    function Chart2(ddlmatval) {
+        $('.forRemoveData2').remove();
+        $.ajax({
+            type: "POST",
+            //url: "../WebApi/Dashboard.asmx/ItemUtilizeSecond",
+            url: "/ItemUtilizeDashboard/ItemUtilizeSecond",
+            data: JSON.stringify({ Siteid: ddlmatval }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                //ItemDetail = response.d;
+                ItemDetail = response;
+                //console.log(ItemDetail);
+                var Item = [];
+                var itemton = [];
+                var ItemData = [];
+                var percent = [];
+                for (var i = 0; i < ItemDetail.length; i++) {
+                    var TobePush = true;
+                    if (TobePush) {
+                        ItemData.push({ name: ItemDetail[i].TypeList1, y: ItemDetail[i].TotalTonnes1, sliced: true });
+                        itemton.push(ItemDetail[i].TypeList1);
+                        ItemData.push({ name: ItemDetail[i].TypeList2, y: ItemDetail[i].TotalTonnes2, sliced: true });
+                        itemton.push(ItemDetail[i].TypeList2);
+                        ItemData.push({ name: ItemDetail[i].TypeList3, y: ItemDetail[i].TotalTonnes3, sliced: true });
+                        itemton.push(ItemDetail[i].TypeList3);
+                    }
+
+                }
+                var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                theExportOptions.splice(0, 1);
+
+
+                Highcharts.setOptions({ colors: ['#4c9640', '#f9cb13', '#0000FF', '#fc2828'] });//Change line By 19 Nov 2018
+                Highcharts.chart('container2', {
+                    chart: {
+                        type: 'bar',
+                        backgroundColor: '#f2f2f2'
+                    },
+                    title: {
+                        align: 'left',
+                        text: 'Scaffold Material On Site Vs Available Vs Standing',
+                        style: {
+                            fontSize: '16px',
+                        }
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    xAxis: {
+                        categories: ['Available', 'Standing', "On Site"],
+                        title: {
+                            text: 'Site Scaffold Material'
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Tonnages',
+                            //align: 'justify'
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return this.x + ' ' + this.y + ' Tonnes';
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function () {
+
+                                        var clickedType = this.category;
+                                        var siteId = $('#ddlSite').val();
+                                        var ClientId = getParameterByName('id');
+                                        LoadItemBreakdown(clickedType, siteId, ClientId);
+                                    }
+                                }
+                            }
+                        },
+
+                        bar: {
+                            dataLabels: {
+                                enabled: true,
+                                // color: 'black'
+                                color: 'white',
+                            }
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                                //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                            },
+
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#btnOpenModel2').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+
+
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        showInLegend: false,
+                        colorByPoint: true,
+                        data: ItemData
+                    }]
+                });
+                function redrawchart1() {
+                    var chart = $('#container2').highcharts();
+
+                    var w = $('#container2').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (2.2 / 4), false
+                    );
+                }
+                $('#menu_toggle').on('click', function () {
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                });
+                $(window).resize(redrawchart1);
+                redrawchart1();
+                var row = "";
+
+                // clear only data rows
+                $("#tbDetails2 tbody").empty();
+
+                var obj = response[0];
+
+                row += "<tr class='forRemoveData2'><td style='text-align:center;'>" + obj.TypeList1 + "</td><td style='text-align:center;'>" + obj.TotalTonnes1 + "</td></tr>";
+                row += "<tr class='forRemoveData2'><td style='text-align:center;'>" + obj.TypeList2 + "</td><td style='text-align:center;'>" + obj.TotalTonnes2 + "</td></tr>";
+                row += "<tr class='forRemoveData2'><td style='text-align:center;'>" + obj.TypeList3 + "</td><td style='text-align:center;'>" + obj.TotalTonnes3 + "</td></tr>";
+
+                $("#tbDetails2 tbody").append(row);
+
+            }
+        });
+    }
+
+    function LoadItemBreakdown(type, siteId, ClientId) {
+
+        $('#lblAction').text(type);
+        $('#labelaction').val(type);
+        $('#QuantityModal1').show();
+
+        if (type === "Available") {
+            $('#thQuantity').text('Available Quantity');
+        }
+        else if (type === "Standing") {
+            $('#thQuantity').text('Quantity with Job');
+        }
+        else if (type === "On Site") {
+            $('#thQuantity').text('On Site');
+        }
+        else {
+            $('#thQuantity').text('Quantity');
+        }
+
+        $('#LoadingPanel1').show();
+
+        $.ajax({
+            type: "POST",
+            url: "/ItemUtilizeDashboard/GetScaffoldItemBreakdown",
+            data: JSON.stringify({
+                SiteId: siteId,
+                Type: type,
+                ClientId: ClientId
+            }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+
+            success: function (data) {
+
+                if ($.fn.DataTable.isDataTable('#tblScaffoldDetails')) {
+                    $('#tblScaffoldDetails').DataTable().destroy();
+                }
+
+                $('#tbodyScaffoldDetails').empty();
+
+                var rows = '';
+                var totalWeight = 0;
+
+                $.each(data, function (i, obj) {
+
+                    totalWeight += obj.TotalWeight;
+
+                    var rowTonnage = (obj.TotalWeight / 1000).toFixed(2);
+                    rows += `
+                <tr>
+                    <td style="text-align:center">${obj.MaterialType}</td>
+                    <td style="text-align:center">${obj.ItemCode}</td>
+                    <td style="text-align:center">${obj.ItemDesc}</td>
+                    <td style="text-align:center">${obj.Quantity}</td>
+                    <td style="text-align:center">${obj.ItemWeight}</td>
+                    <td style="text-align:center">${obj.TotalWeight.toFixed(2)}</td>
+                    <td style="text-align:center">${rowTonnage}</td>
+                </tr>`;
+                });
+
+                $('#tbodyScaffoldDetails').append(rows);
+
+                /*$('#txtTotalQuantity').val(totalWeight.toFixed(2));*/
+                //$('#txtTotalTonnage').val((totalWeightTonnage / 1000).toFixed(4)); // ← optional summary field
+                $('#ScaffoldDetailModal').modal('show');
+                $('#LoadingPanel1').hide();
+            },
+
+            error: function () {
+                $('#LoadingPanel1').hide();
+                alert('Error loading scaffold data');
+            }
+        });
+    }
+
+
+</script>
+<style>
+    tspan {
+        font-weight: 100;
+    }
+
+    .check67 {
+        height: 640px !important;
+    }
+
+    .check75 {
+        height: 520px !important;
+    }
+
+    .check80 {
+        height: 474px !important;
+    }
+
+    .check90 {
+        height: 374px !important;
+    }
+
+    .check100 {
+        height: 303px !important;
+    }
+
+    .rgCaption, .rgHeader, .rgRow {
+        background: #f2f2f2 !important;
+    }
+
+    .RadGrid_Default {
+        border: 1px solid lightgrey !important;
+        border-radius: 4px !important;
+    }
+
+    .highcharts-credits {
+        display: none;
+    }
+
+    .container .DshbrdBack {
+        background-color: #ffffcc;
+    }
+
+    caption {
+        border-bottom: 1px solid lightgrey !important;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    .right_col {
+        background-color: #ffffcc !important;
+    }
+</style>
+
+<div class="container DshbrdBack">
+    @*<asp:HiddenField ID="hdnSite" runat="server" />*@
+    <input type="hidden" id="hdnSite" />
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="container1" class="wrapper"></div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="container2" class="wrapper" style="width: 100%"></div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" style="margin-top: 24px">
+            <div class="col-lg-1 col-md-1 col-sm-12 col-xs-12"></div>
+            <div class="col-lg-11 col-md-12 col-sm-12 col-xs-12">
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    @*<asp:Label ID="lblSite" Text="Site:" Style="color: black" runat="server"> </asp:Label>*@
+                    <label id="lblSite" Text="Site:" Style="color: black">Site: </label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    @*<asp:DropDownList ID="ddlSite" onchange="ajaxload()" AppendDataBoundItems="true" AutoPostBack="true" OnSelectedIndexChanged="ddlSite_SelectedIndexChanged" CssClass="form-control" runat="server"></asp:DropDownList>*@
+                    <select id="ddlSite" onchange="ddlSite_SelectedIndexChanged()" Class="form-control"></select>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    @*<asp:Label ID="lblMaterial" Text="Material Type:" Style="color: black" runat="server"></asp:Label>*@
+                    <label id="lblMaterial" Text="Material Type:" Style="color: black">Material Type:</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    @*<asp:DropDownList ID="ddlMattype" AppendDataBoundItems="true" OnSelectedIndexChanged="ddlMattype_SelectedIndexChanged" AutoPostBack="true" CssClass="form-control" onchange="ajaxload()" runat="server"></asp:DropDownList>*@
+                    <select id="ddlMattype" Class="form-control" onchange="ddlMattype_SelectedIndexChanged()"></select>
+                </div>
+
+                @*<%--   Add Code on 30/01/2020.--%>*@
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    @*<%-- Change On 06 Feb 2020--%>*@
+                    @*<asp:Label ID="Lblitemcode" Text="Item Code:" Style="color: black" runat="server"></asp:Label>*@
+                    <label id="Lblitemcode" Text="Item Code:" Style="color: black">Item Code:</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    @*<%--   <asp:DropDownList ID="ddlitemcode" onchange="ajaxload()" OnSelectedIndexChanged="ddlitemcode_SelectedIndexChanged" AppendDataBoundItems="true" AutoPostBack="true" CssClass="form-control" runat="server"></asp:DropDownList>--%>*@
+                    @*<telerik:RadComboBox RenderMode="Lightweight" ID="ddlitemcode" Width="100%" AllowCustomText="false" Filter="Contains" OnSelectedIndexChanged="ddlitemcode_SelectedIndexChanged" AutoPostBack="true" CssClass="form-control" runat="server"></telerik:RadComboBox>*@
+                    <select id="ddlitemcode" style="Width:100%" onchange="ddlitemcode_SelectedIndexChanged()" Class="form-control"></select>
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    @*<asp:Label ID="lblitemdesc" Text="Item Desc:" Style="color: black" runat="server"></asp:Label>*@
+                    <label id="lblitemdesc" Text="Item Desc:" Style="color: black">Item Desc:</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    @*<asp:DropDownList ID="ddlitemdesc" onchange="ajaxload()" OnSelectedIndexChanged="ddlitemdesc_SelectedIndexChanged" AppendDataBoundItems="true" AutoPostBack="true" CssClass="form-control" Enabled="false" runat="server"></asp:DropDownList>*@
+                    <select id="ddlitemdesc" onchange="ddlitemdesc_SelectedIndexChanged()" Class="form-control" disabled></select>
+                </div>
+
+                @*<%--  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                    <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                        <asp:Label ID="lblQtyonsite" Text="Quantity On Site:" Style="color: black" runat="server"> </asp:Label>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                        <asp:TextBox ID="txtqtyonsite" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>--%>*@
+                @*<%--Changes On 06 Sep 2019 Add Damage Qty.--%>*@
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    @*<asp:Label ID="lblQtyonsite" Text="Quantity On Site  / Damaged" Style="color: black" runat="server"> </asp:Label>*@
+                    <label id="lblQtyonsite" Text="Quantity On Site  / Damaged" Style="color: black">Quantity On Site  / Damaged </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                    @*<asp:TextBox ID="txtqtyonsite" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtqtyonsite" Class="form-control" disabled />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                    @*<asp:TextBox ID="txtqtyDamaged" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtqtyDamaged" disabled Class="form-control" />
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    @*<asp:Label ID="lblAvaliablQty" Text="Quantity Avaliable:" Style="color: black" runat="server"> </asp:Label>*@
+                    <label id="lblAvaliablQty" Text="Quantity Avaliable:" Style="color: black">Quantity Avaliable: </label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    @*<asp:TextBox ID="txtqtyAvaliable" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtqtyAvaliable" disabled Class="form-control" />
+                </div>
+                @*<%--Changes On 06 Sep 2019 Add Damage Qty.--%>*@
+
+                @*<%--    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                    <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                        <asp:Label ID="lblAvaliablQty" Text="Quantity Avaliable / Damaged" Style="color: black" runat="server"> </asp:Label>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                        <asp:TextBox ID="txtqtyAvaliable" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                        <asp:TextBox ID="txtqtyDamaged" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>--%>*@
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    @*<asp:Label ID="lblQtyStanding" Text="Quantity Standing / Not Started" Style="color: black;" runat="server"> </asp:Label>*@
+                    <label id="lblQtyStanding" Text="Quantity Standing / Not Started" Style="color: black;">Quantity Standing / Not Started </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                    @*<asp:TextBox ID="txtqtystanding" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" id="txtqtystanding" Class="form-control" disabled />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6">
+                    @*<asp:TextBox ID="txtNotstarted" ReadOnly="true" CssClass="form-control" runat="server"></asp:TextBox>*@
+                    <input type="text" class="form-control" id="txtNotstarted" disabled />
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+
+            </div>
+
+
+            <div id="container4" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 17px">
+                <div class="row">
+                    <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6">
+                        @*<asp:Button ID="ExportToCsvButton" runat="server" CommandName="ExportToCsv" style="Width:100% ;padding-left: 10px;" CssClass="btn w3-btn w3-teal " Text="Export To CSV" OnClick="ExportToCsvButton_Click" />*@
+                        <button id="ExportToCsvButton" style="Width: 78%; padding-left: 10px;" Class="btn w3-btn w3-teal " Text="Export To CSV" OnClick="ExportToCsvButton_Click()">Export Standing Jobs To CSV</button>
+                    </div>
+
+                    <div class="col-lg-6 col-sm-6 col-md-6 col-xs-6">
+                        @*<asp:Button ID="ExportToCsvButton" runat="server" CommandName="ExportToCsv" style="Width:100% ;padding-left: 10px;" CssClass="btn w3-btn w3-teal " Text="Export To CSV" OnClick="ExportToCsvButton_Click" />*@
+                        <button id="ExportToCsvButton12" style="Width: 77%; padding-left: 10px; margin-left: 9%; " Class="btn w3-btn w3-teal " Text="Export To CSV" OnClick="ExportToCsvButton_Click12()">Export Dismantled Jobs To CSV</button>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div id="JobList" style="color: black; width: 100%;margin-top:5px;">
+                        <table id="tblJobList" class="table table-striped " style="width:100%">
+                            <thead style="background-color: #efefef; color: #716262;">
+                                <tr>
+                                    <th class="setWidth0" style="display:none;"></th>
+                                    <th class="setWidth1">ScafRef</th>
+                                    <th class="setWidth2">Location</th>
+                                    <th class="setWidth3">Building No.</th>
+                                    <th class="setWidth4">Asset No.</th>
+                                    <th class="setWidth5">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyJobList" style="width:100%"></tbody>
+                        </table>
+                    </div>
+                </div>
+                @*
+                    <Telerik:RadGrid runat="server" ID="MatDetail" AutoGenerateColumns="false" ClientSettings-Scrolling-AllowScroll="true" Skin="Windows7" ClientSettings-Scrolling-UseStaticHeaders="true" ClientSettings-ClientEvents-OnGridCreated="abc" EnableHeaderContextMenu="true" OnNeedDataSource="MatDetail_NeedDataSource" MasterTableView-AllowSorting="true">
+                        <MasterTableView>
+                            <%-- <CommandItemSettings ShowAddNewRecordButton="true" ExportToCsvText="MaterialList" ShowExportToCsvButton="true" />--%>
+
+                            <Columns>
+                                <Telerik:GridBoundColumn DataField="ScaffRef" HeaderStyle-Width="20px" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Left" HeaderText="ScafRef"></Telerik:GridBoundColumn>
+                                <Telerik:GridBoundColumn DataField="Location" HeaderStyle-Width="20px" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Left" HeaderText="Location"></Telerik:GridBoundColumn>
+                                <Telerik:GridBoundColumn DataField="BuildingNo" HeaderStyle-Width="20px" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Left" HeaderText="Building No."></Telerik:GridBoundColumn>
+                                <Telerik:GridBoundColumn DataField="AssetNo" HeaderStyle-Width="20px" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Left" HeaderText="Asset No."></Telerik:GridBoundColumn>
+                                <Telerik:GridBoundColumn DataField="AvailableQuantity" HeaderStyle-Width="20px" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Left" HeaderText="Quantity"></Telerik:GridBoundColumn>
+                            </Columns>
+                        </MasterTableView>
+                    </Telerik:RadGrid>*@
+            </div>
+            <div class="row" style="width:100%;display:none;" id="divTotalAvailableQuantity">
+                <div class="col-lg-6 col-md-5 col-sm-5 col-xs-12"></div>
+                <div class="col-lg-3 col-md-5 col-sm-4 col-xs-7">
+                    <label id="iblQty"><b>Total Quantity:</b></label>
+                </div>
+                <div class="col-lg-3 col-md-1 col-sm-3 col-xs-2 divTotalQuantity">
+                    <input type="text" id="txtTotalQuantity" Class="form-control" disabled />
+                </div>
+
+                @*<div class="col-lg-5 col-md-4 col-sm-4 col-xs-7">
+                        <h4>Total Quantity:</h4>
+                        <input type="text" id="txtTotalQuantity" Class="form-control" disabled />
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<%--Model to Show Material type and tonnes chart-1--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+    <div class="modal fade" id="myModal2" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Material Type and Tonnage </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                        <tbody>
+                        <thead>
+                            <tr>
+                                @*<%--
+            <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%;display:none;"><b>Site Name</b></td>--%>*@
+                                <td style="width: 40%; text-align: center;"><b>Material Type</b></td>
+                                <td style="width: 40%; text-align: center;"><b>Tonnage</b></td>
+                                <td style="width: 80%; text-align: center;"><b>% Of Tonnage</b></td>
+                            </tr>
+                        </thead>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Material type and tonnes chart-1--%>*@
+
+
+
+@*<%--Model to Show Material type and tonnes chart-2--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+    <div class="modal fade" id="myModal3" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Type and Tonnage</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails2" style="width:100%; color:black">
+                        <thead>
+                            <tr>
+                                <th style="width:40%; text-align:center;">Type</th>
+                                <th style="width:40%; text-align:center;">Tonnage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- data rows will come here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Material type and tonnes chart-2--%>*@
+
+<div class="modal fade" id="ScaffoldDetailModal" role="dialog">
+    <div class="row" style="padding-top: 90px;">
+        <div class="col-lg-1 col-md-1"></div>
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+            <div class="modal-content" style="width: 100%">
+                <div class="modal-header row">
+                    <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
+                        <h4 class="modal-title" id="QuantityModal1" style="display:none">
+                            Scaffolds Material <u>
+                                <label id="lblAction" style="font-size: 20px"></label>
+                                <input type="hidden" id="labelaction" />
+                            </u>
+                        </h4>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                        @*<asp:LinkButton ID="exporttopdf" runat="server" Style="height: 28px; padding-left: 5px; padding-top: 5px;" OnClick="exporttopdf_Click" CssClass="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                        @*<button ID="exporttopdf" Style="height: 28px; padding-top: 5px; width:100px;" type="button" OnClick="" Class="btn btn-blue w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>*@
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" style="padding-left: 50px; padding-right: 0px">
+                        @*<asp:LinkButton ID="myButtonControlID" runat="server" Style="height: 28px; padding-top: 5px;" CssClass="btn btn-primary w3-btn w3-teal" Text="Export">Export</asp:LinkButton>*@
+                        <button id="myButtonControlID" @*OnClick="exportCsv_Click()"*@ Style="height: 28px; width:100px;" Class="btn btn-primary w3-btn w3-teal"><i class="fa fa-file-excel-o"></i>&nbsp; Export</button>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body" id="divTableDataHolder">
+                    <div style="overflow: auto">
+                        <table class="table table-bordered" id="tblScaffoldDetails" style="width: 100%; color: black">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%; text-align:center; font-size:12px;">Material Type</th>
+                                    <th style="width:25%; text-align:center; font-size:12px;">Item Code</th>
+                                    <th style="width:15%; text-align:center; font-size:12px;">Item Desc</th>
+                                    <th id="thQuantity" style="width:10%; text-align:center; font-size:12px;"></th>
+                                    <th style="width:10%; text-align:center; font-size:12px;">Item Weight</th>
+                                    <th style="width:10%; text-align:center; font-size:12px;">Total Weight(kg)</th>
+                                    <th style="width:10%; text-align:center; font-size:12px;">Total Weight(tonnes)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyScaffoldDetails">
+                                <!-- rows added dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-1 col-md-1"></div>
+    </div>
+</div>
+
+
+

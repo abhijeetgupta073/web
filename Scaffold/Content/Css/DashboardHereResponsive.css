@@ -1,0 +1,65 @@
+﻿    @media (min-height:570px) and (max-height:606px) {
+        .summaryDataforparagraph p{
+            font-size:9px !important;
+        }
+        .clsbuildstanding p{
+            font-size: 10px !important;
+        }
+        .txtsummaryData{
+            font-size:10px !important;
+            margin:3px 0 6px 0;
+        }
+        .clsStandingText{
+            margin-top:65px !important;
+        }
+        .smhireshow {
+            margin-top:18px !important;
+        }
+        .clsOpCentre {
+            margin-top: -10px !important;
+        }
+    }
+    @media (min-height:630px) and (max-height:686px) {
+        .summaryDataforparagraph p {
+            font-size: 11px !important;
+        }
+
+        .clsbuildstanding p {
+            font-size: 11px !important;
+        }
+
+        .txtsummaryData {
+            font-size: 10px !important;
+            margin: 3px 0 6px 0;
+        }
+
+        .clsStandingText {
+            margin-top: 99px !important;
+        }
+        .clsOpCentre {
+            margin-top:31px !important;
+        }
+    }
+    @media (min-height:710px) and (max-height:755px) {
+        
+        .clsOpCentre {
+            margin-top: 38px !important;
+        }
+        .summaryDataforparagraph p {
+            font-size: 12px !important;
+        }
+
+        .clsbuildstanding p {
+            font-size: 12px !important;
+        }
+
+        .txtsummaryData {
+            font-size: 10px !important;
+            margin: 3px 0 6px 0;
+        }
+
+        .clsStandingText {
+            margin-top: 105px !important;
+        }
+    }
+

@@ -1,0 +1,460 @@
+﻿
+@{
+    ViewBag.Title = "ScafMapJobPipelinestatus";
+}
+
+<script src="https://maps.googleapis.com/maps/api/js?key=@(Session["googlemapapi"])&libraries=places" type="text/javascript"></script>
+<script>
+
+    $(document).ready(function () {
+        var id = getParameterByName('id');
+        var DecriptData = Decrypt([id]);
+        $("#ClientId").val(DecriptData[0]);
+
+        var Clientid = $('#ClientId').val();
+        SiteDropdownBind(Clientid);
+
+        var ddlsite = $('#ddlsite').val();
+        var Location = $("#ddllocation").val();
+
+        ddllocationbind(Clientid, ddlsite);
+        ddlbuildingbind(Clientid, ddlsite, "All");
+        var ddlBuilding = $('#ddlbuilding').val();
+        ddlFloorbind(Clientid, ddlsite, "All", "All");
+        var FloorLevelID = $('#ddlFloorLevel').val();
+        GoogleMap(Clientid, ddlsite, "All", "All", "All");
+
+    });
+
+    function ddlchange() {
+        var ddlsite = $('#ddlsite').val();
+        var ClientID = $('#ClientId').val();
+        ddllocationbind(ClientID, ddlsite);
+        ddlbuildingbind(ClientID, ddlsite, "All");
+        var LocationId = $("#ddllocation").val();
+        var ddlBuilding = $('#ddlbuilding').val();
+        ddlFloorbind(ClientID, ddlsite, LocationId, ddlBuilding);
+        var FloorLevelID = $('#ddlFloorLevel').val();
+        GoogleMap(ClientID, ddlsite, "All", "All", "All");
+
+    }
+    function Changelocation() {
+        var ddlsite = $('#ddlsite').val();
+        var ClientID = $('#ClientId').val();
+        var Location = $("#ddllocation").val();
+        ddlbuildingbind(ClientID, ddlsite, Location);
+        var ddlBuilding = $('#ddlbuilding').val();
+        ddlFloorbind(ClientID, ddlsite, Location, ddlBuilding);
+        var FloorLevelID = $('#ddlFloorLevel').val();
+        GoogleMap(ClientID, ddlsite, Location, "All", "All");
+    }
+    function Changebuilding() {
+        var ddlsite = $('#ddlsite').val();
+        var ClientID = $('#ClientId').val();
+        var Location = $("#ddllocation").val();
+        var Building = $("#ddlbuilding").val();
+        ddlFloorbind(ClientID, ddlsite, Location, Building);
+        var FloorLevelID = $('#ddlFloorLevel').val();
+        GoogleMap(ClientID, ddlsite, Location, Building, "All");
+    }
+
+    function ChangeFloorLevel() {
+        var ddlsite = $('#ddlsite').val();
+        var ClientID = $('#ClientId').val();
+        var Location = $("#ddllocation").val();
+        var Building = $("#ddlbuilding").val();
+        var FloorLevelID = $('#ddlFloorLevel').val();
+        GoogleMap(ClientID, ddlsite, Location, Building, FloorLevelID);
+    }
+
+
+    function redirection_Click() {
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var id = getParameterByName('id');
+
+        var RID = $('#hdnrid').val();
+        var EncryptData = Encrypt([RID]);
+        RID = EncryptData[0];
+        window.location.href = '/Register/Register?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&RID=' + RID;
+    }
+
+    function SiteDropdownBind(Clientid) {
+        var UID = getParameterByName('UID');
+        $.ajax({
+            type: "POST",
+            url: '/ScafMapJobPipelinestatus/SiteDropdownBind',
+            async: false,
+            data: JSON.stringify({ id: Clientid, UID: UID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddSite = "";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                    }
+                });
+                if (ddSite != "") {
+                    $('#ddlsite').empty().append(ddSite);
+                }
+
+            }
+        });
+
+
+    }
+    function ddllocationbind(ClientID, ddlsite) {
+        $.ajax({
+            type: "POST",
+            url: '/ScafMapJobPipelinestatus/ddlLocationScafMap',
+            data: JSON.stringify({ ClientID: ClientID, SiteId: ddlsite }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddllocationdropdownbind = response;
+                $("#ddllocation").html("");
+                $("#ddllocation").append('<option value="All">All</option>');
+                for (var i = 0; i < ddllocationdropdownbind.length; i++) {
+                    $("#ddllocation").append('<option value="' + ddllocationdropdownbind[i].areaid + '">' + ddllocationdropdownbind[i].area + '</option>');
+
+                }
+            }
+        });
+    }
+    function ddlbuildingbind(ClientID, SiteId, LocationId) {
+        $.ajax({
+            type: "POST",
+            url: '/ScafMapJobPipelinestatus/ddlbuildingScafMap',
+            data: JSON.stringify({ ClientID: ClientID, SiteId: SiteId, LocationId: LocationId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddlbuildingdropdownbind = response;
+                $("#ddlbuilding").html("");
+                $("#ddlbuilding").append('<option value="All">All</option>');
+                for (var i = 0; i < ddlbuildingdropdownbind.length; i++) {
+                    $("#ddlbuilding").append('<option value="' + ddlbuildingdropdownbind[i].buildingid + '">' + ddlbuildingdropdownbind[i].buildingno + '</option>');
+                }
+            }
+        });
+
+    }
+    function ddlFloorbind(ClientID, SiteId, LocationId, ddlBuilding) {
+        $.ajax({
+            type: "POST",
+            url: '/ScafMapJobPipelinestatus/ddlFloorbind',
+            async: false,
+            data: JSON.stringify({ ClientID: ClientID, SiteId: SiteId, LocationId: LocationId, ddlBuilding: ddlBuilding }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var ddlFloordropdownbind = response;
+                $("#ddlFloorLevel").html("");
+                $("#ddlFloorLevel").append('<option value="All">All</option>');
+                for (var i = 0; i < ddlFloordropdownbind.length; i++) {
+                    $("#ddlFloorLevel").append('<option value="' + ddlFloordropdownbind[i].FloorLevelId + '">' + ddlFloordropdownbind[i].FloorLevel + '</option>');
+                }
+            }
+        });
+
+    }
+    function GoogleMap(ClientID, id, location, building, FloorLevelID) {
+        var locations = [];
+        $.ajax({
+            type: "POST",
+            url: '/ScafMapJobPipelinestatus/GetMapLocation',
+            data: JSON.stringify({ ClientID: ClientID, id: id, location: location, building: building, FloorLevelID: FloorLevelID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                if (response.length == '0') {
+                    var response = { Result: "Failed", Message: "There is no register for the selected value." }
+                    CustomAlert(response);
+                }
+                var GoogleMap = response;
+                for (var i = 0; i < GoogleMap.length; i++) {
+                    locations.push([GoogleMap[i].Lat, GoogleMap[i].Long, GoogleMap[i].ScaffRef, GoogleMap[i].RID, GoogleMap[i].Lattitude, GoogleMap[i].Longitude, GoogleMap[i].StartDate, GoogleMap[i].EndDate, GoogleMap[i].HireDaysToDate, GoogleMap[i].MaterialTypeMap, GoogleMap[i].DesignType, GoogleMap[i].ManHrsDismantle, GoogleMap[i].Tonnage, GoogleMap[i].BuildingMap, GoogleMap[i].FloorLevelMap, GoogleMap[i].Status, GoogleMap[i].DaysSinceLastInsp, GoogleMap[i].WONumber, GoogleMap[i].PipelineStartDate, GoogleMap[i].PlanDuration, GoogleMap[i].BuildDuringShutdown]);
+
+                }
+                GetMap(locations);
+            }
+        });
+
+
+    }
+
+
+    function GetMap(markers) {
+        var map;
+        var global_markers = [];
+        var infowindow = new google.maps.InfoWindow({});
+        $(function () {
+            geocoder = new google.maps.Geocoder();
+            if (markers.length > 0) {
+                var lat = markers[0][4];
+                var long = markers[0][5];
+            }
+            else {
+                var lat = "";
+                var long = "";
+            }
+            var latlng = new google.maps.LatLng(lat, long);
+            var myOptions = {
+                zoom: 19,
+                tilt: 0,
+                center: latlng,
+                mapTypeId: google.maps.MapTypeId.HYBRID,
+                mapTypeControl: false,
+            }
+            map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+            map.setOptions({ minZoom: 2 });
+            var Clientid = getParameterByName('id');
+            var ddlsite = $('#ddlsite').val();
+            addMarker();
+        })
+
+
+        function addMarker() {
+            for (var i = 0; i < markers.length; i++) {
+                var lat = '';
+                var lng = '';
+                if (markers[i][0] != '0' && markers[i][0] != '0') {
+                    lat = parseFloat(markers[i][0]);
+                    lng = parseFloat(markers[i][1]);
+                }
+
+                var Name = '';
+                if (markers[i][2] != '' && markers[i][2] != null) {
+                    Name = markers[i][2];
+                }
+                var url = markers[i][3];
+                if (url == '' || url == null || url == '0') {
+                    continue;
+                }
+                var duration = '';
+                if (markers[i][8] != '' && markers[i][8] != null) {
+                    duration = markers[i][8];
+                }
+
+                var ErectDate = '';
+                if (markers[i][6] != null && markers[i][6] != '1900-01-01') {
+                    var date1 = new Date(markers[i][6]);
+                    var erect = "" + date1 + "";
+                    var date1dd = erect.substring(8, 11);
+                    var date1mm = erect.substring(4, 7);
+                    var date1yyyy = erect.substring(11, 16);
+                    ErectDate = date1dd + '-' + date1mm + '-' + date1yyyy
+                }
+                else {
+                    var date1 = '';
+                }
+
+                if (markers[i][7] != null && markers[i][7] != '1900-01-01') {
+                    var date2 = new Date(markers[i][7]);
+                }
+                else {
+                    var date2 = new Date();
+                }
+                if (date1 != '') {
+                    var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+                }
+
+                var DType = '';
+                if (markers[i][10] != '' && markers[i][10] != null) {
+                    DType = markers[i][10];
+                }
+                var MType = '';
+                if (markers[i][9] != '' && markers[i][9] != null) {
+                    MType = markers[i][9];
+                }
+                if (lat != '' && lng != '' && lat != '0' && lng != '0') {
+                    var myLatlng = new google.maps.LatLng(lat, lng);
+                }
+                else {
+                    var myLatlng = '';
+                }
+                var ManDismantle = '';
+                if (markers[i][11] != '' && markers[i][11] != null) {
+                    ManDismantle = markers[i][11];
+                }
+                var HireDaysToDate = '';
+                if (markers[i][8] != '' && markers[i][8] != null) {
+                    HireDaysToDate = markers[i][8];
+                }
+
+                var DaysSinceLastInsp = '';
+                if (markers[i][16] != '' && markers[i][16] != null) {
+                    DaysSinceLastInsp = markers[i][16];
+                }
+                var Tonnage = '';
+                if (markers[i][12] != '' && markers[i][12] != null) {
+                    Tonnage = markers[i][12];
+                }
+
+                var BuildingMap = '';
+                if (markers[i][13] != '' && markers[i][13] != null) {
+                    BuildingMap = markers[i][13];
+                }
+
+                var FloorLevel = '';
+                if (markers[i][14] != '' && markers[i][14] != null) {
+                    FloorLevel = markers[i][14];
+                }
+                var BuildDuringShutdown = '';
+                if (markers[i][20] != '' && markers[i][20] != null) {
+                    BuildDuringShutdown = markers[i][20];
+                }
+                var Status = markers[i][15];
+                var markerCode;
+                var cleanStatus = (Status && typeof Status === "string") ? Status.trim().toLowerCase() : "";
+                var BuildDuringShutdown = (markers[i][20] != '' && markers[i][20] != null) ? markers[i][20] : false;
+                if (cleanStatus === "pipeline") {
+                    if (String(BuildDuringShutdown).toUpperCase() === "TRUE") {
+                        markerCode = "#FFFFFF";
+                    } else {
+                        markerCode = "#0000CD";
+                    }
+                }
+                var PlanDuration = '';
+                if (markers[i][19] != '' && markers[i][19] != null) {
+                    PlanDuration = markers[i][19];
+                }
+                var WONumber = '';
+                if (markers[i][17] != '' && markers[i][17] != null) {
+                    WONumber = markers[i][17];
+                }
+                var PipelineStartDate = '';
+                if (markers[i][18] != null && markers[i][18] != '1900-01-01') {
+                    var date1 = new Date(markers[i][18]);
+                    var erect = "" + date1 + "";
+                    var date1dd = erect.substring(8, 11);
+                    var date1mm = erect.substring(4, 7);
+                    var date1yyyy = erect.substring(11, 16);
+                    PipelineStartDate = date1dd + '-' + date1mm + '-' + date1yyyy
+                }
+                else {
+                    var date1 = '';
+                }
+                // End Changed on 03 June 2020
+
+                var contentString = "<html><body><div><p><h2>" + Name + "</h2></p></div></body></html>";
+                var marker = new google.maps.Marker({                                           //Create marker
+                    //icon: mark,
+                    icon: pinSymbol(markerCode),
+                    position: myLatlng,
+                    map: map,
+
+                    //Changed on 03 June 2020
+                    /*   title: '-~-~-~-~-DETAILS-~-~-~-~- \n Scaf Ref                              : ' + Name + '\n Erection Date                     : ' + ErectDate + '\n Standing Days to Date       : ' + HireDaysToDate + '\n Days Since Last Inspection : ' + DaysSinceLastInsp + '\n Man Hrs Dismantle            : ' + ManDismantle + '\n Material Type                     : ' + MType + '\n Design Type                       : ' + DType + '\n Tonnage                             : ' + Tonnage + '\n Building                             : ' + BuildingMap + '\n Floor Level                         : ' + FloorLevel*/
+
+                    title: '-~-~-~-~--~-~-~-~- DETAILS -~-~-~-~--~-~-~-~-\n' +
+                        'Scaf Ref                               : ' + Name + '\n' +
+                        //'Erection Date                      : ' + ErectDate + '\n' +
+                        //'Standing Days to Date        : ' + HireDaysToDate + '\n' +
+                        //'Days Since Last Inspection : ' + DaysSinceLastInsp + '\n' +
+                        'WO Number                       : ' + WONumber + '\n' +
+                        'Pipeline Start Date              : ' + PipelineStartDate + '\n' +
+                        'Planned Standing Days       : ' + PlanDuration + '\n' +
+                        'Man Hrs Dismantle             : ' + ManDismantle + '\n' +
+                        'Material Type                      : ' + MType + '\n' +
+                        'Design Type                        : ' + DType + '\n' +
+                        'Tonnage                              : ' + Tonnage + '\n' +
+                        'Building                              : ' + BuildingMap + '\n' +
+                        'Floor Level                          : ' + FloorLevel
+
+                    // title: '-~-~-~-~-DETAILS-~-~-~-~-\n Scaf Ref                         : ' + Name + '\n Erection Date                : ' + ErectDate + '\n Actual Standing Days  : ' + Status + '\n Man Hrs Dismantle      : ' + ManDismantle + '\n Material Type                : ' + MType + '\n Design Type                  : ' + DType
+                    //title: '-~-~-~-~-DETAILS-~-~-~-~-\n ScaffRef : ' + Name + '\n Erection Date : ' + ErectDate + '\n Days Standing : ' + duration + '\n Man Hrs Dismantle : ' + ManDismantle + '\n MaterialType : ' + MType + '\n Design Type : ' + DType
+                });
+
+                infoWindow(marker, url);
+                marker['infowindow'] = contentString;
+
+                global_markers[i] = marker;
+
+
+            }
+        }
+
+        function pinSymbol(color) {
+            return {
+                path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z M -2,-30 a 2,2 0 1,1 4,0 2,2 0 1,1 -4,0',
+                fillColor: color,
+                fillOpacity: 1,
+                strokeColor: '#000',
+                strokeWeight: 2,
+                scale: 1,
+            };
+        }
+
+        function infoWindow(marker, url) {
+            google.maps.event.addListener(marker, 'click', function () {
+
+                $('#hdnrid').val(url);
+                redirection_Click();
+            });
+        }
+    }
+
+
+
+</script>
+
+
+
+<input type="hidden" id="ClientId" />
+<input type="hidden" id="hdnrid" />
+<div class="row">
+    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3" style="padding:0px">
+        <label style="float:right;font-weight:700;font-size:18px;color:black">Site:</label>
+    </div>
+    <div class="col-lg-2 col-md-5 col-sm-7 col-xs-9">
+        <select id="ddlsite" Class="form-control" onchange="ddlchange()" style="width:100%;color:black;border:1px solid;border-color: #e5e3df;"></select>
+    </div>
+
+    <div class="col-lg-1 col-md-2 col-sm-3 col-xs-3" style="padding:0px">
+        <label id="lbllocation" style="font-weight: 700; font-size: 18px; color: black; float:right">Location:</label>
+    </div>
+    <div class="col-lg-2 col-md-4 col-sm-7 col-xs-9">
+        <select id="ddllocation" Class="form-control" Style="border: 1px solid ;border-color: #e5e3df; width:100%" onchange="Changelocation();"></select>
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3" style="padding:0px">
+        <label id="lblbuilding" runat="server" style="font-weight: 700; font-size: 18px; color: black; float:right">Building:</label>
+    </div>
+    <div class="col-lg-2 col-md-5 col-sm-7 col-xs-9">
+        <select id="ddlbuilding" Class="form-control" Style="border: 1px solid ;border-color: #e5e3df; width:100%" onchange="Changebuilding();"></select>
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3" style="padding:0px">
+        <label id="lblFloorLevel" runat="server" style="font-weight: 700; font-size: 18px; color: black; float:right">Floor Level:</label>
+    </div>
+    <div class="col-lg-2 col-md-5 col-sm-7 col-xs-9">
+        <select id="ddlFloorLevel" Class="form-control" Style="border: 1px solid ;border-color: #e5e3df; width:100%" onchange="ChangeFloorLevel();"></select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="xsfield">
+        <input type="hidden" id="HiddenforMappAddress" />
+        <div id="map_canvas" style="width: 101%; height: 550px;margin-left:-2px">
+        </div>
+    </div>
+</div>
+
+
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <button id="redirection" style="display:none" OnClick="redirection_Click()"></button>
+    <label Text="*" style="color:red">*</label>
+    <img src="/images/NewBlue.png" id="imgLogo1" title="red pin" style="height: 15px; background-color: white;" />
+    <label id="Label1" style="color:black;width:auto;font-size:11px;">Build on Live Plant</label>
+    <div class="row">
+        <button id="redirection" style="display:none" OnClick="redirection_Click()"></button>
+        <label Text="*" style="color:red">*</label>
+        <img src="/images/NewWhite.png" id="imgLogo2" title="red pin" style="height: 15px; background-color: white;" />
+        <label id="Label1" style="color:black;width:auto;font-size:11px;">Build During Shutdown</label>
+
+    </div>
+
+</div>
+

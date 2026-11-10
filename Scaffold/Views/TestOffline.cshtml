@@ -1,0 +1,48 @@
+﻿@{
+    ViewBag.Title = "TestOffline";
+}
+
+<style>
+
+</style>
+
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+
+</head>
+
+<script></script>
+
+<div class="row">
+    <div class="col-lg-8 col-md-4 col-sm-4 col-xs-12">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span id="lblTestOffline" Font-Size="16px" Font-Bold="true">Test Offline</span></b></h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12" style="display: flex; justify-content: center; margin-bottom: 10px;">
+        <button id="btnGoOffline" class="btn w3-btn" style="width: -webkit-fill-available; height: 33px; background-color: #4169E1; border: none; color: white; " onclick="btnGoOfflie_Click()">
+            <i class="fa fa-internet-explorer"></i>&nbsp;Go Offline
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="OffSystemInspectionList" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblOffSystemInspectionList" class="table table-striped " style="width:100%">
+                <thead style="background-color: #efefef; color: #716262;width: 100%;">
+                    <tr>
+                        <th class="setWidth0" style="display:none;"></th>
+                        <th class="setWidth0">Status</th>
+                        <th class="setWidth1">Scaf Ref #</th>
+                        <th class="setWidth2">Site</th>
+                        <th class="setWidth3">Location</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyOffSystemInspectionList" style="width:100%"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

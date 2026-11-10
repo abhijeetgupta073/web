@@ -1,0 +1,27 @@
+﻿CACHE MANIFEST
+# Version 1.0
+ORIGIN-TRIAL:
+AtuFfgxjtLmQZWq5BdprMFHj6MdEFHohwk9eRU/f1PNSD+G8i094SCwTwQCzoqDvqu0svTS3PYaTNkJg6zVQ2Q4AAAB1eyJvcmlnaW4iOiJodHRwczovL3NjYWZwYWNhcHB0ZXN0LmF6dXJld2Vic2l0ZXMubmV0OjQ0MyIsImZlYXR1cmUiOiJBcHBDYWNoZSIsImV4cGlyeSI6MTYxNzc1MzU5OSwiaXNTdWJkb21haW4iOnRydWV9
+
+CACHE:
+/Content/css/w3.css
+/Content/css/bootstrap.min.css
+/Content/fonts/css/font-awesome.min.css
+/Content/fonts/css/font-awesome.min.css
+/Content/css/signature-pad.css
+/Content/js/jquery.min.js
+/Content/js/bootstrap.min.js
+/Content/js/Audiojs/audiodisplay.js
+/Content/js/Audiojs/recorderjs/recorder.js
+/Content/js/signature_pad.js
+/Content/js/html2canvas.js
+/Content/js/Audiojs/AudioInsp.js
+/Content/js/locationInsp.js
+/Content/js/videoInsp.js
+/Content/js/cameraInsp.js
+/Images/loading.gif
+
+NETWORK:
+/service/status
+FALLBACK:
+/online.png /offlinelogo.png

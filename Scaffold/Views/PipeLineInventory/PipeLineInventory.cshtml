@@ -1,0 +1,251 @@
+﻿
+@{
+    ViewBag.Title = "PipeLineInventory";
+}
+
+<script src="~/Content/js/PipeLineInventory.js?V1=11"></script>
+<script>
+    $(document).ready(function () {
+        var RID = getParameterByName('RID');
+        var ArrayData = [RID];
+        var DecryptData = Decrypt(ArrayData);
+        var fromtocheck = getParameterByName('fromtocheck');
+        var ThirdParty = getParameterByName('ThirdParty');
+
+        RID = DecryptData[0];
+        if (RID != "" && RID != null) {
+            $('#rdositetojob').prop('checked', true);
+            $('#showback').css('display', 'block');
+            $('#DtoS').css('display', 'none');
+            $('#showreqdel').css('display', 'none');
+            $('#StoJ').css('display', 'block');
+            $('#txtsite').val('@ViewBag.SiteName');
+            $('#txtjob').val('@ViewBag.ScaffRref');
+
+            $('#ShowThirdPartytoDepot').css('display', 'none');
+            $('#Showdepottosite').css('display', 'none');
+
+        }
+        else {
+            if (Decrypt(fromtocheck) == "3" || Decrypt(ThirdParty) == "true")
+            {
+                $('#rdoThirdPartytoDepot').prop('checked', true);
+                $('#lblfrom').css('display', 'none');
+                $('#ddlSite').css('display', 'none');
+            }
+        else{
+            $('#rdodepottosite').prop('checked', true);
+            }
+        }
+        var from = getParameterByName('from');
+        if (from != null) // check Come From Job From
+        {
+            $('#btnbacktoPipelineJob').css('display', 'block');
+        }
+
+        SiteDropDownBind();
+        PipelineDateDropDown();
+
+       $("#ddlSite").on("change", function () {
+           JobDropDown();
+           PipelineDateDropDown();
+           GetPipeLineInventoryData();
+
+       });
+       $("#ddlJob").on("change", function () {
+           PipelineDateDropDown();
+           GetPipeLineInventoryData();
+           GetPipelineStartDate();
+           $('#txtBtnHideShow').css("display", "block");
+           $('#txtBtnHideShow1').css("display", "block"); 
+           $('#txtBtnHideShow2').css("display", "block");
+       });
+
+       $("#ddlPipeline").on("change", function () {
+           GetPipeLineInventoryData();
+       });
+
+    });
+
+
+
+
+</script>
+
+
+<style>
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    
+</style>
+
+<div class="clearfix"></div>
+<input type="hidden" id="hdnSiteID" />
+
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liThirdParty" runat="server" style="width: 191px">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotInventory">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+
+            <li id="liSiteInventory" style="width: 161px">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+
+            <li id="liJob">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            <li id="LiSacafpac" runat="server">
+                <a id="AnchorReturnInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                </a>
+            </li>
+            <li id="LiDamaged" runat="server">
+                <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                </a>
+            </li>
+            <li class="active">
+                <a id="AnchorPipeLineInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;PipeLine Inventory</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial; height: auto !important">
+
+        <div class="row">
+
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-5">
+                <label id="lblfrom">Site</label>
+                <select id="ddlSite" Style="width: 148px"></select>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                <label id="lblfrom">Job</label>
+                <select id="ddlJob" Style="width: 148px"></select>
+
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5">
+                <label id="lblpipelinedate">Pipeline Date</label>
+                <select id="ddlPipeline" Style="width: 148px"></select>
+            </div>
+
+            <div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+
+                <button type="button" Class="btn w3-btn w3-teal" id="ExportToCsvButton" Style="color: white; margin-left: 39%; width: 75%; height: 26px; padding: initial;" onclick="ExportToCsvButton_Click()"><i class="fa fa-file-excel-o"></i> Export To CSV</button>
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                @*<label id="siteddl">Site:</label>*@
+                <button id="btnbacktoPipelineJob" Style="color: white; margin-left: 56%; display: none; width: 80%; height: 27px; " class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktoPipelineJob_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</button>
+            </div>
+            @*<div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+
+                <button type="button" Class="btn w3-btn w3-teal" id="CreateNewRequest" Style="margin-top: 15px; color: white; margin-left: 73%; width: 80%;" onclick="AddNewRequest2()">
+                    <i class="fa fa-plus"></i>&nbsp; Add Request
+                </button>
+            </div>*@
+
+
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="col-lg-1 col-md-2 col-sm-3 col-xs-5">
+                <label># of Items</label>
+                <input type="text" id="txtitems" class="form-control" disabled="disabled" />
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                <label>Total Tonnage</label>
+                <input type="text" id="txttotaltonnage" class="form-control" disabled="disabled" />
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="txtBtnHideShow" style="display:none;">
+                <label>Pipeline Start Date</label>
+                <input type="text" id="txtPipelineStartDate" class="form-control" disabled="disabled" />
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="txtBtnHideShow1" style="display: none; width: 27%;">
+                <label>Pipeline Notes</label>
+                <textarea type="text" id="txtpipelineNotes" class="form-control tooltip" disabled="disabled"></textarea>
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="txtBtnHideShow2" style="display: none; margin-left: 3%; width: 28%;">
+                <label>Pipeline Inventory Description</label>
+                <textarea type="text" id="txtDescription" class="form-control " disabled="disabled"></textarea>
+            </div>
+            </div>
+            <!--<div class="col-lg-3 col-md-3 col-sm-4 col-xs-4" style="margin-left: 50%;">-->
+            @*<label id="siteddl">Site:</label>*@
+            <!--<button id="btnbacktoPipelineJob" style="Width:80%; float: right; display:none;" class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktoPipelineJob_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Pipeline Job Inventory</button>
+        </div>-->
+            <div class="row"></div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="divSiteInventory">
+                    <div id="SiteInventoryGrid" style="color: black;">
+                        <table id="tblPipeLineInventory" class="table;" style="width:100% !important;display:none">
+                            <thead style="background-color: #efefef; color: #716262;">
+                                <tr>
+                                    @*<td style="display:none">Site Id</td>*@
+                                    <th style="display:none" class="setWidth0"></th>
+                                    <th class="setWidth1">Material Type</th>
+                                    <th class="setWidth8">Site</th>
+                                    <th class="setWidth2">Item Code</th>
+                                    <th class="setWidth3">Item Description</th>
+                                    @*<th class="setWidth4">Pipeline Start Date</th>
+                                    <th class="setWidth5">Pipeline Note</th>*@
+                                    <th class="setWidth6"> Quantity</th>
+                                    <th class="setWidth9">Item Weight (kg)</th>
+                                    <th class="setWidth10">Total Weight (kg)</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyTblPipeLineInventory"></tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+<div id="divConfirmReq" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 146px; width: 445px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey" id="P1">
+                <label>Do You want To Convert The Pending Pipeline Items  To Request ? </label>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-2 col-md-2 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnConfirmReqYes" OnClick="AddNewRequest()" style=" margin-left: 49%; "><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-4">
+                <button Class="btn btn-dark" id="btncancel" OnClick="btncancel_Click()" style=" margin-left: 123%"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

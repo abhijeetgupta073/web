@@ -1,0 +1,567 @@
+﻿
+@{
+    ViewBag.Title = "ImageGallery";
+}
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<style>
+    .spancolorandsize {
+        font-size: 12px !important;
+    }
+
+    .img-container {
+        margin-left: 45px;
+        margin-top: 13px;
+    }
+
+    .imagesize {
+        height: 23px;
+        font-size: 13px;
+        padding-top: 3px;
+    }
+
+    .img-container:hover {
+        border: 1px solid black;
+    }
+
+    element.style {
+    }
+
+    label {
+        font-weight: 400;
+        font-size: 12px;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $('#liimage').removeClass('active').addClass('active');
+        ShowJobInfoDetails();
+        showtImage();
+    });
+
+    $(document).ready(function () {
+        //$('input[type="file"]').change(function (e) {
+        //    var output = document.getElementById('fileList');
+        //    //output.innerHTML = 'File Selected:';
+        //    output.innerHTML = '<ul>';
+
+        //    for (var i = 0; i <= e.target.files.length; i++) {
+        //        output.innerHTML += '<li>' + e.target.files.item(i).name + '</li>';
+        //    }
+        //    output.innerHTML += '</ul>';
+        //});
+        $(document).ready(function () {
+            $('input[type="file"]').change(function (e) {
+                var output = document.getElementById('fileList');
+                output.innerHTML = '<ul>';
+                for (var i = 0; i < e.target.files.length; i++) {
+                    output.innerHTML += '<li>' + e.target.files[i].name + '</li>';
+                }
+                output.innerHTML += '</ul>';
+            });
+        });
+
+
+
+        $('img').on('click', function () {
+            //alert(this.id);
+            var imageid = this.id;
+            if (imageid != 'ppdl') {
+                $('#ppdl').attr("src", this.src);
+                $('#popup').css('display', 'block');
+            }
+            else {
+
+            }
+        });
+
+        $('.close').on('click', function () {
+            $('#popup').css('display', 'none');
+        });
+
+    });
+    function addnewimage() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        $('#fileList').val('');
+        $("#divCreatePop").css("display", "block");
+    }
+
+
+</script>
+<script>
+    $(document).ready(function () {
+        $('li.dropdown.user').on("click", function () {
+            $('li.dropdown.user').addClass('open');
+        });
+
+        $('#btndelete').on('click', function () {
+            if (IsSiteStatus == "InActive") {
+                CustomAlert({
+                    Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+                });
+                return false;
+            }
+            var parentids = $(this).parent();
+            var siblingids = parentids.siblings();
+            var imglink = siblingids[0].currentSrc;
+            var splitting = imglink.split('siteimage/');
+            var imgname = splitting[1];
+            $('#hdnimgname').val(imgname);
+            $('#divdelete').css('display', 'block');
+        });
+
+        var GetisSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && !navigator.userAgent.match('CriOS');
+        if (GetisSafari == false) {
+            $(".nonsafari").css("display", "block");
+            $(".safari").css("display", "none");
+            var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                $(".mobileApp").css("display", "block");
+                $(".desktopApp").css("display", "none");
+            } else {
+                $(".mobileApp").css("display", "none");
+                $(".desktopApp").css("display", "block");
+            }
+        } else {
+            $(".nonsafari").css("display", "none");
+            $(".safari").css("display", "block");
+        }
+
+
+        $(document).on("change", ".mob_file_image", function (evt) {
+            var base64mobImagedata;
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            var name = this.files[0].name;
+            $("#nameget").val(name);
+            reader.onloadend = function () {
+                base64mobImagedata = reader.result;
+                //$("#Image1").attr('src', base64mobImagedata);
+                //Console.log(base64mobImagedata);
+                $("#tempimg").val(base64mobImagedata);
+            }
+        });
+
+        $(document).on("change", "#mobApp_file", function (evt) {
+            var base64mobdata;
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            var name = this.files[0].name;
+            $("#nameget").val(name);
+            reader.onloadend = function () {
+                base64mobdata = reader.result;
+                //console.log(base64mobdata);
+                // $("#imga").attr('src', base64mobdata);
+
+                $("#tempimg").val(base64mobdata);
+            }
+        });
+
+        $("#getCamera").on("click", function () {
+            // alert();
+            $("#cancelsnap").on("click", function () {
+                $("#btnOpenModel").css("display", "none");
+                cameraStream.stop();
+            });
+            $("#btnOpenModel").css("display", "block");
+            $(".hdnCamerabefore").css("display", "block");
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var video = document.querySelector('video#video');
+            var cameraStream = null;
+            var mediaConfig = { video: true };
+            var errBack = function (e) {
+                console.log('An error has occurred!', e)
+            };
+            // Put video listeners into place
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(mediaConfig).then(function (stream) {
+                    video.srcObject = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                });
+            }
+            /* Legacy code below! */
+            else if (navigator.getUserMedia) { // Standard
+                navigator.getUserMedia(mediaConfig, function (stream) {
+                    video.src = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                }, errBack);
+            }
+            else if (navigator.mozGetUserMedia) {// Mozilla-prefixed
+                navigator.mozGetUserMedia(mediaConfig, function (stream) {
+                    video.src = window.URL.createObjectURL(stream);
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                }, errBack);
+            }
+            // Trigger photo take
+            document.getElementById('snap').addEventListener('click', function () {
+                $("#btnOpenModel").css("display", "none");
+                $('#hdncapture').val("true");
+                $("#imageLicence").css("display", "none");
+                context.drawImage(video, 0, 0, 640, 480);
+                var image = document.getElementById("canvas").toDataURL("image/png");
+                $("#tempimg").val(image);
+                cameraStream.stop();
+            });
+        });
+        $('#btndownload').click(function () {
+            var imageUrl = $('#ppdl').attr('src');
+            var fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+            var registerId = getParameterByName('RID');
+            window.location.href = '/ImageGallery/DownloadImage?registerId=' + registerId + '&fileName=' + encodeURIComponent(fileName);
+            Res = { Result: "Success", Message: "File downloaded Successfully" };
+            CustomAlert(Res);
+            $('.selectFile').prop('selected', 'selected');
+        });
+    });
+
+    function btnclose() {
+        var output = document.getElementById('fileList');
+        output.innerHTML = '';
+        $('#fileList').val('');
+        $('#divCreatePop').css('display', 'none');
+        $("#Photoblock").css('display', 'none');
+        $('#txtdesc').val('');
+        $('#TextBox1').val('');
+    }
+
+
+    function margin() {
+        $('.footermargin').css('margin-top', '300px');
+    }
+
+
+    function ButtonClient() {
+        var desc = $("#txtdesc").val();
+        if (desc != "") {
+            $('#LoadingPanel1').css('display', 'block');
+
+            var fileData = new FormData();
+            var files;
+
+            // Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+                if (files == null || files == "") {
+                    var fileUpload = $('#FileUpload1').get(0);
+                    files = fileUpload.files;
+                }
+                var fileUpload = $('#FileUpload1').get(0);
+                // Create FormData object
+                //  var fileData = new FormData();
+                if (files.length != 0) {
+
+                    //var FileName = files[0].name;
+                    //var FileSize = files[0].size;
+                    //var extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+                    //fileData.append(files[0].name, files[0]);
+
+                    for (var i = 0; i < files.length; i++) {
+                        var FileName = files[i].name;
+                        var FileSize = files[i].size;
+                        var extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+                        fileData.append(files[i].name, files[i]);
+                        $('#hdnOriginalfileName').val(files[0].name);//Added on 16-July-2022
+                    }
+                }
+            }
+
+            var UID = getParameterByName('UID');
+            var UserRole = getParameterByName('UserRole');
+            var id = getParameterByName('id');
+            var DIDetailID = getParameterByName('DIDetailID');
+            var RID = getParameterByName('RID');
+            var OriginalDocumentName = $('#hdnOriginalfileName').val();//Added on 16-July-2022
+
+            var tempimg = $('#tempimg').val();
+            var hdndocument = $('#hdndocument').val();
+            var FileUpload1 = $('#FileUpload1').val();
+            var hdncapture = $('#hdncapture').val();
+            var nameget = $('#nameget').val();
+
+
+            fileData.append('UID', UID);
+            fileData.append('id', id);
+            fileData.append('DIDetailID', DIDetailID);
+            fileData.append('txtdesc', desc);
+            fileData.append('RID', RID);
+            fileData.append('UserRole', UserRole);
+            fileData.append('tempimg', tempimg);
+            fileData.append('hdndocument', hdndocument);
+            fileData.append('FileUpload1', FileUpload1);
+            fileData.append('hdncapture', hdncapture);
+            fileData.append('nameget', nameget);
+            fileData.append('OriginalDocumentName', OriginalDocumentName); //Added on 16-July-2022
+
+            $.ajax({
+                url: '/ImageGallery/btnSave_Click',
+                type: "POST",
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: fileData,
+                success: function (response) {
+                    var res = response;
+                    //var response = { Result: "Success", Message: "Data Saved Successfully." };
+                    CustomAlert(response);
+                    $('#divCreatePop').hide();
+                    showtImage();
+                    $('#txtdesc').val('');
+                    $('#TextBox1').val('');
+                    $('#fileList').val('');
+                    $("#LoadingPanel1").css("display", "none");
+                }
+            })
+
+        } else {
+            $("#LoadingPanel1").css("display", "none");
+            var response = { Result: "Failed", Message: "Please Fill Description." };
+            CustomAlert(response);
+        }
+    }
+
+
+    function showtImage() {
+
+        var RID = getParameterByName('RID');
+        $.ajax({
+            url: '/ImageGallery/showtImage',
+            type: 'POST',
+            data: JSON.stringify({ RID: RID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                $('#placeholderforimage').empty().append(response);
+
+
+                $('img').on('click', function () {
+                    //alert(this.id);
+                    var imageid = this.id;
+                    if (imageid != 'ppdl') {
+                        $('#ppdl').attr("src", this.src);
+                        $('#popup').css('display', 'block');
+                    }
+                    else {
+
+                    }
+                });
+
+                $('.close').on('click', function () {
+                    $('#popup').css('display', 'none');
+                });
+                $('#maindivImageGellery').css('display', 'block');
+            }
+
+        });
+
+    }
+
+
+    function btndeleteyes_Click() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        $('#LoadingPanel1').css('display', 'block');
+        var fileData = new FormData();
+
+        var RID = getParameterByName('RID');
+        var hdnimagname = $('#hdnimgname').val();
+
+        fileData.append('RID', RID);
+        fileData.append('hdnimgname', hdnimgname);
+
+        $.ajax({
+            url: '/ImageGallery/btndeleteyes_Click',
+            type: "POST",
+            data: JSON.stringify({ RID: RID, hdnimgname: hdnimagname }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+
+            success: function (response) {
+                var res = response;
+                if (res = "Success") {
+                    $('#divdelete').css('display', 'none');
+                    CustomAlert(response);
+                    showtImage();
+                    $('#LoadingPanel1').css('display', 'none');
+                }
+
+
+            }
+        });
+
+    }
+
+
+
+
+    function deleteno() {
+        $('#divdelete').css('display', 'none');
+    }
+
+</script>
+<input type="hidden" id="hdnOriginalfileName" value="" /> @*Added on 16-July-2022*@
+<div class="tab-content" id="maindivImageGellery" style="display:none">
+    <div class="row">
+        <div class="title_left col-lg-5 col-md-5 col-sm-5">
+            <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-image"></i>&nbsp;<span id="lblclient" Font-Size="16px" Font-Bold="true">Image Gallery</span></b></h4>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2">
+        </div>
+
+    </div>
+    @Html.Partial("_RegisterPartiaView")
+
+
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="AddNewImg" runat="server">
+            <button id="btnNewImage" type="button" class="w3-btn w3-teal" style="float: right; margin-right: 7px" onclick="addnewimage();"><i class="fa fa-plus"></i>&nbsp;Add New Image</button>
+
+        </div>
+    </div>
+
+    <input type="hidden" id="hdncapture" Value="" />
+    <input type="hidden" id="hdnimgname" Value="" />
+    <input type="hidden" id="nameget" Value="" />
+    <input type="hidden" id="tempimg" name="tempimg" />
+
+
+    @*<asp:PlaceHolder ID="placeholderforimage" runat="server"></asp:PlaceHolder>*@
+    <div id="placeholderforimage" style="overflow-y: scroll;height:500px"></div>
+
+</div>
+<div id="popup" class="w3-modal" runat="server">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width:fit-content;">
+        <span class="crossbtn" style="cursor: pointer; color: Black; font-weight: bold; margin-right: 5px; float: right; background: white" onclick="document.getElementById('popup').style.display='none'">
+            <a id="btndownload" download><i class="glyphicon glyphicon-download-alt"></i></a>
+            &nbsp;&nbsp;<a id="btndelete"><i class="glyphicon glyphicon-trash"></i></a>&nbsp;&nbsp;X
+        </span>
+
+        <img id="ppdl" class="img-responsive" runat="server" src="" align="middle" style="min-height: 350px; min-width: 350px !important; height: auto; width: auto; max-width: 1000px; max-height: 450px; margin-top: -10px;" />
+    </div>
+</div>
+
+
+<div id="divCreatePop" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 435px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Image<a id="close" class="close" style="float: right; color: white" onclick="btnclose();">X</a></h4>
+        </header>
+        <div class="row"></div>
+        <div class="row">
+
+            <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3">
+                <label id="lbldescription" runat="server" style="font-size: 15px">Description<span style="color: red">&nbsp*</span></label>
+            </div>
+
+            <div class="col-xs-8 col-lg-8 col-md-8 col-sm-8">
+                @*<asp:TextBox ID="txtdesc" runat="server" CausesValidation="true" CssClass="form-control"></asp:TextBox>
+                    <asp:RequiredFieldValidator ID="rfv" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtdesc" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+                <input type="text" id="txtdesc" class="form-control" required />
+            </div>
+
+            <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1" style="opacity:0">
+                @*<asp:TextBox ID="TextBox1" Enabled="true" runat="server" Height="0px" Width="0px" BackColor="White" Visible="true" CssClass="form-control"></asp:TextBox>*@
+                <input type="text" id="TextBox1" step="Height:0px; Width:0px;" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+
+
+            <div class="row safari" style="display: none;">
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                    @*<input type="file" name="file" id="mob_file_image" multiple="multiple" class="mob_file_image custombtn" accept="image/*;capture=camera" />*@
+                    <input type="file" name="file" id="mob_file_image" multiple="multiple" class="mob_file_image custombtn" accept="image/*" capture="environment" />
+                </div>
+            </div>
+            <div class="nonsafari" style="display: none;">
+                <div class="desktopApp" style="display: none;">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                        @*<asp:FileUpload runat="server" ID="FileUpload1" AllowMultiple="true" />*@
+                        <input type="file" id="FileUpload1" AllowMultiple="true" multiple="multiple" />
+                    </div>
+
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4 desktopApp nonsafari" style="display: none;">
+                        <button type="button" id="getCamera" style="width: 95%" class="btn w3-btn w3-ripple w3-blue-grey imagesize"><i class="fa fa-camera"></i> &nbsp;Capture</button>
+                    </div>
+                </div>
+                <div class="mobileApp" style="display: none;">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+
+                        @*<input type="file" name="file" id="mobApp_file" multiple="multiple" class="custombtn" accept="image/*;capture=camera" />*@
+                        <input type="file" name="file" id="mobApp_file" multiple="multiple" class="custombtn" accept="image/*" capture="environment" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                @*<asp:Button runat="server" ID="btnSave" ValidationGroup="Save" OnClientClick="ButtonClient();" Width="100%" CssClass="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSave_Click" Text="Save" />*@
+                <button type="button" id="btnSave" onclick="ButtonClient();" style="Width:100%;" class="w3-btn w3-small w3-green btnheight imagesize"><i class="fa fa-save"></i>&nbsp;Save</button>
+            </div>
+            <div runat="server" id="Photoblock" class="hdnCamerabefore" style="display: none; width: 200px;">
+                <canvas id="canvas" width="640" height="480" style="width: 336px; height: 180px; margin-left: 14px; margin-top: 10px;"></canvas>
+            </div>
+        </div>
+        <div id="fileList" style="color: black; margin-left: 14px">
+        </div>
+    </div>
+</div>
+
+<div id="btnOpenModel" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4" runat="server">Capture Your Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <video id="video" style="width:100%; height:auto;" autoplay></video>
+                <div class="row">
+                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+                    </div>
+                    <div class="col-lg-5 col-md-6 col-sm-3 col-xs-3"></div>
+                    <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="cancelsnap" class="btn btn-danger" onclick="Cancel();">Cancel</button>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="divdelete" runat="server" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Delete the Image?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeleteyes" runat="server" OnClick="btndeleteyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteyes" onclick="btndeleteyes_Click();"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndeleteno" runat="server" OnClientClick="deleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" onclick="deleteno();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,359 @@
+﻿
+@{
+    ViewBag.Title = "Representative_Position";
+}
+
+    <style>
+        .dt-button.buttons-csv.buttons-html5 {
+            display: none;
+        }
+
+        #gridRepresentative_Position_length {
+            margin-top: -16px;
+        }
+    </style>
+
+<script>
+    $(function () {
+        GetRepresentativePositionType();
+    });
+
+    let Status = '';
+    function GetRepresentativePositionType() {
+        $("#LoadingPanel1").css("display", "block");
+        
+        var str = "";
+
+        str += '<table id="gridRepresentative_Position" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+        // str += "<th style='width:7%'>#</th>";
+        str += "<th style='width:3%;padding: 0px;' class='ClassbtnRepr_PositionEdit'></th>";
+        str += "<th style='width:3%;padding: 0px;' class='ClassbtnRepr_PositionDelete'></th>";
+        str += "<th  style='text-align:center;display:none'>RepresentativeId</th>";
+        str += "<th  style='text-align:left;width:30%'>Position</th>";
+        str += "<th  style='text-align:center;width:20%'>Position Status</th></tr ></thead > <tbody>";
+
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/Representative_Position/GetRepresentattivePositionData',
+            type: 'POST',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getdata = response;
+               
+                str += "<tr id='row_9999' style='display:none'><td  style='width:2%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                    str += "<td  style='text-align:center;display:none'></td>";
+                    str += "<td  style='text-align:center;display:none'>0</td>";
+                    str += "<td  style='text-align:left;width:10%'></td>";
+                    str += "<td  style='text-align:center;width:10%'></td></tr>";
+                
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var RepresentativeId = getdata[i].ID == null ? "" : getdata[i].ID;
+                        var Position = getdata[i].Position == null ? "" : getdata[i].Position;
+                        var Status = getdata[i].Status == null ? "" : getdata[i].Status;
+
+                        //str += "<td  style='width:2%;'><a id='rowpencil' class='expand fa fa-pencil'></a>&nbsp;&nbsp;<a id='rowdelete' class='fa fa-trash'></a></td>";
+                        str += "<td style='width:3%;' class='ClassbtnRepr_PositionEdit'><a id='rowpencil' class='expand fa fa-pencil'></a></td>";
+                        str += "<td style='width:3%;' class='ClassbtnRepr_PositionDelete'><a id='rowdelete' class='fa fa-trash'></a></td>";
+                        str += "<td  style='text-align:center;display:none'>" + RepresentativeId + "</td>";
+                        str += "<td  style='text-align:left;width:10%'>" + Position + "</td>";
+                        str += "<td  style='text-align:center; width:10%'>" + Status + "</td></tr>";
+                    }
+                 
+                }
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+
+                $("#LoadingPanel1").css("display", "none");
+
+                $(".fa-trash").click(function () {
+                    // var represantiveId = $(this).parent().parent().children()[1].innerText;
+                    var represantiveId = $(this).parent().parent().children()[2].innerText;
+                    $("#hdnRepresantiveId").val(represantiveId);
+                    $("#Deletemodal").css("display", "block");
+                });
+
+                $(".fa-pencil").click(function () {
+                    var visible = $(this).parent().parent().hasClass("Edit");
+                    var tr = $(this).closest('tr');
+                    var row = table.row(tr);
+                    if (visible == true) {
+                        $(this).parent().parent().next('tr').remove();
+                        $(this).parent().parent().removeClass('Edit');
+                    }
+                    else {
+                        row.child(Editing(row.data())).show();
+                        $('#ddlStatus').val(StatusVal);
+                        row.child.show();
+                        tr.addClass('Edit');
+                    }
+
+                });
+
+                var table = $('#gridRepresentative_Position').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    info: false,
+                    "pageLength": 50,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    fixedHeader: true,
+                    fixedColumns: {
+                        leftColumns: 11,
+                    },
+                    dom: 'lBfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Representative Position',
+                            exportOptions: {
+                                columns: [3, 4]
+                            }
+                        }
+                    ],
+
+                    initComplete: function () {
+                        $("#gridRepresentative_Position_length").children().html('<button id="btnaddRepresentativeType"  type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:-43px;">&nbsp;Add New Position</button><button id="btnExport" type="button" class="w3-btn w3-teal Export" style="margin-left:178px;height:26px;padding-top:3px;"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>');
+                        $("#btnaddRepresentativeType").click(function () {
+
+                            var trow1 = $(this).parent().parent().siblings();
+                            var trow = $(this).parent().parent().siblings()[2].childNodes[0];
+                            var row = table.row(trow);
+                            var c = 0;
+                            row.child(Editing(c)).show();
+
+                        });
+
+                        $(".Export").click(function () {
+                            $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+                        });
+                    },
+                    "columnDefs": [
+                        { "width": "100px", "targets": 'fullsize' }
+                    ],
+                    "drawCallback": function () {
+
+                        $('.fa-angle-right').click(function (eve) {
+                            eve.stopImmediatePropagation();
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+                            var visible = $(this).parent().parent().hasClass("shown");
+                            var anglechange = $(this).hasClass("fa-angle-right");
+                            if (anglechange == true) {
+                                var x = tr.children()[0];
+                                $(this).removeClass("fa-angle-right");
+                                $(this).addClass("fa-angle-down");
+                            }
+                            else {
+                                $(this).addClass("fa-angle-right");
+                                $(this).removeClass("fa-angle-down");
+                            }
+                            if (visible == true) {
+                                // This row is already open - close it
+                                $(this).parent().parent().next('tr').remove();
+                                $(this).parent().parent().removeClass('shown');
+                            }
+                            else {
+                                // Open this row
+                                row.child(format(row.data())).show();
+                                row.child.show();
+                                tr.addClass('shown');
+                            }
+                        });
+                        GridButtonHideShow(table, "gridRepresentative_Position");
+
+                    }
+
+                });
+
+                // scrolling Top when Click On Next Button
+
+                table.on('page.dt', function () {
+                    $('.dataTables_scrollBody').animate({
+                        scrollTop: 0
+                    }, 300);
+                });
+               
+                // Hide Show For DataTable Column And Buttons Start Here
+
+                GridButtonHideShow(table, "gridRepresentative_Position");
+
+                // Hide Show For DataTable Column And Buttons End Here
+            }
+        });
+    }
+
+
+
+    function Editing(d) {
+
+        $('#ddlStatus').val(d[3]);
+        var id = getParameterByName('id');
+        $.ajax({
+
+            success: function (response) {
+
+            },
+            complete: function () {
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#savechange").click(function () {
+
+                   // var RepresentativeId = $(this).parent().parent().parent().parent().prev('tr').children()[1].innerText;
+                    var RepresentativeId = $(this).parent().parent().parent().parent().prev('tr').children()[2].innerText;
+
+                    var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+                    var sropdownval = $(this).parent().parent().prev('div').children().find('select');
+
+                    var Position = firstrow[0].value;
+                    var Status = sropdownval[0].value;
+
+
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+
+                    if (Position != "") {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/Representative_Position/RepresentativeSaveData",
+                            data: JSON.stringify({ "RepresentativeId": RepresentativeId, "Position": Position, "Status": Status, "id": id, "UID": UID }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                               
+                                if (response.Result == 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    GetRepresentativePositionType();
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                                // $('#hdnOldQty').val("");
+                            }
+                        })
+                    } else {
+                        $("#LoadingPanel1").css("display", "none");
+                        $('#txtRepresentativePotion').css('border-color', 'red');
+                    }
+
+                });
+            }
+        });
+        if (d == 0) {
+            return '<div class="col-lg-12">'
+                + '<div class="col-lg-6">'
+                + 'Position <a style="color:red">*</a><input id="txtRepresentativePotion" type="text" class="form-control" style="width:100%" required>'
+                + '</div><div class="col-lg-6">'
+                + 'Status<select id="ddlStatus" style="width:100%" class="form-control" required><option value="Active">Active</option><option value="InActive">InActive</option></select>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-3">'
+                + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-3">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-6"></div></div>'
+
+        }
+        else {
+            StatusVal = d[4];
+            return '<div class="col-lg-12">'
+                + '<div class="col-lg-6">'
+                + 'Position <a style="color:red">*</a><input id="txtRepresentativePotion" type="text" class="form-control" value="' + d[3] + '" style="width:100%" required>'
+                + '</div><div class="col-lg-6">'
+                + 'Status<select id="ddlStatus" style="width:100%" class="form-control" required><option value="Active">Active</option><option value="InActive">InActive</option></select>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-3">'
+                + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-3">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-6"></div></div>'
+
+        }
+
+    }
+
+
+
+
+
+
+    function btnyes_Click() {
+
+        var RepresantiveId = $('#hdnRepresantiveId').val();
+
+        $.ajax({
+            url: '/Representative_Position/DeleteDocument',
+            type: 'post',
+            data: { RepresantiveId: RepresantiveId },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response.Result == 'Success') {
+                    CustomAlert(response);
+                    GetRepresentativePositionType();
+                } else {
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+
+</script>
+<input type="hidden" id="hdnTableData" />
+<input type="hidden" id="hdnRepresantiveId" />
+<div class="row">
+    <div class=" col-lg-12 col-md-12 col-sm-12">
+        <h4 class="heading" style="color: #0070ba;font-size:15px;"><b><i class="fa fa-briefcase" aria-hidden="true"></i>&nbsp;Representative Position</b></h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="loaddata" style="color: black; width: 80%"></div>
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+

@@ -1,0 +1,345 @@
+﻿
+@{
+    ViewBag.Title = "HierarchyofAccessChoice";
+}
+
+<link href="~/Content/Css/select2.min.css" rel="stylesheet" />
+<script src="~/Content/js/select2.min.js"></script>
+@*<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" />*@
+<link href="~/Content/Css/font-awesome.min.css" rel="stylesheet" />
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<script src="~/Content/js/HierarchyofAccessChoice.js"></script>
+<script>
+    $(document).ready(function () {
+      if ('@ViewBag.ddlsupervisor' != "") {
+    	$('#ddlsupervisor').val('@ViewBag.ddlsupervisor');
+        }   
+  });
+</script>
+<style>
+    input[type=checkbox] {
+        cursor: pointer;
+    }
+
+        input[type=checkbox]:checked:before {
+            content: "\2713";
+            background: #fffed5;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .2);
+            font-size: 25px;
+            text-align: center;
+            line-height: 10px;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            color: #00904f;
+            border: 1px solid #cdcdcd;
+            border-radius: 4px;
+            margin: -3px -3px;
+            text-indent: 1px;
+        }
+
+        input[type=checkbox]:before {
+            content: "\202A";
+            background: #ffffff;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, .2);
+            font-size: 25px;
+            text-align: center;
+            line-height: 10px;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            color: #00904f;
+            border: 1px solid #cdcdcd;
+            border-radius: 4px;
+            margin: -3px -3px;
+            text-indent: 1px;
+        }
+
+    .arrowimage {
+        position: absolute;
+        top: calc(-45%);
+        left: calc(86%);
+    }
+
+    .spancolorandsize {
+        font-size: 12px !important;
+    }
+
+
+    .form-control {
+        height: 28px !important;
+    }
+
+    .x_content {
+        padding: 0 0px 6px;
+    }
+
+    .input-group {
+        margin-bottom: 0px;
+    }
+
+    #FormSection label {
+        color: gray !important;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .nav-sm span.fa, .nav-sm .menu_section h3 {
+        display: block !important;
+    }
+
+    .w3-card-4, .w3-hover-shadow:hover {
+        box-shadow: 0 0px 0px 0 rgba(0,0,0,0.2),0 0px 0px 0 rgba(0,0,0,0.19) !important;
+    }
+
+    .panel_toolbox > li > a:hover {
+        background: none;
+    }
+
+    label {
+        font-size: 12px;
+    }
+
+
+    @@media(min-width:100px) and (max-width:550px) {
+        label.Size {
+            font-size: 10px !important;
+        }
+
+        .sizetextbox {
+            font-size: 10px !important;
+        }
+    }
+
+    @@media(min-width:550px) and (max-width:850px) {
+        label.Size {
+            font-size: 14px !important;
+        }
+
+        .sizetextbox {
+            font-size: 14px !important;
+        }
+    }
+
+    @@media(min-width:850px) and (max-width:3000px) {
+        label.Size {
+            font-size: 16px !important;
+        }
+
+        .sizetextbox {
+            font-size: 18px !important;
+        }
+    }
+</style>
+
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        @*<h4 class="heading" style="color: #0070ba"><b><i class="fa fa-check"></i>&nbsp;<asp:Label ID="lblclient" runat="server" Text="Hierarchy of Access Choice" Font-Size="16px" Font-Bold="true"></asp:Label></b></h4>*@
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-check"></i>&nbsp;<span id="lblclient" Font-Size="16px" Font-Bold="true">Hierarchy of Access Choice</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+    </div>
+</div>
+
+@Html.Partial("_RegisterPartiaView")
+
+<div class="clearfix"></div>
+@*<div id="FormSection" class="row">
+    <div class="col-xs-12" style="padding-left: 1px;">*@
+   
+        <input type="hidden" ID="hdncount" Value="1" />
+        <div class="tab-content">
+            <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+                @*<div class="row" id="HideSaveReset" runat="server">*@
+                <div class="row" id="HideSaveReset">
+                    <div class="col-lg-10 col-md-10 col-sm-8 col-xs-5"></div>
+                    <div class="col-lg-1 col-md-1 col-sm-2 col-xs-4">
+                        @*<asp:LinkButton Width="100%" runat="server" ID="btnsave" Style="height: 31px !important; padding-top: 6px !important" OnClick="btnsave_Click" CssClass=" w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</asp:LinkButton>*@
+                        <button  ID="btnsave" Style="height: 31px !important; padding-top: 6px !important;width:100%;" OnClick="btnsave_Click()" class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3">
+                        <a id="btnReset" Class="w3-btn w3-small w3-dark-grey" style="padding-left: 10px;Width:100%;"><i class="fa fa-refresh"></i>&nbsp;Reset</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5">
+                        <label class="Size" style="font-weight: bold">HIERARCHY OF ACCESS CHOICE</label>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 ">
+                        <label class="Size" style="font-weight: bold">YES</label>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 ">
+                        <label class="Size" style="font-weight: bold">NO</label>
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4">
+                        <label class="Size" style="font-weight: bold">COMMENTS</label>
+                    </div>
+                </div>
+                <div class="row" style="margin-bottom: 2px !important">
+                    <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5">
+                        @*<%--<img src="images/1 Engineer Out.png" id="imgEngineer" runat="server" style="width: 100%" />--%>*@
+                        @*<asp:TextBox ID="imgEngineer" Enabled="false" runat="server" Text="Engineer Out" CssClass="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;"></asp:TextBox>*@
+                        <input type="text" ID="imgEngineer" disabled="disabled" value="Engineer Out" Class="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox ID="chkYesEngineer" runat="server" value="1" class="check1" OnCheckedChanged="chkvalue_CheckedChanged" AutoPostBack="true" />*@
+                        <input type="checkbox" ID="chkYesEngineer" value="1" class="check1" onchange="chkvalue_CheckedChanged();" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox ID="chkNoEngineer" runat="server" value="0" CssClass="check1" OnCheckedChanged="chkvalue_CheckedChanged" onchange="NoCheck1();" AutoPostBack="true" />*@
+                        <input type="checkbox" ID="chkNoEngineer" value="0" Class="check1" OnCheckedChanged="chkvalue_CheckedChanged();" onchange="NoCheck1();" />
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4">
+                        @*<asp:TextBox ID="txtComment1" runat="server" CssClass="form-control" OnTextChanged="txtComment1_TextChanged" Style="width: 100%; margin-top: 8px" AutoPostBack="true" />
+                            <input type="text" id="Text1" runat="server" style="width: 0px; height: 0px; border: aliceblue;" />*@
+
+                        <input type="text" ID="txtComment1" Class="form-control" onchange="txtComment1_TextChanged();" Style="width: 100%; margin-top: 8px" />
+                        <input type="text" id="Text1" style="width: 0px; height: 0px; border: aliceblue;" />
+                    </div>
+                </div>
+
+                @*<div class="row" id="ImageHide1" runat="server" style="display: none">*@
+                <div class="row" id="ImageHide1" style="display: none">
+                    <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5">
+                        @*<img src="images/Arrow.png" runat="server" style="width: 10%; float: right; height:35px" class="arrowimage" />*@
+                        <img src="~/images/Arrow.png" style="width: 10%; float: right; height:35px" class="arrowimage" />
+                        @*<%--<img src="images/2 Mechinical Means.png" id="img1" runat="server" style="width: 100%" />--%>*@
+                        @*<asp:TextBox ID="imgMechinical" Enabled="false" runat="server" Text="Mechanical Means" CssClass="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;"></asp:TextBox>*@
+                        <input type="text" ID="imgMechinical" disabled="disabled" value="Mechanical Means" Class="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 " style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox ID="chkYesMechinical" OnCheckedChanged="chkvalue_CheckedChanged" runat="server" class="check2" value="1" AutoPostBack="true" />*@
+                        <input type="checkbox" id="chkYesMechinical" onchange="chkvalue_CheckedChanged();" class="check2" value="1" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 " style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox ID="chkNoMechinical" OnCheckedChanged="chkvalue_CheckedChanged" runat="server" class="check2" value="0" onchange="NoCheck2();" AutoPostBack="true" />*@
+                        <input type="checkbox" ID="chkNoMechinical" class="check2" value="0" onchange="NoCheck2();" />
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4">
+                        @*<asp:TextBox ID="txtComment2" runat="server" OnTextChanged="txtComment2_TextChanged" CssClass="form-control" Style="width: 100%; margin-top: 8px" AutoPostBack="true" />*@
+                        <input type="text" ID="txtComment2" onchange="txtComment2_TextChanged();" Class="form-control" Style="width: 100%; margin-top: 8px" />
+                    </div>
+                </div>
+
+                @*<div class="row" id="ImageHide2" runat="server" style="display: none">*@
+                <div class="row" id="ImageHide2" style="display: none">
+                    <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5">
+                        @*<img src="images/Arrow.png" runat="server" style="width: 10%; float: right; height:35px" class="arrowimage" />*@
+                        <img src="~/images/Arrow.png" style="width: 10%; float: right; height:35px" class="arrowimage" />
+                        @*<%--<img src="images/3 Rope Access.png" id="img2" runat="server" style="width: 100%" />--%>*@
+                        @*<asp:TextBox ID="imgRope" Enabled="false" runat="server" Text="Rope Access" CssClass="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;"></asp:TextBox>*@
+                        <input type="text" ID="imgRope" disabled="disabled" value="Rope Access" Class="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 " style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox OnCheckedChanged="chkvalue_CheckedChanged" ID="chkYesRope" runat="server" class="check3" value="1" AutoPostBack="true" />*@
+                        <input type="checkbox" onchange="chkvalue_CheckedChanged();" ID="chkYesRope" class="check3" value="1" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 " style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox OnCheckedChanged="chkvalue_CheckedChanged" ID="chkNoRope" runat="server" class="check3" value="0" onchange="NoCheck3();" AutoPostBack="true" />*@
+                        <input type="checkbox" OnCheckedChanged="chkvalue_CheckedChanged" ID="chkNoRope" class="check3" value="0" onchange="NoCheck3();" />
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4">
+                        @*<asp:TextBox ID="txtComment3" runat="server" OnTextChanged="txtComment3_TextChanged" Style="width: 100%;     margin-top: 8px" CssClass="form-control" AutoPostBack="true" />*@
+                        <input type="text" ID="txtComment3" onchange="txtComment3_TextChanged();" Style="width: 100%;  margin-top: 8px" Class="form-control" />
+                    </div>
+                </div>
+
+                @*<div class="row" id="ImageHide3" runat="server" style="display: none">*@
+                <div class="row" id="ImageHide3" style="display: none">
+                    <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5">
+                        @*<img src="images/Arrow.png" runat="server" style="width: 10%; float: right; height:35px" class="arrowimage" />*@
+                        <img src="~/images/Arrow.png" style="width: 10%; float: right; height:35px" class="arrowimage" />
+                        @*<%--<img src="images/4 Modular Scaffold Build.png" id="img3" runat="server" style="width: 100%" />--%>*@
+                        @*<asp:TextBox ID="imgModularScaffold" Enabled="false" runat="server" Text="Modular Scaffold Build" CssClass="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;"></asp:TextBox>*@
+                        <input type="text" ID="imgModularScaffold" disabled="disabled" value="Modular Scaffold Build" Class="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 " style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox OnCheckedChanged="chkvalue_CheckedChanged" ID="chkYesModularScaffold" runat="server" class="check4" value="1" AutoPostBack="true" />*@
+                        <input type="checkbox" onchange="chkvalue_CheckedChanged();" ID="chkYesModularScaffold" class="check4" value="1" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 " style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox OnCheckedChanged="chkvalue_CheckedChanged" ID="chkNoModularScaffold" runat="server" class="check4" value="0" onchange="NoCheck4();" AutoPostBack="true" />*@
+                        <input type="checkbox" OnCheckedChanged="chkvalue_CheckedChanged" ID="chkNoModularScaffold" class="check4" value="0" onchange="NoCheck4();" />
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4">
+                        @*<asp:TextBox ID="txtComment4" runat="server" Style="width: 100%; margin-top: 8px" OnTextChanged="txtComment4_TextChanged" CssClass="form-control" AutoPostBack="true" />*@
+                        <input type="text" ID="txtComment4" Style="width: 100%; margin-top: 8px" onchange="txtComment4_TextChanged();" Class="form-control" />
+                    </div>
+                </div>
+
+                @*<div class="row" id="ImageHide4" runat="server" style="display: none">*@
+                <div class="row" id="ImageHide4" style="display: none">
+                    <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5">
+                        @*<img src="images/Arrow.png" runat="server" style="width: 10%; float: right; height:35px" class="arrowimage" />*@
+                        <img src="~/images/Arrow.png" style="width: 10%; float: right; height:35px" class="arrowimage" />
+                        @*<%--<img src="images/5 Tube Coupler Scaffold Build.png" id="img4" runat="server" style="width: 100%" />--%>*@
+                        @*<asp:TextBox ID="imgTubeCoupler" Enabled="false" runat="server" Text="Tube & Coupler Build" CssClass="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;"></asp:TextBox>*@
+                        <input type="text" ID="imgTubeCoupler" disabled="disabled" value="Tube & Coupler Build" Class="form-control sizetextbox" Style="background-color: #135ebf; color: white; font-weight: bold; height: 47px !important; font-size: 20px;" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox OnCheckedChanged="chkvalue_CheckedChanged" ID="chkYesTubeCoupler" runat="server" class="check5" value="1" AutoPostBack="true" />*@
+                        <input type="checkbox" onchange="chkvalue_CheckedChanged();" ID="chkYesTubeCoupler" class="check5" value="1" />
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="padding-top: 12px; padding-left: 12px;">
+                        @*<asp:CheckBox OnCheckedChanged="chkvalue_CheckedChanged" ID="chkNoTubeCoupler" runat="server" class="check5" value="0" AutoPostBack="true" />*@
+                        <input type="checkbox" onchange="chkvalue_CheckedChanged();" ID="chkNoTubeCoupler" class="check5" value="0" />
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-4 col-xs-4">
+                        @*<asp:TextBox ID="txtComment5" runat="server" Style="width: 100%; margin-top: 8px" OnTextChanged="txtComment5_TextChanged" CssClass="form-control" />*@
+                        <input type="text" ID="txtComment5" Style="width: 100%; margin-top: 8px" onchange="txtComment5_TextChanged();" Class="form-control" />
+                    </div>
+                </div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-1"></div>
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-5">
+                        <label style="float: right; font-size: 14px; font-size:16px;font-weight: bold">SIGNED OFF BY</label>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6 ">
+                        @*<%-- <asp:LinkButton ToolTip="Add Site" OnClick="btnsupervisorAdd_Click" ID="btnsupervisorAdd" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>--%>*@
+                        @*<asp:DropDownList ID="ddlsupervisor" AppendDataBoundItems="true" runat="server" CssClass="form-control"></asp:DropDownList>*@
+                        <select id="ddlsupervisor" Class="form-control"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+@*<div id="DivConfirm" runat="server" class="w3-modal" style="display: none">*@
+<div id="DivConfirm" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            @*<h4 class="w3-text-white" id="h3" runat="server">Alert!</h4>*@
+            <h4 class="w3-text-white" id="h3">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                @*<label runat="server" id="Label1">All Comment and Hierarchy will be cleared.</label>*@
+                <label id="Label1">All Comment and Hierarchy will be cleared.</label>
+            </p>
+            <p class="w3-padding-top w3-text-grey">
+                @*<label runat="server" id="Label2">Do you want to continue?</label>*@
+                <label id="Label2">Do you want to continue?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton runat="server" class="w3-btn w3-green w3-hover-dark-grey" ID="btnyesCon" OnClick="btnyesCon_Click"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</asp:LinkButton>*@
+                <button class="w3-btn w3-green w3-hover-dark-grey" ID="btnyesCon" OnClick="btnyesCon_Click()"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <a class="w3-btn nln-bg w3-hover-dark-grey" id="btnNoCon"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</a>
+            </div>
+        </div>
+    </div>
+</div>

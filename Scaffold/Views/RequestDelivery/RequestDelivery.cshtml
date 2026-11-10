@@ -1,0 +1,124 @@
+﻿
+@{
+    ViewBag.Title = "RequestDelivery";
+}
+
+<script src="~/Content/js/RequestDelivery.js"></script>
+<div class="clearfix"></div>
+<div id="FormSection" class="row">
+
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liYard">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSiteInventory">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+            <li id="liJob">
+                <a id="AnchorJobInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory</span>
+                </a>
+            </li>
+            <li id="liSite" class="active" style="width: 161px">
+                <a id="AnchorDelInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Delivery Inventory</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</div>
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+
+
+            <div id="filtermattype" class="filter" runat="server" style="display: none;">
+                <div class="col-lg-1 col-sm-1 col-md-1 coll-xs-2">
+
+                    <label>Material</label>
+                </div>
+                <div class="col-lg-2 col-sm-3 col-md-4 col-xs-3">
+                    <select id="ddlMaterialType" class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="MaterialChange()"></select>
+
+                </div>
+            </div>
+            <input type="hidden" id="hdnfield" />
+            <input type="hidden" id="getgridcount" />
+
+            <div class="col-lg-7 col-md-7 col-sm-4 col-xs-12">
+                <label id="lbltab" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE BUTTON to save data</label>
+            </div>
+            <div id="setbutton" class="col-lg-5 col-md-5 col-sm-8 col-xs-12">
+                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6" style="display: none;">
+                    <button Class="w3-btn  w3-cyan buttonBlue" CausesValidation="false" id="btnAllocate" Visible="true" Style="width: 100%; color: white!important; font-size: 12px;  padding-left: 3px;" OnClientClick="SaveChangesInGrid(); return false;">&nbsp;Allocate </button>
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6" id="divConfirmDelivery" runat="server">
+                    <button id="btnconfirmDelvry" class="w3-btn  w3-green buttonBlue" Visible="true" OnClick="btnconfirmDelvry_Click()" Style="width: 100%; font-size: 12px; padding-left: 3px">Confirm Delivery</button>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6">
+                    <button Class="w3-btn  w3-blue-grey buttonBlue" Visible="true" CausesValidation="false" id="btnback" Style="width: 100%; font-size: 12px; padding-left: 3px;" OnClick="Back_Click()" runat="server"><i class="fa fa-backward"></i>&nbsp;Back </button>
+                </div>
+                <div id="lockimage" class="col-lg-2 col-md-2 col-sm-2 col-xs-6" runat="server" style="display: none">
+                    <img src="/images/lock.png" class="img-responsive" id="imglock" title="red pin" style="float: right; height: 50px; object-fit: contain; background-color: white;" />
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row"></div>
+
+        <input type="hidden" id="hdnfromcheck" />
+        <input type="hidden" id="hdncheckId" />
+        <input type="hidden" id="hdnTo" />
+        <input type="hidden" id="hdnToId" />
+        <input type="hidden" id="hdnFrom" />
+        <input type="hidden" id="hdnFromID" />
+        <input type="hidden" id="hdnTransID" />
+        <input type="hidden" id="hdnClientId" />
+        <input type="hidden" id="hdnUId" />
+        <input type="hidden" id="hdntextdisable" />
+        <input type="hidden" id="hdnInvetory" />
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div id="loaddata"></div>
+
+             </div>
+
+
+    </div>
+</div>
+
+<div id="confmodal" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label5">Have You Loaded the material and verified the list.</label>
+                <label id="c1">No changes can be made to this Delivery once confirmed..</label>
+                <label id="Label7">Do you wish to confirm?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnconfirmyes" OnClick="btnconfirmyes_Click()" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnconfirmno" OnClick="btnconfirmno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+

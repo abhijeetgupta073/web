@@ -1,0 +1,36 @@
+﻿CACHE MANIFEST
+# Version 1.0
+ORIGIN-TRIAL:
+AtuFfgxjtLmQZWq5BdprMFHj6MdEFHohwk9eRU/f1PNSD+G8i094SCwTwQCzoqDvqu0svTS3PYaTNkJg6zVQ2Q4AAAB1eyJvcmlnaW4iOiJodHRwczovL3NjYWZwYWNhcHB0ZXN0LmF6dXJld2Vic2l0ZXMubmV0OjQ0MyIsImZlYXR1cmUiOiJBcHBDYWNoZSIsImV4cGlyeSI6MTYxNzc1MzU5OSwiaXNTdWJkb21haW4iOnRydWV9
+CACHE:
+/Offline.html
+/OfflineInspectionList.html
+/Content/fonts/css/font-awesome.min.css
+/Content/css/bootstrap.min.css
+/Content/css/jquery.dataTables.min.css
+/Content/Css/CustomAlert.css
+/Content/css/w3.css
+/Content/css/SecStyle.css
+/Content/js/jquery.min.js
+/Content/js/bootstrap.min.js
+/Content/js/bootbox.min.js
+/Content/js/jquery.dataTables.min.js
+/Content/js/jquery-ui.min.js
+/Content/js/CustomAlert.js
+/Content/js/OfflineInspection.js
+/Images/loading.gif
+/img/logo1.png
+/images/lock.png
+/images/fonts/fa_list.png
+/images/TopLogo.png
+/images/fonts/fa_edit.png
+/images/onlineStatus.png
+/images/offlineStatus.png
+/images/fonts/fa_offlinedelete.png
+
+NETWORK:
+
+FALLBACK:
+/img/logo1.png /img/logo1.png
+/Offline.html /Offline.html
+/OfflineInspectionList.html /OfflineInspectionList.html

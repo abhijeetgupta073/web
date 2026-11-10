@@ -1,0 +1,1012 @@
+﻿
+@{
+    ViewBag.Title = "PIVsMaintenanceDashboard";
+}
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>
+
+    <style>
+        /*::placeholder {
+            color: black;
+            font-size: 18px;
+           
+            opacity: 1; 
+        }
+
+        :-ms-input-placeholder {
+            color: black;
+        }
+
+        ::-ms-input-placeholder {
+            color: black;
+        }*/
+
+        .row.chartfrstrow {
+            margin: 0px 0 0px 0 !important;
+        }
+
+        .highcharts-credits {
+            display: none;
+        }
+
+        h1 {
+            font-size: 20px;
+            color: #615f5f;
+            font-weight: bold;
+        }
+
+        .container.DshbrdBack {
+            background-color: #ffffcc;
+        }
+
+        .txtsummaryData {
+            background-color: white;
+        }
+
+        .BuildSummaryData {
+            color: black;
+        }
+
+        .OnSiteSummary {
+            color: black;
+        }
+
+        .BuildSummaryData.placeholder {
+            color: black;
+        }
+
+        #tbDetails tr td {
+            color: #808080;
+        }
+
+        #tbDetails1 tr td {
+            color: #808080;
+        }
+
+        #tbDetails2 tr td {
+            color: #808080;
+        }
+
+        #tbDetails3 tr td {
+            color: #808080;
+        }
+    </style>
+    <script>
+
+        $(document).ready(function () {
+            $("#PIVVsMantanceDashBoardimgLogo").attr('src', '@ViewBag.ClientImage');
+
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+
+            var ClientID = $('#hdnClientID').val();
+            ddlsitedropdownbindquery(ClientID);
+            PIMaintainChart(ClientID, "all", "all","1");
+            BuildsOnSiteTons(ClientID, "all", "all", "0");
+
+            //ddlJobbind(ClientID,"all");
+
+        });
+        function ddlsitedropdownbindquery(ClientID) {
+            //var ddlsite = ("#ddlSite").val();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/ddlJobDashboard",
+                url: "/PIVsMaintenanceDashboard/ddlsitedropdownbindquery",
+                data: JSON.stringify({ id: ClientID}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var GetData = response;
+                    $("#ddlsite").html("");
+                    $("#ddlsite").append('<option value="All">All</option>');
+                    for (var i = 0; i < GetData.length; i++) {
+                        $("#ddlsite").append('<option value="' + GetData[i].SiteLocID + '">' + GetData[i].SiteLocation + '</option>');
+                    }
+                }
+            });
+
+        }
+
+        function ddlJobbind(id, SiteId) {
+            //var ddlsite = ("#ddlSite").val();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/ddlJobDashboard",
+                url: "/PIVsMaintenanceDashboard/ddlJobDashboard",
+                data: JSON.stringify({ id: id, SiteId: SiteId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var ddlJobdropdownbind = response;
+                    $("#ddlarea").html("");
+                    $("#ddlarea").append('<option value="All">All</option>');
+                    for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                        siteLocid = ddlJobdropdownbind[0].areaid;
+                       // $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].SiteLocID + '">' + ddlJobdropdownbind[i].SiteLoca + '</option>');
+                        $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].areaid + '">' + ddlJobdropdownbind[i].area + '</option>');
+                    }
+                }
+            });
+
+        }
+
+        /// ChartDashboard 1
+        function PIMaintainChart(ClientID, SiteLocId, LocationId, GraphData) {
+            $('.forRemoveData1').remove();
+            $('.forRemoveData2').remove();
+            $('.forRemoveData3').remove();
+            $('.forRemoveData4').remove();
+            $.ajax({
+                type: "POST",
+               // url: "../WebApi/Dashboard.asmx/PIMaintenaceDashboardData",
+                url:"/PIVsMaintenanceDashboard/PIMaintenaceDashboardData",
+                data: JSON.stringify({ ClientID: ClientID, SiteLocId: SiteLocId, LocationId: LocationId, GraphData: GraphData }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    ItemDetail = response;
+                    var row1 = "";
+                    var row2 = "";
+                    var row3 = "";
+                    var row4 = "";
+
+                    var ItemData = [];
+                    var ItemPIBuiltToDate = [];
+                    var ItemtonPIBuiltToDate = [];
+                    var PIBuiltToDatepercentage = [];
+                    var ItemDataMaintenanceBuiltToDate = [];
+                    var ItemMaintenanceBuiltToDate = [];
+                    var ItemtonMaintenanceBuiltToDate = [];
+                    var MaintenanceBuiltToDatepercentage = [];
+                    var ItemDataPIStanding = [];
+                    var ItemPIStanding = [];
+                    var ItemtonPIStanding = [];
+                    var PIStandingpercentage = [];
+                    var ItemDataMaintenanceStanding = [];
+                    var ItemMaintenanceStanding = [];
+                    var ItemtonMaintenanceStanding = [];
+                    var MaintenanceStandingpercentage = [];
+                    for (var i = 0; i < ItemDetail.length; i++) {
+                        var GraphName = ItemDetail[i].GraphName;
+                       // row1 += "<tr class='forRemoveData1'><td style='text-align: center;'>" + ItemDetail[i].MaterialType + "</td><td style='text-align: center;'>" + ItemDetail[i].PerMaterialTonnage + "</td> <td style='text-align: center;'>" + (ItemDetail[i].TonnagebySitePct) * 100 + "%" + "</td></tr>";
+                        var TobePush = true;
+                        if (TobePush) {
+
+                            if (GraphName == "P&IBuiltToDate") {
+                                ItemData.push({ name: ItemDetail[i].MaterialType, y: ItemDetail[i].PerMaterialTonnage, z: ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2), sliced: true });
+                                ItemPIBuiltToDate.push(ItemDetail[i].MaterialType);
+                                ItemtonPIBuiltToDate.push(ItemDetail[i].PerMaterialTonnage);
+                                PIBuiltToDatepercentage.push((ItemDetail[i].TonnagebySitePct) * 100);
+
+                                row1 += "<tr class='forRemoveData1'><td style='text-align: center;'>" + ItemDetail[i].MaterialType + "</td><td style='text-align: center;'>" + ItemDetail[i].PerMaterialTonnage + "</td> <td style='text-align: center;'>" + ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2) + "%" + "</td></tr>";
+                            }
+                            if (GraphName == "MaintenanceBuiltToDate") {
+                                ItemDataMaintenanceBuiltToDate.push({ name: ItemDetail[i].MaterialType, y: ItemDetail[i].PerMaterialTonnage, z: ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2), sliced: true });
+                                ItemMaintenanceBuiltToDate.push(ItemDetail[i].MaterialType);
+                                ItemtonMaintenanceBuiltToDate.push(ItemDetail[i].PerMaterialTonnage);
+                                MaintenanceBuiltToDatepercentage.push((ItemDetail[i].TonnagebySitePct) * 100);
+
+                                row2 += "<tr class='forRemoveData2'><td style='text-align: center;'>" + ItemDetail[i].MaterialType + "</td><td style='text-align: center;'>" + ItemDetail[i].PerMaterialTonnage + "</td> <td style='text-align: center;'>" + ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2) + "%" + "</td></tr>";
+                            }
+                            if (GraphName == "P&IStanding") {
+                                ItemDataPIStanding.push({ name: ItemDetail[i].MaterialType, y: ItemDetail[i].PerMaterialTonnage, z: ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2), sliced: true });
+                                ItemPIStanding.push(ItemDetail[i].MaterialType);
+                                ItemtonPIStanding.push(ItemDetail[i].PerMaterialTonnage);
+                                PIStandingpercentage.push((ItemDetail[i].TonnagebySitePct) * 100);
+
+                                row3 += "<tr class='forRemoveData3'><td style='text-align: center;'>" + ItemDetail[i].MaterialType + "</td><td style='text-align: center;'>" + ItemDetail[i].PerMaterialTonnage + "</td> <td style='text-align: center;'>" + ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2) + "%" + "</td></tr>";
+                            }
+                            if(GraphName == "MaintenanceStanding"){
+                                ItemDataMaintenanceStanding.push({ name: ItemDetail[i].MaterialType, y: ItemDetail[i].PerMaterialTonnage, z: ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2), sliced: true });
+                                ItemMaintenanceStanding.push(ItemDetail[i].MaterialType);
+                                ItemtonMaintenanceStanding.push(ItemDetail[i].PerMaterialTonnage);
+                                MaintenanceStandingpercentage.push((ItemDetail[i].TonnagebySitePct) * 100);
+
+                                row4 += "<tr class='forRemoveData4'><td style='text-align: center;'>" + ItemDetail[i].MaterialType + "</td><td style='text-align: center;'>" + ItemDetail[i].PerMaterialTonnage + "</td> <td style='text-align: center;'>" + ((ItemDetail[i].TonnagebySitePct) * 100).toFixed(2) + "%" + "</td></tr>";
+                            }
+
+                        }
+
+                    }
+                    var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                    theExportOptions.splice(0, 1);
+                    //theExportOptions.splice(1, 5);
+
+                    //var pieColors = (function () {
+                    //    var colors = [],
+                    //        base = Highcharts.getOptions().colors[0],
+                    //        i;
+
+                    //    for (i = 0; i < 10; i += 1) {
+                    //        colors.push(Highcharts.Color(base).brighten((i - 2) / 12).get());
+                    //    }
+                    //    return colors;
+                    //}());
+
+                    Highcharts.setOptions({
+                        lang: { noData: "No Data To Display" }
+                    })
+                    // First Chart Start( On Site P&I Built to Date(Tonnes))
+                    Highcharts.chart('container1', {
+
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            //height: 200,
+                            type: 'pie',
+                            //allowPointSelect:true,
+                            backgroundColor: '#f2f2f2',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+
+                        title: {
+                            align: 'left',
+                            text: 'AT-PAC Vs Tube & Fit'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                //height: 500,
+                                size: 140,
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                               // slicedOffset: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                   // format: '{point.name} ({point.y} {series.name},{point.z}%)',
+                                    format: ' ({point.y} {series.name},{point.z}%)',
+                                    style:{
+                                        // width:'7px',
+                                        fontWeight: 'Normal'
+                                    },
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -5,
+                                    onclick: function () {
+                                        $('#btnOpenModel').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All',
+
+                                }
+                            }
+
+
+                        },
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: ' Tonnes',
+                            data: ItemData,
+                            showInLegend: true
+                        }]
+                    });// highchart1 end braces.
+
+
+                    // Second Chart Start( On Site Maintenance Built to Date(Tonnes))
+                    Highcharts.chart('container2', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            //height: 500,
+                            type: 'pie',
+                            backgroundColor: '#f2f2f2',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+
+                        title: {
+                            align: 'left',
+                            text: 'AT-PAC Vs Tube & Fit'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                //height: 500,
+                                size: 140,
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                //slicedOffset: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                    //format: '{point.name} ({point.y} {series.name},{point.z}%)',
+                                    format: ' ({point.y} {series.name},{point.z}%)',
+                                    style: {
+                                        fontWeight: 'Normal'
+                                    },
+                                }
+
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -5,
+                                    onclick: function () {
+                                        $('#btnOpenModel1').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All',
+
+                                }
+                            }
+
+
+                        },
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: ' Tonnes',
+                            data: ItemDataPIStanding,
+                            showInLegend: true
+                        }]
+                    });
+
+                    // Second Chart End
+
+
+                    // Third Chart Start( On Site P&I Standing (Tonnes))
+                    Highcharts.chart('container3', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            //height: 200,
+                            type: 'pie',
+                            backgroundColor: '#f2f2f2',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+                        title: {
+                            align: 'left',
+                            text: 'AT-PAC Vs Tube & Fit'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                size: 140,
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                //slicedOffset: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                    //format: '{point.name} ({point.y} {series.name},{point.z}%)',
+                                    format: ' ({point.y} {series.name},{point.z}%)',
+                                    style: {
+                                     fontWeight: 'Normal'
+                                    },
+                                }
+
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -5,
+                                    onclick: function () {
+                                        $('#btnOpenModel2').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All',
+
+                                }
+                            }
+
+
+                        },
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: ' Tonnes',
+                            data: ItemDataMaintenanceBuiltToDate,
+                            showInLegend: true
+                        }]
+                    });// Highchart3 Braces end.
+
+                    // Thirth  Chart End
+
+
+                    // Fourth Chart Start ( Chart 4 On Site Maintenance Standing (Tonnes))
+                    Highcharts.chart('container4', {
+                        chart: {
+                            borderColor: '#D3D3D3',
+                            borderWidth: 1,
+                            type: 'pie',
+                            backgroundColor: '#f2f2f2',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+                        title: {
+                            align: 'left',
+                            text: 'AT-PAC Vs Tube & Fit'
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                size: 140,
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                //slicedOffset: 1,
+                                dataLabels: {
+                                    enabled: true,
+                                    //format: '{point.name} ({point.y} {series.name},{point.z}%)',
+                                    format: ' ({point.y} {series.name},{point.z}%)',
+                                    style: {
+                                        fontWeight: 'Normal'
+                                    },
+                               }
+
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -5,
+                                    onclick: function () {
+                                        $('#btnOpenModel3').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All',
+
+                                }
+                            }
+
+
+                        },
+                        legend: {
+                            itemStyle: {
+                                fontWeight: 'Normal'
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: ' Tonnes',
+                            data: ItemDataMaintenanceStanding,
+                            showInLegend: true
+                        }]
+                    });
+
+                    // Fourth Chart End
+
+                    function redrawchart1() {
+                        var chart = $('#container1').highcharts();
+
+                        var w = $('#container1').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2 / 4), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+
+                    $("#tbDetails tbody").append(row1);
+
+                    function redrawchart2() {
+                        var chart = $('#container2').highcharts();
+
+                        var w = $('#container2').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2 / 4), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart2);
+                    redrawchart2();
+
+                    $("#tbDetails1 tbody").append(row2);
+
+                    function redrawchart3() {
+                        var chart = $('#container3').highcharts();
+
+                        var w = $('#container3').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2 / 4), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart3);
+                    redrawchart3();
+
+
+                    $("#tbDetails2 tbody").append(row3);
+
+                    function redrawchart4() {
+                        var chart = $('#container4').highcharts();
+
+                        var w = $('#container4').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2 / 4), false
+                        );
+                    }
+
+                    $(window).resize(redrawchart4);
+                    redrawchart4();
+
+                    $("#tbDetails3 tbody").append(row4);
+
+                },
+                error: function (response) {
+                    alert(response);
+                }
+            })
+        }
+
+        /// ChartDashboard 2 For (Upper Grid data).
+        function BuildsOnSiteTons(ClientID, SiteLocId, LocationId, GraphData) {
+            //$('.forRemoveData1').remove();
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/PIMaintenaceDashboardData1",
+                url: "/PIVsMaintenanceDashboard/PIMaintenaceDashboardData1",
+                data: JSON.stringify({ ClientID: ClientID, SiteLocId: SiteLocId, LocationId: LocationId, GraphData: GraphData }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    ItemDetail = response;
+
+                    for (var i = 0; i < ItemDetail.length; i++) {
+                        var ConditionText = ItemDetail[i].ConditionText;
+
+                        if (ConditionText == "Number OF Scaffolds Built To Date")
+                        {
+                            $("#txtScaffoldbuiltTotal").val(ItemDetail[i].AllValue);
+                            $("#txtScaffoldbuiltPI").val(ItemDetail[i].PIValue);
+                            $("#txtScaffoldbuiltMaintain").val(ItemDetail[i].MaintenanceValue);
+                            //$("#ContentPlaceHolder1_txtScaffoldbuiltTotal").val(ItemDetail[i].AllValue);
+                            //$("#ContentPlaceHolder1_txtScaffoldbuiltPI").val(ItemDetail[i].PIValue);
+                            //$("#ContentPlaceHolder1_txtScaffoldbuiltMaintain").val(ItemDetail[i].MaintenanceValue);
+                        }
+
+                        if (ConditionText == "Total Number OF Scaffolds Standing")
+                        {
+                            $("#txtScaffoldStandingTotal").val(ItemDetail[i].AllValue);
+                            $("#txtScaffoldStandingPI").val(ItemDetail[i].PIValue);
+                            $("#txtScaffoldStandingMaintain").val(ItemDetail[i].MaintenanceValue);
+                            //$("#ContentPlaceHolder1_txtScaffoldStandingTotal").val(ItemDetail[i].AllValue);
+                            //$("#ContentPlaceHolder1_txtScaffoldStandingPI").val(ItemDetail[i].PIValue);
+                            //$("#ContentPlaceHolder1_txtScaffoldStandingMaintain").val(ItemDetail[i].MaintenanceValue);
+                        }
+
+                        if (ConditionText == "Av Weight OF Standing Scaffold")
+                        {
+                            $("#txtAvgWeightTotal").val(ItemDetail[i].AllValue);
+                            $("#txtAvgWeightPI").val(ItemDetail[i].PIValue);
+                            $("#txtAvgWeightMaintain").val(ItemDetail[i].MaintenanceValue);
+                            //$("#ContentPlaceHolder1_txtAvgWeightTotal").val(ItemDetail[i].AllValue);
+                            //$("#ContentPlaceHolder1_txtAvgWeightPI").val(ItemDetail[i].PIValue);
+                            //$("#ContentPlaceHolder1_txtAvgWeightMaintain").val(ItemDetail[i].MaintenanceValue);
+                        }
+
+                        if (ConditionText == "Av Number OF days Standing(To Date)")
+                        {
+                            $("#txtAvgNumDaysTotal").val(ItemDetail[i].AllValue);
+                            $("#txtAvgNumDaysPI").val(ItemDetail[i].PIValue);
+                            $("#txtAvgNumDaysMaintain").val(ItemDetail[i].MaintenanceValue);
+                            //$("#ContentPlaceHolder1_txtAvgNumDaysTotal").val(ItemDetail[i].AllValue);
+                            //$("#ContentPlaceHolder1_txtAvgNumDaysPI").val(ItemDetail[i].PIValue);
+                            //$("#ContentPlaceHolder1_txtAvgNumDaysMaintain").val(ItemDetail[i].MaintenanceValue);
+                        }
+
+                        if (ConditionText == "AT-PAC Tonnage")
+                        {
+                            $("#txtATPACTonnageTotal").val(ItemDetail[i].AllValue);
+                            $("#txtATPACTonnagePI").val(ItemDetail[i].PIValue);
+                            $("#txtATPACTonnageMaintain").val(ItemDetail[i].MaintenanceValue);
+                            //$("#ContentPlaceHolder1_txtATPACTonnageTotal").val(ItemDetail[i].AllValue);
+                            //$("#ContentPlaceHolder1_txtATPACTonnagePI").val(ItemDetail[i].PIValue);
+                            //$("#ContentPlaceHolder1_txtATPACTonnageMaintain").val(ItemDetail[i].MaintenanceValue);
+                        }
+
+                        if (ConditionText == "Tube & Fit Tonnage")
+                        {
+                            $("#txtTubeFitTonnageTotal").val(ItemDetail[i].AllValue);
+                            $("#txtTubeFitTonnagePI").val(ItemDetail[i].PIValue);
+                            $("#txtTubeFitTonnageMaintain").val(ItemDetail[i].MaintenanceValue);
+                            //$("#ContentPlaceHolder1_txtTubeFitTonnageTotal").val(ItemDetail[i].AllValue);
+                            //$("#ContentPlaceHolder1_txtTubeFitTonnagePI").val(ItemDetail[i].PIValue);
+                            //$("#ContentPlaceHolder1_txtTubeFitTonnageMaintain").val(ItemDetail[i].MaintenanceValue);
+                        }
+
+                        if (ConditionText == "AT-PAC Ratio")
+                        {
+                            $("#txtATPACRatioTotal").val((ItemDetail[i].AllValue * 100).toFixed(2) + "%");
+                            $("#txtATPACRatioPI").val((ItemDetail[i].PIValue * 100).toFixed(2) + "%");
+                            $("#txtATPACRatioMaintain").val((ItemDetail[i].MaintenanceValue * 100).toFixed(2) + "%");
+                            //$("#ContentPlaceHolder1_txtATPACRatioTotal").val((ItemDetail[i].AllValue*100) + "%");
+                            //$("#ContentPlaceHolder1_txtATPACRatioPI").val((ItemDetail[i].PIValue*100)+ "%");
+                            //$("#ContentPlaceHolder1_txtATPACRatioMaintain").val((ItemDetail[i].MaintenanceValue*100) + "%");
+                        }
+
+                        if (ConditionText == "Tube & Fit Ratio")
+                        {
+                            $("#txtTubeFitRatioTotal").val((ItemDetail[i].AllValue * 100).toFixed(2) + "%");
+                            $("#txtTubeFitRatioPI").val((ItemDetail[i].PIValue * 100).toFixed(2) + "%");
+                            $("#txtTubeFitRatioMaintain").val((ItemDetail[i].MaintenanceValue * 100).toFixed(2) + "%");
+                            //$("#ContentPlaceHolder1_txtTubeFitRatioTotal").val((ItemDetail[i].AllValue*100) + "%");
+                            //$("#ContentPlaceHolder1_txtTubeFitRatioPI").val((ItemDetail[i].PIValue*100) + "%");
+                            //$("#ContentPlaceHolder1_txtTubeFitRatioMaintain").val((ItemDetail[i].MaintenanceValue*100) + "%");
+                        }
+
+                    }
+                }
+            })
+        }
+
+    </script>
+
+    <input type="hidden" id="hdnClientID"/>
+
+    <div class="container DshbrdBack">
+        <div class="row">
+            <div class="col-lg-2 col-sm-2 col-xs-3 ">
+                <div class="dashLogo">
+                    @*<img src="/images/logo.png" id="imgLogo" class="img-responsive" style="margin-left:0px;" />*@
+                    @*<img src="/images/logo.png" id="PIVVsMantanceDashBoardimgLogo" class="img-responsive" style="margin-left:0px;" />*@
+                    <img src="/images/logo.png" id="PIVVsMantanceDashBoardimgLogo" class="img-responsive" style="margin-left:0px;"/>
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-1 col-sm-2 col-xs-2" style="display:none;">
+                <div class="col-lg-4 col-md-1 col-sm-2 col-xs-2" style="margin-top: 20px">
+                    <label id="Label1" style="font-weight: 700; font-size: 17px; color: black; float: right">Site:</label>
+                </div>
+                <div class="col-lg-8 col-md-3 col-sm-8 col-xs-5" style="margin-top: 20px">
+                    @*<asp:DropDownList ID="ddlsite" CssClass="form-control" onchange="Changesite()" Style="border: 1px solid;" runat="server" Width="100%" AppendDataBoundItems="true"></asp:DropDownList>*@
+
+                    <select id="ddlsite" Class="form-control" onchange="Changesite()" Style="border: 1px solid; Width:100%"></select>
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-1 col-sm-2 col-xs-2" style="display:none;">
+                <div class="col-lg-4 col-md-1 col-sm-2 col-xs-3" style="margin-top: 20px">
+                    <label id="loc" runat="server" style="font-weight: 700; font-size: 17px; color: black; float: right">Location:</label>
+                </div>
+                <div class="col-lg-8 col-md-3 col-sm-8 col-xs-5" style="margin-top: 20px">
+                    @*<asp:DropDownList ID="ddlarea" CssClass="form-control" runat="server" Style="border: 1px solid" Width="100%" AppendDataBoundItems="true" onchange="selectarea();"></asp:DropDownList>*@
+                   <select id="ddlarea" Class="form-control" Style="border: 1px solid; Width:100%"  onchange="selectarea();"></select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-lg-12 col-sm-12 col-xs-12 col-md-12">
+                <label id="lblbyPIMaintain" Style="font-size: 20px; margin-top: -18px; color: #615f5f; font-weight: bold;" Text="Site Analysis - P&I Vs Maintenance ">Site Analysis - P&I Vs Maintenance</label>
+            </div>
+        </div>
+
+        <div class="row chartfrstrow">
+            <div class="col-lg-6 col-sm-12 col-xs-12" style="margin-left:0px">
+                <div class="BuildSummaryData">
+                    <p>
+                        <b>BUILDS</b>
+                        <input type="text" Style="text-align: center;width:12%;" placeholder="Maint." disabled BackColor="#ddecee" Class="txtsummaryData" 
+                                     id="TxtBuildsMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" placeholder="P&I" disabled BackColor="#ddecee" Class="txtsummaryData" 
+                                     id="TxtBuildsPI"/>
+                        <input type="text" Style="text-align: center;width:12%;" placeholder="Total" disabled BackColor="#ddecee" Class="txtsummaryData" 
+                                     id="TxtBuildsTotal"/>
+                    </p>
+                    <p>
+                        Number of Scaffolds Built to Date
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtScaffoldbuiltMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData"
+                                     id="txtScaffoldbuiltPI"/>
+                        <input type="text" Style="text-align: center; width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtScaffoldbuiltTotal"/>
+
+                    </p>
+                    <p>
+                        Total Number of Scaffolds Standing
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtScaffoldStandingMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtScaffoldStandingPI"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtScaffoldStandingTotal"/>
+
+                    </p>
+                    <p>
+                        Avg Weight of Standing Scaffold
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData"
+                                     id="txtAvgWeightMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtAvgWeightPI"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData"
+                                     id="txtAvgWeightTotal"/>
+                    </p>
+
+                    <p>
+                        Avg Number of Days Standing (To Date)
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtAvgNumDaysMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData"
+                                     id="txtAvgNumDaysPI"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtAvgNumDaysTotal"/>
+                    </p>
+
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-sm-12 col-xs-12 " style="margin-top:0px">
+
+                <div class="OnSiteSummary">
+                    <p>
+                        <b>ON SITE (Tonnes)</b>
+                     
+                        <input type="text" Style="text-align: center;width:12%;" placeholder="Maint." disabled BackColor="#ddecee" Class="txtsummaryData"
+                     id="txtOnSiteMaintain"/>
+                       <input type="text" Style="text-align: center;width:12%;" placeholder="P&I" disabled BackColor="#ddecee" Class="txtsummaryData" 
+                     id="txtOnSitePI"/>
+                       <input type="text" Style="text-align: center;width:12%;" placeholder="Total" disabled BackColor="#ddecee" Class="txtsummaryData" 
+                     id="txtOnSiteTotal"/>
+                    </p>
+                    <p>
+                        AT-PAC Tonnage
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtATPACTonnageMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtATPACTonnagePI"/>
+                        <input type="text" Style="text-align: center; width:12%;"disabled value="0" Class="txtsummaryData" 
+                                     id="txtATPACTonnageTotal"/>
+                    </p>
+                    <p>
+                        Tube & Fit Tonnage
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData"
+                                     id="txtTubeFitTonnageMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData"
+                                     id="txtTubeFitTonnagePI"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0" Class="txtsummaryData" 
+                                     id="txtTubeFitTonnageTotal"/>
+
+                    </p>
+
+                    <p>
+                        AT-PAC Ratio
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0%" Class="txtsummaryData" 
+                                     id="txtATPACRatioMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0%" Class="txtsummaryData" 
+                                     id="txtATPACRatioPI"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0%" Class="txtsummaryData"
+                                     id="txtATPACRatioTotal"/>
+                    </p>
+
+                    <p>
+                        Tube & Fit Ratio
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0%" Class="txtsummaryData"
+                                     id="txtTubeFitRatioMaintain"/>
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0%" Class="txtsummaryData" 
+                                     id="txtTubeFitRatioPI" />
+                        <input type="text" Style="text-align: center;width:12%;" disabled value="0%" Class="txtsummaryData" 
+                                     id="txtTubeFitRatioTotal" />
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <h1>P&I Built to Date (Tonnes)</h1>
+                <div id="container1" class="wrapper" style="margin-top:0px;"> </div>
+
+                <h1>P&I Standing (Tonnes)</h1>
+                <div id="container2" class="wrapper" style="margin-top:0px;"> </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <h1>Maintenance Built to Date (Tonnes)</h1>
+                <div id="container3" class="wrapper" style="margin-top:0px;"> </div>
+
+                <h1>Maintenance Standing (Tonnes)</h1>
+                <div id="container4" class="wrapper"> </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    @*<%--Model to Show P&I. Built to Date.(Tonnes)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">P&I Built to Date (Tonnes)</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>Tonnage PI Built </b></td>
+                                    <td style="width: 33%; text-align: center;"><b>% Of Tonnage PI Bulit</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show P&I. Built to Date.(Tonnes)--%>*@
+
+    @*<%--Model to Show P&I. Standing.(Tonnes)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+        <div class="modal fade" id="myModal1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"> P&I Standing (Tonnes)</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails2" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>Tonnage PI Standing </b></td>
+                                    <td style="width: 33%; text-align: center;"><b>% Of Tonnage PI Standing</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show P&I. Standing.(Tonnes)--%>*@
+
+    @*<%--Model to Show Maintenance Built to Date.(Tonnes)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+        <div class="modal fade" id="myModal2" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Maintenance Built to Date (Tonnes)</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails1" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>Tonnage Maintenance Built </b></td>
+                                    <td style="width: 33%; text-align: center;"><b>% Of Tonnage Maintenance Bulit</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Maintenance Built to Date.(Tonnes)--%>
+
+    <%--Model to Show Maintenance Standing.(Tonnes)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+        <div class="modal fade" id="myModal3" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Maintenance Standing (Tonnes)</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails3" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 33%; text-align: center;"><b>Material Type</b></td>
+                                    <td style="width: 33%; text-align: center;"><b>Tonnage Maintenance Standing </b></td>
+                                    <td style="width: 33%; text-align: center;"><b>% Of Tonnage Maintenance Standing</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Maintenance Standing.(Tonnes)--%>*@
+
+

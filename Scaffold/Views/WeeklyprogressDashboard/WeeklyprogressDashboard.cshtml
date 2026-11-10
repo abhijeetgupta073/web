@@ -1,0 +1,2058 @@
+﻿
+@{
+    ViewBag.Title = "WeeklyprogressDashboard";
+}
+   @*<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://rawgithub.com/laff/technical-indicators/master/technical-indicators.src.js"></script>
+    <script src="https://rawgithub.com/phpepe/highcharts-regression/master/highcharts-regression.js?8"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>*@
+    <script src="/Content/js/highcharts.js"></script>
+    <script src="/Content/js/highcharts-3d.js"></script>
+    <script src="/Content/js/exporting.js"></script>
+    <script src="/Content/js/technical-indicators.src.js"></script>
+    <script src="/Content/js/highcharts-regression.js"></script>
+    <script src="/Content/js/export-data.js"></script>
+    <script src="/Content/js/canvasjs.min.js"></script>
+    <script src="/Content/js/no-data-to-display.js"></script>
+    <script src="/Content/js/html2canvas.js"></script>
+    <script>
+        //$(document)
+        //                   .ajaxStart(function () {
+        //                       $('#loadingpanel1').css('display', 'block');
+        //                   })
+        //                 .ajaxStop(function () {
+        //                     $('#loadingpanel1').css('display', 'none');
+        //                 });
+
+        $(document).ready(function () {
+
+            var CurrentData = new Date();
+           
+            $('#Picdatereport').val(CurrentData.DateMonthFormat());
+
+            $("#Picdatereport").datepicker({
+                dateFormat: 'dd-M-yy',
+                // maxDate: 0,
+                closeText: 'Close',
+
+            });
+
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+
+            var ClientID = $("#hdnClientID").val();
+
+            SiteDropDownBind(ClientID);
+
+            var Siteid = $("#ddlsite").val();
+            var getnewdate = $("#Picdatereport").val();
+            //chart1(ClientID, Siteid, "All", getnewdate);
+            //chart2(ClientID, Siteid, "All", getnewdate);
+            //chart3(ClientID, Siteid, "All", getnewdate);
+
+            $('#loadingpanel1').css('display', 'block');
+            setTimeout(function () {
+            //chart1(ClientID, "All", "All", getnewdate);
+            //chart2(ClientID, "All", "All", getnewdate);
+            //chart3(ClientID, "All", "All", getnewdate);
+                ChartLoadAll(ClientID, "All", "All", "All", getnewdate)
+                $('#loadingpanel1').css('display', 'none');
+            }, 500)
+            ddlJobbind(ClientID, "All");
+
+
+
+
+            ddlWorkgroupbind(ClientID, "All", "All");
+
+            Highcharts.getSVG = function (charts) {
+                var svgArr = [],
+                  top = 0,
+                  width = 0;
+                Highcharts.each(charts, function (chart, i) {
+                    var svg = chart.getSVG();
+                    svg = svg.replace('<svg', '<g transform="translate(0,' + top + ')" ');
+                    svg = svg.replace('</svg>', '</g>');
+                    top += chart.chartHeight;
+                    if (i<=1) {
+                        width = Math.max(width, chart.chartWidth);
+                        //width = width / 2;
+                    }
+                    if (i==2) {
+                        width = Math.max(width, chart.chartWidth/2);
+                        //width = width / 2;
+                    }
+                    svgArr.push(svg);
+                });
+                return '<svg height="' + top + '" width="' + width + '" version="1.1" xmlns="http://www.w3.org/2000/svg">' + svgArr.join('') + '</svg>';
+            };
+
+            Highcharts.exportCharts = function (charts, options) {
+                // Merge the options
+                options = Highcharts.merge(Highcharts.getOptions().exporting, options);
+                // Post to export server
+                Highcharts.post(options.url, {
+                    filename: options.filename || 'chart',
+                    type: options.type,
+                    width: options.width,
+                    svg: Highcharts.getSVG(charts),
+                });
+            };
+
+            $("#exportButton").click(function () {
+                var chart1 = $('#Chart1container').highcharts();
+                var chart2 = $('#Chart2container').highcharts();
+                var chart3 = $('#Chart3container').highcharts();
+                Highcharts.exportCharts([chart1, chart2, chart3], {
+                    type: 'application/pdf',
+                    filename: 'WeeklyProgressReport-pdf'
+                });
+            });
+            generateActualPlanningWeek();
+        });
+
+        function generateActualPlanningWeek() {
+            var id = getParameterByName('id');
+            var UID = getParameterByName('UID');
+            $.ajax({
+                type: "POST",
+                url: "/WeeklySummaryReport/generateActualWeekPlan",
+                data: JSON.stringify({ id: id, UID: UID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var generate = response;
+                }
+            });
+        }
+
+        //function ChangeReportdate(sender, e) {
+        function ChangeReportdate() {
+            $('#loadingpanel1').css('display', 'block');
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var location = $("#ddlarea").val();
+            var getnewdate = $("#Picdatereport").val();
+
+            var WorkGroup = $("#ddlworkgroup").val();
+            //chart1(ClientID, Siteid, location, getnewdate);
+            //chart2(ClientID, Siteid, location, getnewdate);
+            //chart3(ClientID, Siteid, location, getnewdate);
+            ChartLoadAll(ClientID, Siteid, location, WorkGroup, getnewdate);
+            $('#loadingpanel1').css('display', 'none');
+        }
+        function Changesite() {
+            $('#loadingpanel1').css('display', 'block');
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var getnewdate = $("#Picdatereport").val();
+            ddlJobbind(ClientID, Siteid);
+             ddlWorkgroupbind(ClientID, Siteid, "All")
+            //chart1(ClientID, Siteid, "All", getnewdate);
+            //chart2(ClientID, Siteid, "All", getnewdate);
+            //chart3(ClientID, Siteid, "All", getnewdate);
+            ChartLoadAll(ClientID, Siteid, "All", "All", getnewdate);
+            $('#loadingpanel1').css('display', 'none');
+        }
+        function selectarea() {
+            var ClientID = $("#hdnClientID").val();
+            var ddlselectarea = $("#ddlarea").val();
+            var Siteid = $("#ddlsite").val();
+            var getnewdate = $("#Picdatereport").val();
+            ddlWorkgroupbind(ClientID, Siteid, ddlselectarea);
+            //chart1(ClientID, Siteid, ddlselectarea, getnewdate);
+            //chart2(ClientID, Siteid, ddlselectarea, getnewdate);
+            //chart3(ClientID, Siteid, ddlselectarea, getnewdate);
+            ChartLoadAll(ClientID, Siteid, ddlselectarea, "All",getnewdate);
+        }
+        function SiteDropDownBind(id) {
+
+            $.ajax({
+                type: "POST",
+                url: "/WeeklyprogressDashboard/SiteDropDownBind",
+                data: JSON.stringify({ id: id}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var getData = response;
+                    $("#ddlsite").html("");
+                    $("#ddlsite").append('<option value="All">All</option>');
+                    for (var i = 0; i < getData.length; i++) {
+                        $("#ddlsite").append('<option value="' + getData[i].SiteLocID + '">' + getData[i].SiteLocation + '</option>');
+
+                    }
+                }
+            });
+
+        }
+        function ddlJobbind(id, SiteId) {
+            //var ddlsite = ("#ddlSite").val();
+
+            $.ajax({
+                type: "POST",
+                url: "/WeeklyprogressDashboard/ddlJobDashboard",
+                data: JSON.stringify({ id: id, SiteId: SiteId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    var ddlJobdropdownbind = response;
+                    $("#ddlarea").html("");
+                    $("#ddlarea").append('<option value="All">All</option>');
+                    for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                        siteLocid = ddlJobdropdownbind[0].areaid;
+                        $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].areaid + '">' + ddlJobdropdownbind[i].area + '</option>');
+                       
+                    }
+                }
+            });
+
+        }
+
+        //function chart1(ClientID, Siteid, jobval, getnewdate) {
+        //    $('#loadingpanel1').css('display', 'block');
+        //    $('.forRemoveData').remove();
+        //    $.ajax({
+        //        type: "POST",
+        //        //url: "../WebApi/Dashboard.asmx/WeeklyProgress",
+        //        url: "/WeeklyprogressDashboard/WeeklyProgress",
+        //        data: JSON.stringify({ id: ClientID, site: Siteid, jobid: jobval, getnewdate: getnewdate }),
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: "json",
+        //        success: function (response) {
+        //            // WTonnage = response.d;
+        //            WTonnage = response;
+        //            var Week = [];
+        //            var WTonnageDataErect = [];
+        //            var WTonnageDataDismantle = [];
+        //            var week1tonnage = 0;
+        //            var weeks = [];
+        //            var week10tonnage = 0;
+        //            var start = "";
+        //            var end = "";
+        //            if (WTonnage.length > 0) {
+        //                for (var i = 0; i < WTonnage.length; i++) {
+        //                    var TobePush = true;
+        //                    if (TobePush) {
+
+        //                        WTonnageDataErect.push({ name: WTonnage[i].WeekNo, y: WTonnage[i].TotErectedTonnage, sliced: true });
+        //                        WTonnageDataDismantle.push({ name: WTonnage[i].WeekNo, y: WTonnage[i].TotDismantleTonnage, sliced: true });
+        //                        //week1tonnage = WTonnage[0].TotErectedTonnage;
+        //                        //week10tonnage = WTonnage[9].TotErectedTonnage;
+        //                        Week.push('Week ' + WTonnage[i].WeekNo);
+        //                        weeks.push([WTonnage[i].WeekNo - 1, WTonnage[i].TotErectedTonnage]);
+        //                        if (WTonnage[i].WeekNo == '10') {
+        //                            start = WTonnage[i].WeekStartDate;
+        //                            end = WTonnage[i].WeekEndDate;
+        //                        }
+        //                    }
+        //                }
+
+
+
+        //            }
+        //            Highcharts.chart('Chart1container', {
+        //                title: {
+        //                    //align: 'left',
+        //                    text: 'Tonnage Erected Vs Dismantled',
+        //                    x: -40,
+        //                },
+        //                subtitle: {
+        //                    // align: 'left',
+        //                    text: '(Week 10 => ' + start + ' to ' + end + ')',
+        //                    x: -40,
+        //                },
+        //                yAxis: {
+        //                    allowDecimals: true,
+        //                    title: {
+        //                        text: ''
+        //                    }
+        //                },
+
+        //                xAxis: {
+        //                    categories: Week
+        //                },
+        //                labels: {
+        //                    items: [{
+        //                        html: '',
+        //                        style: {
+        //                            left: '50px',
+        //                            top: '18px',
+        //                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+        //                        }
+        //                    }]
+        //                },
+        //                navigation: {
+        //                    buttonOptions: {
+        //                        verticalAlign: 'top',
+        //                        y: -12,
+        //                    }
+        //                },
+        //                exporting: {
+        //                    buttons: {
+        //                        contextButton: {
+        //                            enabled: true,
+        //                            x: 9,
+        //                        },
+        //                        exportButton: {
+        //                            //x: -28,
+        //                            onclick: function () {
+        //                                $('#btnOpenModel1').click();
+        //                            },
+        //                            //symbol: 'circle'
+        //                            text: 'Show All'
+        //                        }
+        //                    }
+
+
+        //                },
+        //                series: [{
+        //                    type: 'column',
+        //                    regression: true,
+        //                    regressionSettings: {
+        //                        name: 'Linear (Tonnage Erected)',
+        //                        dashStyle: 'ShortDot',
+        //                        color: '#76C3FD'
+        //                    },
+        //                    name: 'Tonnage Erected',
+        //                    data: weeks
+        //                }, {
+        //                    type: 'column',
+        //                    name: 'Tonnage Dismantled',
+        //                    color: '#D5333E',
+        //                    data: WTonnageDataDismantle
+        //                    //}, {
+        //                    //    type: 'line',
+        //                    //    dashStyle: 'ShortDot',
+        //                    //    color: '#76C3FD',
+        //                    //    width: 1,
+        //                    //    marker: {
+        //                    //        enabled: false,
+        //                    //        radius: 3
+        //                    //    },
+        //                    //    name: 'Linear (Tonnage Erected)',
+        //                    //    data: [[0, week1tonnage + 0.1], [9, week10tonnage + 0.1]
+        //                    //    ]
+        //                    //marker: {
+        //                    //    lineWidth: 2,
+        //                    //    lineColor: Highcharts.getOptions().colors[3],
+        //                    //    fillColor: 'white'
+        //                    //}
+        //                }]
+        //            });
+        //            //function redrawchart() {
+        //            //    var chart = $('#Chart1container').highcharts();
+
+        //            //    var w = $('#Chart1container').closest(".wrapper").width()
+        //            //    //chart.setSize(
+        //            //    //    w, w * (2.0 / 4), false
+        //            //    //);
+        //            //    chart.setSize(
+        //            //        w, w * (3.4/ 4), false
+        //            //    );
+        //            //}
+
+        //            ///// 27 Feb 2019 Madhavi size adjusted
+
+        //            //function redrawchart() {
+        //            //    var chart = $('#Chart1container').highcharts();
+
+        //            //    var w = $('#Chart1container').closest(".wrapper").width()
+        //            //    var size = $(window).width();
+        //            //    if (size < 1150 && size > 650) {
+        //            //        chart.setSize(
+        //            //       w, w * (2.0 / 4), false
+        //            //    );
+        //            //    } else {
+        //            //        if (size < (650)) {
+        //            //            chart.setSize(
+        //            //             w, w * (3.4 / 4), false
+        //            //          );
+        //            //        } else {
+        //            //            chart.setSize(
+        //            //     w, w * (2.0 / 4), false
+        //            //     );
+        //            //        }
+        //            //    }
+        //            //}
+        //            ///// 27 Feb 2019 Madhavi size adjusted
+        //            function redrawchart() {
+        //                var chart = $('#Chart1container').highcharts();
+
+        //                var w = $('#Chart1container').closest(".wrapper").width()
+        //                var size = $(window).width();
+        //                if (size < 1150 && size > 650) {
+        //                    chart.setSize(
+        //                   w, w * (1.0 / 4), false
+        //                );
+        //                } else {
+        //                    if (size < (650)) {
+        //                        chart.setSize(
+        //                         w, w * (3.0 / 4), false
+        //                      );
+        //                    } else {
+        //                        chart.setSize(
+        //                 w, w * (1.0 / 4), false
+        //                 );
+        //                    }
+        //                }
+        //            }
+
+        //            $(window).resize(redrawchart);
+        //            redrawchart();
+        //            var row = '';
+        //            // $.each(response.d, function (index, obj) {
+        //            $.each(response, function (index, obj) {
+        //                var num;
+        //                // num = (obj.PctAllSite1 * 100);
+        //                row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedTonnage + "</td><td style='text-align: center;'>" + obj.TotDismantleTonnage + "</td></tr>";
+        //            });
+        //            $("#tbDetails1 tbody").append(row);
+        //            //Added on 08-09-2023
+        //            $('#loadingpanel1').css('display', 'none');
+        //        }
+
+        //    });
+
+        //}
+        //function chart2(ClientID, Siteid, jobval, getnewdate) {
+        //    //Added on 08-09-2023
+        //    $('#loadingpanel1').css('display', 'block');
+        //    $('.forRemoveData').remove();
+        //    $.ajax({
+        //        type: "POST",
+        //        // url: "../WebApi/Dashboard.asmx/WeeklyProgress",
+        //        url: "/WeeklyprogressDashboard/WeeklyProgress",
+        //        data: JSON.stringify({ id: ClientID, site: Siteid, jobid: jobval, getnewdate: getnewdate }),
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: "json",
+        //        success: function (response) {
+        //            //WManHrs = response.d;
+        //            WManHrs = response;
+        //            var Week = [];
+        //            var WManHrsDataErect = [];
+        //            var WManHrsDataDismantle = [];
+        //            var week1ManHrs = 0;
+        //            var week10ManHrs = 0;
+        //            var weeks = [];
+        //            var start = "";
+        //            var end = "";
+        //            if (WManHrs.length > 0) {
+        //                for (var i = 0; i < WManHrs.length; i++) {
+        //                    var TobePush = true;
+        //                    if (TobePush) {
+
+        //                        WManHrsDataErect.push({ name: WManHrs[i].WeekNo, y: WManHrs[i].TotManHrsErect, sliced: true });
+        //                        WManHrsDataDismantle.push({ name: WManHrs[i].WeekNo, y: WManHrs[i].TotManHrsDismantle, sliced: true });
+        //                        //week1ManHrs = WManHrs[0].TotManHrsErect;
+        //                        //week10ManHrs = WManHrs[9].TotManHrsErect;
+        //                        Week.push('Week ' + WManHrs[i].WeekNo);
+        //                        weeks.push([WManHrs[i].WeekNo - 1, WManHrs[i].TotManHrsErect]);
+        //                        if (WManHrs[i].WeekNo == '10') {
+        //                            start = WManHrs[i].WeekStartDate;
+        //                            end = WManHrs[i].WeekEndDate;
+        //                        }
+        //                    }
+
+
+        //                }
+
+        //            }
+        //            Highcharts.chart('Chart2container', {
+        //                title: {
+        //                    //align: 'left',
+        //                    text: 'Man Hrs Spent Erect Vs Dismantle',
+        //                    x: -40,
+
+        //                },
+        //                subtitle: {
+        //                    //align: 'left',
+        //                    text: '(Week 10 => ' + start + ' to ' + end + ')',
+        //                    x: -40,
+
+        //                },
+        //                yAxis: {
+        //                    allowDecimals: false,
+        //                    title: {
+        //                        text: ''
+        //                    }
+        //                },
+
+        //                xAxis: {
+        //                    categories: Week
+        //                },
+        //                labels: {
+        //                    items: [{
+        //                        html: '',
+        //                        style: {
+        //                            left: '50px',
+        //                            top: '18px',
+        //                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+        //                        }
+        //                    }]
+        //                },
+        //                navigation: {
+        //                    buttonOptions: {
+        //                        verticalAlign: 'top',
+        //                        y: -12,
+        //                    }
+        //                },
+        //                exporting: {
+        //                    buttons: {
+        //                        contextButton: {
+        //                            enabled: true,
+        //                            x: 9,
+        //                        },
+        //                        exportButton: {
+        //                            //x: -28,
+        //                            onclick: function () {
+        //                                $('#btnOpenModel2').click();
+        //                            },
+        //                            //symbol: 'circle'
+        //                            text: 'Show All',
+
+        //                        }
+        //                    }
+
+
+        //                },
+        //                series: [{
+        //                    type: 'column',
+        //                    regression: true,
+        //                    regressionSettings: {
+        //                        name: 'Linear (Man Hrs Erect)',
+        //                        dashStyle: 'ShortDot',
+        //                        color: '#76C3FD'
+        //                    },
+        //                    name: 'Man Hrs Erect',
+        //                    data: weeks
+        //                }, {
+        //                    type: 'column',
+        //                    color: '#D5333E',
+        //                    name: 'Man Hrs Dismantle',
+        //                    data: WManHrsDataDismantle
+        //                    //}, {
+        //                    //    type: 'line',
+        //                    //    dashStyle: 'ShortDot',
+        //                    //    color: '#76C3FD',
+        //                    //    width: 1,
+        //                    //    marker: {
+        //                    //        enabled: false,
+        //                    //        radius: 3
+        //                    //    },
+        //                    //    name: 'Linear (Man Hrs Erected)',
+        //                    //    data: [[0, week1ManHrs + 0.1], [9, week10ManHrs + 0.1]
+        //                    //    ],
+        //                    //marker: {
+        //                    //    lineWidth: 2,
+        //                    //    lineColor: Highcharts.getOptions().colors[3],
+        //                    //    fillColor: 'white'
+        //                    //}
+        //                }]
+        //            });
+        //            //function redrawchart() {
+        //            //    var chart = $('#Chart2container').highcharts();
+
+        //            //    var w = $('#Chart2container').closest(".wrapper").width()
+        //            //    //chart.setSize(
+        //            //    //    w, w * (2.0 / 4), false
+        //            //    //);
+        //            //    chart.setSize(
+        //            //       w, w * (3.4 / 4), false
+        //            //    );
+        //            //}
+
+        //            ///// 27 Feb 2019 Madhavi size adjusted
+
+        //            //function redrawchart() {
+        //            //    var chart = $('#Chart2container').highcharts();
+
+        //            //    var w = $('#Chart2container').closest(".wrapper").width()
+        //            //    var size = $(window).width();
+        //            //    if (size < 1150 && size > 650) {
+        //            //        chart.setSize(
+        //            //       w, w * (2.0 / 4), false
+        //            //    );
+        //            //    } else {
+        //            //        if (size < (650)) {
+        //            //            chart.setSize(
+        //            //             w, w * (3.4 / 4), false
+        //            //          );
+        //            //        } else {
+        //            //            chart.setSize(
+        //            //     w, w * (2.0 / 4), false
+        //            //     );
+        //            //        }
+        //            //     }
+        //            //}
+        //            ///// 27 Feb 2019 Madhavi size adjusted
+
+        //            function redrawchart() {
+        //                var chart = $('#Chart2container').highcharts();
+
+        //                var w = $('#Chart2container').closest(".wrapper").width()
+        //                var size = $(window).width();
+        //                if (size < 1150 && size > 650) {
+        //                    chart.setSize(
+        //                   w, w * (1.0 / 4), false
+        //                );
+        //                } else {
+        //                    if (size < (650)) {
+        //                        chart.setSize(
+        //                         w, w * (3.0 / 4), false
+        //                      );
+        //                    } else {
+        //                        chart.setSize(
+        //                 w, w * (1.0 / 4), false
+        //                 );
+        //                    }
+        //                }
+        //            }
+
+
+
+        //            $(window).resize(redrawchart);
+        //            redrawchart();
+        //            var row2 = '';
+        //            //$.each(response.d, function (index, obj) {
+        //            $.each(response, function (index, obj) {
+        //                var num;
+        //                row2 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotManHrsErect + "</td><td style='text-align: center;'>" + obj.TotManHrsDismantle + "</td></tr>";
+        //            });
+        //            $("#tbDetails2 tbody").append(row2);
+        //            //Added on 08-09-2023
+        //            $('#loadingpanel1').css('display', 'none');
+        //        }
+
+        //    });
+        //}
+        //function chart3(ClientID, Siteid, jobval, getnewdate) {
+        //    //Added on 08-09-2023
+        //    $('#loadingpanel1').css('display', 'block');
+        //    $('.forRemoveData').remove();
+        //    $.ajax({
+        //        type: "POST",
+        //        //url: "../WebApi/Dashboard.asmx/WeeklyProgress",
+        //        url: "/WeeklyprogressDashboard/WeeklyProgress",
+        //        data: JSON.stringify({ id: ClientID, site: Siteid, jobid: jobval, getnewdate: getnewdate }),
+        //        contentType: "application/json; charset=utf-8",
+        //        dataType: "json",
+        //        success: function (response) {
+        //            // WRegister = response.d;
+        //            WRegister = response;
+        //            var Week = [];
+        //            var WRegisterDataErect = [];
+        //            var WRegisterDataDismantle = [];
+        //            var week1Register = 0;
+        //            var weeks = [];
+        //            var start = "";
+        //            var end = "";
+        //            var erect = 0;
+        //            var week10Register = 0;
+        //            if (WRegister.length > 0) {
+        //                for (var i = 0; i < WRegister.length; i++) {
+        //                    var TobePush = true;
+        //                    if (TobePush) {
+
+        //                        WRegisterDataErect.push({ name: WRegister[i].WeekNo, y: WRegister[i].TotErectedRegister, sliced: true });
+        //                        WRegisterDataDismantle.push({ name: WRegister[i].WeekNo, y: WRegister[i].TotDismantleRegister, sliced: true });
+        //                        //week1Register = WRegister[0].TotErectedRegister;
+        //                        //week10Register = WRegister[9].TotErectedRegister;
+        //                        Week.push('Week ' + WRegister[i].WeekNo);
+        //                        weeks.push([WRegister[i].WeekNo - 1, WRegister[i].TotErectedRegister]);
+        //                        //alert(weeks);
+        //                        if (WRegister[i].WeekNo == '10') {
+        //                            start = WRegister[i].WeekStartDate;
+        //                            end = WRegister[i].WeekEndDate;
+        //                        }
+        //                    }
+
+
+        //                }
+
+        //            }
+        //            Highcharts.chart('Chart3container', {
+        //                title: {
+        //                    text: 'Scaffold Builds Vs Dismantles',
+        //                    x: -20,
+        //                },
+        //                subtitle: {
+        //                    text: '(Week 10 => ' + start + ' to ' + end + ')',
+        //                    x: -20,
+        //                },
+        //                yAxis: {
+        //                    allowDecimals: false,
+        //                    title: {
+        //                        text: ''
+        //                    }
+        //                },
+
+        //                xAxis: {
+        //                    categories: Week
+        //                },
+        //                labels: {
+        //                    items: [{
+        //                        html: '',
+        //                        style: {
+        //                            left: '50px',
+        //                            top: '18px',
+        //                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+        //                        }
+        //                    }]
+        //                },
+        //                navigation: {
+        //                    buttonOptions: {
+        //                        verticalAlign: 'top',
+        //                        y: -12,
+        //                    }
+        //                },
+        //                exporting: {
+        //                    buttons: {
+        //                        contextButton: {
+        //                            enabled: true,
+        //                            x: 9,
+        //                        },
+        //                        exportButton: {
+        //                            //x: -28,
+        //                            onclick: function () {
+        //                                $('#btnOpenModel3').click();
+        //                            },
+        //                            //symbol: 'circle'
+        //                            text: 'Show All'
+        //                        }
+        //                    }
+
+
+        //                },
+        //                series: [{
+        //                    type: 'column',
+        //                    regression: true,
+        //                    regressionSettings: {
+        //                        name: 'Linear (Built)',
+        //                        dashStyle: 'ShortDot',
+        //                        color: '#76C3FD'
+        //                    },
+        //                    name: 'Built',
+        //                    id: 'primary',
+        //                    data: weeks
+        //                }, {
+        //                    type: 'line',
+        //                    color: '#D5333E',
+        //                    marker: {
+        //                        enabled: false,
+        //                        radius: 3
+        //                    },
+        //                    name: ' Dismantled',
+        //                    data: WRegisterDataDismantle
+        //                }, {
+        //                    name: '2 per. Mov. Avg.(Built)',
+        //                    linkedTo: 'primary',
+        //                    dashStyle: 'ShortDot',
+        //                    color: '#5A79F5',
+        //                    showInLegend: true,
+        //                    type: 'trendline',
+        //                    algorithm: 'SMA',
+        //                    periods: 2
+        //                    //    }
+        //                    //{
+        //                    //    type: 'line',
+        //                    //    dashStyle: 'ShortDot',
+        //                    //    color: '#76C3FD',
+        //                    //    width: 1,
+        //                    //    marker: {
+        //                    //        enabled: false,
+        //                    //        radius: 3
+        //                    //    },
+        //                    //    //yAxis: 2,
+        //                    //    name: 'Linear (Built)',
+        //                    //    data: [[0, week1Register + 0.1], [9, week10Register + 0.1]
+        //                    //    ]
+        //                    //    //marker: {
+        //                    //    //    lineWidth: 2,
+        //                    //    //    lineColor: Highcharts.getOptions().colors[3],
+        //                    //    //    fillColor: 'white'
+        //                    //    //}
+        //                }]
+
+        //            });
+        //            //function redrawchart() {
+        //            //    var chart = $('#Chart3container').highcharts();
+
+        //            //    var w = $('#Chart3container').closest(".wrapper").width()
+        //            //    //chart.setSize(
+        //            //    //    w, w * (1.0 / 4), false
+        //            //    //);
+        //            //    chart.setSize(
+        //            //        w, w * (3.0 / 4), false
+        //            //    );
+        //            //}
+
+        //            function redrawchart() {
+        //                var chart = $('#Chart3container').highcharts();
+
+        //                var w = $('#Chart3container').closest(".wrapper").width()
+        //                var size = $(window).width();
+        //                if (size < 1150 && size > 650) {
+        //                    chart.setSize(
+        //                   w, w * (1.0 / 4), false
+        //                );
+        //                } else {
+        //                    if (size < (650)) {
+        //                        chart.setSize(
+        //                         w, w * (3.0 / 4), false
+        //                      );
+        //                    } else {
+        //                        chart.setSize(
+        //                 w, w * (1.0 / 4), false
+        //                 );
+        //                    }
+
+
+        //                }
+        //            }
+
+
+
+        //            $(window).resize(redrawchart);
+        //            redrawchart();
+        //            var row3 = '';
+        //            // $.each(response.d, function (index, obj) {
+        //            $.each(response, function (index, obj) {
+        //                //var num;
+        //                //num = (obj.PctAllSite1 * 100);
+        //                row3 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedRegister + "</td><td style='text-align: center;'>" + obj.TotDismantleRegister + "</td></tr>";
+        //            });
+        //            $("#tbDetails3 tbody").append(row3);
+        //            //Added on 08-09-2023
+        //            $('#loadingpanel1').css('display', 'none');
+        //        }
+
+        //    });
+        //}
+
+        //function chart1(response) {
+        //    // WTonnage = response.d;
+        //    WTonnage = response;
+        //    var Week = [];
+        //    var WTonnageDataErect = [];
+        //    var WTonnageDataDismantle = [];
+        //    var week1tonnage = 0;
+        //    var weeks = [];
+        //    var week10tonnage = 0;
+        //    var start = "";
+        //    var end = "";
+        //    if (WTonnage.length > 0) {
+        //        for (var i = 0; i < WTonnage.length; i++) {
+        //            var TobePush = true;
+        //            if (TobePush) {
+
+        //                WTonnageDataErect.push({ name: WTonnage[i].WeekNo, y: WTonnage[i].TotErectedTonnage, sliced: true });
+        //                WTonnageDataDismantle.push({ name: WTonnage[i].WeekNo, y: WTonnage[i].TotDismantleTonnage, sliced: true });
+        //                //week1tonnage = WTonnage[0].TotErectedTonnage;
+        //                //week10tonnage = WTonnage[9].TotErectedTonnage;
+        //                Week.push('Week ' + WTonnage[i].WeekNo);
+        //                weeks.push([WTonnage[i].WeekNo - 1, WTonnage[i].TotErectedTonnage]);
+        //                if (WTonnage[i].WeekNo == '10') {
+        //                    start = WTonnage[i].WeekStartDate;
+        //                    end = WTonnage[i].WeekEndDate;
+        //                }
+        //            }
+        //        }
+
+
+
+        //    }
+        //    Highcharts.chart('Chart1container', {
+        //        title: {
+        //            //align: 'left',
+        //            text: 'Tonnage Erected Vs Dismantled',
+        //            x: -40,
+        //        },
+        //        subtitle: {
+        //            // align: 'left',
+        //            text: '(Week 10 => ' + start + ' to ' + end + ')',
+        //            x: -40,
+        //        },
+        //        yAxis: {
+        //            allowDecimals: true,
+        //            title: {
+        //                text: ''
+        //            }
+        //        },
+
+        //        xAxis: {
+        //            categories: Week
+        //        },
+        //        labels: {
+        //            items: [{
+        //                html: '',
+        //                style: {
+        //                    left: '50px',
+        //                    top: '18px',
+        //                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+        //                }
+        //            }]
+        //        },
+        //        navigation: {
+        //            buttonOptions: {
+        //                verticalAlign: 'top',
+        //                y: -12,
+        //            }
+        //        },
+        //        exporting: {
+        //            buttons: {
+        //                contextButton: {
+        //                    enabled: true,
+        //                    x: 9,
+        //                },
+        //                exportButton: {
+        //                    //x: -28,
+        //                    onclick: function () {
+        //                        $('#btnOpenModel1').click();
+        //                    },
+        //                    //symbol: 'circle'
+        //                    text: 'Show All'
+        //                }
+        //            }
+
+
+        //        },
+        //        series: [{
+        //            type: 'column',
+        //            regression: true,
+        //            regressionSettings: {
+        //                name: 'Linear (Tonnage Erected)',
+        //                dashStyle: 'ShortDot',
+        //                color: '#76C3FD'
+        //            },
+        //            name: 'Tonnage Erected',
+        //            data: weeks
+        //        }, {
+        //            type: 'column',
+        //            name: 'Tonnage Dismantled',
+        //            color: '#D5333E',
+        //            data: WTonnageDataDismantle
+        //            //}, {
+        //            //    type: 'line',
+        //            //    dashStyle: 'ShortDot',
+        //            //    color: '#76C3FD',
+        //            //    width: 1,
+        //            //    marker: {
+        //            //        enabled: false,
+        //            //        radius: 3
+        //            //    },
+        //            //    name: 'Linear (Tonnage Erected)',
+        //            //    data: [[0, week1tonnage + 0.1], [9, week10tonnage + 0.1]
+        //            //    ]
+        //            //marker: {
+        //            //    lineWidth: 2,
+        //            //    lineColor: Highcharts.getOptions().colors[3],
+        //            //    fillColor: 'white'
+        //            //}
+        //        }]
+        //    });
+        //    //function redrawchart() {
+        //    //    var chart = $('#Chart1container').highcharts();
+
+        //    //    var w = $('#Chart1container').closest(".wrapper").width()
+        //    //    //chart.setSize(
+        //    //    //    w, w * (2.0 / 4), false
+        //    //    //);
+        //    //    chart.setSize(
+        //    //        w, w * (3.4/ 4), false
+        //    //    );
+        //    //}
+
+        //    ///// 27 Feb 2019 Madhavi size adjusted
+
+        //    //function redrawchart() {
+        //    //    var chart = $('#Chart1container').highcharts();
+
+        //    //    var w = $('#Chart1container').closest(".wrapper").width()
+        //    //    var size = $(window).width();
+        //    //    if (size < 1150 && size > 650) {
+        //    //        chart.setSize(
+        //    //       w, w * (2.0 / 4), false
+        //    //    );
+        //    //    } else {
+        //    //        if (size < (650)) {
+        //    //            chart.setSize(
+        //    //             w, w * (3.4 / 4), false
+        //    //          );
+        //    //        } else {
+        //    //            chart.setSize(
+        //    //     w, w * (2.0 / 4), false
+        //    //     );
+        //    //        }
+        //    //    }
+        //    //}
+        //    ///// 27 Feb 2019 Madhavi size adjusted
+        //    function redrawchart() {
+        //        var chart = $('#Chart1container').highcharts();
+
+        //        var w = $('#Chart1container').closest(".wrapper").width()
+        //        var size = $(window).width();
+        //        if (size < 1150 && size > 650) {
+        //            chart.setSize(
+        //                w, w * (1.0 / 4), false
+        //            );
+        //        } else {
+        //            if (size < (650)) {
+        //                chart.setSize(
+        //                    w, w * (3.0 / 4), false
+        //                );
+        //            } else {
+        //                chart.setSize(
+        //                    w, w * (1.0 / 4), false
+        //                );
+        //            }
+        //        }
+        //    }
+
+        //    $(window).resize(redrawchart);
+        //    redrawchart();
+        //    var row = '';
+        //    // $.each(response.d, function (index, obj) {
+        //    $.each(response, function (index, obj) {
+        //        var num;
+        //        // num = (obj.PctAllSite1 * 100);
+        //        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedTonnage + "</td><td style='text-align: center;'>" + obj.TotDismantleTonnage + "</td></tr>";
+        //    });
+        //    $("#tbDetails1 tbody").append(row);
+        //    //Added on 08-09-2023
+        //    $('#loadingpanel1').css('display', 'none');
+
+        //}
+        //function chart2(response) {
+        //    //WManHrs = response.d;
+        //    WManHrs = response;
+        //    var Week = [];
+        //    var WManHrsDataErect = [];
+        //    var WManHrsDataDismantle = [];
+        //    var week1ManHrs = 0;
+        //    var week10ManHrs = 0;
+        //    var weeks = [];
+        //    var start = "";
+        //    var end = "";
+        //    if (WManHrs.length > 0) {
+        //        for (var i = 0; i < WManHrs.length; i++) {
+        //            var TobePush = true;
+        //            if (TobePush) {
+
+        //                WManHrsDataErect.push({ name: WManHrs[i].WeekNo, y: WManHrs[i].TotManHrsErect, sliced: true });
+        //                WManHrsDataDismantle.push({ name: WManHrs[i].WeekNo, y: WManHrs[i].TotManHrsDismantle, sliced: true });
+        //                //week1ManHrs = WManHrs[0].TotManHrsErect;
+        //                //week10ManHrs = WManHrs[9].TotManHrsErect;
+        //                Week.push('Week ' + WManHrs[i].WeekNo);
+        //                weeks.push([WManHrs[i].WeekNo - 1, WManHrs[i].TotManHrsErect]);
+        //                if (WManHrs[i].WeekNo == '10') {
+        //                    start = WManHrs[i].WeekStartDate;
+        //                    end = WManHrs[i].WeekEndDate;
+        //                }
+        //            }
+
+
+        //        }
+
+        //    }
+        //    Highcharts.chart('Chart2container', {
+        //        title: {
+        //            //align: 'left',
+        //            text: 'Man Hrs Spent Erect Vs Dismantle',
+        //            x: -40,
+
+        //        },
+        //        subtitle: {
+        //            //align: 'left',
+        //            text: '(Week 10 => ' + start + ' to ' + end + ')',
+        //            x: -40,
+
+        //        },
+        //        yAxis: {
+        //            allowDecimals: false,
+        //            title: {
+        //                text: ''
+        //            }
+        //        },
+
+        //        xAxis: {
+        //            categories: Week
+        //        },
+        //        labels: {
+        //            items: [{
+        //                html: '',
+        //                style: {
+        //                    left: '50px',
+        //                    top: '18px',
+        //                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+        //                }
+        //            }]
+        //        },
+        //        navigation: {
+        //            buttonOptions: {
+        //                verticalAlign: 'top',
+        //                y: -12,
+        //            }
+        //        },
+        //        exporting: {
+        //            buttons: {
+        //                contextButton: {
+        //                    enabled: true,
+        //                    x: 9,
+        //                },
+        //                exportButton: {
+        //                    //x: -28,
+        //                    onclick: function () {
+        //                        $('#btnOpenModel2').click();
+        //                    },
+        //                    //symbol: 'circle'
+        //                    text: 'Show All',
+
+        //                }
+        //            }
+
+
+        //        },
+        //        series: [{
+        //            type: 'column',
+        //            regression: true,
+        //            regressionSettings: {
+        //                name: 'Linear (Man Hrs Erect)',
+        //                dashStyle: 'ShortDot',
+        //                color: '#76C3FD'
+        //            },
+        //            name: 'Man Hrs Erect',
+        //            data: weeks
+        //        }, {
+        //            type: 'column',
+        //            color: '#D5333E',
+        //            name: 'Man Hrs Dismantle',
+        //            data: WManHrsDataDismantle
+        //            //}, {
+        //            //    type: 'line',
+        //            //    dashStyle: 'ShortDot',
+        //            //    color: '#76C3FD',
+        //            //    width: 1,
+        //            //    marker: {
+        //            //        enabled: false,
+        //            //        radius: 3
+        //            //    },
+        //            //    name: 'Linear (Man Hrs Erected)',
+        //            //    data: [[0, week1ManHrs + 0.1], [9, week10ManHrs + 0.1]
+        //            //    ],
+        //            //marker: {
+        //            //    lineWidth: 2,
+        //            //    lineColor: Highcharts.getOptions().colors[3],
+        //            //    fillColor: 'white'
+        //            //}
+        //        }]
+        //    });
+        //    //function redrawchart() {
+        //    //    var chart = $('#Chart2container').highcharts();
+
+        //    //    var w = $('#Chart2container').closest(".wrapper").width()
+        //    //    //chart.setSize(
+        //    //    //    w, w * (2.0 / 4), false
+        //    //    //);
+        //    //    chart.setSize(
+        //    //       w, w * (3.4 / 4), false
+        //    //    );
+        //    //}
+
+        //    ///// 27 Feb 2019 Madhavi size adjusted
+
+        //    //function redrawchart() {
+        //    //    var chart = $('#Chart2container').highcharts();
+
+        //    //    var w = $('#Chart2container').closest(".wrapper").width()
+        //    //    var size = $(window).width();
+        //    //    if (size < 1150 && size > 650) {
+        //    //        chart.setSize(
+        //    //       w, w * (2.0 / 4), false
+        //    //    );
+        //    //    } else {
+        //    //        if (size < (650)) {
+        //    //            chart.setSize(
+        //    //             w, w * (3.4 / 4), false
+        //    //          );
+        //    //        } else {
+        //    //            chart.setSize(
+        //    //     w, w * (2.0 / 4), false
+        //    //     );
+        //    //        }
+        //    //     }
+        //    //}
+        //    ///// 27 Feb 2019 Madhavi size adjusted
+
+        //    function redrawchart() {
+        //        var chart = $('#Chart2container').highcharts();
+
+        //        var w = $('#Chart2container').closest(".wrapper").width()
+        //        var size = $(window).width();
+        //        if (size < 1150 && size > 650) {
+        //            chart.setSize(
+        //                w, w * (1.0 / 4), false
+        //            );
+        //        } else {
+        //            if (size < (650)) {
+        //                chart.setSize(
+        //                    w, w * (3.0 / 4), false
+        //                );
+        //            } else {
+        //                chart.setSize(
+        //                    w, w * (1.0 / 4), false
+        //                );
+        //            }
+        //        }
+        //    }
+
+
+
+        //    $(window).resize(redrawchart);
+        //    redrawchart();
+        //    var row2 = '';
+        //    //$.each(response.d, function (index, obj) {
+        //    $.each(response, function (index, obj) {
+        //        var num;
+        //        row2 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotManHrsErect + "</td><td style='text-align: center;'>" + obj.TotManHrsDismantle + "</td></tr>";
+        //    });
+        //    $("#tbDetails2 tbody").append(row2);
+        //    //Added on 08-09-2023
+        //    $('#loadingpanel1').css('display', 'none');
+        //}
+        //function chart3(response) {
+        //    // WRegister = response.d;
+        //    WRegister = response;
+        //    var Week = [];
+        //    var WRegisterDataErect = [];
+        //    var WRegisterDataDismantle = [];
+        //    var week1Register = 0;
+        //    var weeks = [];
+        //    var start = "";
+        //    var end = "";
+        //    var erect = 0;
+        //    var week10Register = 0;
+        //    if (WRegister.length > 0) {
+        //        for (var i = 0; i < WRegister.length; i++) {
+        //            var TobePush = true;
+        //            if (TobePush) {
+
+        //                WRegisterDataErect.push({ name: WRegister[i].WeekNo, y: WRegister[i].TotErectedRegister, sliced: true });
+        //                WRegisterDataDismantle.push({ name: WRegister[i].WeekNo, y: WRegister[i].TotDismantleRegister, sliced: true });
+        //                //week1Register = WRegister[0].TotErectedRegister;
+        //                //week10Register = WRegister[9].TotErectedRegister;
+        //                Week.push('Week ' + WRegister[i].WeekNo);
+        //                weeks.push([WRegister[i].WeekNo - 1, WRegister[i].TotErectedRegister]);
+        //                //alert(weeks);
+        //                if (WRegister[i].WeekNo == '10') {
+        //                    start = WRegister[i].WeekStartDate;
+        //                    end = WRegister[i].WeekEndDate;
+        //                }
+        //            }
+
+
+        //        }
+
+        //    }
+        //    Highcharts.chart('Chart3container', {
+        //        title: {
+        //            text: 'Scaffold Builds Vs Dismantles',
+        //            x: -20,
+        //        },
+        //        subtitle: {
+        //            text: '(Week 10 => ' + start + ' to ' + end + ')',
+        //            x: -20,
+        //        },
+        //        yAxis: {
+        //            allowDecimals: false,
+        //            title: {
+        //                text: ''
+        //            }
+        //        },
+
+        //        xAxis: {
+        //            categories: Week
+        //        },
+        //        labels: {
+        //            items: [{
+        //                html: '',
+        //                style: {
+        //                    left: '50px',
+        //                    top: '18px',
+        //                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+        //                }
+        //            }]
+        //        },
+        //        navigation: {
+        //            buttonOptions: {
+        //                verticalAlign: 'top',
+        //                y: -12,
+        //            }
+        //        },
+        //        exporting: {
+        //            buttons: {
+        //                contextButton: {
+        //                    enabled: true,
+        //                    x: 9,
+        //                },
+        //                exportButton: {
+        //                    //x: -28,
+        //                    onclick: function () {
+        //                        $('#btnOpenModel3').click();
+        //                    },
+        //                    //symbol: 'circle'
+        //                    text: 'Show All'
+        //                }
+        //            }
+
+
+        //        },
+        //        series: [{
+        //            type: 'column',
+        //            regression: true,
+        //            regressionSettings: {
+        //                name: 'Linear (Built)',
+        //                dashStyle: 'ShortDot',
+        //                color: '#76C3FD'
+        //            },
+        //            name: 'Built',
+        //            id: 'primary',
+        //            data: weeks
+        //        }, {
+        //            type: 'line',
+        //            color: '#D5333E',
+        //            marker: {
+        //                enabled: false,
+        //                radius: 3
+        //            },
+        //            name: ' Dismantled',
+        //            data: WRegisterDataDismantle
+        //        }, {
+        //            name: '2 per. Mov. Avg.(Built)',
+        //            linkedTo: 'primary',
+        //            dashStyle: 'ShortDot',
+        //            color: '#5A79F5',
+        //            showInLegend: true,
+        //            type: 'trendline',
+        //            algorithm: 'SMA',
+        //            periods: 2
+        //            //    }
+        //            //{
+        //            //    type: 'line',
+        //            //    dashStyle: 'ShortDot',
+        //            //    color: '#76C3FD',
+        //            //    width: 1,
+        //            //    marker: {
+        //            //        enabled: false,
+        //            //        radius: 3
+        //            //    },
+        //            //    //yAxis: 2,
+        //            //    name: 'Linear (Built)',
+        //            //    data: [[0, week1Register + 0.1], [9, week10Register + 0.1]
+        //            //    ]
+        //            //    //marker: {
+        //            //    //    lineWidth: 2,
+        //            //    //    lineColor: Highcharts.getOptions().colors[3],
+        //            //    //    fillColor: 'white'
+        //            //    //}
+        //        }]
+
+        //    });
+        //    //function redrawchart() {
+        //    //    var chart = $('#Chart3container').highcharts();
+
+        //    //    var w = $('#Chart3container').closest(".wrapper").width()
+        //    //    //chart.setSize(
+        //    //    //    w, w * (1.0 / 4), false
+        //    //    //);
+        //    //    chart.setSize(
+        //    //        w, w * (3.0 / 4), false
+        //    //    );
+        //    //}
+
+        //    function redrawchart() {
+        //        var chart = $('#Chart3container').highcharts();
+
+        //        var w = $('#Chart3container').closest(".wrapper").width()
+        //        var size = $(window).width();
+        //        if (size < 1150 && size > 650) {
+        //            chart.setSize(
+        //                w, w * (1.0 / 4), false
+        //            );
+        //        } else {
+        //            if (size < (650)) {
+        //                chart.setSize(
+        //                    w, w * (3.0 / 4), false
+        //                );
+        //            } else {
+        //                chart.setSize(
+        //                    w, w * (1.0 / 4), false
+        //                );
+        //            }
+
+
+        //        }
+        //    }
+
+
+
+        //    $(window).resize(redrawchart);
+        //    redrawchart();
+        //    var row3 = '';
+        //    // $.each(response.d, function (index, obj) {
+        //    $.each(response, function (index, obj) {
+        //        //var num;
+        //        //num = (obj.PctAllSite1 * 100);
+        //        row3 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedRegister + "</td><td style='text-align: center;'>" + obj.TotDismantleRegister + "</td></tr>";
+        //    });
+        //    $("#tbDetails3 tbody").append(row3);
+        //    //Added on 08-09-2023
+        //    $('#loadingpanel1').css('display', 'none');
+        //}
+
+        function ddlWorkgroupbind(ClientID, SiteId, ddlselectarea) {
+            $.ajax({
+                type: "POST",
+                url: "/WeeklyprogressDashboard/ddlWorkgroupDashboard",
+                data: JSON.stringify({ ClientID: ClientID, SiteId: SiteId, ddlselectarea: ddlselectarea }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    debugger;
+                    var ddlworkgropdropdownbind = response;
+                    $("#ddlworkgroup").html("");
+                    $("#ddlworkgroup").append('<option value="All">All</option>');
+                    for (var i = 0; i < ddlworkgropdropdownbind.length; i++) { 
+                        $("#ddlworkgroup").append('<option value="' + ddlworkgropdropdownbind[i].WorkGroupID + '">' + ddlworkgropdropdownbind[i].WorkGroup + '</option>');
+
+                    }
+
+                }
+            });
+        }
+        function ChangeWorkgroup() {
+            var ClientID = $("#hdnClientID").val();
+            var ddlselectarea = $("#ddlarea").val();
+            var Siteid = $("#ddlsite").val();
+            var getnewdate = $("#Picdatereport").val();
+            var WorkGroup = $("#ddlworkgroup").val();
+            ChartLoadAll(ClientID, Siteid, ddlselectarea, WorkGroup, getnewdate);
+        }
+        function ChartLoadAll(ClientID, Siteid, jobval, WorkGroup, getnewdate)
+        {
+            $('#loadingpanel1').css('display', 'block');
+            $('.forRemoveData').remove();
+            $.ajax({
+                type: "POST",
+                async:false,
+                url: "/WeeklyprogressDashboard/WeeklyProgress",
+                data: JSON.stringify({ id: ClientID, site: Siteid, jobid: jobval, WorkGroup:WorkGroup,getnewdate: getnewdate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //WTonnage = response;
+                    //WManHrs = response;
+                    //WRegister = response;
+                    WChartData = response;
+                    var Week = [];
+                    var WTonnageDataErect = [];
+                    var WTonnageDataDismantle = [];
+                    var WRegisterDataErect = [];
+                    var WRegisterDataDismantle = [];
+                    var week1tonnage = 0;
+                    var weeks = [];
+                    var weeks2 = [];
+                    var weeks3 = [];
+                    var week10tonnage = 0;
+                    var WManHrsDataErect = [];
+                    var WManHrsDataDismantle = [];
+                    var week1ManHrs = 0;
+                    var week10ManHrs = 0;
+                    var start = "";
+                    var end = "";
+                    var week1Register = 0;
+                    var erect = 0;
+                    var week10Register = 0;
+                    var lastWeekNo = WChartData[WChartData.length - 1].WeekNo;
+                    var firstWeekNo = lastWeekNo - 9;
+
+                    if (WChartData.length > 0) {
+                        for (var i = 0; i < WChartData.length; i++) {
+                             var TobePush = true;
+                            
+                            if (TobePush) {
+
+                                //Data For Chat1
+                                WTonnageDataErect.push({ name: WChartData[i].WeekNo, y: WChartData[i].TotErectedTonnage, sliced: true });
+                                WTonnageDataDismantle.push({ name: WChartData[i].WeekNo, y: WChartData[i].TotDismantleTonnage, sliced: true });
+                                
+                                weeks.push([WChartData[i].WeekNo - firstWeekNo , WChartData[i].TotErectedTonnage]);
+                                
+
+                                //Data For Chart 2
+                                WManHrsDataErect.push({ name: WChartData[i].WeekNo, y: WChartData[i].TotManHrsErect, sliced: true });
+                                WManHrsDataDismantle.push({ name: WChartData[i].WeekNo, y: WChartData[i].TotManHrsDismantle, sliced: true });
+                              
+                                weeks2.push([WChartData[i].WeekNo - firstWeekNo, WChartData[i].TotManHrsErect]);
+                                
+                                
+                                //Data For Chart 3
+                                WRegisterDataErect.push({ name: WChartData[i].WeekNo, y: WChartData[i].TotErectedRegister, sliced: true });
+                                WRegisterDataDismantle.push({ name: WChartData[i].WeekNo, y: WChartData[i].TotDismantleRegister, sliced: true });
+
+                                
+                                
+                                Week.push('Week ' + WChartData[i].WeekNo);
+                                weeks3.push([WChartData[i].WeekNo - firstWeekNo, WChartData[i].TotErectedRegister]);
+                                 
+                               
+                                //  if (WChartData[i].WeekNo == '10') {
+                                if (WChartData[i].WeekNo == lastWeekNo) {
+                                    start = WChartData[i].WeekStartDate;
+                                    end = WChartData[i].WeekEndDate;
+
+                                }
+                            }
+                        }
+                    }
+                
+
+                    Highcharts.chart('Chart1container', {
+                        title: {
+                            //align: 'left',
+                            text: 'Tonnage Erected Vs Dismantled',
+                            x: -40,
+                        },
+                        subtitle: {
+                            // align: 'left',
+                            /*  text: '(Week 10 => ' + start + ' to ' + end + ')',*/
+                            text: '(Week ' + lastWeekNo + ' => ' + start + ' to ' + end + ')',
+                            x: -40,
+                        },
+                        yAxis: {
+                            allowDecimals: true,
+                            title: {
+                                text: ''
+                            }
+                        },
+
+                        xAxis: {
+                            categories: Week,
+
+                            //tickInterval: 1, // Ensure ticks align with categories
+                            //startOnTick: true, // Force alignment with the first category
+                            //endOnTick: true, // Force alignment with the last category
+                            //min: 0, // Start at the first category
+                            //max: Week.length - 1 // End at the last category,
+                        },
+                        labels: {
+                            items: [{
+                                html: '',
+                                style: {
+                                    left: '50px',
+                                    top: '18px',
+                                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                                }
+                            }]
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel1').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        series: [{
+                            type: 'column',
+                            regression: true,
+                            regressionSettings: {
+                                name: 'Linear (Tonnage Erected)',
+                                dashStyle: 'ShortDot',
+                                color: '#76C3FD'
+                            },
+                            name: 'Tonnage Erected',
+                            data: weeks
+                        }, {
+                            type: 'column',
+                            name: 'Tonnage Dismantled',
+                            color: '#D5333E',
+                            data: WTonnageDataDismantle
+                        }]
+                    });
+
+                    Highcharts.chart('Chart2container', {
+                        title: {
+                            //align: 'left',
+                            text: 'Man Hrs Spent Erect Vs Dismantle',
+                            x: -40,
+
+                        },
+                        subtitle: {
+                            //align: 'left',
+                            //text: '(Week 10 => ' + start + ' to ' + end + ')',
+                            text: '(Week ' + lastWeekNo + ' => ' + start + ' to ' + end + ')',
+                            x: -40,
+
+                        },
+                        yAxis: {
+                            allowDecimals: false,
+                            title: {
+                                text: ''
+                            }
+                        },
+
+                        xAxis: {
+                      
+
+                            categories: Week,
+                       
+                        //tickInterval: 1, // Ensure ticks align with categories
+                        //startOnTick: true, // Force alignment with the first category
+                        //endOnTick: true, // Force alignment with the last category
+                        //min: 0, // Start at the first category
+                        //max: Week.length - 1 // End at the last category,
+                        },
+                        labels: {
+                            items: [{
+                                html: '',
+                                style: {
+                                    left: '50px',
+                                    top: '18px',
+                                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                                }
+                            }]
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel2').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All',
+
+                                }
+                            }
+
+
+                        },
+                        series: [{
+                            type: 'column',
+                            regression: true,
+                            regressionSettings: {
+                                name: 'Linear (Man Hrs Erect)',
+                                dashStyle: 'ShortDot',
+                                color: '#76C3FD'
+                            },
+                            name: 'Man Hrs Erect',
+                            data: weeks2
+                        }, {
+                            type: 'column',
+                            color: '#D5333E',
+                            name: 'Man Hrs Dismantle',
+                            data: WManHrsDataDismantle
+                        }]
+                    });
+
+                    Highcharts.chart('Chart3container', {
+                        title: {
+                            text: 'Scaffold Builds Vs Dismantles',
+                            x: -20,
+                        },
+                        subtitle: {
+                           // text: '(Week 10 => ' + start + ' to ' + end + ')',
+                            text: '(Week ' + lastWeekNo + ' => ' + start + ' to ' + end + ')',
+                            x: -20,
+                        },
+                        yAxis: {
+                            allowDecimals: false,
+                            title: {
+                                text: ''
+                            }
+                        },
+
+                        xAxis: {
+                            categories: Week,
+                          
+                            //tickInterval: 1, // Ensure ticks align with categories
+                            //startOnTick: true, // Force alignment with the first category
+                            //endOnTick: true, // Force alignment with the last category
+                            //min: 0, // Start at the first category
+                            //max: Week.length - 1 // End at the last category,
+                        },
+                        labels: {
+                            items: [{
+                                html: '',
+                                style: {
+                                    left: '50px',
+                                    top: '18px',
+                                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                                }
+                            }]
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel3').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        series: [{
+                            type: 'column',
+                             regression: true,
+                            regressionSettings: {
+                                name: 'Linear (Built)',
+                                dashStyle: 'ShortDot',
+                                color: '#76C3FD'
+                            },
+                            name: 'Built',
+                            id: 'primary',
+                            data: weeks3
+                        }, {
+                            type: 'line',
+                            color: '#D5333E',
+                            marker: {
+                                enabled: false,
+                                radius: 3
+                            },
+                            name: ' Dismantled',
+                            data: WRegisterDataDismantle
+                        }, {
+                            name: '2 per. Mov. Avg.(Built)',
+                            linkedTo: 'primary',
+                            dashStyle: 'ShortDot',
+                            color: '#5A79F5',
+                            showInLegend: true,
+                            type: 'trendline',
+                            algorithm: 'SMA',
+                            periods: 2
+                        }]
+
+                    });
+
+                    function redrawchart() {
+                        var chart = $('#Chart1container').highcharts();
+                        var chart2 = $('#Chart2container').highcharts();
+                        var chart3 = $('#Chart3container').highcharts();
+
+                        var w = $('#Chart1container').closest(".wrapper").width()
+                        var w2 = $('#Chart2container').closest(".wrapper").width()
+                        var w3 = $('#Chart3container').closest(".wrapper").width()
+                        var size = $(window).width();
+                        if (size < 1150 && size > 650) {
+                            chart.setSize(
+                                w, w * (1.0 / 4), false
+                            );
+                            chart2.setSize(
+                                w2, w2 * (1.0 / 4), false
+                            );
+                            chart3.setSize(
+                                w3, w3 * (1.0 / 4), false
+                            );
+                        } else {
+                            if (size < (650)) {
+                                chart.setSize(
+                                    w, w * (3.0 / 4), false
+                                );
+                                chart2.setSize(
+                                    w2, w2 * (3.0 / 4), false
+                                );
+                                chart3.setSize(
+                                    w3, w3 * (3.0 / 4), false
+                                );
+                            } else {
+                                chart.setSize(
+                                    w, w * (1.0 / 4), false
+                                );
+                                chart2.setSize(
+                                    w2, w2 * (1.0 / 4), false
+                                );
+
+                                chart3.setSize(
+                                    w3, w3 * (1.0 / 4), false
+                                );
+                            }
+                        }
+                    }
+
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                    var row = '';
+                    var row2 = '';
+                    var row3 = '';
+
+                    $.each(response, function (index, obj) {
+                        var num;
+                      
+                            row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedTonnage + "</td><td style='text-align: center;'>" + obj.TotDismantleTonnage + "</td></tr>";
+                        
+                    });
+                    $("#tbDetails1 tbody").append(row);
+
+                    $.each(response, function (index, obj) {
+                        var num;
+                        
+                            row2 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotManHrsErect + "</td><td style='text-align: center;'>" + obj.TotManHrsDismantle + "</td></tr>";
+                        
+                    });
+                    $("#tbDetails2 tbody").append(row2);
+
+                    $.each(response, function (index, obj) {
+                        var num = "";
+                      
+                            row3 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.TotErectedRegister + "</td><td style='text-align: center;'>" + obj.TotDismantleRegister + "</td></tr>";
+                        
+                    });
+                    $("#tbDetails3 tbody").append(row3);
+
+                    $('#loadingpanel1').css('display', 'none');
+                }
+
+            });
+        }
+
+    </script>
+    <style>
+        #Picdatereport {
+            border-color: #e5e5e5 !important;
+            border-radius: 4px !important;
+            height: 28px !important;
+        }
+
+        .highcharts-credits {
+            display: none;
+        }
+
+        .container .DshbrdBack {
+            background-color: #ffffcc;
+            height: 1023px;
+        }
+
+        .rcInputCell {
+            width: 76% !important;
+        }
+
+        @@media(min-width:220px) and (max-width:767px) {
+            #lblweekdate {
+                float: left !important;
+                margin-left: 4px !important;
+            }
+
+            #Picdatereport {
+                margin-left: -29px;
+            }
+        }
+
+        @@media (min-width:766px) and (max-width:991px) {
+            #lblweekdate {
+                margin-left: 20px !important;
+            }
+
+            #ddlsite {
+                width: 56% !important;
+            }
+
+            #ddlarea {
+                width: 56% !important;
+            }
+        }
+    </style>
+
+    <div class="container DshbrdBack">
+        <input type="hidden" id="hdnClientID"/>
+        <div class="row">
+            <div class="col-lg-1 col-md-1 col-sm-3 col-xs-4">
+                <label id="Label1" style="font-weight: 700; font-size: 15px; color: black; float: right">Site</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-9 col-xs-8">
+                @*<asp:DropDownList ID="ddlsite" CssClass="form-control" onchange="Changesite()" Style="border: 1px solid; border-color: #cac5c5;" runat="server" Width="100%" AppendDataBoundItems="true"></asp:DropDownList>*@
+                <select id="ddlsite" Class="form-control" onchange="Changesite()" Style="border: 1px solid; border-color: #cac5c5;" style="Width:100%"></select>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-3 col-xs-4">
+                <label id="loc" style="font-weight: 700; font-size: 15px; color: black; float: right">Location</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-9 col-xs-8">
+                @*<asp:DropDownList ID="ddlarea" CssClass="form-control" runat="server" Style="border: 1px solid; border-color: #cac5c5;" Width="100%" AppendDataBoundItems="true" onchange="selectarea();"></asp:DropDownList>*@
+                <select id="ddlarea" Class="form-control" Style="border: 1px solid; border-color: #cac5c5;" style="Width:100%"  onchange="selectarea();"></select>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-5">
+                <label id="lblweekdate" style="font-weight: 700; font-size: 15px; color: black; float: right">Report Date </label>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6">
+                @*<Telerik:RadDatePicker ID="Picdatereport" runat="server" DateInput-DateFormat="dd-MMM-yyyy">
+                    <ClientEvents OnDateSelected="ChangeReportdate" />
+                </Telerik:RadDatePicker>*@
+                <input type="text" id="Picdatereport" class="form-control" onchange="ChangeReportdate()"/>
+            </div>
+            @*<button id="exportButton" style="color:black;" type="button">Export as PDF</button>*@
+            
+            <div id="divWorkgroupDashboard">
+                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="margin-top: 6px">
+                    <label id="lblworkgroup" runat="server" style="font-weight: 700; font-size: 17px; color: black; float: right">WorkGroup </label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-9 col-xs-8" style="margin-top: 6px">
+                    <select id="ddlworkgroup" Class="form-control" Style="border: 1px solid; border-color: #cac5c5; Width:100%;" onchange="ChangeWorkgroup();"></select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <button id="exportButton" style="color:black;float: right;margin-right: 11px;height:100%" type="button" Class="btn btn-small w3-btn w3-teal"><i class="fa fa-file-excel-o"></i>&nbsp;Export as PDF</button>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 6px;">
+                <div id="Chart1container" class="wrapper"></div>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="Chart2container" class="wrapper"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="Chart3container" class="wrapper"></div>
+            </div>
+        </div>
+
+    </div>
+
+
+    @*<%--Model to Show Chart 1 (Tonnage)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+        <div class="modal fade" id="myModal1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Tonnage Erected and Dismantled </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Week</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Tonnage Erected</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Tonnage Dismantled</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Chart 1 (Tonnage)--%>*@
+
+    @*<%--Model to Show Chart 2 (Man Hrs)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+        <div class="modal fade" id="myModal2" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Man Hrs Spent and Dismantle </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails2" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Week</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Man Hrs Erect</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Man Hrs Dismantle</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Chart 2 (Man Hrs)--%>*@
+
+    @*<%--Model to Show Chart 3 (Register Built)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+        <div class="modal fade" id="myModal3" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Scaffold Build and Dismantles </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Week</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Scaffolds Builds</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Scaffolds Dismantles</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Chart 3 (Register Built)--%>*@
+
+
+

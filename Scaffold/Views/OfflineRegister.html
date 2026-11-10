@@ -1,0 +1,1174 @@
+﻿
+<!DOCTYPE html>
+<html xmlns="https://www.w3.org/1999/xhtml" manifest="OfflineRegister.appcache">
+
+<!--<html xmlns="https://www.w3.org/1999/xhtml">-->
+<head>
+    <title>SCAFPAC</title>
+    <link rel="icon" href="images/TopLogo.png" />
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1" />-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5, user-scalable=no" />-->  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <!--<meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=0.5, maximum-scale=0.5, user-scalable=no" http-equiv="origin-trial" content="AtuFfgxjtLmQZWq5BdprMFHj6MdEFHohwk9eRU/f1PNSD+G8i094SCwTwQCzoqDvqu0svTS3PYaTNkJg6zVQ2Q4AAAB1eyJvcmlnaW4iOiJodHRwczovL3NjYWZwYWNhcHB0ZXN0LmF6dXJld2Vic2l0ZXMubmV0OjQ0MyIsImZlYXR1cmUiOiJBcHBDYWNoZSIsImV4cGlyeSI6MTYxNzc1MzU5OSwiaXNTdWJkb21haW4iOnRydWV9">-->
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" http-equiv="origin-trial" content="AtuFfgxjtLmQZWq5BdprMFHj6MdEFHohwk9eRU/f1PNSD+G8i094SCwTwQCzoqDvqu0svTS3PYaTNkJg6zVQ2Q4AAAB1eyJvcmlnaW4iOiJodHRwczovL3NjYWZwYWNhcHB0ZXN0LmF6dXJld2Vic2l0ZXMubmV0OjQ0MyIsImZlYXR1cmUiOiJBcHBDYWNoZSIsImV4cGlyeSI6MTYxNzc1MzU5OSwiaXNTdWJkb21haW4iOnRydWV9" />-->
+    <link href="/Content/Css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="/Content/Css/custom.css" rel="stylesheet" />
+    <!--<link rel="stylesheet" href="/Content/Css/base_jquery-ui.css">-->
+    <link href="/Content/Css/w3.css" rel="stylesheet" />
+    <link href="/Content/Css/SecStyle.css" rel="stylesheet" />
+    <link href="/Content/Css/CustomAlert.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery-ui.css" rel="stylesheet" />
+
+    <script src="/Content/js/jquery.min.js"></script>
+    <script src="/Content/js/jquery-ui.min.js"></script>
+    <script src="/Content/js/bootstrap.min.js"></script>
+    <script src="/Content/js/bootbox.min.js"></script>
+    <script src="Content/js/CustomAlert.js"></script>
+    <script src="/Content/js/jquery.dataTables.min.js"></script>
+    <!--<script src="/Content/js/Register-sw.js"></script>-->
+    <script src="/Content/js/OfflineRegister.js?v1=7"></script>
+    <script>
+
+
+        function deletecheck() {
+            var CheckRID;
+            var tempvalue = "";
+            db.transaction(function (tx) {
+                tx.executeSql("Select * from tblCurrentRID", [], function (tx, results) {
+                    if (results.rows.length > 0) {
+                        CheckRID = results.rows.item(0).RID;
+
+                    }
+                });
+            });
+            setTimeout(function () {
+                if (CheckRID == "0") {
+                    var img1 = document.getElementById("imga");
+                    img1.src = "images/noimg.jpg";
+                    $("#tempimg").val(tempvalue);
+                    // $("#deleteimage").css("display", "none");
+
+                }
+                else {
+                    $("#divdeleteimage").css("display", "block");
+                }
+                console.log(CheckRID);
+            }, 1000);
+        }
+        function ImageRotate(angle) {
+            if (angle == 90 || angle == -90 || angle == 270 || angle == -270) {
+                $('#imga').addClass("rotatedimg");
+            }
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +angle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + angle + 'deg)' });
+            }
+        }
+        function newclickforward() {
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            var imgsrc = $('#imga').attr('src');
+
+            var angle = 90;
+            var newangle = $("#imgangle").val();
+
+            if (newangle == 0) {
+                newangle = 90;
+            } else {
+                newangle = parseInt(newangle) + angle;
+            }
+            if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+                $('#imga').addClass("rotatedimg");
+            } else {
+                $('#imga').removeClass("rotatedimg");
+            }
+
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +newangle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+            }
+
+            if (newangle > -360 && newangle < 360) {
+                $("#imgangle").val(newangle);
+            } else {
+                newangle = 0;
+                $("#imgangle").val(newangle);
+            }
+        }
+        function newclickbackward() {
+            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            var angle = -90;
+            var newangle = $("#imgangle").val();
+
+            if (newangle == 0) {
+                newangle = -90;
+            } else {
+                newangle = parseInt(newangle) + angle;
+            }
+
+            if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+                //alert("hello");
+                // $(".rotatedimgdiv").css("margin", "50px 0 0 0");
+                //$(".rotatedimg").css("margin", "0 0 0 25px").css("max-width", "260px").css("width", "100%");
+                $('#imga').addClass("rotatedimg");
+                // $("#removemargin").css("margin-top", "0");
+            } else {
+                // $(".rotatedimgdiv").css("margin", "0 0 0 0");
+                $('#imga').removeClass("rotatedimg");
+                //$(".rotatedimg").css("margin", "0 0 0 0").css("max-width", "auto").css("width", "100%");
+                // $("#removemargin").css("margin-top", "-32px");
+            }
+
+            if (isFirefox == true) {
+                $(".changeimg").css('image-orientation', +newangle + 'deg');
+            } else {
+                $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+            }
+
+            if (newangle > -360 && newangle < 360) {
+                $("#imgangle").val(newangle);
+            } else {
+                newangle = 0;
+                $("#imgangle").val(newangle);
+
+            }
+        }
+
+
+        $(document).ready(function () {         
+
+            var number = document.getElementById('txtplnstandDur');
+
+            $(".mob_file_image").on("change", function (evt) {
+                var base64mobImagedata;
+                var reader = new FileReader();
+                reader.readAsDataURL(this.files[0]);
+                var name = this.files[0].name;
+                var getname = name.split(".");
+                var extensionname = getname[1];
+                if (extensionname.toLowerCase() == "xlsx" || extensionname.toLowerCase() == "csv" || extensionname.toLowerCase() == "doc" || extensionname.toLowerCase() == "docx" || extensionname.toLowerCase() == "pdf" || extensionname.toLowerCase() == "xls" || extensionname.toLowerCase() == "mov") {
+                    var Res = { Result: "Failed", Message: "Failed to upload Image! Valid File Extensions Are jpg, jpeg, png, gif, bmp" };
+                    CustomAlert(Res);
+                }
+                else {
+                    reader.onloadend = function () {
+                        base64mobImagedata = reader.result;
+                        $("#tempimg").val(base64mobImagedata);
+                        $("#imga").attr('src', base64mobImagedata);
+                        $("#deleteimage").css("display", "block");
+                        $("#btnSaveImage").css("display", "block");
+
+                    }
+                }
+
+            });
+
+            number.onkeydown = function (e) {
+                if (!((e.keyCode > 95 && e.keyCode < 106)
+                    || (e.keyCode > 47 && e.keyCode < 58)
+                    || e.keyCode == 8)) {
+                    return false;
+                }
+            }
+
+            document.getElementById("txtlength").addEventListener('input', restrictToInteger);
+            document.getElementById("txtwidth").addEventListener('input', restrictToInteger);
+            document.getElementById("txtheight").addEventListener('input', restrictToInteger);
+            document.getElementById("txtManhrserect").addEventListener('input', restrictToInteger);
+            document.getElementById("txtmanDisman").addEventListener('input', restrictToInteger);
+            document.getElementById("txtCrewSize").addEventListener('input', restrictToInteger);
+            function restrictToInteger() {
+                this.value = this.value.replace(/[^\d.]/g, '');
+            }
+            $("#btndeleteimageno").on("click", function () {
+                $("#divdeleteimage").css("display", "none");
+            });
+            $("#btndeleteimageyes").on("click", function () {
+                UpdateImageRID();
+
+
+            });
+            if ($("#tempimg").val() != "") {
+                $("#deleteimage").css("display", "block");
+                $("#btnSaveImage").css("display", "block");
+            }
+
+        });
+        $(function () {
+            $("#txtManhrserect").on('change', function () {
+                ManHrsRatioGet(ClientID);
+            });
+        });
+
+        //function Submit() {
+        //    //var ddl = document.getElementById("ddlscaffoldowner");
+        //    //var option = document.createElement("OPTION");
+        //    //option.innerHTML = document.getElementById("txtpopupowner").value;
+        //    //option.value = document.getElementById("txtpopupowner").value;
+
+        //    var ddlOwnerVal = $("#txtpopupowner").val();
+        //    //ddl.options.add(option);
+        //    $("#divpopupOwner").css("display", "none");
+        //    $("#ddlscaffoldowner").append($('<option></option>').attr("value", ddlOwnerVal).text(ddlOwnerVal));
+        //    $("#ddlscaffoldowner").val(ddlOwnerVal);
+
+        //}
+
+        function ManHrsRatioGet(ClientID) {
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/OfflineRegister.asmx/ClientErectRatio",
+                url: "/OfflineRegister/ClientErectRatio",
+                data: JSON.stringify({ id: ClientID }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // var Ratio = response.d;
+                    var Ratio = response;
+                    var ManHrsRatio = Ratio["0"].ManHrsRatio;
+
+                    var ManHrsErect = $("#txtManhrserect").val();
+                    var ManHrsDismantle = $("#txtmanDisman").val();
+                    //if (ManHrsDismantle == "") {
+                    var ManDismantel = (ManHrsRatio) * (ManHrsErect);
+                    var ManHrsDismantel = ManDismantel.toFixed(2);
+
+
+                    $("#txtmanDisman").val(ManHrsDismantel);
+                    //}
+                }
+            });
+        }
+    </script>
+    <style>
+        input:focus {
+        font-size: 16px;
+      }
+        #custDetails {
+            height: 1200px !important;
+        }
+
+        label {
+            font-size: 11px;
+        }
+
+        .panel_toolbox > li > a:hover {
+            background: none;
+        }
+
+        .upperRow {
+            margin: 15px 0 0 20px;
+        }
+
+        control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+            background-color: #eeeeee !important;
+        }
+
+        .form-control {
+            height: 28px !important;
+        }
+
+        .bootbox-body {
+            color: #666666;
+            font-size: 14px;
+        }
+
+        th {
+            color: #666666;
+        }
+
+        td {
+            color: #666666;
+        }
+
+        table.dataTable.no-footer {
+            border-bottom: none;
+        }
+
+        .dataTables_wrapper.no-footer .dataTables_scrollBody {
+            border-bottom: none;
+        }
+
+        img.fa_AddNew {
+            height: 9px;
+            width: 9px;
+            margin: -2px 1px 0 0px;
+        }
+
+        .btn_Add {
+            height: 9px;
+            width: 9px;
+            margin: -2px 1px 0 0px;
+        }
+
+        .rotatedimg {
+            /*margin: 0 0 50px 25px;*/
+            margin: 100px 0 50px 0;
+            max-width: 260px;
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+        }
+
+        @media (min-width:300px) and (max-width:736px) {
+
+            #btnShowOfflineList {
+                margin-left: 2px;
+                width: 35Px;
+            }
+
+            #btnSaveRegister {
+                margin-left: 2px;
+                width: 35Px;
+            }
+
+            #btnAddRegister {
+                margin-left: 2px;
+                width: 35Px;
+            }
+
+            #btnImage {
+                margin-left: 2px;
+            }
+        }
+    </style>
+
+
+</head>
+<body onselectstart="return false" style="background: #F7F7F7;">
+
+    <div id="customLoader" style="display:none;position: fixed; z-index: 999; height: 100%; width: 100%; top: 0; left: 0; background-color: black; filter: alpha(opacity=60); opacity: 0.3; -moz-opacity: 0.8;">
+        <div style="z-index: 99999; margin: 16% 48%; padding: 10px; width: 150px; border-radius: 10px; filter: alpha(opacity=100); opacity: 1; -moz-opacity: 1;">
+            <img src="/Images/loading.gif" style="height: 128px; width: 128px;" />
+            <p class="w3-margin-left"><b>Please Wait.......</b></p>
+        </div>
+    </div>
+
+    <div style="display:none;top: 0px;" id="CustomAlert">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <span ID="alertMsg"></span>
+    </div>
+
+    <input type="hidden" id="hdnRID" />
+
+    <div class="row upperRow">
+        <div class="title_left col-lg-5 col-md-3 col-sm-2 col-xs-4">
+            <h4 class="heading" style="color: #0070ba"><b><img src='/images/fonts/fa_book.png' class='img-responsive' style='height: 15px;width: 14px;margin-top: 5px;float: left;' />&nbsp;<label style="color: #0070ba !important;font-weight: 700;" ID="lblclient" Font-Size="16px" Font-Bold="true">Offline Job</label></b></h4>
+        </div>
+        <div class="col-lg-7 col-sm-10 col-md-9 col-xs-8">
+
+            <!--<div class="col-lg-2 col-md-3 col-sm-2 col-xs-1"></div>-->
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+                <button type="button" id="btnShowOfflineList" style="display:none;" class="w3-btn w3-small w3-blue btnheight"><span class="icon"><img src='/images/fonts/fa_list.png' class='img-responsive' style='height: 17px;width: 16px;' /></span><span class="text">&nbsp;Show List</span></button>
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4">
+                <button type="button" id="btnSaveRegister" class="w3-btn w3-small w3-green btnheight"><span class="icon"><img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' /></span><span class="respText text">&nbsp;Save</span></button>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4">
+                <button type="button" id="btnAddRegister" onclick="AddJobRedirect();" class="w3-btn w3-teal"><span class="icon"><img src='/images/fonts/fa_add.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' /></span><span class="text">&nbsp;Add Job</span></button>
+            </div>
+            
+            <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12">
+                <label style="font-size:20px">Connection Status:</label>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-12" id="btnImage">
+                    <!--<asp:LinkButton runat="server" ID="btnCAncel" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnCAncel_Click"> <span class="icon"><i class="fa fa-backward"> </i></span><span class="text">&nbsp;Back to Register </span></asp:LinkButton>
+            <asp:LinkButton runat="server" CssClass="w3-btn w3-teal Back" CausesValidation="false" Style="height: 26px; width: 85%; padding-top: 3px; display: none" ID="btnback" OnClick="btnCAncel_Click"><span class="icon"><i class="fa fa-backward"></i></span><span class="c respText">&nbsp;Back </span></asp:LinkButton>-->
+                    <!--<button type="button" id="btnmovetoffline" class="btn w3-btn w3-ripple w3-red" onclick="" style="margin: 0 0 15px 0;display:none;float: right;">&nbsp;Get Offline Link</button>-->
+                    <!--<img src="/images/online.png" class="img-responsive" id="onlineimg" style="display:none;max-height: 25px;margin: 3px 0px 15px 0;float: right;" />
+            <img src="/images/offlinelogo.png" class="img-responsive" id="offlineimg" style="display:none;max-height: 25px;margin: 3px 0px 15px 0;float: right;" />-->
+                    <img src="/images/onlineStatus.png" class="img-responsive" id="onlineimg" style="display:none;max-height: 70px;margin-top: -13px;" />
+                    <img src="/images/offlineStatus.png" class="img-responsive" id="offlineimg" style="display:none;max-height: 70px;margin-top: -13px;" />
+
+                </div>
+            </div>
+    </div>
+
+    <input type="hidden" id="hdnDecryptRID" />
+    <input type="hidden" id="hdnEncryptRID" />
+
+    <div class="row">
+        <div class="col-xs-12 col-lg-12 col-sm-12 col-md-12 xsfieldset">
+            <fieldset>
+                <legend>Job Info</legend>
+                <div class="row w3-padding-0">
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4 sn">
+                        <label>Site Name</label>
+                        <input type="text" class="form-control" id="txtSiteName" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Site Location</label>
+                        <input type="text" class="form-control" id="txtSiteLocation" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Inspected By</label>
+                        <input type="text" class="form-control" id="txtInspectedBy" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Most Recent Insp. Date</label>
+                        <input type="text" class="form-control" id="txtRecentinspectiondate" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Days Since Last Insp.</label>
+                        <input type="text" class="form-control" id="txtDaylastinspetion" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2" id="statusinsp">
+                        <label>Job Status</label>
+                        <label id="txtstatus" class="form-control" style="background: #eeeeee;word-break: break-all; overflow: hidden;"></label>
+                        <br />
+                        <img src="" id="imgstaus" style="margin-top: -14px;height:20px;" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                        <label>Plan Status</label>
+                        <input type="text" id="txtPlannedStatus" style="background: #eeeeee;" readonly="readonly" class="form-control" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Standing Days to Date</label>
+                        <input type="text" id="txtHireDays" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Total Standing Days</label>
+                        <input type="text" id="txtTotalhireday" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Date Tagged</label>
+                        <input type="text" id="txtdatetagged" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-4 col-lg-2 col-md-4">
+                        <label>Date Dismantle</label>
+                        <input type="text" id="txtDatedismantle" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                        <label># of Items</label>
+                        <input type="text" id="txtNoOfItem" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-6 col-sm-2 col-lg-1 col-md-2">
+                        <label>Tonnage</label>
+                        <input type="text" id="txttonnage" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                    <div class="col-xs-3 col-sm-2 col-lg-1 col-md-2">
+                        <label>Mat.Finalised</label><br />
+                        <input type="text" id="txtoptstatus" class="form-control" style="width:100%" readonly="readonly" />
+                        <br />
+                        <img src="" style="margin-top: -14px;height:20px;" id="imgopt" />
+                    </div>
+                    <div class="col-xs-3 col-sm-2 col-lg-1 col-md-2">
+                        <label>Scaf Ref # </label>
+                        <input type="text" id="txtscaffref" class="form-control" style="width:100%" readonly="readonly" />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+
+
+
+    <!--Form Section Starts Here-->
+
+    <div id="FormSection" class="row">
+        <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+            <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+                <li id="liCompany" class="active">
+                    <a id="AnchorRegister" data-toggle="tab">
+                        <span class="spancolorandsize"><img src='/images/fonts/fa_user.png' class='img-responsive' style='height: 12px;width: 15px;margin-top: 2px;float: left;' />&nbsp;Job</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+                    <div class="row w3-margin-top">
+
+                        <div class="col-lg-5 col-md-6 col-sm-12 col-sx-12">
+
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                <div style="height: 600px;" class="x_panel w3-padding-0 w3-card-4">
+                                    <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                        <h4 style="margin-top: 6px; font-size: 15px" id="lblVaccinations"><i class="fa fa-list"></i>&nbsp;Basic Information <span style="margin-left: 5px; display:block" id="VacCount"></span></h4>
+
+                                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+                                            <li>
+                                                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content" style="margin-bottom: 3px!important;">
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Site<span style="color: red">&nbsp*</span></label>
+                                                <select id="ddlsites" onchange="changeSelectedSite(0);" class="form-control">
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Owner Name</label>
+                                                <input type="text" id="txtOwnername" readonly="readonly" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Address</label>
+                                                <input type="text" id="txtsiteAddress" readonly="readonly" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>City</label>
+                                                <input type="text" id="txtsiteCity" readonly="readonly" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Postcode</label>
+                                                <input type="text" id="txtZip" readonly="readonly" class="form-control" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Location<span style="color: red">&nbsp*</span></label>
+                                                <button type="button" id="btnLocation" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                <select id="ddlLocation" onchange="changeSelectedLocation($('#ddlLocation option:selected').text(),'0');" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                <label>Owner Ref</label>
+                                                <input type="text" id="txtclientReference" class="form-control" />
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                <label>WO No.</label>
+                                                <input type="text" id="txtWOnumb" class="form-control" />
+                                            </div>
+                                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                                <label>SAP No.</label>
+                                                <input type="text" id="txtSapNumber" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Work Groups</label>
+                                                <!--<label ToolTip="Work Groups" onclick="addnewWorkGroups();return false;" id="btnWorkGroups" Style="float: right; color: #800000 !important; font-size: smaller !important"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller"></i>Add</label>-->
+                                                <button type="button" id="btnWorkGroups" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                <select id="ddlWorkGroups" Class="form-control">
+                                                    <option value=""></option>s
+                                                </select>
+                                            </div>
+                                            </div>
+                                            <div class="row" style="margin-top: 10px;">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label>Sub Groups</label>
+                                                    <!--<label ToolTip="Sub Groups" onclick="addnewSubGroups();return false;" id="btnSubGroups" Style="float: right; color: #800000 !important; font-size: smaller"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>-->
+                                                    <button type="button" id="btnSubGroups" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                    <select id="ddlSubGroups" class="form-control">
+                                                        <option value=""></option>
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                        <div class="row" style="margin-top: 10px;display:none;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Maintain Inventory At Job</label>
+                                                <input type="checkbox" id="checkboxMaintainInventory" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                <div style="height: 600px;" class="x_panel w3-padding-0 w3-card-4">
+                                    <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                        <h4 style="margin-top: 6px; font-size: 15px" id="H3"><i class="fa fa-list"></i>&nbsp;Details <span style="margin-left: 5px;" id="Span3"></span></h4>
+
+                                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                            <li>
+                                                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                    <div class="x_content">
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Date Tagged</label>
+                                                <!--<input type="text" class="form-control datepicker" id="rdpDateTagged" style="width:100%;"/>-->
+                                                <input type="text" class="form-control" id="rdpDateTagged" style="width:100%;" autocomplete="off" />
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Date Dismantle</label>
+                                                <input type="text" class="form-control" id="rdpdatedis" style="width:100%;" readonly="readonly" autocomplete="off" />
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Design Type</label>
+
+                                                <!--<asp:LinkButton ID="btnDesign" ToolTip="Add Design" runat="server" OnClick="btnDesign_Click" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>-->
+                                                <button type="button" id="btnDesign" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+
+                                                <select id="ddlScaffoldDesign" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Duty Rating</label>
+                                                <button type="button" id="btnRating" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                <select id="ddlDutyrating" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Material Type</label>
+                                                <button type="button" id="btnMaterial" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                <select id="ddlMaterialType" class="form-control">
+                                                    <!--<option disabled value="">Select</option>-->
+                                                    <option readonly value=""></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Reason for Access. (Provide Detailed Description)</label>
+                                                <textarea id="txtdesc" Rows="5" class="form-control" style="height: 127px !important"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Inspection Time Frame</label>
+                                                <select id="ddlInspectionTimeFrame" class="form-control">
+                                                    <option disabled value="">Select</option>
+                                                    <option value="07 Days">07 Days</option>
+                                                    <option value="14 Days">14 Days</option>
+                                                    <option value="21 Days">21 Days</option>
+                                                    <option value="28 Days">28 Days</option>
+                                                    <option value="30 Days">30 Days</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-top: 10px;">
+                                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label>Requested By</label>
+                                                <input type="text" class="form-control" id="txtRequestedBy" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-7 col-md-6 col-sm-12 col-xs-12">
+                            <!--More Info Section Starts-->
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 xsheight">
+                                    <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4 xshight">
+                                        <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                            <h4 style="margin-top: 6px; font-size: 15px" id="H1"><i class="fa fa-list"></i>&nbsp;More Information <span style="margin-left: 5px;" id="Span1"></span></h4>
+
+                                            <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+                                                <li>
+                                                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                                </li>
+                                            </ul>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                        <div class="x_content" style="margin-bottom: 3px!important;">
+                                            <div class="row" style="margin-top: 10px;">
+                                                <div class="col-lg-3 col-md-12 col-sm-6 col-xs-12">
+                                                    <label>Building / Module No.<span style="color: red"></span></label>
+                                                    <button type="button" id="btnBuilding" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+
+                                                    <select id="ddbuilding" onchange="changeSelectedBuilding($('#ddbuilding option:selected').text(), 0);" class="form-control">
+                                                        <!--<option disabled value="">Select</option>-->
+                                                        <option readonly value=""></option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-lg-3 col-md-12 col-sm-6 col-xs-12">
+                                                    <label>Asset # / Func. Loc</label>
+                                                    <button type="button" id="btnAsset" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                    <select id="ddassets" onchange="changeSelectedAsset($('#ddassets option:selected').text(), 0);" class="form-control">
+                                                        <!--<option disabled value="">Select</option>-->
+                                                        <option readonly value=""></option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-2 col-md-12 col-sm-4 col-xs-12">
+                                                    <label>Length</label>
+                                                    <input type="number" class="form-control" id="txtlength" min="0" />
+                                                </div>
+                                                <div class="col-lg-2 col-md-12 col-sm-4 col-xs-12">
+                                                    <label>Width</label>
+                                                    <input type="number" class="form-control" id="txtwidth" min="0" />
+                                                </div>
+                                                <div class="col-lg-2 col-md-12 col-sm-4 col-xs-12">
+                                                    <label>Height(TWP)</label>
+                                                    <input type="number" class="form-control" id="txtheight" min="0" />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+
+                                                <div class="col-lg-4 col-md-12 col-sm-8 col-xs-12">
+                                                    <label>Asset # Description</label>
+                                                    <input type="text" class="form-control" id="txtassetsdesc" readonly="readonly" />
+                                                </div>
+
+                                                <div class="col-lg-2 col-md-12 col-sm-4 col-xs-12">
+                                                    <label>Working Decks #</label>
+                                                    <select id="DropDownList2" class="form-control">
+                                                        <option disabled value="">Select</option>
+                                                        <option Value="N/A">N/A</option>
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                        <option value="6">6</option>
+                                                        <option value="7">7</option>
+                                                        <option value="8">8</option>
+                                                        <option value="9">9</option>
+                                                        <option value="10">10</option>
+                                                        <option value="11">11</option>
+                                                        <option value="12">12</option>
+                                                        <option value="13">13</option>
+                                                        <option value="14">14</option>
+                                                        <option value="15">15</option>
+                                                        <option value="16">16</option>
+                                                        <option value="17">17</option>
+                                                        <option value="18">18</option>
+                                                        <option value="19">19</option>
+                                                        <option value="20">20</option>
+                                                        <option value="21">21</option>
+                                                        <option value="22">22</option>
+                                                        <option value="23">23</option>
+                                                        <option value="24">24</option>
+                                                        <option value="25">25</option>
+                                                        <option value="26">26</option>
+                                                        <option value="27">27</option>
+                                                        <option value="28">28</option>
+                                                        <option value="29">29</option>
+                                                        <option value="30">30</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-3 col-md-12 col-sm-6 col-xs-12">
+                                                    <label>Floor Level<span style="color: red">&nbsp*</span></label>
+                                                   
+                                                    <select id="DropDownList1" class="form-control">
+                                                        <!--<option disabled value="">Select</option>-->
+                                                        <option readonly value=""></option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-3 col-md-12 col-sm-6 col-xs-12">
+                                                    <label>Bearing</label>
+                                                    <input type="text" class="form-control" id="txtbearning" min="0" />
+                                                </div>
+                                                <div class="row"></div>
+                                                <div class="row">
+                                                    <div class="col-xs-12 col-sm-10 col-md-6 col-lg-6">
+                                                        <label id="lblChecklist">Scaffold Inspection List</label>
+                                                        <select id="ddlChecklistInsp" class="form-control">
+                                                            <option disabled value="">Select</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!--<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">-->
+                                                    <!--<asp:LinkButton runat="server" ID="btnview" CausesValidation="false" OnClick="btnview_Click" CssClass="w3-btn w3-teal" CommandName="View" Style="margin-top: 16px; width: 75px; padding-left: 7px"><i class="fa fa-search"></i>&nbsp;Preview</asp:LinkButton>-->
+                                                    <!--</div>-->
+                                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6" style="display:none">
+                                                        <label id="lblManHrsAllo">Man Hours Allowed</label>
+                                                        <input type="text" class="form-control" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6" id="rowmanHrsErect">
+                                                        <label id="lblManHrsErect">Man Hrs Erect</label>
+                                                        <input type="number" id="txtManhrserect" class="form-control" style="width:100%;" min="0" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6" id="rowmanHrsDisman">
+                                                        <label id="Label8">Man Hrs Dismantle</label>
+                                                        <input type="number" id="txtmanDisman" class="form-control" style="width:100%;" min="0" />
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                        <label>Client Scaf Ref</label>
+                                                        <input type="text" class="form-control" id="txtClientScaff" readonly="readonly" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                        <!--<label>Scaf Type</label>-->
+                                                        <label>Project Type</label>
+                                                        <input type="text" class="form-control" id="txtScaffType" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                                        <label>Planned Standing Days<span style="color: red">&nbsp;*</span></label>
+                                                        <input type="number" id="txtplnstandDur" value="30" class="form-control" style="width:100%;" min="0" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                                        <label id="lblplannStatus">Plan Status</label>
+                                                        <select id="ddlPlanningStatus" class="form-control">
+                                                            <option disabled value="">Select</option>
+                                                            <option value="Planned">Planned</option>
+                                                            <option value="Unplanned">Unplanned</option>
+                                                            <option value="Break-In">Break-In</option>
+                                                            <option value="Cancelled">Cancelled</option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+
+                                                    <!--<div style="position:relative;width:200px;height:25px;border:0;padding:0;margin:0;">
+                                                    <select style="position:absolute;top:0px;left:0px;width:200px; height:25px;line-height:20px;margin:0;padding:0;" onchange="document.getElementById('displayValue').value=this.options[this.selectedIndex].text; document.getElementById('idValue').value=this.options[this.selectedIndex].value;">
+                                                       <option></option>
+                                                       <option value="one">one</option>
+                                                       <option value="two">two</option>
+                                                       <option value="three">three</option>
+                                                       <option value="Fourth">fourth</option>
+                                                    </select>
+                                                    <input name="displayValue" placeholder="add/select a value" id="displayValue" style="position:absolute;top:0px;left:0px;width:183px;width:180px\9;width:180px;height:22px; height:28px\9;height:25px;border:1px solid #A9A9A9;" onfocus="this.select()" type="text">
+                                                    <input name="idValue" id="idValue" type="hidden">
+                                                    </div>-->
+
+                                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                                        <!--<label id="txtscaffoldowner">Scaffold Owner</label>-->
+                                                        <label id="txtscaffoldowner">Sub Owner</label>
+                                                        <button type="button" id="btnscaffoldowner" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                        <select id="ddlscaffoldowner" class="form-control">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                                        <label id="txtsubownerRep">Sub Owner Rep</label>
+                                                        <button type="button" id="btnsubownerRep" Style="float: right;color: #800000;font-size: smaller;background: none;border: none;font-weight: 600;"><img src="/images/fonts/fa_AddNew.png" class="fa_AddNew" />Add</button>
+                                                        <select id="ddlSubownerRep" class="form-control">
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                                        <label>Dismantle Approved Notes</label>
+                                                        <input ID="txtdiappronotes" type="text" Class="form-control" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+                                                        <label>Shift Allocation</label>
+                                                        <select ID="ddlShiftAllocation" Class="form-control">
+                                                            <option value=""></option>
+                                                            <option Value="Shift A">Shift A</option>
+                                                            <option Value="Shift B">Shift B</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                                        <label id="lblEngineeredDesign">Engineered Design?</label>
+                                                        <select id="ddlEngineeredDesign" class="form-control">
+                                                            <option value="NO">NO</option>
+                                                            <option value="YES">YES</option>
+                                                            <option value="N/A">N/A</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                                        <label>Design Drawing No</label>
+                                                        <input id="txtDesignDrawingNo" type="text" class="form-control" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                                        <label>Max # of Decks at one time</label>
+                                                        <input id="txtNoOfPlatform" type="number" class="form-control" min="0" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                                        <label>Dismantle Approved Date</label>
+                                                        <input id="rddateDisAppro" type="text" class="form-control datepicker " />
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-3 col-md-5 col-sm-6 col-xs-6">
+                                                        <label id="lblsupervisor">Supervisor</label>
+                                                        <select id="ddlsupervisor" class="form-control">
+                                                            <option value="">Select</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2">
+                                                        <label>Crew</label>
+                                                        <input ID="txtCrew" type="text" Class="form-control" />
+                                                    </div>
+                                                    <div class="col-lg-2 col-md-5 col-sm-4 col-xs-4">
+                                                        <label>Permit #</label>
+                                                        <input ID="txtPermit" type="text" Class="form-control" />
+                                                    </div>
+
+                                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                        <label>Minimum Crew Size</label>
+                                                        <input type="number" id="txtCrewSize" class="form-control" style="width:100%;" min="0" />
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                        <label id="Label1">Locked In?</label>
+                                                        <select id="ddlLockedIn" class="form-control">
+                                                            <option value="0">No</option>
+                                                            <option value="1">Yes</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row"></div>
+                                                <div class="row">
+                                                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-7">
+                                                        <label>Comments</label>
+                                                        <textarea id="txtcomment" Rows="5" class="form-control" style="height: 100px !important"></textarea>
+                                                    </div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5">
+                                                        <img src="/images/LockedIn.png" style="height: 100px; float: right;display:none;" id="imgLocked" class="img-responsive" />
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4">
+                                                        <button type="button" id="txtsaveBottom" style="margin-top: 15px;width:100%;" class="w3-btn w3-small w3-green btnheight"><span class="icon"><img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' /></span><span class="respText text">&nbsp;Save</span></button>
+                                                    </div>
+                                                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-1"></div>
+                                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-7" style="display:none" id="divhideLockedtextbox">
+                                                        <label>Locked In Signed Off By</label>
+                                                        <input id="txtlockedsignby" type="text" readonly="readonly" class="form-control" />
+                                                    </div>
+                                                </div>
+                                                <!--<div class="row">
+                                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                                                        <button type="button" id="txtsaveBottom" style="margin-top: 14px;width:100%;" class="w3-btn w3-small w3-green btnheight"><span class="icon"><img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px;width: 14px;padding-top: 1px;' /></span><span class="respText text">&nbsp;Save</span></button>
+                                                    </div>
+                                                </div>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--More Info Section Ends-->
+                            </div>
+
+                            <!--Removed GPS Section From Here-->
+
+                        </div>
+                    </div>
+                    <div class="row w3-padding-top">
+                        <div class="col-lg-5 col-md-6 col-sm-12 col-xs-12">
+                            <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                <h4 style="margin-top: 6px; font-size: 15px" id="H5"><i class="fa fa-list"></i>&nbsp;Scaffold Image <span style="margin-left: 5px;" id="Span5"></span></h4>
+                            </div>
+
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div class="row">
+                                    <div class="col-lg-7 col-md-5 col-sm-7 col-xs-12">
+                                        <input type="file" name="file" id="mob_file_image" class="mob_file_image" accept="image/*;capture=camera" />
+                                    </div>
+                                    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3   w3-padding-top" style="margin-top: -6px">
+                                        <img src="images/forspinicon.png" style="height: 20px; cursor: pointer;" id="btnchngeimg" onclick="newclickforward();" />
+                                    </div>
+                                    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3  w3-padding-top" style="margin-top: -6px">
+                                        <img src="images/backspinicon.png" style="height: 20px; cursor: pointer;" id="btnchngg" onclick="newclickbackward();" />
+                                    </div>
+                                   
+                                        <div class="col-lg-1 col-md-2 col-sm-1 col-xs-3">
+                                            <img src='/images/fonts/mi-delete.png' class='img-responsive' id="deleteimage" style='height: 15px;width: 12px;margin-top: 5px;float: left; display:none' onclick="deletecheck();" />
+                                            <!--<button type="button" id="deleteimage" onclick="deletecheck();" style="background: none; border: 0; float: left;display:none"><i class=""></i></button>-->
+                                        </div>
+
+                                    <div class="col-lg-2 col-md-1 col-sm-12 col-xs-1 " style="margin-top:4px">
+                                        <button type="button" id="btnSaveImage" class="w3-btn w3-small w3-green btnheight" style="display:none;"><span class="icon"><img src='/images/fonts/fa_save.png' class='img-responsive' style='height: 15px;
+                                      width: 16px;padding-top:5px;' /></span><span class="respText text">&nbsp;Save</span></button>
+                                    </div>
+                                    </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-8 col-md-12 col-sm-12 col-xs-12">
+                                    <img src="../images/noimg.jpg" style="object-fit: contain" id="imga" class="img-responsive changeimg" />
+                                </div>
+                            </div>
+                            <input type="hidden" id="imgangle" name="imgangle" />
+                            <input type="hidden" id="tempimg" name="tempimg" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Locked Popup Modal Code Starts Here -->
+                <div id="PopLocked" class="w3-modal" style="display: none">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 305px; width: 365px; margin-top: 86px;">
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="h7"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation!</h4>
+                        </header>
+                        <div class="w3-container">
+                            <p class="w3-padding-top w3-text-grey">
+                                <label id="Label2">This should only be set to 'Yes' if the following are optimised?</label>
+                            </p>
+                            <p>
+                                <label id="Label3">1: Material Use</label>
+                            </p>
+                            <p>
+                                <label id="Label4">2: Man Hours</label>
+                            </p>
+                            <p>
+                                <label id="Label5">3: Design Type</label>
+                            </p>
+                            <p>
+                                <label id="Label6">4: Hierarchy of Access Choice</label>
+                            </p>
+                            <p>
+                                <label id="Label7">Do you want 'Lock In' this Job?</label>
+                            </p>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                <label id="lblLocksignedOffBy" style="margin-left: 5px">Signed Off By :</label>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <select id="ddlLocksignedOffBy" class="form-control">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-bottom: 20px">
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btnlockedyes"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                            </div>
+                            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btnlockedno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Locked Popup Modal Code Ends Here -->
+                <!-- Offline Modal Code Starts Here -->
+                <div id="OfflineModalList" class="w3-modal" style="display: none">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: fit-content; margin-top: 86px;">
+                        <span class="crossbtn" style="cursor:pointer;float: right;margin: 2px 10px 0 0;font-size: 15px;" onclick="document.getElementById('OfflineModalList').style.display = 'none'">x</span>
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="h7">&nbsp;Offline Register!</h4>
+                        </header>
+                        <div class="w3-container"></div>
+                        <div class="row" style="padding-bottom: 20px">
+                            <table id="example" class="display" style="width:100%;padding: 0px 18px 0 16px;">
+                                <thead>
+                                    <tr>
+                                        <th>Scaf Ref# </th>
+                                        <th>Site Name</th>
+                                        <!-- Commented on 14-09-2023 Renamed as Date Built -->
+                                        <!--<th>Date Tagged</th>-->
+                                        <th>Date Built</th>
+                                        <th>Date Dismantle</th>
+                                        <th>Design Type</th>
+                                        <th>Duty Rating</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="loadOfflineList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- Locked Popup Modal Code Ends Here -->
+                <!-- List Items Add Code Starts Here -->
+                <div id="OfflineListAdd" class="w3-modal" style="display: none;">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+                        <span class="crossbtn" style="cursor:pointer;float: right;margin: 2px 10px 0 0;font-size: 15px;" onclick="document.getElementById('OfflineListAdd').style.display = 'none'">x</span>
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="AddlistHeader"></h4>
+                        </header>
+                        <div class="w3-container"></div>
+                        <div class="row" id="commonDiv" style="padding: 5px 10px 20px 10px;">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label for="customAddnew" class="customAddnew"></label>
+                                <input type="text" class="form-control" id="customAddnew" />
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="AssetDiv" style="display:none;">
+                                <label for="customAddnew" class="assetAddnew"></label>
+                                <input type="text" class="form-control" id="assetAddnew" />
+                            </div>
+
+                            <input type="hidden" id="hdnNewCurrentId" />
+                            <input type="hidden" id="hdntblName" />
+                        </div>
+
+
+                        <!--<div class="row" id="siteList" style="padding: 5px 10px 20px 10px;display:none;">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label>Owner Name</label>
+                                <input type="text" id="popOwnerName" class="form-control"/>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label>Status</label>
+                                <select id="popStatus" class="form-control">
+                                    <option value="Active">Active</option>
+                                    <option value="InActive">InActive</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label>Address<span style="color: red">&nbsp;*</span></label>
+                                <input type="text" id="popAddress" class="form-control" />
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label>City<span style="color: red">&nbsp;*</span></label>
+                                <input type="text" id="popCity" class="form-control" />
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label>State/County</label>
+                                <select id="popStatus" class="form-control">
+                                    <option disabled value="">Select</option>
+                                </select>
+                            </div>
+                        </div>-->
+                        <div class="row" style="padding-bottom: 20px">
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btnsubmit"><i class="glyphicon glyphicon-ok-circle"></i> Submit</button>
+                            </div>
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" onclick="document.getElementById('OfflineListAdd').style.display = 'none'" id="btncancel"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- List Items Add Code Ends Here -->
+                <!----DeleteImage Popup start-->
+                <div id="divdeleteimage" class="w3-modal" style="display: none">
+                    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                        <header class="w3-container w3-dark-grey">
+                            <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+                        </header>
+                        <div class="w3-container">
+                            <p class="w3-padding-top w3-text-grey">
+                                <label>Are you sure you want to Delete the Image?</label>
+                            </p>
+                        </div>
+                        <div class="row" style="padding-bottom: 20px">
+                            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                                <button type="button" class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteimageyes"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                            </div>
+                            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                                <button type="button" class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteimageno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!----DeleteImage Popup End-->
+             
+</body>
+</html>

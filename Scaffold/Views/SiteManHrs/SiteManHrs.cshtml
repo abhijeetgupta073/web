@@ -1,0 +1,575 @@
+﻿
+@{
+    ViewBag.Title = "SiteManHrs";
+}
+
+@*<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>*@
+<script>
+
+        $(document).ready(function () {
+            dropdownSiteLocation();
+
+            if ('@ViewBag.txtstandardworkinghour' != "") {
+            $('#txtstandardworkinghour').val('@ViewBag.txtstandardworkinghour');
+            }
+             
+            if ('@ViewBag.txtstandardworkinghour' == "0.00") {
+            $('#txtstandardworkinghour').css("background-color", "red");
+            }
+ 
+            
+            var today = new Date();
+
+            $("#txtDate").val(today.DateMonthFormat());
+
+            $("#txtDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            maxDate: new Date(),
+            closeText: 'Close',
+
+            });
+
+        });
+
+
+        $(document).ready(function () {
+            //    $("#ulalwaysactive").css("display", "none");
+            var screensize = $(window).width();
+            if (screensize < 1150 && screensize > 650) {
+                ($BODY.hasClass('nav-md'))
+                $('#CreateNewDropDown').css("margin-top", "2px");
+                $BODY.removeClass('nav-md').addClass('nav-sm');
+                $LEFT_COL.removeClass('scroll-view');
+                //$('#BlackSection').css('display', 'block');
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "38px");
+                $('#leftbarsection').css('margin-top', '0px');
+
+
+            }
+
+
+            else {
+                if (screensize < (650)) {
+                    $BODY.removeClass('nav-sm')
+                    $('#imgLogo').parent().css('display', 'none');
+                    $('#imgLogo1').css('display', 'block').css("height", "52px");
+                }
+                else {
+                    $('#CreateNewDropDown').css("margin-top", "6px");
+                    $BODY.removeClass('nav-sm').addClass('nav-md');
+                    //$('#BlackSection').css('display', 'none');
+                    $('#imgLogo').parent().css('display', 'block');
+                    $('#imgLogo1').css('display', 'none');
+                    $('#leftbarsection').css('margin-top', '40px');
+                }
+
+            }
+        });
+
+     $(document).on("keydown",".EnterQuantity",function(eve) { 
+         //$('.EnterQuantity').keydown(function (eve) {
+                            if (eve.keyCode != 8) {
+                                var value = eve.key
+                                var regex = /^[-_!':.,;"/|<>?+=@@#$%^&*({})a-zA-Z[]]+$/;
+                                if (value.match(regex)) {
+                                    eve.preventDefault();
+                                }
+                                if (eve.keyCode == 189) {
+                                    eve.preventDefault();
+                                }
+                            }
+          //  });
+
+    });
+
+   function dropdownSiteLocation() {
+    var id = getParameterByName('id');
+    var UID = getParameterByName('UID');
+    //$('#LoadingPanel1').css('display', 'block');
+    $.ajax({
+        type: "POST",
+        url: "/SiteManHrs/dropdownSiteLocation",
+
+        data: JSON.stringify({ id: id, UID: UID }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: false,
+        success: function (response) {
+
+            var SiteData = response;
+            if (SiteData.length > 0) {
+                $("#ddlSite").append('<option value=""></option>');
+                for (var i = 0; i < SiteData.length; i++) {
+                    $("#ddlSite").append("<option value='" + SiteData[i].SiteLocID + "'>" + SiteData[i].SiteLocation + "</option>");
+                }
+            }
+           
+        }
+
+    })
+  }
+
+  function btnSaveSiteManHrs_Click(){
+       $('#LoadingPanel1').show();
+
+        SiteManHrsDataArr = [];
+        var ChkUpdateAllflag = false;
+        if ($('#ddlSite').val() != "") {
+         table.$('.Chkselected').each(function () {
+                        if (this.checked) {
+                            ChkUpdateAllflag = true;
+
+                             var indexNumber = this.id.split('_')[1];
+                             var SiteManHrsId = $("#SiteManHrsId_" + indexNumber).text();
+                             var UserId = $("#UserId_" + indexNumber).text();
+                             var Resource = $("#Resource_" + indexNumber).text();
+                             var Category = $("#Category_" + indexNumber).text();
+                             var AllocatedHrs = $("#AllocatedHrs_" + indexNumber).text();
+                             var NoOfWorkedHrs = $("#NoOfWorkedHrs_" + indexNumber).val();
+                             var EntryDate = $("#EntryDate_" + indexNumber).text();
+                             var SiteLocation = $("#SiteLocation_" + indexNumber).text();                             
+                             var ClientID = getParameterByName('id');
+                             var UID = getParameterByName('UID');
+                             var SiteID = $('#ddlSite').val();                     
+                                                  
+                            var ArryVal = { ClientID: ClientID, SiteLocId: SiteID, SiteManHrsId: SiteManHrsId, NoOfWorkedHrs: NoOfWorkedHrs, UserId:UserId, EntryDate:EntryDate ,UID:UID};
+                            SiteManHrsDataArr.push(ArryVal);
+                        }
+                    });
+                    if (ChkUpdateAllflag == true) {
+                        $.ajax({
+                            type: 'post',
+                            url: '/SiteManHrs/btnSaveSiteManHrs_Click',
+                            data: JSON.stringify({ model: SiteManHrsDataArr }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            async: false,
+                            success: function (response) {
+                                var GetData = response;
+                                CustomAlert(response);
+                                
+                                GetSiteManHrsData();
+                               
+                            }
+                        });
+                    }
+                    else {
+                        var response = { Result: "Failed", Message: "Please select check box then click on Save Button." }
+                        CustomAlert(response);
+                        $('#LoadingPanel1').hide();
+                    }
+                  } else {
+                    var response = { Result: "Failed", Message: "Please Select Site." }
+                    CustomAlert(response);
+                    $('#LoadingPanel1').hide();
+                }
+
+  }
+
+   function btnCancelSiteManHrs_Click(){
+   GetSiteManHrsData();
+   }
+
+   function ddlSite_SelectedIndexChanged1() {
+    $('#tblSiteManHrsList').DataTable().clear();
+    $('#tblSiteManHrsList').DataTable().destroy();
+    $('#btnprint').css('display', 'block');
+    $("#divbuttonsave").css("display", "none");
+    GetSiteManHrsData();
+  
+    }
+   function txtDate_SelectedDateChanged(){
+    var SiteID = $('#ddlSite').val();
+    if (SiteID != ""){
+    GetSiteManHrsData();
+      }
+   } 
+
+    var table = "";
+    var SiteManHrsArr = [];
+    function GetSiteManHrsData() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSite').val();
+       
+        var siteName = $('#ddlSite option:selected').text();
+        var EntryDate = $('#txtDate').val();
+        if ('@ViewBag.ExportToCSV' != "") {
+            var chckExportToCsv = '@ViewBag.ExportToCSV' ;
+          }
+
+        $('#LoadingPanel1').show();
+        
+     if (SiteID != "") {
+        $.ajax({
+            type: "POST",
+            url: "/SiteManHrs/GetSiteManHrsData",
+            data: JSON.stringify({ id: id,SiteID:SiteID,siteName:siteName,EntryDate:EntryDate, chckExportToCsv:chckExportToCsv }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                
+                var GetData = response;
+                $('#tblSiteManHrsList').DataTable().clear();
+                $('#tblSiteManHrsList').DataTable().destroy();
+              //  $('#mainDivDataTable').css('display','block');
+                if (GetData.length > 0) {
+                    $("#divbuttonsave").css("display", "block");
+                    var str = "";
+                    for (var i = 0; i < GetData.length; i++) {
+                        var SiteManHrsId = GetData[i].SiteManHrsId == null ? "" : GetData[i].SiteManHrsId;
+                        var SiteLocId = GetData[i].SiteLocId == null ? "" : GetData[i].SiteLocId;
+                        var SiteLocation = GetData[i].SiteLocation == null ? "" : GetData[i].SiteLocation;
+
+                        var UserId = GetData[i].UserId == null ? "" : GetData[i].UserId;
+                        var Resource = GetData[i].name == null ? "" : GetData[i].name;
+                        var NoOfWorkedHrs = GetData[i].NoOfWorkedHrs == null ? "" : GetData[i].NoOfWorkedHrs.toFixed(2);
+                        var IsPresent = GetData[i].IsPresent == null ? "" : GetData[i].IsPresent;
+                        var AllocatedHrs = GetData[i].AllocatedHrs == null ? "" : GetData[i].AllocatedHrs.toFixed(2);
+                        var Category = GetData[i].Category == null ? "" : GetData[i].Category;
+                        var EntryDate = GetData[i].EntryDate == null ? "" : GetData[i].EntryDate;
+
+                        str += "<tr>"
+                        str += "<td class='setWidth0' id='SiteManHrsId_" + i + "' style='display:none'>" + SiteManHrsId + "</td>"
+                        if(IsPresent == "Yes"){
+                        str += "<td class='setWidth0'><input type='checkbox' class='Chkselected' id='CheckBoxIndex_" + i + "' checked /></td>"
+                        } else{
+                        str += "<td class='setWidth0'><input type='checkbox' class='Chkselected' id='CheckBoxIndex_" + i + "' /></td>"
+                        } 
+                        str += "<td class='setWidth1' id='SiteLocation_" + i + "'>" + SiteLocation + "</td>"
+                        str += "<td class='setWidth2' id='Resource_" + i + "'>" + Resource + "</td>"
+                        str += "<td class='setWidth3' id='Category_" + i + "'>" + Category + "</td>"
+                        str += "<td class='setWidth4' id='AllocatedHrs_" + i + "'>" + AllocatedHrs + "</td>"
+                        
+                        str += "<td class='setWidth5' style='background-color: LightCyan;'><input id='NoOfWorkedHrs_" + i + "' min='0' type='number' class='Noofworks EnterQuantity form-control' value= '"+NoOfWorkedHrs+ "' /></td>"
+                      
+                      
+                        str += "<td class='setWidth6' id='EntryDate_" + i + "'>" + EntryDate+ "</td>"  
+                        str += "<td class='setWidth7' id='UserId_" + i + "' style='display:none'>" + UserId + "</td>"                  
+
+                    }
+
+                    $('#tbodySiteManHrsList').append(str);
+
+                    $('.Chkselected').click(function () {
+                        event.stopImmediatePropagation();
+                         var CheckBoxAll = $(this).prop('checked');
+                         var indexNumber = this.id.split('_')[1];
+                        
+                        if (CheckBoxAll == true) {
+                          $("#NoOfWorkedHrs_" + indexNumber).val($('#txtstandardworkinghour').val());
+                          $("#NoOfWorkedHrs_" + indexNumber).css('border','1px solid Red');
+                            
+                        } else {
+                           $("#NoOfWorkedHrs_" + indexNumber).val("0.00");
+                           $("#NoOfWorkedHrs_" + indexNumber).css('border','1px solid #9e9898');
+                        }
+
+                    });
+
+
+                    $('#LoadingPanel1').hide();
+                }
+                $('#LoadingPanel1').hide();
+                table = $('#tblSiteManHrsList').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    "bLengthChange": true,
+                    "bInfo": false,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollY: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    "lengthMenu": [10, 25, 50, 100, 200],
+                    "pageLength": 50,
+
+                    dom: 'Bfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Daily Site Hours Input List',
+                            exportOptions: {
+                                columns: [2,3, 4, 5, 6, 7]
+                            },
+                        }
+                    ],
+
+                });
+
+            }
+        })
+
+      }
+      else {
+       $("#LoadingPanel1").css("display", "none");
+      // $('#mainDivDataTable').css('display','none');
+
+        }
+    }
+
+    function ExportToCsvButton_Click() {
+    //@ViewBag.ExportToCSV="true";
+    $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+    }
+
+   function btnprint_Click(){
+      $('#LoadingPanel1').show();
+      if ($('#ddlSite').val() != "") {
+
+                var ClientID = getParameterByName('id');
+                var UID = getParameterByName('UID');
+                var UserRole = getParameterByName('UserRole');  
+                var SiteID = $('#ddlSite').val(); 
+                var EntryDate = $('#txtDate').val(); 
+                window.open('/SiteManHrsReport/showreport?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientID + '&SiteId=' + SiteID + '&EntryDate=' + EntryDate );
+                $("#LoadingPanel1").hide();
+                } else {
+                    var response = { Result: "Failed", Message: "Please Select Site ." }
+                    CustomAlert(response);
+                    $('#LoadingPanel1').hide();
+                }
+   }
+
+    </script>
+
+    <style>
+       .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+        }
+
+        #txtDate_dateInput {
+            border-color: #e5e5e5 !important;
+            border-radius: 4px !important;
+            height: 27px;
+        }
+
+        .invalidCol {
+            background-color: #ff0000 !important;
+            color: white !important;
+        }
+
+    
+
+        .RadGrid_Metro .rgSave {
+            background-position: 3px -1825px;
+            position: absolute;
+            margin-left: 0px !important;
+            margin-top: 5px !important;
+        }
+
+        .RadGrid_Metro .rgCommandRow .rgCancel {
+            background-position: -1px -1850px;
+            position: absolute;
+            margin-left: 2px !important;
+            margin-top: 5px !important;
+        }
+
+        .stndrdhrs {
+            width: 100%;
+        }
+
+        .double-scroll {
+            width: auto;
+        }
+
+        #lblSite {
+            margin-top: 3px;
+        }
+
+        #txtDate {
+            margin-top: 0px;
+            height: 26px;
+            width: 100px;
+        }
+
+
+        #txtDate_popupButton {
+            margin-left: -0px;
+            /*width:70px;
+            height:70px;*/
+        }
+
+        #SiteBtnManHrs {
+            margin-top: 1px;
+        }
+
+        #label#ContentPlaceHolder1_lblDtae {
+            margin-left: 55px;
+        }
+
+        .rgCommandTable td:nth-child(1) {
+            display: block !important;
+        }
+
+        li.rlbItem .rlbText {
+            color: red;
+        }
+
+        .message {
+            line-height: 37px;
+        }
+
+        .RadGrid .rgRow,
+        .RadGrid .rgAltRow {
+            height: 30px;
+        }
+
+        .RadGrid_Silk .rgRow,
+        .RadGrid_Silk .rgAltRow,
+        .RadGrid_Glow .rgRow,
+        .RadGrid_Glow .rgAltRow {
+            height: 36px;
+        }
+
+        #rfvtxtddlSite {
+            margin-right: 30px;
+        }
+
+        #rdFileddate {
+            margin-right: 30px;
+        }
+
+        .RadGrid_MetroTouch .rgRow,
+        .RadGrid_MetroTouch .rgAltRow,
+        .RadGrid_BlackMetroTouch .rgRow,
+        .RadGrid_BlackMetroTouch .rgAltRow {
+            height: 46px;
+        }
+
+
+        #ctl00_ContentPlaceHolder1_SiteManHrs1_GridData {
+            height: 600px !important;
+        }
+
+        @@media (min-width:991px) and (max-width:1370px) {
+            #ddlSite {
+                margin-left: -37px !important;
+            }
+
+            #txtDate_wrapper {
+                margin-left: -37px !important;
+            }
+
+            #txtstandardworkinghour {
+                margin-left: -68px !important;
+            }
+        }
+
+        @@media (min-width:1400px) {
+            .margincheck {
+                text-align: right !important;
+            }
+        }
+
+        .setWidth1, .setWidth2,.setWidth3, .setWidth6 {
+        min-width: 50px !important;
+    }
+
+      .setWidth5 {
+        min-width: 80px !important;
+    }
+
+    </style>
+
+    @*<div runat="server" style="display: none" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <asp:Label ID="alertlabel" runat="server"></asp:Label>
+    </div>*@
+    <div class="row">
+
+        <div class="title_left col-lg-3 col-md-3 col-sm-4 col-xs-12">
+            <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span ID="lblRigister" Font-Size="16px" Font-Bold="true">Daily Site Hours Input</span></b></h4>
+        </div>
+    </div>
+
+    <input type="hidden" id="getgridcount" />
+    <div class="row">
+        @*<asp:HiddenField runat="server" ID="getgridcount" />*@
+
+        <div class="col-lg-1 col-md-1 col-sm-2 col-xs-4 sitemargin margincheck">
+            <label id="lblSite" runat="server">Site </label>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8">
+            @*<asp:DropDownList ID="ddlSite" runat="server" OnSelectedIndexChanged="ddlSite_SelectedIndexChanged1" AutoPostBack="true" AppendDataBoundItems="true" Width="100%" CssClass="form-control">
+            </asp:DropDownList>
+            <asp:RequiredFieldValidator ID="rfvtxtddlSite" runat="server" CssClass="rdf-initial rdf-text"
+                ControlToValidate="ddlSite" ValidationGroup="Save" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+            <select id="ddlSite" onchange="ddlSite_SelectedIndexChanged1()" style="Width:100%" Class="form-control"></select>
+        </div>
+
+        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 Datemargin margincheck">
+            <label id="lblDate" runat="server">Date</label>
+        </div>
+        <div class="col-lg-3 col-md-2 col-sm-2 col-xs-8">
+            @*<Telerik:RadDatePicker ID="DatePicker" DateInput-DateFormat="dd-MMM-yyyy" runat="server" OnSelectedDateChanged="DatePicker_SelectedDateChanged" AutoPostBack="true" Width="100%"></Telerik:RadDatePicker>
+            <asp:RequiredFieldValidator ID="rdFileddate" runat="server" CssClass="rdf-initial rdf-text"
+                ControlToValidate="DatePicker" ValidationGroup="Save" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+            <input type="text" id="txtDate" onchange="txtDate_SelectedDateChanged()" style="width:100%;color:black;" />
+
+        </div>
+
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4 Datemargin margincheck">
+            <label id="Label1" runat="server">Standard Hrs</label>
+        </div>
+        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+            @*<asp:TextBox ID="txtstandardworkinghour" runat="server" Width="100%" Enabled="false" CssClass="stndrdhrs form-control"></asp:TextBox>*@
+             <input type="text" disabled Class="stndrdhrs form-control" Width="100%" id="txtstandardworkinghour" />
+        </div>
+        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+            @*<asp:LinkButton ID="btnprint" Style="display: none" runat="server" Width="100%" CssClass="btn btn-primary w3-btn w3-teal" OnClick="btnprint_Click"><i class="fa fa-print" ></i> Print</asp:LinkButton>*@
+            <button id="btnprint" Style="display: none" Width="100%" Class="btn btn-primary w3-btn w3-teal" onclick="btnprint_Click()"> <i class="fa fa-print" ></i> Print</button>
+        </div>
+
+        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 sitemanmargin">
+
+            @*<asp:LinkButton CssClass="w3-btn w3-teal w3-animate-zoom" Visible="false" ValidationGroup="Save" OnClick="SiteBtnManHrs_Click" runat="server" ID="SiteBtnManHrs">GO</asp:LinkButton>*@
+            @*<button Class="w3-btn w3-teal w3-animate-zoom"  ValidationGroup="Save" OnClick="SiteBtnManHrs_Click()" ID="SiteBtnManHrs">GO</button>*@
+        </div>
+
+    </div>
+
+ <div class="row" id="divbuttonsave" style="display:none;">
+         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                  @*<asp:LinkButton ID="btnsave" ForeColor="White" Width="100%" class="w3-btn w3-green" runat="server" CommandName="Save" OnClientClick=" SaveChangesInGrid(); return false;" Style="background-color: green; float: left; font-weight: bold;"><i class="fa fa-save" ></i>&nbsp;Save Changes</asp:LinkButton>
+                  </div>*@
+                   <button ID="btnsave" ForeColor="White" Width="100%" Class="w3-btn w3-green"  OnClick="btnSaveSiteManHrs_Click()" Style="background-color: green; float: left; font-weight: bold;"><i class="fa fa-save" ></i>&nbsp;Save Changes</button>
+                  </div>
+             <div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+               @*<asp:LinkButton ID="btncancel" ForeColor="White" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white " Style="font-weight: bold;" runat="server" CommandName="Cancel"><i class="fa fa-remove" style="display:inline-block;"></i>&nbsp;Cancel</asp:LinkButton>*@
+                 <button ID="btncancel" ForeColor="White" Width="100%" Class="w3-btn w3-small  nln-bg w3-text-white " OnClick="btnCancelSiteManHrs_Click()" Style="font-weight: bold;"  ><i class="fa fa-remove" style="display:inline-block;"></i>&nbsp;Cancel</button>
+             </div>
+
+                 <div class="col-md-2 col-sm-2 col-lg-2 col-xs-2">
+                    <button type="button" Class="btn w3-btn w3-teal" id="ExportToCsvButton" Style="margin-top: 0px; color:white;    width: 100%;" onclick="ExportToCsvButton_Click()">Export to CSV</button>
+              </div>
+   </div>
+
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="mainDivDataTable">
+        <div id="SiteManHrsList" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblSiteManHrsList" class="table table-striped ">
+                <thead style="background-color: #efefef; color: #716262;width:100%">
+                    <tr>
+                        <th class="setWidth0" style="display:none"></th>
+                        <th class="setWidth0"></th>
+                        <th class="setWidth1">Site</th>
+                        <th class="setWidth2">Resource</th>
+                        <th class="setWidth3">Category</th>
+                        <th class="setWidth4">All Sites Hours</th>
+                        <th class="setWidth5">This Site Hours</th>
+                        <th class="setWidth6">Entry Date</th>
+                        <th class="setWidth7" style="display:none"></th>
+                    </tr>
+                </thead>
+                <tbody id="tbodySiteManHrsList" style="width:100%"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+

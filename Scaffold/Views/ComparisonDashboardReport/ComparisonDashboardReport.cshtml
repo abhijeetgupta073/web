@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewBag.Title = "ComparisonDashboardReport";
+}
+
+
+<form id="form1" runat="server">
+    <asp:Chart ID="Chart1" runat="server" Height="300px" Width="400px">
+        <Titles>
+            <asp:Title ShadowOffset="3" Name="Items" />
+        </Titles>
+        <Legends>
+            <asp:Legend Alignment="Center" Docking="Bottom" IsTextAutoFit="False" Name="Default"
+                        LegendStyle="Row" />
+        </Legends>
+        <Series>
+            <asp:Series Name="Default" />
+        </Series>
+        <ChartAreas>
+            <asp:ChartArea Name="ChartArea1" BorderWidth="0" />
+        </ChartAreas>
+    </asp:Chart>
+    <br />
+
+    <asp:Button ID="btnExportPDF" runat="server" Text="Export to PDF" onclick="btnExportPDF_Click" />
+</form>
+

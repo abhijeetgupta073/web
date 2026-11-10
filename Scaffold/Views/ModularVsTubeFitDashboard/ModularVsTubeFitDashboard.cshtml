@@ -1,0 +1,796 @@
+﻿
+@{
+    ViewBag.Title = "ModularVsTubeFitDashboard";
+}
+    @*<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://rawgithub.com/laff/technical-indicators/master/technical-indicators.src.js"></script>
+    <script src="https://rawgithub.com/phpepe/highcharts-regression/master/highcharts-regression.js?8"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>*@
+    <script src="/Content/js/highcharts.js"></script>
+    <script src="/Content/js/highcharts-3d.js"></script>
+    <script src="/Content/js/exporting.js"></script>
+    <script src="/Content/js/technical-indicators.src.js"></script>
+    <script src="/Content/js/highcharts-regression.js"></script>
+    <script src="/Content/js/export-data.js"></script>
+    <script src="/Content/js/canvasjs.min.js"></script>
+    <script src="/Content/js/no-data-to-display.js"></script>
+    <script src="/Content/js/html2canvas.js"></script>
+    <script>
+        $(document)
+                           .ajaxStart(function () {
+                               $('#loadingpanel1').css('display', 'block');
+                           })
+                         .ajaxStop(function () {
+                             $('#loadingpanel1').css('display', 'none');
+                         });
+
+        $(document).ready(function () {
+
+            var CurrentData = new Date();
+            var FromData = new Date();
+            var now = new Date();
+            FromData.setDate(FromData.getDate() - 69);
+
+            //var rdpReportStartDate = new Date(rdpReportEndDate.getFullYear(), rdpReportEndDate.getMonth(), 1);
+
+            $('#Picdatefrmdt').val(FromData.DateMonthFormat());
+            $('#Picdatetodt').val(CurrentData.DateMonthFormat());
+
+            $("#Picdatefrmdt").datepicker({
+                dateFormat: 'dd-M-yy',
+                // maxDate: 0,
+                closeText: 'Close',
+
+            });
+            $("#Picdatetodt").datepicker({
+                dateFormat: 'dd-M-yy',
+                //  maxDate: 0,
+                closeText: 'Close',
+
+            });
+
+
+
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+
+            BindallDropdown();
+            if ('@ViewBag.ddlmaterial1' != '') {
+                $('#ddlmaterial1').val('@ViewBag.ddlmaterial1');
+            }
+            var  ddlmaterial2='@ViewBag.ddlmaterial2'.replace('&amp;', '&');
+            if (ddlmaterial2 != '') {
+                $('#ddlmaterial2').val(ddlmaterial2);
+            }
+
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var MaterialType1 = $("#ddlmaterial1").val();
+            var MaterialType2 = $('#ddlmaterial2').val();
+            //var fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+            //var todate = $("#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput").val();
+            var fromdate = $('#Picdatefrmdt').val();
+            var todate = $("#Picdatetodt").val();
+            chart1(ClientID, Siteid, "All", MaterialType1, MaterialType2, fromdate, todate);
+            chart2(ClientID, Siteid, "All", MaterialType1, MaterialType2, fromdate, todate);
+            ddlJobbind(ClientID, "All");
+        });
+
+        //19-Mar-2019-Geets
+        //$(document).ready(function () {
+        function refreshbydate() {
+            var fromdate, todate, MaterialType1, MaterialType2, Siteid;
+            var ClientID = $("#hdnClientID").val();
+            var Location = $("#ddlarea").val();
+            MaterialType1 = $('#ddlmaterial1').val();
+            MaterialType2 = $('#ddlmaterial2').val();
+            //fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+            //todate = $('#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput').val();
+            fromdate = $('#Picdatefrmdt').val();
+            todate = $('#Picdatetodt').val();
+            Siteid = $("#ddlsite").val();
+            //Location = $("#ContentPlaceHolder1_ddlarea").val();
+            chart1(ClientID, Siteid, Location, MaterialType1, MaterialType2, fromdate, todate);
+            chart2(ClientID, Siteid, Location, MaterialType1, MaterialType2, fromdate, todate);
+        }
+        //});
+
+        function ChangeReportdate(sender, e) {
+            var ClientID = $("#hdnClientID").val();
+            var MaterialType1 = $('#ddlmaterial1').val();
+            var MaterialType2 = $('#ddlmaterial2').val();
+            //var fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+            //var todate = $('#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput').val();
+            var fromdate = $('#Picdatefrmdt').val();
+            var todate = $('#Picdatetodt').val();
+            var Location = $("#ddlarea").val();
+            var Siteid = $("#ddlsite").val();
+
+
+            var dResultFromdate = new Date(fromdate);
+            var dResultTodate = new Date(todate);
+
+            if (dResultTodate < dResultFromdate) {
+                alert('To Date should be greater than From Date');
+            }
+            var days = 70;
+
+            var dFromPlus10week = new Date(fromdate);
+            dFromPlus10week.setDate(dFromPlus10week.getDate() + days);
+            var dToDate = new Date(todate);
+            dToDate.setDate(dToDate.getDate());
+            //fromdate.setMonth(fromdate.getMonth() + dif);
+            if (dFromPlus10week < dToDate) {
+                alert('Date Range should be within 10 weeks');
+
+            }
+
+        }
+
+        function ChangeReporFromdate(sender, e) {
+            var ClientID = $("#hdnClientID").val();
+            var MaterialType1 = $('#ddlmaterial1').val();
+            var MaterialType2 = $('#ddlmaterial2').val();
+            //var fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+            //var todate = $('#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput').val();
+            var fromdate = $('#Picdatefrmdt').val();
+            var todate = $('#Picdatetodt').val();
+            var Location = $("#ddlarea").val();
+            var Siteid = $("#ddlsite").val();
+
+            var dFromPlus10weeks = new Date(fromdate);
+            var dToDates = new Date(todate);
+
+            if (dFromPlus10weeks > dToDates) {
+                alert('From Date should be less than To Date');
+            }
+
+            var days = 70;
+            var dFromPlus10week = new Date(todate);
+            dFromPlus10week.setDate(dFromPlus10week.getDate() - days);
+            var dToDate = new Date(fromdate);
+            dToDate.setDate(dToDate.getDate());
+            if (dToDate < dFromPlus10week) {
+                alert('Date Range should be within 10 weeks');
+
+            }
+
+        }
+
+
+        function BindallDropdown() {
+            var id = $("#hdnClientID").val();
+            $.ajax({
+                url: '/ModularVsTubeFitDashboard/BindallDropdown',
+                async: false,
+                data: { id: id },
+                success: function (response) {
+
+                    data = response;
+
+                    var ddSite = "<option value='All'>All</option>";
+                    $.each(response.ddlsites, function (idx, obj) {
+                        if (obj != null) {
+                            ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                        }
+                    });
+
+                    // var ddlMaterialType = "<option value='All'>All</option>";
+                    var ddlMaterialType = "";
+                    $.each(response.ddlMaterialType, function (idx, obj) {
+                        if (obj != null) {
+                            ddlMaterialType += '<option value="' + obj.MaterialType + '">' + obj.MaterialType + '</option>';
+                        }
+                    });
+
+                    $('#ddlsite').empty().append(ddSite);
+                    $('#ddlmaterial1').empty().append(ddlMaterialType);
+                    $('#ddlmaterial2').empty().append(ddlMaterialType);
+                }
+            });
+        }
+
+        function Changesite() {
+            var ClientID = $("#hdnClientID").val();
+            var MaterialType1 = $('#ddlmaterial1').val();
+            var MaterialType2 = $('#ddlmaterial2').val();
+            //var todate = $('#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput').val();
+            //var fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+            var todate = $('#Picdatetodt').val();
+            var fromdate = $('#Picdatefrmdt').val();
+            //var Location = $("#ContentPlaceHolder1_ddlarea").val();
+            var Siteid = $("#ddlsite").val();
+            // ddlJobbind(ClientID, Siteid);
+            chart1(ClientID, Siteid, "All", MaterialType1, MaterialType2, todate);
+            chart2(ClientID, Siteid, "All", MaterialType1, MaterialType2, todate);
+
+
+        }
+
+        function selectarea() {
+            var ClientID = $("#hdnClientID").val();
+            var ddlselectarea = $("#ddlarea").val();
+            var Siteid = $("#ddlsite").val();
+            var MaterialType1 = $('#ddlmaterial1').val();
+            var MaterialType2 = $('#ddlmaterial2').val();
+            //var todate = $('#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput').val();
+            //var fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+            var todate = $('#Picdatetodt').val();
+            var fromdate = $('#Picdatefrmdt').val();
+            //chart1(ClientID, Siteid, ddlselectarea, MaterialType1, MaterialType2, fromdate, todate);
+            //chart2(ClientID, Siteid, ddlselectarea, MaterialType1, MaterialType2, fromdate, todate);
+        }
+
+        function ddlJobbind(id, SiteId) {
+            //var ddlsite = ("#ddlSite").val();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/ddlJobDashboard",
+                url: "/ModularVsTubeFitDashboard/ddlJobDashboard",
+                data: JSON.stringify({ id: id, SiteId: SiteId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // var ddlJobdropdownbind = response.d;
+                    var ddlJobdropdownbind = response;
+                    //alert(ddllocationSitedropdownbind.length);
+
+                    $("#ddlarea").html("");
+                    $("#ddlarea").append('<option value="All">All</option>');
+                    for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                        siteLocid = ddlJobdropdownbind[0].areaid;
+                        $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].areaid + '">' + ddlJobdropdownbind[i].area + '</option>');
+
+                    }
+                }
+            });
+        }
+
+        function chart1(ClientID, Siteid, Location, MaterialType1, MaterialType2, fromdate, todate) {
+            $('.forRemoveData').remove();
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/MaterialProgress",
+                url: "/ModularVsTubeFitDashboard/MaterialProgress",
+                data: JSON.stringify({ id: ClientID, site: Siteid, jobid: Location, MaterialType1: MaterialType1, MaterialType2: MaterialType2, fromdate: fromdate, todat: todate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //  mtrltnng = response.d;
+                    mtrltnng = response;
+                    var Week = [];
+                    var Matrltnng1 = [];
+                    var Matrltnng2 = [];
+                    var week1tonnage = 0;
+                    var weeks = [];
+                    var week10tonnage = 0;
+                    var start = "";
+                    var end = "";
+                    if (mtrltnng.length > 0) {
+                        for (var i = 0; i < mtrltnng.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                Matrltnng1.push({ name: mtrltnng[i].WeekNo, y: mtrltnng[i].MaterialType1Tonnage, sliced: true });
+                                Matrltnng2.push({ name: mtrltnng[i].WeekNo, y: mtrltnng[i].MaterialType2Tonnage, sliced: true });
+                                //week1tonnage = WTonnage[0].TotErectedTonnage;
+                                //week10tonnage = WTonnage[9].TotErectedTonnage;
+                                Week.push(mtrltnng[i].WeekEndDate);
+                                weeks.push([mtrltnng[i].WeekEndDate - 1, mtrltnng[i].MaterialType1Tonnage]);
+                                // weeks.push([mtrltnng[i].WeekEndDate - 1, mtrltnng[i].MaterialType2Tonnage]);
+                                if (mtrltnng[i].WeekNo == '10') {
+                                    start = mtrltnng[i].WeekStartDate;
+                                    end = mtrltnng[i].WeekEndDate;
+                                }
+                            }
+                        }
+                        var MaterialType1 = $("#ddlmaterial1").val() == null ? "" : $("#ddlmaterial1").val();
+                        var MaterialType2 = $("#ddlmaterial2").val() == null ? "" : $("#ddlmaterial2").val();
+
+                        //var todate = $("#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput").val();
+                        //var fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+                        var todate = $("#Picdatetodt").val();
+                        var fromdate = $('#Picdatefrmdt').val();
+
+                    }
+                    Highcharts.chart('Chart1container', {
+                        title: {
+                            //align: 'left',
+                            //var vk = $("#ContentPlaceHolder1_ddlsite").val();
+                            //text: '(Week 10 => ' + ddlsite + ' to ' + ddlmaterial2 + ')',
+                            text: '( ' + MaterialType1 + ' Vs ' + MaterialType2 + ' Builds - By Tonnage)',
+                            x: -40,
+                        },
+                        subtitle: {
+                            // align: 'left',
+                            text: '(' + fromdate + ' to ' + todate + ')',
+                            x: -40,
+                        },
+                        yAxis: {
+                            allowDecimals: true,
+                            title: {
+                                text: ''
+                            }
+                        },
+
+                        xAxis: {
+                            categories: Week
+                        },
+                        tooltip: { pointFormat: '{series.name} :<b>{point.y:,.2f}</b>' },
+                        labels: {
+                            items: [{
+                                html: '',
+                                style: {
+                                    left: '50px',
+                                    top: '18px',
+                                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                                }
+                            }]
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel1').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        series: [{
+                            type: 'column',
+                            regression: false,
+                            regressionSettings: {
+                                name: 'Linear (MaterialTypeTonnage)',
+                                dashStyle: 'ShortDot',
+                                color: '#76C3FD'
+                            },
+                            name: '( ' + MaterialType1 + ')',
+                            data: Matrltnng1
+                        }, {
+                            type: 'column',
+                            name: '( ' + MaterialType2 + ')',
+                            color: '#D5333E',
+                            data: Matrltnng2
+
+                        }]
+                    });
+
+                    Highcharts.setOptions({
+                        lang: {
+                            thousandsSep: ','
+                        }
+                    });
+
+                    function redrawchart() {
+                        var chart = $('#Chart1container').highcharts();
+
+                        var w = $('#Chart1container').closest(".wrapper").width()
+                        var size = $(window).width();
+                        if (size < 1150 && size > 650) {
+                            chart.setSize(
+                           w, w * (1.0 / 4), false
+                        );
+                        } else {
+                            if (size < (650)) {
+                                chart.setSize(
+                                 w, w * (3.0 / 4), false
+                              );
+                            } else {
+                                chart.setSize(
+                         w, w * (1.0 / 4), false
+                         );
+                            }
+                        }
+                    }
+
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                    var row = '';
+                    //$.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.WeekStartDate + "</td><td style='text-align: center;'>" + obj.WeekEndDate + "</td><td style='text-align: center;'>" + obj.MaterialType1Tonnage + "</td><td style='text-align: center;'>" + obj.MaterialType2Tonnage + "</td></tr>";
+                    });
+                    $("#tbDetails1 tbody").append(row);
+
+                }
+
+            });
+
+        }
+
+        function chart2(ClientID, Siteid, Location, MaterialType1, MaterialType2, fromdate, todate) {
+            $('.forRemoveData').remove();
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/MaterialProgress",
+                url: "/ModularVsTubeFitDashboard/MaterialProgress",
+                data: JSON.stringify({ id: ClientID, site: Siteid, jobid: Location, MaterialType1: MaterialType1, MaterialType2: MaterialType2, fromdate: fromdate, todat: todate }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // mtrlqnty = response.d;
+                    mtrlqnty = response;
+                    var Week = [];
+                    var mtrlqnty1 = [];
+                    var mtrlqnty2 = [];
+                    var week1Register = 0;
+                    var weeks = [];
+                    var start = "";
+                    var end = "";
+                    var erect = 0;
+                    var week10Register = 0;
+                    if (mtrlqnty.length > 0) {
+                        for (var i = 0; i < mtrlqnty.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                mtrlqnty1.push({ name: mtrlqnty[i].WeekNo, y: mtrlqnty[i].MaterialType1Quantity, sliced: true });
+                                mtrlqnty2.push({ name: mtrlqnty[i].WeekNo, y: mtrlqnty[i].MaterialType2Quantity, sliced: true });
+                                //week1Register = WRegister[0].TotErectedRegister;
+                                //week10Register = WRegister[9].TotErectedRegister;
+                                Week.push(mtrlqnty[i].WeekEndDate);
+                                weeks.push([mtrlqnty[i].WeekEndDate - 1, mtrlqnty[i].MaterialType1Quantity]);
+                                //alert(weeks);
+                                if (mtrlqnty[i].WeekNo == '10') {
+                                    start = mtrlqnty[i].WeekStartDate;
+                                    end = mtrlqnty[i].WeekEndDate;
+                                }
+                            }
+
+
+                        }
+                        var MaterialType1 = $("#ddlmaterial1").val() == null ? "" : $("#ddlmaterial1").val();
+                        var MaterialType2 = $("#ddlmaterial2").val() == null ? "" : $("#ddlmaterial2").val();
+
+                        //var todate = $("#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput").val();
+                        //var fromdate = $('#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput').val();
+                        var todate = $("#Picdatetodt").val();
+                        var fromdate = $('#Picdatefrmdt').val();
+                    }
+
+
+                    Highcharts.chart('Chart2container', {
+                        title: {
+                            text: '( ' + MaterialType1 + ' Vs ' + MaterialType2 + ' Builds - By Quantity)',
+                            x: -20,
+                        },
+                        subtitle: {
+                            text: '(' + fromdate + ' to ' + todate + ')',
+                            x: -20,
+                        },
+                        yAxis: {
+                            allowDecimals: false,
+                            title: {
+                                text: ''
+                            }
+                        },
+
+                        xAxis: {
+                            categories: Week
+                        },
+                        tooltip: { pointFormat: '{series.name} :<b>{point.y:,.0f}</b>' },
+                        labels: {
+
+                            items: [{
+                                html: '',
+                                style: {
+                                    left: '50px',
+                                    top: '18px',
+                                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                                }
+                            }]
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel3').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        series: [{
+                            type: 'column',
+                            regression: false,
+                            regressionSettings: {
+                                name: 'Linear (MaterialTypeQuantity)',
+                                dashStyle: 'ShortDot',
+                                color: '#76C3FD'
+                            },
+                            name: '( ' + MaterialType1 + ')',
+                            id: 'primary',
+                            data: mtrlqnty1
+                        }, {
+                            type: 'column',
+                            color: '#D5333E',
+                            marker: {
+                                enabled: false,
+                                radius: 3
+                            },
+                            name: '( ' + MaterialType2 + ')',
+                            data: mtrlqnty2
+                        }
+                        //{
+                        //    name: '2 per. Mov. Avg.(Built)',
+                        //    linkedTo: 'primary',
+                        //    dashStyle: 'ShortDot',
+                        //    color: '#5A79F5',
+                        //    showInLegend: true,
+                        //    type: 'trendline',
+                        //    algorithm: 'SMA',
+                        //    periods: 2
+                        //}
+                        ]
+
+                    });
+
+                    Highcharts.setOptions({
+                        lang: {
+                            thousandsSep: ','
+                        }
+                    });
+
+                    function redrawchart() {
+                        var chart = $('#Chart2container').highcharts();
+
+                        var w = $('#Chart2container').closest(".wrapper").width()
+                        var size = $(window).width();
+                        if (size < 1150 && size > 650) {
+                            chart.setSize(
+                           w, w * (1.0 / 4), false
+                        );
+                        } else {
+                            if (size < (650)) {
+                                chart.setSize(
+                                 w, w * (3.0 / 4), false
+                              );
+                            } else {
+                                chart.setSize(
+                         w, w * (1.0 / 4), false
+                         );
+                            }
+
+
+                        }
+                    }
+
+
+
+                    $(window).resize(redrawchart);
+                    redrawchart();
+                    var row3 = '';
+                    //$.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        //var num;
+                        //num = (obj.PctAllSite1 * 100);
+                        row3 += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.WeekNo + "</td><td style='text-align: center;'>" + obj.WeekStartDate + "</td><td style='text-align: center;'>" + obj.WeekEndDate + "</td><td style='text-align: center;'>" + obj.MaterialType1Quantity + "</td><td style='text-align: center;'>" + obj.MaterialType2Quantity + "</td></tr>";
+                    });
+                    $("#tbDetails3 tbody").append(row3);
+                }
+
+            });
+        }
+
+    </script>
+    <style>
+        #ctl00_ContentPlaceHolder1_Picdatetodt_dateInput ,#ctl00_ContentPlaceHolder1_Picdatefrmdt_dateInput{
+            border-color: #e5e5e5 !important;
+            border-radius: 4px !important;
+            height: 28px !important;
+        }
+
+        .highcharts-credits {
+            display: none;
+        }
+
+        .container .DshbrdBack {
+            background-color: #ffffcc;
+            height: 1023px;
+        }
+
+        .rcInputCell {
+            width: 76% !important;
+        }
+
+        @@media(min-width:220px) and (max-width:767px) {
+            #lblweekdate {
+                float: left !important;
+                margin-left: 4px !important;
+            }
+
+            /*#ctl00_ContentPlaceHolder1_Picdatetodt_dateInput {
+                margin-left: -29px;
+            }*/
+        }
+
+        @@media (min-width:766px) and (max-width:991px) {
+            #lblweekdate {
+                margin-left: 20px !important;
+            }
+
+            #ddlmaterial1 {
+                width: 56% !important;
+            }
+
+            #ddlmaterial2 {
+                width: 56% !important;
+            }
+        }
+    </style>
+   <div style="display: none" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <label id="alertlabel"></label>
+        @*<asp:Label ID="alertlabel" runat="server"></asp:Label>*@
+    </div>
+    <div class="container DshbrdBack">
+        <input type="hidden" id="hdnClientID" />
+        <div class="row">
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-8">
+                <label id="lblsite" style="font-weight: 700; font-size: 15px; color: black;">Site </label>
+
+                @*<asp:DropDownList ID="ddlsite" CssClass="form-control" onchange="Changesite()" Style="border: 1px solid; border-color: #cac5c5;" runat="server" AppendDataBoundItems="true"></asp:DropDownList>*@
+                <select id="ddlsite" Class="form-control" onchange="Changesite()" Style="border: 1px solid; border-color: #cac5c5;"></select>
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-8">
+                <label id="lblLocation" style="font-weight: 700; font-size: 15px; color: black;">Location </label>
+                @*<asp:DropDownList ID="ddlarea" CssClass="form-control" runat="server" Style="border: 1px solid; border-color: #cac5c5;" Width="100%" AppendDataBoundItems="true" onchange="selectarea();"></asp:DropDownList>*@
+                <select id="ddlarea" Class="form-control" Style="border: 1px solid; border-color: #cac5c5; Width:100%;" onchange="selectarea();"></select>
+            </div>
+
+            <div class="col-lg-1 col-md-1 col-sm-3 col-xs-8" style="width: 146px;">
+                <label id="lblmaterial1" style="font-weight: 700; font-size: 15px; color: black;">Material Type 1 </label>
+
+                @*<asp:DropDownList ID="ddlmaterial1" CssClass="form-control" onchange="Changesite()" Style="border: 1px solid; border-color: #cac5c5;" runat="server" AppendDataBoundItems="true"></asp:DropDownList>*@
+                <select id="ddlmaterial1" Class="form-control" onchange="Changesite()" Style="border: 1px solid; border-color: #cac5c5;"></select>
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-3 col-xs-8" style="width: 146px;">
+                <label id="lblmaterial2" style="font-weight: 700; font-size: 15px; color: black">Material Type 2 </label>
+
+                @*<asp:DropDownList ID="ddlmaterial2" CssClass="form-control" runat="server" Style="border: 1px solid; border-color: #cac5c5;" AppendDataBoundItems="true"></asp:DropDownList>*@
+                <select id="ddlmaterial2" Class="form-control"  Style="border: 1px solid; border-color: #cac5c5;"></select>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6" style="width: 147px;">
+                <label id="lblfrmdate" style="font-weight: 700; font-size: 15px; color: black;">From Date </label>
+
+                @*<Telerik:RadDatePicker ID="Picdatefrmdt" runat="server" DateInput-DateFormat="dd-MMM-yyyy" Width="140px">
+                    <ClientEvents OnDateSelected="ChangeReporFromdate" />
+                </Telerik:RadDatePicker>*@
+                <input type="text" id="Picdatefrmdt" class="form-control" onchange="ChangeReporFromdate()" />
+            </div>
+
+
+            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-8" style="width: 147px;">
+
+                <label id="lbltodate" style="font-weight: 700; font-size: 15px; color: black;">To Date </label>
+
+                @*<Telerik:RadDatePicker ID="Picdatetodt" runat="server" DateInput-DateFormat="dd-MMM-yyyy" Width="130px">
+                    <ClientEvents OnDateSelected="ChangeReportdate" />
+                </Telerik:RadDatePicker>*@
+
+                <input type="text" id="Picdatetodt" class="form-control" onchange="ChangeReportdate()" />
+                @*<%-- <div class="col-lg-2 col-md-2 col-sm-3 col-xs-8">
+                    <a style="padding-top: 2px; padding-bottom: 2px; font-size: 14px; margin-top: 20px;" id="btnRefreshChart" runat="server" class="btn btn-primary" onclick="refreshbydate()"><i class="fa fa-refresh"></i>&nbsp;Refresh</a>
+
+                </div>--%>*@
+            </div>
+
+
+            <div class="col-lg-1 col-md-1 col-sm-3 col-xs-7">
+                <a style="padding-top: 2px; padding-bottom: 2px; font-size: 14px; margin-top: 21px; height:28px;" id="btnRefreshChart" Width="100%" class="btn btn-primary" onclick="refreshbydate()"><i class="fa fa-refresh"></i>&nbsp;Refresh</a>
+
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 6px;">
+                    <div id="Chart1container" class="wrapper"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div id="Chart2container" class="wrapper"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @*<%--Model to Show Chart 1 (Tonnage)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+        <div class="modal fade" id="myModal1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modular Vs Tube & Fit Builds – By Tonnage</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Week</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>From Date</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>To Date</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Material1\Tonnage</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Material2\Tonnage</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Chart 1 (Tonnage)--%>*@
+
+    @*<%--Model to Show Chart 3 (Register Built)--%>*@
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+        <div class="modal fade" id="myModal3" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Modular Vs Tube & Fit Builds – By Quantity</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Week</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 45%; text-align: center;"><b>From Date</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 45%; text-align: center;"><b>To Date</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 20%; text-align: center;"><b>Material1\Quantity</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Material2\Quantity </b></td>
+                                    @*<%--
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b> Total Quantity</b></td>--%>*@
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<%--Model to Show Chart 3 (Register Built)--%>*@
+
+
+
+

@@ -1,0 +1,394 @@
+﻿
+@{
+    ViewBag.Title = "State";
+}
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #gridState_length {
+        margin-top: -16px;
+    }
+</style>
+
+<script>
+
+    $(function () {
+        GetCountryDropdown();
+       
+        $('#ddlCountry').change(function () {
+            var id = $(this).val();
+            if (id != '' && id != 'undefined') {
+                GetState(id);
+            }
+        });
+
+        
+    });
+
+    function GetCountryDropdown() {
+        $.ajax({
+            type: "Get",
+            url: "/State/countryDropDown",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var data = response;
+                if (data.length > 0) {
+                    for (var m = 0; m < data.length; m++) {
+                        $("#ddlCountry").append("<option value='" + data[m] + "'>" + data[m] + "</option>");
+                    }
+                }
+                let ddlCountry = $('#ddlCountry').val();
+                GetState(ddlCountry);
+            }
+        });
+    }
+
+
+    function GetState(ddlCountry) {
+     
+        var str = "";
+
+        str += '<table id="gridState" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+       // str += "<th style='width:2%'>#</th>";
+        str += "<th style='width:3%;padding: 0px;' class='ClassbtnStateEdit'></th>";
+        str += "<th style='width:3%;padding: 0px;' class='ClassbtnStateDelete'></th>";
+        str += "<th  style='text-align:center;display:none'>StateId</th>";
+        str += "<th  style='text-align:center;width:40%'>State/County</th></tr></thead><tbody>";
+
+        $.ajax({
+            url: '/State/GetStateData',
+            type: 'POST',
+            data: JSON.stringify({ ddlCountry: ddlCountry }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getdata = response;
+               
+                str += "<tr id='row_9999' style='display:none'><td  style='width:2%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                    str += "<td  style='text-align:center;display:none'></td>";
+                    str += "<td  style='text-align:center;display:none'>0</td>";
+                    str += "<td  style='text-align:center;width:40%'></td></tr>";
+                
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var StateId = getdata[i].StateId == null ? "" : getdata[i].StateId;
+                        var State = getdata[i].State == null ? "" : getdata[i].State;
+
+                      
+                        //str += "<td  style='width:2%;display:inline-flex;'><a id='rowpencil' class='expand fa fa-pencil'></a>&nbsp;&nbsp;<a id='rowdelete' class='fa fa-trash'></a></td>";
+                        str += "<td style='width:3%;' class='ClassbtnStateEdit'><a id='rowpencil' class='expand fa fa-pencil'></a></td>";
+                        str += "<td style='width:3%;' class='ClassbtnStateDelete'><a id='rowdelete' class='fa fa-trash'></a></td>";
+                        str += "<td  style='text-align:center;display:none'>" + StateId + "</td>";
+                        str += "<td  style='text-align:center;width:40%'>" + State + "</td></tr>";
+                    }
+                  
+                }
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+
+                $("#LoadingPanel1").css("display", "none");
+
+                $(".fa-trash").click(function () {
+                    // var stateId = $(this).parent().parent().children()[1].innerText;
+                    var stateId = $(this).parent().parent().children()[2].innerText;
+                    $("#hdnStateId").val(stateId);
+                    $("#Deletemodal").css("display", "block");
+                });
+
+                $(".fa-pencil").click(function () {
+                    var visible = $(this).parent().parent().hasClass("Edit");
+                    var tr = $(this).closest('tr');
+                    var row = table.row(tr);
+                    if (visible == true) {
+                        $(this).parent().parent().next('tr').remove();
+                        $(this).parent().parent().removeClass('Edit');
+                    }
+                    else {
+                        row.child(Editing(row.data())).show();
+                        row.child.show();
+                        tr.addClass('Edit');
+                    }
+                });
+
+                var table = $('#gridState').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: false,
+                    info: false,
+                    "pageLength": 50,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    fixedHeader: true,
+                    fixedColumns: {
+                        leftColumns: 11,
+                    },
+
+                    dom: 'lBfrtip',
+                    buttons: [
+                        {
+                            extend: 'csvHtml5',
+                            title: 'State/Country',
+                            exportOptions: {
+                                columns: [3]
+                            }
+                        }
+                    ],
+
+
+                    initComplete: function () {
+                        $("#gridState_length").children().html('<button id="btnaddState"  type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:-44px;">&nbsp;Add New State/County</button><button id="btnExport" type="button" class="w3-btn w3-teal Export" style="margin-left:200px;height:26px;padding-top:3px;"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>');
+
+                        $("#btnaddState").click(function () {
+
+                            var trow1 = $(this).parent().parent().siblings();
+                           
+                            var trow = $(this).parent().parent().siblings()[1].childNodes[0];
+                           // var trow = $(this).parent().parent().siblings()[2].childNodes[0];
+                            var row = table.row(trow);
+                            var c = 0;
+                            // row.child(Editing(c)).show();
+
+                            var te = Editing(c);
+                            row.child(Editing(c)).show();
+                        });
+
+                        $(".Export").click(function () {
+                            $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+                        });
+                    },
+
+                    "columnDefs": [
+                        { "width": "100px", "targets": 'fullsize' }
+                    ],
+
+                    "drawCallback": function () {
+
+                        $('.fa-angle-right').click(function (eve) {
+                            eve.stopImmediatePropagation();
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+                            var visible = $(this).parent().parent().hasClass("shown");
+                            var anglechange = $(this).hasClass("fa-angle-right");
+                            if (anglechange == true) {
+                                var x = tr.children()[0];
+                                $(this).removeClass("fa-angle-right");
+                                $(this).addClass("fa-angle-down");
+                            }
+                            else {
+                                $(this).addClass("fa-angle-right");
+                                $(this).removeClass("fa-angle-down");
+                            }
+                            if (visible == true) {
+                                // This row is already open - close it
+                                $(this).parent().parent().next('tr').remove();
+                                $(this).parent().parent().removeClass('shown');
+                            }
+                            else {
+                                // Open this row
+                                row.child(format(row.data())).show();
+                                row.child.show();
+                                tr.addClass('shown');
+                            }
+                        });
+                        GridButtonHideShow(table, "gridState");
+                    }
+
+                });
+
+                // scrolling Top when Click On Next Button
+
+                table.on('page.dt', function () {
+                    $('.dataTables_scrollBody').animate({
+                        scrollTop: 0
+                    }, 300);
+                });
+
+                // Hide Show For DataTable Column And Buttons Start Here
+
+                GridButtonHideShow(table, "gridState");
+
+                // Hide Show For DataTable Column And Buttons End Here
+            }
+        });
+    }
+
+    function Editing(d) {
+
+        var id = getParameterByName('id');
+        $.ajax({
+
+            success: function (response) {
+
+            },
+            complete: function () {
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#btnsavechange").click(function (eve) {
+                    eve.stopImmediatePropagation();
+                    //var StateId = $(this).parent().parent().parent().parent().prev('tr').children()[1].innerText;
+                    var StateId = $(this).parent().parent().parent().parent().prev('tr').children()[2].innerText;
+                    var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+                    
+
+                    var state = firstrow[0].value;
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+                    let ddlCountry = $('#ddlCountry').val();
+                    if (state != "") {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/State/SaveStateCountry",
+                            data: JSON.stringify({ "StateId": StateId, "state": state, "ddlCountry": ddlCountry, "id": id, "UID": UID }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response;
+                                if (result.Result == 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    let ddlCountry = $('#ddlCountry').val();
+                                    GetState(ddlCountry);
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                                // $('#hdnOldQty').val("");
+                            }
+                        })
+                    } else {
+                        $("#LoadingPanel1").css("display", "none");
+                        $('#txtState').css('border-color', 'red');
+                      //  $("#btnsubmit").click();
+                    }
+                });
+            }
+        });
+        if (d == 0) {
+         
+            return '<div class="row">'
+                + '<div class="col-lg-12">'
+                + 'State/County <a style="color:red">*</a><input id="txtState" type="text" class="form-control" style="width:100%" required>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-5">'
+                + '<input type="button" id="btnsavechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-5">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-2">'
+                + '</div></div>'
+
+
+        }
+        else {
+            return '<div class="row">'
+                + '<div class="col-lg-12">'
+                + 'State/County <a style="color:red">*</a><input id="txtState" type="text" class="form-control" value="' + d[3] + '" style="width:100%" required>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-5">'
+                + '<input type="button" id="btnsavechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-5">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-2">'
+                + '</div></div>'
+        }
+    }
+
+
+    function btnyes_Click() {
+
+        var StateId = $('#hdnStateId').val();
+
+        $.ajax({
+            url: '/State/DeleteDocument',
+            type: 'post',
+            data: { StateId: StateId },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response.Result == 'Success') {
+                    CustomAlert(response);
+                    let ddlCountry = $('#ddlCountry').val();
+                    GetState(ddlCountry);
+                } else {
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+
+
+
+</script>
+
+<input type="hidden" id="hdnStateId" />
+<div class="row">
+    <div class="title_left col-lg-2 col-md-3 col-sm-4 col-xs-6">
+        <h4 class="heading" style="color: #0070ba; font-size:16px;"><b><i class="fa fa-flag"></i>&nbsp;State/County List</b></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+        <label>Country</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+        @*<asp:DropDownList ID="ddlCountry" runat="server" AutoPostBack="true" CssClass="form-control" AppendDataBoundItems="true" Width="100%" OnSelectedIndexChanged="ddlCountry_SelectedIndexChanged">
+            </asp:DropDownList>*@
+        <select id="ddlCountry" class="form-control" style="width:100%"></select>
+    </div>
+
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+        @*<asp:LinkButton CssClass="w3-btn w3-teal" CausesValidation="false" Style="height: 24px; padding-top: 3px" ID="btnaddState" Width="100%" OnClientClick="AddButtonClickOfGrid('#ctl00_ContentPlaceHolder1_ctl00_ContentPlaceHolder1_gridStatePanel'); return false;" runat="server"><i class="fa fa-plus "></i>&nbsp;Add New State/County</asp:LinkButton>*@
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12 col-lg-4 col-md-6 col-sm-8">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+    </div>
+</div>
+
+
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>

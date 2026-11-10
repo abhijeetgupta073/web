@@ -1,0 +1,2603 @@
+﻿
+@{
+    ViewBag.Title = "CycloneDashboard";
+}
+@*<script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>*@
+<script src="/Content/js/highcharts.js"></script>
+<script src="/Content/js/exporting.js"></script>
+<script src="/Content/js/highcharts-3d.js"></script>
+<script src="/Content/js/no-data-to-display.js"></script>
+
+<script>
+        $(document)
+                  .ajaxStart(function () {
+
+                      $('#LoadingPanel1').css('display', 'block');
+                  })
+                .ajaxStop(function () {
+                    $('#LoadingPanel1').css('display', 'none');
+                });
+        $(document).ready(function () {
+            BindallDropdown();
+            SiteDropdown();
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+              var ddlRiskRating = $("#ddlRiskRating").val();
+            CycloneQty(ClientID, "All", Siteid, ddlRiskRating);
+            Manandprephr(ClientID, Siteid, ddlRiskRating);
+            CycloneTonnage(ClientID, "All",Siteid, ddlRiskRating);
+            CycloneManHrs(ClientID, "All", Siteid, ddlRiskRating);
+            CycloneHours(ClientID, "All", Siteid, ddlRiskRating);
+            CycloneTonsandManhrs(ClientID, "All");
+            ddlJobbind(ClientID, "All");
+            ScaffoldsDePlanked(ClientID, "All", Siteid, "All", ddlRiskRating);
+            ScaffoldsTieDown(ClientID, "All", Siteid, "All", ddlRiskRating);
+
+
+            $('#ManHoursAvailable').prop('disabled', true);
+
+            // Single change event
+            $("#ddlpopsitedropdown").on("change", function () {
+                $("#negativeValueMsg").hide();
+
+                var selectedSite = $(this).val().trim().toLowerCase();
+
+                if (selectedSite !== '' && selectedSite !== 'all') {
+                    $('#ManHoursAvailable').prop('disabled', false);   // ENABLE INPUT
+                    loadManHourData(selectedSite);
+                } else {
+                    $('#ManHoursAvailable')
+                        .val('')
+                        .prop('disabled', true);                        // DISABLE INPUT
+                }
+            });
+
+            // Negative value validation
+            $('#ManHoursAvailable').on('input', checkForNegativeValues);
+        });
+
+        $(document).ready(function () {
+            $("[id$=myButtonControlID]").click(function (e) {
+                //window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('div[id$=divTableDataHolder]').html()));
+                //e.preventDefault();
+                var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+                  base64 = function (s) {
+                      return window.btoa(unescape(encodeURIComponent(s)))
+                  },
+            format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            }
+
+                var toExcel = "Scaffolds with cyclone action set as " + $("#lblAction").text();
+                toExcel += document.getElementById("tbDetails").innerHTML;
+                var ctx = {
+                    worksheet: name || '',
+                    table: toExcel
+                };
+                var link = document.createElement("a");
+                link.download = "Scaffolds with cyclone action set as " + $("#lblAction").text() + ".xls";
+                link.href = uri + base64(format(template, ctx))
+                link.click();
+            });
+
+        });
+
+    function exporttopdf_Click()
+    {
+
+        $("#LoadingPanel1").css("display", "block");
+        var ddlRiskRating = $("#ddlRiskRating").val();
+        var siteID = $('#ddlsite').val();
+        var ddlarea = $('#ddlarea').val();
+        var CycloneAction = $('#labelaction').val();
+        var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+
+        var EncryptData = [siteID, ddlarea];
+        var encry = Encrypt(EncryptData);
+        siteID = encry[0];
+        ddlarea = encry[2];
+
+        window.open('/QuantityByCategeryReport1/showQuantityReport?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientID + '&CycloneAction=' + CycloneAction + '&Site=' + siteID + '&ddlRiskRating=' + ddlRiskRating + '&Location=' + ddlarea);
+
+        $("#LoadingPanel1").css("display", "none");
+
+       // string actionName = labelaction.Value;
+       //  string location = hdnddlarea.Value;
+
+       @*Response.Write("<script> window.open('QuantityByCategeryReport1?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&CycloneAction=" + databaseCon.Encrypt(actionName) + "&Site=" + databaseCon.Encrypt(ddlsite.SelectedValue) + "&Location=" + databaseCon.Encrypt(location)+ "&btn=prv','_blank');</script>");*@
+
+
+    }
+
+        function BindallDropdown() {
+            var id = getParameterByName('id');
+            $.ajax({
+                url: '/CycloneDashboard/BindallDropdown',
+                async: false,
+                data: { id: id },
+                success: function (response) {
+
+                    data = response;
+
+                    var ddSite = "<option value='All'>All</option>";
+                    $.each(response.ddlsites, function (idx, obj) {
+                        if (obj != null) {
+                            ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                        }
+                    });
+
+                    var ddlscaffref = "<option value='All'>All</option>";
+                    $.each(response.ddlScaffReff, function (idx, obj) {
+                        if (obj != null) {
+                            ddlscaffref += '<option value="' + obj.RegisterId + '">' + obj.ScaffRef + '</option>';
+                        }
+                    });
+
+                    $('#ddlsite').empty().append(ddSite);
+                    $('#ddlscaffref').empty().append(ddlscaffref);
+
+                }
+            });
+        }
+
+        function Changesite() {
+            $('#LoadingPanel1').css('display', 'block');
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var ddlRiskRating = $("#ddlRiskRating").val();
+            ddlJobbind(ClientID, Siteid);
+            Manandprephr(ClientID, Siteid, ddlRiskRating);
+            CycloneQty(ClientID, "All", Siteid, ddlRiskRating);
+            CycloneTonnage(ClientID, "All", Siteid, ddlRiskRating);
+            CycloneManHrs(ClientID, "All", Siteid, ddlRiskRating);
+            CycloneHours(ClientID, "All", Siteid, ddlRiskRating);
+            ScaffoldsDePlanked(ClientID, "All", Siteid, "All", ddlRiskRating);
+            ScaffoldsTieDown(ClientID, "All", Siteid, "All", ddlRiskRating);
+
+        }
+        function selectarea() {
+            var ClientID = $("#hdnClientID").val();
+            var ddlselectarea = $("#ddlarea").val();
+            $("#hdnddlarea").val(ddlselectarea);
+              var ddlRiskRating = $("#ddlRiskRating").val();
+            var Siteid = $("#ddlsite").val();
+
+            CycloneTonnage(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            Manandprephr(ClientID, Siteid,ddlRiskRating);
+            CycloneManHrs(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            CycloneQty(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            CycloneHours(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            ScaffoldsDePlanked(ClientID, "All", Siteid, "All",ddlRiskRating);
+            ScaffoldsTieDown(ClientID, "All", Siteid, "All",ddlRiskRating);
+        }
+
+        function selectscaffref() {
+            var ClientID = $("#hdnClientID").val();
+            var scafpac = $("#ddlscaffref").val();
+            CycloneTonsandManhrs(ClientID, scafpac)
+        }
+function selectRiskRating() {
+         var ClientID = $("#hdnClientID").val();
+            var ddlselectarea = $("#ddlarea").val();
+            $("#hdnddlarea").val(ddlselectarea);
+            var Siteid = $("#ddlsite").val();
+             var ddlRiskRating = $("#ddlRiskRating").val();
+            CycloneTonnage(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            Manandprephr(ClientID, Siteid,ddlRiskRating);
+            CycloneManHrs(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            CycloneQty(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            CycloneHours(ClientID, ddlselectarea, Siteid,ddlRiskRating);
+            ScaffoldsDePlanked(ClientID, "All", Siteid, "All",ddlRiskRating);
+            ScaffoldsTieDown(ClientID, "All", Siteid, "All",ddlRiskRating);
+    }
+        //container
+
+    function Manandprephr(id, SiteId, ddlRiskRating) {
+            //var ddlsite = ("#ddlSite").val();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/ManandPrepHrs",
+                url: "/CycloneDashboard/ManandPrepHrs",
+                data: JSON.stringify({ id: id, SiteId: SiteId, ddlRiskRating: ddlRiskRating }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //var ddlhrs = response.d;
+                    var ddlhrs = response;
+                    $('#txtavailhrs').text(ddlhrs[0].Mahhrsavail);
+                    $('#txtprephrs').text(ddlhrs[0].totalprephrs);
+                    var color = ddlhrs[0].ColorStatus;
+                    $('#imgstatus').attr('src', '/images/' + color + '.jpg');
+                }
+            });
+
+        }
+
+        function ddlJobbind(id, SiteId) {
+            //var ddlsite = ("#ddlSite").val();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/ddlJobDashboard",
+                url: "/CycloneDashboard/ddlJobDashboard",
+                data: JSON.stringify({ id: id, SiteId: SiteId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // var ddlJobdropdownbind = response.d;
+                    var ddlJobdropdownbind = response;
+                    //alert(ddllocationSitedropdownbind.length);
+                    $("#ddlarea").html("");
+                    $("#ddlarea").append('<option value="All">All</option>');
+                    for (var i = 0; i < ddlJobdropdownbind.length; i++) {
+                        //alert(ddllocationSitedropdownbind[i].MaterialType);
+                        //alert(ddllocationSitedropdownbind[i].AreaID);
+                        siteLocid = ddlJobdropdownbind[0].SiteLocID;
+                        $("#ddlarea").append('<option value="' + ddlJobdropdownbind[i].SiteLocID + '">' + ddlJobdropdownbind[i].SiteLoca + '</option>');
+                        // $("#ddlNewCombo").append('<option>jcjfcvhjh</option>');
+
+                    }
+                }
+            });
+
+        }
+
+    function ByCategory(CycloneActionName, ClientID, jobval, Siteid, ddlRiskRating) {
+            $('.forRemoveDataAction').remove();
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/CycloneActionGetByCategory",
+                url: "/CycloneDashboard/CycloneActionGetByCategory",
+                data: JSON.stringify({ CycloneActionName: CycloneActionName, ClientID: ClientID, jobselect: jobval, siteid: Siteid, ddlRiskRating: ddlRiskRating }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // var CycloneAction = response.d;
+                    var CycloneAction = response;
+                    var CycloneData = [];
+                    if (CycloneAction.length > 0) {
+                        for (var i = 0; i < CycloneAction.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                CycloneData.push({ name: CycloneAction[i].ScaffRefAction, y: CycloneAction[i].DescriptionAction, z: CycloneAction[i].Location, s: CycloneAction[i].BuildingNo, r: CycloneAction[i].assetId, x: CycloneAction[i].FloorLevel, a: CycloneAction[i].DesignType, b: CycloneAction[i].MaterialType, c: CycloneAction[i].PreparationHrs, d: CycloneAction[i].RiskRating, sliced: true });
+                            }
+                        }
+                    }
+                    $('#btnOpenModelAllDetails').click();
+                        $("#QuantityModal2").css("display", "none");
+                        $("#QuantityModal1").css("display", "block");
+                    $("#lblAction").text(CycloneActionName);
+                    $("#labelaction").val(CycloneActionName);
+                    var row1 = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        row1 += "<tr class='forRemoveDataAction'><td style='text-align: center;font-size: 12px;'>" + obj.ScaffRefAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DescriptionAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.Location + "</td><td style='text-align: center;font-size: 12px;'>" + obj.BuildingNo + "</td><td style='text-align: center;font-size: 12px;'>" + obj.assetId + "</td><td style='text-align: center;font-size: 12px;'>" + obj.FloorLevel + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DesignType + "</td><td style='text-align: center;font-size: 12px;'>" + obj.MaterialType + "</td><td style='text-align: center;font-size: 12px;'>" + Highcharts.numberFormat(obj.PreparationHrs,2) + "</td><td style='text-align: center;font-size: 12px;'>" + obj.RiskRating + "</td></tr>";
+                    });
+                    $("#tbDetails tbody").append(row1);
+                }
+            });
+
+        }
+
+    function CycloneQty(ClientID, jobval, Siteid, ddlRiskRating) {
+            $('.forRemoveData').remove();
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/CycloneFirst",
+                url: "/CycloneDashboard/CycloneFirst",
+                data: JSON.stringify({ id: ClientID, siteid: Siteid, jobselect: jobval, ddlRiskRating: ddlRiskRating }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //Cyclone = response.d;
+                    Cyclone = response;
+                    var Cton = [];
+                    var CycloneData = [];
+                    if (Cyclone.length > 0) {
+                        for (var i = 0; i < Cyclone.length; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+
+                                CycloneData.push({ name: Cyclone[i].CycloneAction, y: Cyclone[i].TotalCounts, sliced: true });
+                                //console.log(CycloneData);
+                                Cton.push(Cyclone[i].CycloneAction);
+                            }
+
+
+                        }
+
+                    }
+                    var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                    theExportOptions.splice(0, 1);
+
+
+                    Highcharts.setOptions({ colors: ['#4c9640', '#f9cb13', '#0000FF', '#fc2828'] });//Change line By 19 Nov 2018
+                    Highcharts.chart('container', {
+                        chart: {
+                            type: 'bar',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+                            align: 'left',
+                            text: 'Quantity of Scaffolds (By Category)',
+                            style: {
+                                fontSize: '16px',
+                            }
+                        },
+                        subtitle: {
+                            text: ''
+                        },
+                        xAxis: {
+                            categories: ['No Action', 'De-Plank Only', "Tie-Down", 'Full Strip'],//Change line By 19 Nov 2018
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: '',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        tooltip: {
+                            formatter: function () {
+                                return this.x + ', ' + this.y + ' Qty';
+                            }
+                        },
+                        plotOptions: {
+                            series: {
+                                cursor: 'pointer',
+                                point: {
+                                    events: {
+                                        click: function (eve) {
+                                            //alert('Category: ' + this.category + ', value: ' + this.y);
+
+                                            //$('#btnOpenModelAllDetails').click();
+                                            ByCategory(this.category, ClientID, jobval, Siteid, ddlRiskRating);
+                                        }
+                                    }
+                                }
+                            },
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    color: 'black'
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+
+                                contextButton: {
+                                    enabled: true,
+                                    x:9,
+                                    //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                                },
+
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel1').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            showInLegend: false,
+                            colorByPoint: true,
+                            data: CycloneData
+                        }]
+                    });
+                    function redrawchart1() {
+                        var chart = $('#container').highcharts();
+
+                        var w = $('#container').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.2 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart1);
+                        redrawchart1();
+                    });
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                    var row = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                        num = (obj.PctAllSite1 * 100);
+                        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.CycloneAction + "</td><td style='text-align: center;'>" + obj.TotalCounts + "</td></tr>";
+                    });
+                    $("#tbDetails1 tbody").append(row);
+
+                }
+            });
+        }
+
+
+        // container1
+
+    function CycloneHours(ClientID, jobval, Siteid, ddlRiskRating) {
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/CycloneSecond",
+                url: "/CycloneDashboard/CycloneSecond",
+                data: JSON.stringify({ id: ClientID, siteid: Siteid, jobselect: jobval, ddlRiskRating: ddlRiskRating }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // Cyclone = response.d;
+                    Cyclone = response;
+                    var CAction = [];
+                    var CycloneData = [];
+                    var totalhrs = 0;
+                    if (Cyclone.length > 0) {
+                        for (var i = 0; i < Cyclone.length; i++) {
+                            var TobePush = true;
+                            //for (var k = 0; k < CycloneData.length; k++) {
+                            //    if (CycloneData[k].name == Cyclone[i].SiteLocation) {
+                            //        TobePush = false;
+                            //    }
+                            // }
+
+                            if (TobePush) {
+                                CycloneData.push({ name: Cyclone[i].CycloneActionHr, y: Cyclone[i].TotalCountsDismantle, sliced: true });
+                                var actionhr = Cyclone[i].TotalCountsDismantle;
+                                totalhrs = totalhrs + actionhr;
+                                //$('#ContentPlaceHolder1_txtprephrs').val(totalhrs);
+                                //$('#ContentPlaceHolder1_hdnprephrs').val(totalhrs);
+                                //alert(totalhrs);
+                                CAction.push(Cyclone[i].CycloneActionHr);
+
+                            }
+
+                        }
+                    }
+                    Highcharts.setOptions({ colors: ['#f9cb13', '#0000FF', '#fc2828'] });//Change line By 19 Nov 2018
+                    Highcharts.chart('container1', {
+                        chart: {
+                            type: 'bar',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+                            align: 'left',
+                            text: 'Total Preparation  Hours (By Category)',
+                            style: {
+                                fontSize: '16px',
+                            }
+                        },
+                        subtitle: {
+                            text: ''
+                        },
+                        xAxis: {
+                            categories: CAction,
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: '',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        tooltip: {
+                            formatter: function () {
+                                return this.x + ', ' + this.y + ' Hrs';
+                            }
+                        },
+                        plotOptions: {
+                             // Add Code on 30/March/2020
+                                series: {
+                                cursor: 'pointer',
+                                point: {
+                                    events: {
+                                        click: function (eve) {
+                                            ByCategory(this.category, ClientID, jobval, Siteid, ddlRiskRating);
+                                        }
+                                    }
+                                }
+                            },  // End Code on 30/March/2020
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    color: 'black'
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel2').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            colorByPoint: true,
+                            showInLegend: false,
+                            data: CycloneData
+                        }]
+                    });
+                    function redrawchart1() {
+                        var chart = $('#container1').highcharts();
+
+                        var w = $('#container1').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.2/ 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart1);
+                        redrawchart1();
+                    });
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+
+                    var row = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                        num = (obj.PctAllSite1 * 100);
+                        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.CycloneActionHr + "</td><td style='text-align: center;'>" + obj.TotalCountsDismantle + "</td></tr>";
+                    });
+                    $("#tbDetails2 tbody").append(row);
+                }
+            });
+        }
+
+
+        //container3
+
+        // function chart3() {
+    function CycloneTonnage(ClientID, Locid, Siteid, ddlRiskRating) {
+            $('.forRemoveData3').remove();
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/CycloneQty",
+                url: "/CycloneDashboard/CycloneQty",
+                data: JSON.stringify({ id: ClientID, Lid: Locid, siteid: Siteid, ddlRiskRating: ddlRiskRating }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // Cyclone = response.d;
+                    Cyclone = response;
+                    var Cton = [];
+                    var CScaff = [];
+                    var CycloneData = [];
+                    var noofdays = 20;
+                    if (Cyclone.length > 0) {
+                        if (Cyclone.length <= noofdays) {
+                            noofdays = Cyclone.length;
+                        }
+
+                        for (var i = 0; i < noofdays; i++) {
+                            var TobePush = true;
+                            //for (var k = 0; k < CycloneData.length; k++) {
+                            //    if (CycloneData[k].name == Cyclone[i].SiteLocation) {
+                            //        TobePush = false;
+                            //    }
+                            // }
+
+                            if (TobePush) {
+                                CycloneData.push({ name: Cyclone[i].Cyclone3Scafref, y: Cyclone[i].Cyclone3Tonnage, color: Cyclone[i].CycloneColor, sliced: true });
+
+                                Cton.push(Cyclone[i].Cyclone3Tonnage);
+                                CScaff.push(Cyclone[i].Cyclone3Scafref);
+                            }
+
+                        }
+                    }
+
+                    // Highcharts.setOptions({ colors: [' #7cb5ec'] });
+                    Highcharts.chart('container2', {
+                        chart: {
+                            type: 'bar',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+                            align: 'left',
+                            text: 'Scaffold Ref  # & Tonnage',
+                            style: {
+                                fontSize: '16px',
+                            }
+                        },
+                        subtitle: {
+                            text: ''
+                        },
+                        xAxis: {
+                            categories: CScaff,
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: '',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        tooltip: {
+                            formatter: function () {
+                                return this.x + ', ' + this.y + ' Tonnes';
+                            }
+                        },
+                        plotOptions: {
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    color: 'black'
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel3').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            showInLegend: false,
+                            name: 'Tonnes',
+                            data: CycloneData
+                        }]
+                    });
+                    function redrawchart1() {
+                        var chart = $('#container2').highcharts();
+
+                        var w = $('#container2').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.2 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart1);
+                        redrawchart1();
+                    });
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                    var row = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        //json.stringify(obj.Cyclone3Scafref);
+                        num = (obj.PctTonnage * 100);
+                        num = num.toFixed(2);
+                        row += "<tr class='forRemoveData3'><td style='text-align: center;'>" + obj.Cyclone3Scafref + "</td><td style='text-align: center;'>" + obj.Cyclone3Tonnage + "</td><td style='text-align: center;'>" + num + "%" + "</td></tr>";
+                    });
+                    $("#tbDetails3 tbody").append(row);
+
+                }
+            });
+        }
+
+
+        //}
+
+        //container3
+        // Chart 4 ManHrs
+    function CycloneManHrs(ClientID, Locid, Siteid, ddlRiskRating) {
+            $('.forRemoveData4').remove();
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/CycloneQty1",
+                url: "/CycloneDashboard/CycloneQty1",
+                data: JSON.stringify({ id: ClientID, Lid: Locid, siteid: Siteid, ddlRiskRating: ddlRiskRating }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    // Cyclone = response.d;
+                    Cyclone = response;
+                    var Cton = [];
+                    var CScaff = [];
+                    var CycloneData = [];
+                    var noofdays = 20;
+                    if (Cyclone.length > 0) {
+                        if (Cyclone.length <= noofdays) {
+                            noofdays = Cyclone.length;
+                        }
+                        for (var i = 0; i < noofdays; i++) {
+                            var TobePush = true;
+
+                            if (TobePush) {
+                                CycloneData.push({ name: Cyclone[i].Cyclone3Scafref, y: Cyclone[i].Cyclone3Manhrs, color: Cyclone[i].CycloneColor, sliced: true });
+
+                                Cton.push(Cyclone[i].Cyclone3Manhrs);
+                                CScaff.push(Cyclone[i].Cyclone3Scafref);
+
+                            }
+
+                        }
+                    }
+
+
+                    // Highcharts.setOptions({ colors: [' #7cb5ec'] });
+                    Highcharts.chart('container3', {
+                        chart: {
+                            type: 'bar',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+                            align: 'left',
+                            text: 'Scaffold Ref  # & Man Hours to Dismantle',
+                            style: {
+                                fontSize: '16px',
+                            }
+                        },
+                        subtitle: {
+                            text: ''
+                        },
+                        xAxis: {
+                            categories: CScaff,
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: '',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        tooltip: {
+                            formatter: function () {
+                                return this.x + ', ' + this.y + ' Hrs';
+                            }
+                        },
+                        plotOptions: {
+                            bar: {
+                                dataLabels: {
+                                    enabled: true,
+                                    color: 'black'
+                                }
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                },
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel4').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            showInLegend: false,
+                            type: 'bar',
+                            name: 'Man Hours',
+                            data: CycloneData
+                        }]
+                    });
+                    function redrawchart1() {
+                        var chart = $('#container3').highcharts();
+
+                        var w = $('#container3').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.2 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart1);
+                        redrawchart1();
+                    });
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                    var row = '';
+                    //$.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                        num = (obj.PctAllSite1 * 100);
+                        row += "<tr class='forRemoveData4'><td style='text-align: center;'>" + obj.Cyclone3Scafref + "</td><td style='text-align: center;'>" + obj.Cyclone3Manhrs + "</td></tr>";
+                    });
+                    $("#tbDetails4 tbody").append(row);
+
+                }
+            });
+        }
+
+
+        //Container 5
+
+        function CycloneTonsandManhrs(ClientID, scaf) {
+            $('.forRemoveData').remove();
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/CycloneChart5",
+                url: "/CycloneDashboard/CycloneChart5",
+                data: JSON.stringify({ id: ClientID, rid: scaf }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    //Cyclone5 = response.d;
+                    Cyclone5 = response;
+                    var CScaf = [];
+                    var CManhr = [];
+                    var Cton = [];
+                    var CycloneManhrData = [];
+                    var CycloneTonnageData = [];
+                    noofrows = 20;
+                    if (Cyclone5.length < 20) {
+                        noofrows = Cyclone5.length;
+                    }
+                    if (Cyclone5.length > 0) {
+                        for (var i = 0; i < noofrows; i++) {
+                            var TobePush = true;
+                            if (TobePush) {
+                                CycloneManhrData.push({ name: Cyclone5[i].Scafpac, y: Cyclone5[i].ManHrs5, color: '#ADD8E6', sliced: true });
+                                CycloneTonnageData.push({ name: Cyclone5[i].Scafpac, y: Cyclone5[i].Tonnage5, color: '#808080', sliced: true });
+                                Cton.push(Cyclone5[i].Tonnage5);
+                                CScaf.push(Cyclone5[i].Scafpac);
+                                //CManhr.push(Cyclone5[i].ManHrs5 + ',' + Cyclone5[i].Tonnage5);
+                            }
+
+                        }
+                    }
+
+                    var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                    theExportOptions.splice(0, 1);
+
+                    Highcharts.chart('container5', {
+                        chart: {
+                            type: 'column',
+                            backgroundColor: '#f2f2f2'
+                        },
+                        title: {
+                            text: 'Scaffold Ref #(Tonnage & ManHrs)'
+                        },
+                        subtitle: {
+                            text: ''
+                        },
+                        xAxis: {
+                            categories: CScaf,
+                            title: {
+                                text: null
+                            }
+                        },
+                        yAxis: {
+                            //categories: CManhr,
+                            min: 0,
+                            title: {
+                                text: '',
+                                align: 'high'
+                            },
+                            labels: {
+                                overflow: 'justify'
+                            }
+                        },
+                        tooltip: {
+                            //formatter: function () {
+                            //    return 'ManHrs:'+ this.point.y + ' hr ,Tonnage:' + this.point.z + ' qty';
+                            //}
+                            shared: true
+                        },
+                        plotOptions: {
+                            column: {
+                                pointPadding: 0.2,
+                                borderWidth: 0
+                            }
+                        },
+                        navigation: {
+                            buttonOptions: {
+                                verticalAlign: 'top',
+                                y: -12,
+                            }
+                        },
+                        exporting: {
+                            buttons: {
+
+                                contextButton: {
+                                    enabled: true,
+                                    x: 9,
+                                    //menuItems: Highcharts.getOptions().exporting.buttons.contextButton.menuItems.splice(2,5)
+                                },
+
+                                exportButton: {
+                                    //x: -28,
+                                    onclick: function () {
+                                        $('#btnOpenModel5').click();
+                                    },
+                                    //symbol: 'circle'
+                                    text: 'Show All'
+                                }
+                            }
+
+
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        series: [{
+                            showInLegend: true,
+                            color: '#ADD8E6',
+                            name: 'ManHrs',
+                            data: CycloneManhrData
+                        }, {
+                            showInLegend: true,
+                            color: '#808080',
+                            name: 'Tonnage',
+                            data: CycloneTonnageData
+                        }]
+                    });
+                    function redrawchart1() {
+                        var chart = $('#container5').highcharts();
+
+                        var w = $('#container5').closest(".wrapper").width()
+                        chart.setSize(
+                            w, w * (2.2 / 4), false
+                        );
+                    }
+                    $('#menu_toggle').on('click', function () {
+                        $(window).resize(redrawchart1);
+                        redrawchart1();
+                    });
+                    $(window).resize(redrawchart1);
+                    redrawchart1();
+                    var row = '';
+                    // $.each(response.d, function (index, obj) {
+                    $.each(response, function (index, obj) {
+                        var num;
+                        // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                        num = (obj.PctAllSite1 * 100);
+                        row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.Scafpac + "</td><td style='text-align: center;'>" + obj.ManHrs5 + "</td><td style='text-align: center;'>" + obj.Tonnage5 + "</td></tr>";
+                    });
+                    $("#tbDetails5 tbody").append(row);
+                }
+            });
+    }
+
+    //container 6
+    function ScaffoldsDePlanked(ClientID, jobval, Siteid, SubOwner, ddlRiskRating) {
+        $.ajax({
+            type: "POST",
+            //url: "../WebApi/Dashboard.asmx/CycloneSecond",
+            url: "/CycloneDashboard/ScaffoldsDePlanked",
+            data: JSON.stringify({ id: ClientID, siteid: Siteid, jobselect: jobval, SubOwner: SubOwner, ddlRiskRating: ddlRiskRating }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // Cyclone = response.d;
+                Cyclone = response;
+                var CAction = [];
+                var CycloneData = [];
+                var totalhrs = 0;
+                if (Cyclone.length > 0) {
+                    for (var i = 0; i < Cyclone.length; i++) {
+                        var TobePush = true;
+                        //for (var k = 0; k < CycloneData.length; k++) {
+                        //    if (CycloneData[k].name == Cyclone[i].SiteLocation) {
+                        //        TobePush = false;
+                        //    }
+                        // }
+                        //NewTest121
+                        if (TobePush) {
+                            CycloneData.push({ name: Cyclone[i].CycloneActionHr, y: Cyclone[i].TotalCountsDismantle, sliced: true });
+                            var actionhr = Cyclone[i].TotalCountsDismantle;
+                            totalhrs = totalhrs + actionhr;
+                            //$('#ContentPlaceHolder1_txtprephrs').val(totalhrs);
+                            //$('#ContentPlaceHolder1_hdnprephrs').val(totalhrs);
+                            //alert(totalhrs);
+                            CAction.push(Cyclone[i].CycloneActionHr);
+
+                        }
+
+                    }
+                }
+                Highcharts.setOptions({ colors: ['#f9cb13', '#0000FF', '#fc2828'] });//Change line By 19 Nov 2018
+                Highcharts.chart('container6', {
+                    chart: {
+                        type: 'bar',
+                        backgroundColor: '#f2f2f2'
+                    },
+                    title: {
+                        align: 'left',
+                        text: 'Actioned! Quantity of Scaffolds (By Category)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' ,
+                        style: {
+                            fontSize: '16px',
+                        }
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    xAxis: {
+                        categories: CAction,
+                        title: {
+                            text: null
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '',
+                            align: 'high'
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return this.x + ', ' + this.y + ' Qty';
+                        }
+                    },
+                    plotOptions: {
+                        // Add Code on 30/March/2020
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function (eve) {
+                                        ScaffoldsDePlankeddata(this.category, ClientID, jobval, Siteid, SubOwner, ddlRiskRating);
+                                    }
+                                }
+                            }
+                        },  // End Code on 30/March/2020
+                        bar: {
+                            dataLabels: {
+                                enabled: true,
+                                color: 'black'
+                            }
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                            },
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#btnOpenModel6').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+
+
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        colorByPoint: true,
+                        showInLegend: false,
+                        data: CycloneData
+                    }]
+                });
+                function redrawchart6() {
+                    var chart = $('#container6').highcharts();
+
+                    var w = $('#container6').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (2.2 / 4), false
+                    );
+                }
+                $('#menu_toggle').on('click', function () {
+                    $(window).resize(redrawchart6);
+                    redrawchart6();
+                });
+                $(window).resize(redrawchart6);
+                redrawchart6();
+
+                var row = '';
+                // $.each(response.d, function (index, obj) {
+                $.each(response, function (index, obj) {
+                    var num;
+                    // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                    num = (obj.PctAllSite1 * 100);
+                    row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.CycloneActionHr + "</td><td style='text-align: center;'>" + obj.TotalCountsDismantle + "</td></tr>";
+                });
+                $("#tbDetails6 tbody").append(row);
+            }
+        });
+    }
+
+
+    //container 7
+    function ScaffoldsTieDown(ClientID, jobval, Siteid, SubOwner, ddlRiskRating) {
+        $.ajax({
+            type: "POST",
+            //url: "../WebApi/Dashboard.asmx/CycloneSecond",
+            url: "/CycloneDashboard/ScaffoldsTieDown",
+            data: JSON.stringify({ id: ClientID, siteid: Siteid, jobselect: jobval, SubOwner: SubOwner, ddlRiskRating: ddlRiskRating }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // Cyclone = response.d;
+                Cyclone = response;
+                var CAction = [];
+                var CycloneData = [];
+                var totalhrs = 0;
+                if (Cyclone.length > 0) {
+                    for (var i = 0; i < Cyclone.length; i++) {
+                        var TobePush = true;
+                        //for (var k = 0; k < CycloneData.length; k++) {
+                        //    if (CycloneData[k].name == Cyclone[i].SiteLocation) {
+                        //        TobePush = false;
+                        //    }
+                        // }
+
+                        if (TobePush) {
+                            CycloneData.push({ name: Cyclone[i].CycloneActionHr, y: Cyclone[i].TotalCountsDismantle, sliced: true });
+                            var actionhr = Cyclone[i].TotalCountsDismantle;
+                            totalhrs = totalhrs + actionhr;
+                            //$('#ContentPlaceHolder1_txtprephrs').val(totalhrs);
+                            //$('#ContentPlaceHolder1_hdnprephrs').val(totalhrs);
+                            //alert(totalhrs);
+                            CAction.push(Cyclone[i].CycloneActionHr);
+
+                        }
+
+                    }
+                }
+                Highcharts.setOptions({ colors: ['#f9cb13', '#0000FF', '#fc2828'] });//Change line By 19 Nov 2018
+                Highcharts.chart('container7', {
+                    chart: {
+                        type: 'bar',
+                        backgroundColor: '#f2f2f2'
+                    },
+                    title: {
+                        align: 'left',
+                        text: 'Actioned! Hours Used For Prep. Of Scaffolds (By Category)',
+                        style: {
+                            fontSize: '16px',
+                        }
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    xAxis: {
+                        categories: CAction,
+                        title: {
+                            text: null
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '',
+                            align: 'high'
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return this.x + ', ' + this.y + ' Hrs';
+                        }
+                    },
+                    plotOptions: {
+                        // Add Code on 30/March/2020
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function (eve) {
+                                        ScaffoldsTieDowndata(this.category, ClientID, jobval, Siteid, SubOwner, ddlRiskRating);
+                                    }
+                                }
+                            }
+                        },  // End Code on 30/March/2020
+                        bar: {
+                            dataLabels: {
+                                enabled: true,
+                                color: 'black'
+                            }
+                        }
+                    },
+                    navigation: {
+                        buttonOptions: {
+                            verticalAlign: 'top',
+                            y: -12,
+                        }
+                    },
+                    exporting: {
+                        buttons: {
+                            contextButton: {
+                                enabled: true,
+                                x: 9,
+                            },
+                            exportButton: {
+                                //x: -28,
+                                onclick: function () {
+                                    $('#btnOpenModel7').click();
+                                },
+                                //symbol: 'circle'
+                                text: 'Show All'
+                            }
+                        }
+
+
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        colorByPoint: true,
+                        showInLegend: false,
+                        data: CycloneData
+                    }]
+                });
+                function redrawchart7() {
+                    var chart = $('#container7').highcharts();
+
+                    var w = $('#container7').closest(".wrapper").width()
+                    chart.setSize(
+                        w, w * (2.2 / 4), false
+                    );
+                }
+                $('#menu_toggle').on('click', function () {
+                    $(window).resize(redrawchart7);
+                    redrawchart7();
+                });
+                $(window).resize(redrawchart7);
+                redrawchart7();
+
+                var row = '';
+                // $.each(response.d, function (index, obj) {
+                $.each(response, function (index, obj) {
+                    var num;
+                    // var num = ((obj.TonnageStanding / (totalTonnage)) * 100);
+                    num = (obj.PctAllSite1 * 100);
+                    row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.CycloneActionHr + "</td><td style='text-align: center;'>" + obj.TotalCountsDismantle + "</td></tr>";
+                });
+                $("#tbDetails7 tbody").append(row);
+            }
+        });
+    }
+
+    function ScaffoldsDePlankeddata(CycloneActionName, ClientID, jobval, Siteid, SubOwner, ddlRiskRating) {
+        $('.forRemoveDataAction').remove();
+        $.ajax({
+            type: "POST",
+            //url: "../WebApi/Dashboard.asmx/CycloneActionGetByCategory",
+            url: "/CycloneDashboard/ScaffoldsDePlankeddata",
+            data: JSON.stringify({ CycloneActionName: CycloneActionName, ClientID: ClientID, jobselect: jobval, siteid: Siteid, SubOwner: SubOwner, ddlRiskRating }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // var CycloneAction = response.d;
+                var CycloneAction = response;
+                var CycloneData = [];
+                if (CycloneAction.length > 0) {
+                    for (var i = 0; i < CycloneAction.length; i++) {
+                        var TobePush = true;
+                        if (TobePush) {
+
+                            CycloneData.push({ name: CycloneAction[i].ScaffRefAction, y: CycloneAction[i].DescriptionAction, z: CycloneAction[i].Location, s: CycloneAction[i].BuildingNo, r: CycloneAction[i].assetId, x: CycloneAction[i].FloorLevel, a: CycloneAction[i].DesignType, b: CycloneAction[i].MaterialType, c: CycloneAction[i].PreparationHrs, d: CycloneAction[i].RiskRating, sliced: true });
+                        }
+                    }
+                }
+                $('#btnOpenModelAllDetails').click();
+                  //checkaction
+
+
+                    $("#QuantityModal1").css("display", "none");
+                    $("#QuantityModal2").css("display", "block");
+                    $("#lblAction1").text(CycloneActionName);
+                    $("#labelaction").val(CycloneActionName);
+                var row1 = '';
+                // $.each(response.d, function (index, obj) {
+                $.each(response, function (index, obj) {
+                    row1 += "<tr class='forRemoveDataAction'><td style='text-align: center;font-size: 12px;'>" + obj.ScaffRefAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DescriptionAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.Location + "</td><td style='text-align: center;font-size: 12px;'>" + obj.BuildingNo + "</td><td style='text-align: center;font-size: 12px;'>" + obj.assetId + "</td><td style='text-align: center;font-size: 12px;'>" + obj.FloorLevel + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DesignType + "</td><td style='text-align: center;font-size: 12px;'>" + obj.MaterialType + "</td><td style='text-align: center;font-size: 12px;'>" + Highcharts.numberFormat(obj.PreparationHrs, 2) + "</td><td style='text-align: center;font-size: 12px;'>" + obj.RiskRating + "</td></tr>";
+                });
+                $("#tbDetails tbody").append(row1);
+            }
+        });
+
+    }
+
+    function ScaffoldsTieDowndata(CycloneActionName, ClientID, jobval, Siteid, SubOwner, ddlRiskRating) {
+        $('.forRemoveDataAction').remove();
+        $.ajax({
+            type: "POST",
+            //url: "../WebApi/Dashboard.asmx/CycloneActionGetByCategory",
+            url: "/CycloneDashboard/ScaffoldsTieDowndata",
+            data: JSON.stringify({ CycloneActionName: CycloneActionName, ClientID: ClientID, jobselect: jobval, siteid: Siteid, SubOwner: SubOwner, ddlRiskRating: ddlRiskRating }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // var CycloneAction = response.d;
+                var CycloneAction = response;
+                var CycloneData = [];
+                if (CycloneAction.length > 0) {
+                    for (var i = 0; i < CycloneAction.length; i++) {
+                        var TobePush = true;
+                        if (TobePush) {
+
+                            CycloneData.push({ name: CycloneAction[i].ScaffRefAction, y: CycloneAction[i].DescriptionAction, z: CycloneAction[i].Location, s: CycloneAction[i].BuildingNo, r: CycloneAction[i].assetId, x: CycloneAction[i].FloorLevel, a: CycloneAction[i].DesignType, b: CycloneAction[i].MaterialType, c: CycloneAction[i].PreparationHrs, d: CycloneAction[i].RiskRating, sliced: true });
+                        }
+                    }
+                }
+                $('#btnOpenModelAllDetails').click();
+                $("#QuantityModal1").css("display", "none");
+                $("#QuantityModal2").css("display", "block");
+
+                $("#lblAction1").text(CycloneActionName);
+                $("#labelaction").val(CycloneActionName);
+                // QuantityModal1
+                var row1 = '';
+                // $.each(response.d, function (index, obj) {
+                $.each(response, function (index, obj) {
+                    row1 += "<tr class='forRemoveDataAction'><td style='text-align: center;font-size: 12px;'>" + obj.ScaffRefAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DescriptionAction + "</td><td style='text-align: center;font-size: 12px;'>" + obj.Location + "</td><td style='text-align: center;font-size: 12px;'>" + obj.BuildingNo + "</td><td style='text-align: center;font-size: 12px;'>" + obj.assetId + "</td><td style='text-align: center;font-size: 12px;'>" + obj.FloorLevel + "</td><td style='text-align: center;font-size: 12px;'>" + obj.DesignType + "</td><td style='text-align: center;font-size: 12px;'>" + obj.MaterialType + "</td><td style='text-align: center;font-size: 12px;'>" + Highcharts.numberFormat(obj.PreparationHrs, 2) + "</td><td style='text-align: center;font-size: 12px;'>" + obj.RiskRating + "</td></tr>";
+                });
+                $("#tbDetails tbody").append(row1);
+            }
+        });
+
+    }
+
+    function ExportAllCategories() {
+        var id = getParameterByName('id');
+        var siteID = $('#ddlsite').val();
+        var ddlarea = $('#ddlarea').val();
+        var ddlRiskRating = $("#ddlRiskRating").val();
+        //var SubOwner = $('#ddldiscipline').val();
+        var SummDetail = "D";
+        var CycAction = 'All';
+
+        //window.location.href = '/CycloneDashboard/ExportAllCategories?id=' + id + '&siteID=' + siteID + '&ddlarea=' + ddlarea + '&SubOwner=' + SubOwner + '&SummDetail=' + SummDetail + '&CycAction=' + CycAction;
+        window.location.href = '/CycloneDashboard/ExportAllCategories?id=' + id + '&siteID=' + siteID + '&ddlarea=' + ddlarea + '&SummDetail=' + SummDetail + '&CycAction=' + CycAction + '&ddlRiskRating=' + ddlRiskRating;
+    }
+
+    function openpopup() {
+        if (ValidateInactiveSite()) return false;
+        // Reset previous selections
+        $('#ManHoursAvailable')
+            .val('')
+            .prop('disabled', true);
+
+        $('#ddlpopsitedropdown').val('All');  // if you have a dropdown for site selection
+
+        // Now show popup
+        $("#popupModal").show();
+    }
+
+    function closepopup() {
+        $("#popupModal").hide();
+    }
+
+    function SaveManHoursData() {
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var Site = $("#ddlpopsitedropdown").val();
+        var ManHoursAvailable = $("#ManHoursAvailable").val();
+        
+        if (parseFloat(ManHoursAvailable) < 0) {
+            var response = { Result: "Failed", Message: "Negative values are not allowed." }
+            CustomAlert(response);
+            return;
+        }
+        if (Site && Site !== "All") {
+            $.ajax({
+                url: '/CycloneDashboard/SaveManHoursData',
+                async: false,
+                data: { ClientId: id, UserId: UID, SiteId: Site, ManHoursAvailable: ManHoursAvailable },
+                success: function (response) {
+                    if (response.Success === "1") {
+                        var response = { Result: "Success", Message: "Data saved successfully." }
+                        CustomAlert(response);
+                        $('#popupModal').hide();
+                        $('#popupModal').find('input[type="text"], input[type="number"], input[type="email"], input[type="date"], textarea').val('');
+                        $('#popupModal').find('select').prop('selectedIndex', 0);
+                        location.reload();
+                    } else {
+                        var response = { Result: "Failed", Message: "Something went wrong. Please try again." }
+                        CustomAlert(response);
+                        return;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#msgBox').text("An error occurred while saving.");
+                    console.error(error);
+                }
+            });
+        }
+        else {
+            var response = { Result: "Failed", Message: "Please select a Site before proceeding." }
+            CustomAlert(response);
+        }
+    }
+
+    function SiteDropdown() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/CycloneDashboard/BindallDropdown',
+            async: false,
+            data: { id: id },
+            success: function (response) {
+
+                data = response;
+
+                var ddSite = "<option value='All'>All</option>";
+                $.each(response.ddlsites, function (idx, obj) {
+                    if (obj != null) {
+                        ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                    }
+                });
+                $('#ddlpopsitedropdown').empty().append(ddSite);
+            }
+        });
+    }
+
+    function loadManHourData(siteId) {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/CycloneDashboard/GetManHourData',
+            type: 'GET',
+            data: { siteId: siteId, ClientId: id },
+            success: function (response) {
+                if (response && response.success) {
+                    $('#ManHoursAvailable').val(response.data.ManHoursAvailable);
+                } else {
+                    $('#ManHoursAvailable').val('');
+                }
+            },
+            error: function () {
+                alert('Failed to load data. Please try again.');
+            }
+        });
+    }
+
+    function checkForNegativeValues() {
+        var manHours = parseFloat($("#ManHoursAvailable").val()) || 0;
+        
+
+        if (manHours < 0 ) {
+            $("#negativeValueMsg").show();
+        } else {
+            $("#negativeValueMsg").hide();
+        }
+    }
+
+    function IsSiteInactive() {
+        var SiteId = $('#ddlsite').val();
+        if (SiteId == "" || SiteId == null) {
+            return false;
+        }
+        var IsInactive = false;
+        $.ajax({
+            type: "POST",
+            url: "/Layout/CheckSiteActiveStatusSiteId",
+            data: JSON.stringify({ SiteId: SiteId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                IsInactive = response.IsInactive;
+            }
+        });
+        return IsInactive;
+    }
+
+    function ValidateInactiveSite() {
+        if (IsSiteInactive() == true) {
+            CustomAlert({
+                Result: "Failed",
+                Message: "This site is InActive. You cannot make any changes."
+            });
+            return true;
+        }
+        return false;
+    }
+</script>
+@*<style>
+        .container .DshbrdBack {
+            background-color: #ffffcc;
+            height: 1023px;
+        }
+
+        #lblAction {
+            text-decoration: underline;
+        }
+    </style>*@
+
+<style>
+    /* CSS to freeze top section and make graphs scrollable */
+    /*  html, body {
+        margin: 0;
+        padding: 0;
+        height: 150%;
+        overflow: hidden;
+    }*/
+
+    .right_col {
+        background-color: #FFFFCC !important;
+    }
+
+    .DshbrdBack {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .fixed-header-section {
+        flex-shrink: 0;
+        /* background: white;*/
+        z-index: 100;
+        padding-bottom: 10px;
+        overflow: visible;
+    }
+
+    .scrollable-graphs {
+        flex: 1;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        padding-right: 5px;
+        min-height: 0;
+    }
+
+        .scrollable-graphs::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .scrollable-graphs::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .scrollable-graphs::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 5px;
+        }
+
+            .scrollable-graphs::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+    /* Ensure modals don't interfere */
+    .modal {
+        z-index: 100000 !important;
+    }
+</style>
+<input type="hidden" id="hdnClientID" />
+<input type="hidden" id="hdnprephrs" />
+<input type="hidden" id="hdnmanhrsavail" />
+<input type="hidden" id="hdnddlarea" />
+
+
+
+<div class="container DshbrdBack">
+    <!-- FIXED TOP SECTION -->
+    <div class="fixed-header-section" style="margin-top: 5px">
+        <!-- Stats Cards Row -->
+        <div class="row">
+            <div style="margin-left: 11px">
+                @*<div class="col-lg-3 col-md-3 col-sm-5 col-xs-11" style="border: 1px solid lightgrey; width: 300px; height: 80px; text-align: center; background: #f2f2f2; margin-top: 4px">
+                                <label id="lbl" Text="Man Hrs Available" Style="color: black; font-size: 25px">
+                                    Man Hrs Available
+                                </label>
+                                <div class="row">
+                                    <label id="txtavailhrs" Style="width: 33%; margin-left: 20px; text-align: center; font-weight: 700; font-size: 30px; color: black" ReadOnly="true">
+                                    </label>
+                                </div>
+                    </div>*@
+
+                <div class="col-md-4 col-sm-12 col-xs-12">
+                    <div class="card" style="background-color:aliceblue">
+                        <div class="card-block">
+                            <h1 class="card-title" style="text-align:center;">
+                                Man Hrs Available
+                            </h1>
+                            <div class="row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; padding: 0 10px;">
+                                <label id="txtavailhrs"
+                                       style="flex-grow: 1; text-align: center; font-weight: 700; font-size: 30px; color: black;">
+                                </label>
+
+                                <button onclick="openpopup()" id="btnManHrs"
+                                        style="background-color: darkcyan; color: white; padding: 6px 8px; border: none; border-radius: 4px; white-space: nowrap; margin-left: auto;">
+                                    <i class="fa fa-plus" style="margin-right: 5px;"></i> Man Hours
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @*<div class="col-lg-3 col-md-3 col-sm-5 col-xs-11" style="border: 1px solid lightgrey; width: 300px; height: 80px; text-align: center; background: #f2f2f2; margin-top: 4px">
+                                <label id="lbl2" Style="color: black; font-size: 25px">
+                                    Preparation Hrs
+                                </label>
+                                <div class="row">
+                                    <label id="txtprephrs" Style="width: 42%; font-weight: 700; font-size: 30px; color: black" ReadOnly="true">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3 col-md-3 col-sm-5 col-xs-11" style="border: 1px solid lightgrey; width: 300px; height: 80px; text-align: center; background: #f2f2f2; margin-top: 4px">
+                                <label id="lbl1" Text="Status" Style="color: black; font-size: 25px">
+                                    Status
+                                </label>
+                                <div class="row">
+                                    <img id="imgstatus" src="" style="width: 37px;" />
+                        </div>
+                    </div>*@
+
+                <div class="col-md-4 col-sm-12 col-xs-12">
+                    <div class="card" style="background-color:aliceblue">
+                        <div class="card-block">
+                            <h1 class="card-title" style="text-align:center;">
+                                Preparation Hrs
+                            </h1>
+                            <div class="row" style="text-align:center;">
+                                <label id="txtprephrs" Style="width: 42%; font-weight: 700; text-align:center; font-size: 30px; color: black" ReadOnly="true">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12 col-xs-12">
+                    <div class="card" style="background-color:aliceblue">
+                        <div class="card-block">
+                            <h1 class="card-title" style="text-align:center;">
+                                Status
+                            </h1>
+                            <div class="row" style="text-align:center;">
+                                <img id="imgstatus" src="" style="width:44px; " />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-3 col-sm-5 col-xs-11" style="padding-top:10px;">
+                    <button style=" padding-left: 10px;" Class="btn w3-btn w3-teal " onclick="ExportAllCategories()">Export All To CSV</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Row -->
+        <div class="row">
+            <div class="col-lg-4 col-md-6 col-sm-9 col-xs-9" style="margin-top: 6px; display: flex;">
+                <label id="Label1" style="font-weight: 700; font-size: 17px; color: black; margin-top: 2px; float: right">Site</label>
+                <select id="ddlsite" Class="form-control" onchange="Changesite()" Style="border: 1px solid; margin-left: 10px;" runat="server" Width="80%" AppendDataBoundItems="true"></select>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-9 col-xs-9" style="margin-top: 6px; display: flex;">
+                <label id="loc" runat="server" style="font-weight: 700; font-size: 17px; margin-top: 2px; color: black; float: right;">Location</label>
+                <select id="ddlarea" Class="form-control" Style="border: 1px solid; margin-left: 10px;" Width="80%" AppendDataBoundItems="true" onchange="selectarea();"></select>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-9 col-xs-9" style="margin-top: 6px; display: flex;">
+                <label id="loc" runat="server" style="font-weight: 700; font-size: 17px; margin-top: 2px; color: black; white-space: nowrap;"> Risk Rating </label>
+                <select id="ddlRiskRating" Class="form-control" Style="border: 1px solid; margin-left: 10px;" Width="80%" AppendDataBoundItems="true" onchange="selectRiskRating();">
+                    <option value="All">All</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                    <option value="None">None</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCROLLABLE GRAPHS SECTION -->
+    <div class="scrollable-graphs">
+        <!-- Graph Row 1 -->
+        <div class="row">
+            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                <div id="container" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                <div id="container1" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+        </div>
+
+        <!-- Graph Row 2 -->
+        <div class="row">
+            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                <div id="container2" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                <div id="container3" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+        </div>
+
+        <!-- Hidden Scaffold Ref Row -->
+        <div class="row" style="display: none">
+            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-2" style="margin-top: 6px">
+                <label id="Label2" runat="server" style="font-weight: 700; font-size: 17px; color: black; float: right">Scaf Ref</label>
+            </div>
+            <div class="col-lg-5 col-md-3 col-sm-9 col-xs-9">
+                <select id="ddlscaffref" Class="form-control" Style="border: 1px solid" Width="80%" AppendDataBoundItems="true" onchange="selectscaffref();"></select>
+            </div>
+        </div>
+
+        <div class="row" style="display: none">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                <div id="container5" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+        </div>
+
+        <!-- Graph Row 3 -->
+        <div class="row">
+            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px; margin-bottom:70px;">
+                <div id="container6" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12 wrapper" style="margin-top: 7px;">
+                <div id="container7" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End of DshbrdBack container -->
+<!-- All your existing modals below -->
+<div class="container">
+    <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Cyclone Prep - Quantity</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td style="width: 60%; text-align: center;"><b>Total Count</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+    <div class="modal fade" id="myModals1" role="dialog">
+        <div class="row" style="padding-top: 90px;">
+            <div class="col-lg-1 col-md-1"></div>
+            <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+                <div class="modal-content" style="width: 100%">
+                    <div class="modal-header row">
+                        <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
+                            <h4 class="modal-title" id="QuantityModal1" style="display:none">
+                                Scaffolds with cyclone action set as <u>
+                                    <label id="lblAction" style="font-size: 17px"></label>
+                                    <input type="hidden" id="labelaction" />
+                                </u>
+                            </h4>
+                            <h4 class="modal-title" id="QuantityModal2" style="display:none">
+                                Scaffolds Actioned as <u>
+                                    <label id="lblAction1" style="font-size: 17px"></label>
+                                    <input type="hidden" id="labelaction" />
+                                </u>
+                            </h4>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                            <button ID="exporttopdf" Style="height: 28px; padding-top: 5px; width:100px;" OnClick="exporttopdf_Click()" Class="btn btn-blue w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                            <button id="myButtonControlID" Style="height: 28px; padding-top: 5px; width:100px;" Class="btn btn-primary w3-btn w3-teal"><i class="fa fa-file-excel-o"></i>&nbsp;Export</button>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+                    <div class="modal-body" id="divTableDataHolder">
+                        <div style="overflow: auto">
+                            <table class="table table-bordered" id="tbDetails" style="width: 100%; color: black">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Scaf Ref #</b></td>
+                                        <td style="width: 25%; text-align: center; font-size: 12px;"><b>Reason for Access</b></td>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Location</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Building / Module No.</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Asset # / Func. Loc</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Floor Level</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Design Type</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Prep Hours</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Risk Rating</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1 col-md-1"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+    <div class="modal fade" id="myModal1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Cyclone Prep - Hours </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails2" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td class="bysitecolumnmodal" style="width: 60%; text-align: center;"><b>Total Hours</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+    <div class="modal fade" id="myModal2" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ScafRef # and Tonnage </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td style="width: 20%; text-align: center;"><b>Scaf Ref#</b></td>
+                                <td style="width: 40%; text-align: center;"><b>Tonnage</b></td>
+                                <td style="width: 40%; text-align: center;"><b>% Of Tonnage</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModel4" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+    <div class="modal fade" id="myModal3" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ScafRef # and ManHrs </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails4" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Scaf Ref#</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 60%; text-align: center;"><b>Man Hrs</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <button style="display: none;" id="btnOpenModel5" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal5">Open Modal</button>
+    <div class="modal fade" id="myModal5" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ScafRef # , ManHrs and Tonnage</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails5" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Scaf Ref#</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 30%; text-align: center;"><b>Man Hrs</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 30%; text-align: center;"><b>Tonnage</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container6">
+    <button style="display: none;" id="btnOpenModel6" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal6">Open Modal</button>
+    <div class="modal fade" id="myModal6" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Actioned - Quantity</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails6" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td style="width: 60%; text-align: center;"><b>Total Count</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container7">
+    <button style="display: none;" id="btnOpenModel7" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal7">Open Modal</button>
+    <div class="modal fade" id="myModal7" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Actioned - Hours</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails7" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td style="width: 60%; text-align: center;"><b>Total Hours</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All your existing modals below -->
+@*<div class="container">
+        <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Cyclone Prep - Quantity</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                    <td style="width: 60%; text-align: center;"><b>Total Count</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+@*<div class="container">
+        <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+        <div class="modal fade" id="myModals1" role="dialog">
+            <div class="row" style="padding-top: 90px;">
+                <div class="col-lg-1 col-md-1"></div>
+                <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+                    <div class="modal-content" style="width: 100%">
+                        <div class="modal-header row">
+                            <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
+                                <h4 class="modal-title" id="QuantityModal1" style="display:none">
+                                    Scaffolds with cyclone action set as <u>
+                                        <label id="lblAction" style="font-size: 17px"></label>
+                                        <input type="hidden" id="labelaction" />
+                                    </u>
+                                </h4>
+                                <h4 class="modal-title" id="QuantityModal2" style="display:none">
+                                    Scaffolds Actioned as <u>
+                                        <label id="lblAction1" style="font-size: 17px"></label>
+                                        <input type="hidden" id="labelaction" />
+                                    </u>
+                                </h4>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                                <button ID="exporttopdf" Style="height: 28px; padding-top: 5px; width:100px;" OnClick="exporttopdf_Click()" Class="btn btn-blue w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                                <button id="myButtonControlID" Style="height: 28px; padding-top: 5px; width:100px;" Class="btn btn-primary w3-btn w3-teal"><i class="fa fa-file-excel-o"></i>&nbsp;Export</button>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                        </div>
+                        <div class="modal-body" id="divTableDataHolder">
+                            <div style="overflow: auto">
+                                <table class="table table-bordered" id="tbDetails" style="width: 100%; color: black">
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Scaf Ref #</b></td>
+                                            <td style="width: 25%; text-align: center; font-size: 12px;"><b>Reason for Access</b></td>
+                                            <td style="width: 15%; text-align: center; font-size: 12px;"><b>Location</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Building / Module No.</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Asset # / Func. Loc</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Floor Level</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Design Type</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Prep Hours</b></td>
+                                            <td style="width: 10%; text-align: center; font-size: 12px;"><b>Risk Rating</b></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-1 col-md-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+        <div class="modal fade" id="myModal1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Cyclone Prep - Hours </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails2" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                    <td class="bysitecolumnmodal" style="width: 60%; text-align: center;"><b>Total Hours</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+        <div class="modal fade" id="myModal2" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">ScafRef # and Tonnage </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 20%; text-align: center;"><b>Scaf Ref#</b></td>
+                                    <td style="width: 40%; text-align: center;"><b>Tonnage</b></td>
+                                    <td style="width: 40%; text-align: center;"><b>% Of Tonnage</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel4" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+        <div class="modal fade" id="myModal3" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">ScafRef # and ManHrs </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails4" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Scaf Ref#</b></td>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 60%; text-align: center;"><b>Man Hrs</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <button style="display: none;" id="btnOpenModel5" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal5">Open Modal</button>
+        <div class="modal fade" id="myModal5" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">ScafRef # , ManHrs and Tonnage</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails5" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Scaf Ref#</b></td>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 30%; text-align: center;"><b>Man Hrs</b></td>
+                                    <td class="tonnagebyjobcolumnmodal" style="width: 30%; text-align: center;"><b>Tonnage</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container6">
+        <button style="display: none;" id="btnOpenModel6" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal6">Open Modal</button>
+        <div class="modal fade" id="myModal6" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Actioned - Quantity</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails6" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                    <td style="width: 60%; text-align: center;"><b>Total Count</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container7">
+        <button style="display: none;" id="btnOpenModel7" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal7">Open Modal</button>
+        <div class="modal fade" id="myModal7" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Actioned - Hours</h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered" id="tbDetails7" style="width: 100%; color: black">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                    <td style="width: 60%; text-align: center;"><b>Total Hours</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+<script>
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM Ready - Chart containers available');
+
+        // Verify all chart containers exist
+        const containers = ['container', 'container1', 'container2', 'container3', 'container5', 'container6', 'container7'];
+        containers.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                console.log(`${id} found:`, el.offsetWidth, 'x', el.offsetHeight);
+            } else {
+                console.error(`${id} not found!`);
+            }
+        });
+    });
+
+
+</script>
+@*<%--Model to Show Cyclone Prep (Qty)--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Cyclone Prep - Quantity</h4>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails1" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td style="width: 60%; text-align: center;"><b>Total Count</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <button style="display: none;" id="btnOpenModelAllDetails" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModals1">Open Modal</button>
+    <div class="modal fade" id="myModals1" role="dialog">
+        <div class="row" style="padding-top: 90px;">
+            <div class="col-lg-1 col-md-1"></div>
+            <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+                <div class="modal-content" style="width: 100%">
+                    <div class="modal-header row">
+                        <div class="col-lg-8 col-md-8 col-sm-6 col-xs-6">
+                            <h4 class="modal-title" id="QuantityModal1" style="display:none">
+                                Scaffolds with cyclone action set as <u>
+                                    <label id="lblAction" style="font-size: 17px"></label>
+                                    @*<asp:HiddenField ID="labelaction" runat="server" />*@
+                                    <input type="hidden" id="labelaction" />
+                                </u>
+                            </h4>
+                            <h4 class="modal-title" id="QuantityModal2" style="display:none">
+                                Scaffolds Actioned as <u>
+                                    <label id="lblAction1" style="font-size: 17px"></label>
+                                    @*<asp:HiddenField ID="labelaction" runat="server" />*@
+                                    <input type="hidden" id="labelaction" />
+                                </u>
+                            </h4>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                            @*<asp:LinkButton ID="exporttopdf" runat="server" Style="height: 28px; padding-left: 5px; padding-top: 5px;" OnClick="exporttopdf_Click" CssClass="btn btn-blue w3-btn w3-blue" Text="Print"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+                            <button ID="exporttopdf" Style="height: 28px; padding-top: 5px; width:100px;" OnClick="exporttopdf_Click()" Class="btn btn-blue w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                            @*<asp:LinkButton ID="myButtonControlID" runat="server" Style="height: 28px; padding-top: 5px;" CssClass="btn btn-primary w3-btn w3-teal" Text="Export">Export</asp:LinkButton>*@
+                            <button id="myButtonControlID" Style="height: 28px; padding-top: 5px; width:100px;" Class="btn btn-primary w3-btn w3-teal"><i class="fa fa-file-excel-o"></i>&nbsp;Export</button>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body" id="divTableDataHolder">
+                        <div style="overflow: auto">
+                            <table class="table table-bordered" id="tbDetails" style="width: 100%; color: black">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Scaf Ref #</b></td>
+                                        <td style="width: 25%; text-align: center; font-size: 12px;"><b>Reason for Access</b></td>
+                                        <td style="width: 15%; text-align: center; font-size: 12px;"><b>Location</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Building / Module No.</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Asset # / Func. Loc</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Floor Level</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Design Type</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Material Type</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Prep Hours</b></td>
+                                        <td style="width: 10%; text-align: center; font-size: 12px;"><b>Risk Rating</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-1 col-md-1"></div>
+        </div>
+    </div>
+</div>
+
+
+
+@*<%--Model to Show Cyclone Prep (Hours)--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel2" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Open Modal</button>
+    <div class="modal fade" id="myModal1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Cyclone Prep - Hours </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails2" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                <td class="bysitecolumnmodal" style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td class="bysitecolumnmodal" style="width: 60%; text-align: center;"><b>Total Hours</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Cyclone Prep (Hours)--%>*@
+
+
+@*<%--Model to Show ScafRef # and Tonnage--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel3" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+    <div class="modal fade" id="myModal2" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ScafRef # and Tonnage </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails3" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%;display:none;"><b>Site Name</b></td>--%>*@
+                                <td style="width: 20%; text-align: center;"><b>Scaf Ref#</b></td>
+                                <td style="width: 40%; text-align: center;"><b>Tonnage</b></td>
+                                <td style="width: 40%; text-align: center;"><b>% Of Tonnage</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show ScafRef # and Tonnage--%>*@
+
+
+
+@*<%--Model to Show ScafRef # and ManHrs--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel4" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal3">Open Modal</button>
+    <div class="modal fade" id="myModal3" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ScafRef # and ManHrs </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails4" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Scaf Ref#</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 60%; text-align: center;"><b>Man Hrs</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show ScafRef # and ManHrs--%>*@
+
+@*<%--Model to Show Chart 5--%>*@
+<div class="container">
+    <button style="display: none;" id="btnOpenModel5" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal5">Open Modal</button>
+    <div class="modal fade" id="myModal5" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">ScafRef # , ManHrs and Tonnage</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails5" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 40%; text-align: center;"><b>Scaf Ref#</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 30%; text-align: center;"><b>Man Hrs</b></td>
+                                <td class="tonnagebyjobcolumnmodal" style="width: 30%; text-align: center;"><b>Tonnage</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Chart 5--%>*@
+
+@*<%--Model to Show Scaffolds De-Planked chart 6--%>*@
+<div class="container6">
+    <button style="display: none;" id="btnOpenModel6" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal6">Open Modal</button>
+    <div class="modal fade" id="myModal6" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Actioned - Quantity</h4>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails6" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td style="width: 60%; text-align: center;"><b>Total Count</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@*<%--Model to Show Scaffolds Tie-Down chart 7--%>*@
+<div class="container7">
+    <button style="display: none;" id="btnOpenModel7" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal7">Open Modal</button>
+    <div class="modal fade" id="myModal7" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Actioned - Hours</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tbDetails7" style="width: 100%; color: black">
+                        <tbody>
+                            <tr>
+                                @*<%--
+                                    <td class="bysitecolumnmodal" id="sitenamemodal" style="width: 33%; display: none;"><b>Site Name</b></td>--%>*@
+                                <td style="width: 40%; text-align: center;"><b>Cyclone Action</b></td>
+                                <td style="width: 60%; text-align: center;"><b>Total Hours</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%--Model to Show Scaffolds Tie-Down chart 7--%>*@
+
+<div id="popupModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); z-index: 9999; text-align: center; padding-top: 100px;">
+
+    <div style="width: 400px; margin: auto; background-color: white; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.5); overflow: hidden;">
+
+
+        <div style="background-color: #555; color: white; padding: 12px 16px; font-size: 18px; font-weight: bold; text-align: left; position: relative;">
+            <i class="fa fa-exclamation-circle" style="color: yellow; margin-right: 8px;"></i> Add Man Hours
+
+            <a id="closeContractorRep" class="close" onclick="closepopup();"
+               style="position: absolute; top: 10px; right: 16px; color: white; font-size: 20px; text-decoration: none; cursor: pointer;">✖</a>
+        </div>
+
+
+        <div style="padding: 20px; text-align: left; font-size: 15px;">
+            <div style="margin-bottom: 15px;">
+                <label for="txtSite" style="font-weight:bold;">Site:</label>
+                <select id="ddlpopsitedropdown" class="form-control" runat="server" appenddatabounditems="true" required>
+                    <option>All</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="txtManHoursAvailable" style="font-weight:bold;">Man Hours Available:</label>
+                <input type="number" id="ManHoursAvailable" style="width: 100%; padding: 4px; margin-top: 5px;color:black; box-sizing: border-box;" min="0" />
+            </div>
+
+            <span id="negativeValueMsg" style="display: none; color: red; margin-left: 16%; ">Negative values are not allowed.</span>
+            <div style="text-align: right;">
+                <button onclick="SaveManHoursData()" style="background-color: green; color: white; padding: 7px 14px; margin-top: 6%; margin-right: 10px; border: none; border-radius: 4px;">Submit</button>
+                <button onclick="closepopup()" style="background-color: red; color: white; padding: 7px 14px; border: none; border-radius: 4px;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

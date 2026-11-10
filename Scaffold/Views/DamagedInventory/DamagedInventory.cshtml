@@ -1,0 +1,184 @@
+﻿
+@{
+    ViewBag.Title = "DamagedInventory";
+}
+<style>
+    .setWidth2
+    {
+        min-width:200px !important;
+    }
+    .setWidth3 {
+        min-width: 200px !important;
+    }
+    .setWidth4 {
+        min-width: 200px !important;
+    }
+</style>
+<script src="~/Content/js/DamagedInventory.js?V1=10"></script>
+
+<div class="clearfix"></div>
+
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liThirdParty" runat="server" style="width: 191px">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotInventory" runat="server">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSite">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+
+            <li id="liJob">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            <li id="LiSacafpac" runat="server">
+                <a id="AnchorReturnInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                </a>
+            </li>
+            <li id="LiDamaged" class="active" runat="server">
+                <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                </a>
+            </li>
+            
+            <li id="PipeLineInventory">
+                <a id="AnchorPipeLineInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;PipeLine Inventory</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                    @*<asp:RadioButton ID="rdodepottodepot" AutoPostBack="true" OnCheckedChanged="rdodepottodepot_CheckedChanged" GroupName="abc" runat="server" Text="Depot Inventory Damage" />*@
+                    <input type="radio" id="rdodepottodepot" onchange="rdodepottodepot_CheckedChanged()" name="abc" />
+                    <label>Depot Inventory Damage</label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                    @*<asp:RadioButton ID="rdodepottosite" AutoPostBack="true" OnCheckedChanged="rdodepottosite_CheckedChanged" GroupName="abc" runat="server" Text="Site Inventory Damage" />*@
+                    <input type="radio" id="rdodepottosite" onchange="rdodepottosite_CheckedChanged()" name="abc" />
+                    <label>Site Inventory Damage</label>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                    @*<asp:RadioButton ID="rdositetojob" AutoPostBack="true" OnCheckedChanged="rdositetojob_CheckedChanged" GroupName="abc" runat="server" Text="Job Inventory Damage" />*@
+                    <input type="radio" id="rdositetojob" onchange="rdositetojob_CheckedChanged()" name="abc" />
+                    <label>Job Inventory Damage</label>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6">
+                    @*<asp:LinkButton CssClass="w3-btn  w3-green buttonBlue" CausesValidation="false" ID="btnDamagedInventory" Visible="true" OnClick="btnDamagedInventory_Click" runat="server">Damaged Item</asp:LinkButton>*@
+                    <button Class="w3-btn  w3-green buttonBlue" id="btnDamagedInventory"  OnClick="btnDamagedInventory_Click()">
+                        <i class="fa fa-house-damage"></i>Damaged Item</button>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6">
+                    @*<asp:LinkButton CssClass="btn btn-primary w3-btn w3-teal" CausesValidation="false" ID="btnAllDmgReport" Visible="true" OnClick="btnAllDmgReport_Click" runat="server">Historical </asp:LinkButton>*@
+                    <button Class="btn btn-primary w3-btn w3-teal"  id="btnAllDmgReport"  OnClick="btnAllDmgReport_Click()" >
+                        <i class="fa fa-history"></i>&nbsp;Historical </button>
+                </div>
+            </div>
+            <div class="row">
+                <div id="DtoS"  style="display: none">
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                        @*<asp:Label ID="lblfrom" Text="Site" runat="server"></asp:Label>
+                        <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddlfrom" EmptyMessage="All" Style="width: 148px" runat="server" OnSelectedIndexChanged="ddlfrom_SelectedIndexChanged" AutoPostBack="true">
+                        </Telerik:RadComboBox>*@
+                        <label id="lblfrom">Site</label>
+                        <select id="ddlfrom" onchange="ddlfrom_SelectedIndexChanged" Style="width: 148px"></select>
+                    </div>
+
+
+                </div>
+
+                <div id="StoJ" style="display: none">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                        @*<asp:Label ID="txtFrom" Text="Site" runat="server"></asp:Label>
+                        <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddl1to" EmptyMessage="All" OnSelectedIndexChanged="ddl1to_SelectedIndexChanged" AutoPostBack="true" Style="width: 148px" runat="server">
+                        </Telerik:RadComboBox>*@
+                        <label id="txtFrom">Site</label>
+                        <select id="ddl1to" onchange="ddl1to_SelectedIndexChanged()" Style="width: 148px"></select>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                        @*<asp:Label ID="txtTo" Text="Job" runat="server"></asp:Label>
+                        <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" ID="ddl1from" EmptyMessage="All" Style="width: 148px" runat="server" AutoPostBack="true" OnSelectedIndexChanged="ddl1from_SelectedIndexChanged">
+
+                            <HeaderTemplate>
+                                <ul>
+                                    <li class="col-xs-4">ScaffRef</li>
+                                    <li class="col-xs-8">Description</li>
+                                </ul>
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <ul>
+                                    <li class="col-xs-4">
+                                        <%# DataBinder.Eval(Container.DataItem, "ScaffRef") %>
+                                    </li>
+                                    <li class="col-xs-8">
+                                        <%# DataBinder.Eval(Container.DataItem, "Description") %>
+                                    </li>
+                                </ul>
+                            </ItemTemplate>
+                        </Telerik:RadComboBox>*@
+                       
+                        <label id="txtTo">Job</label>
+                        <select id="ddl1from" Style="width: 148px"  onchange="ddl1from_SelectedIndexChanged()"></select>
+                    </div>
+
+                </div>
+            </div>
+            @*<asp:HiddenField ID="hdndocument" runat="server" Value="" />
+            <asp:HiddenField ID="hdnDIDetailID" runat="server" Value="" />*@
+            <input type="hidden" id="hdndocument"  Value="" />
+        <input type="hidden" id="hdnDIDetailID"  Value="" />
+            <div id="displaygrid"  class="row" style="display: none">
+            
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 100%">
+                    
+                    <div class="clearfix"></div>
+                    <div id="DamagedInventoryGrid" style="color: black; width: 100%;margin-top:5px;">
+                        <table id="tblDamagedInventoryGrid" class="table table-striped ">
+                            <thead style="background-color: #efefef; color: #716262;">
+                                <tr>
+                                    @*<th style="width:5% ;text-align: Left;" class='setWidth'></th>
+                                    <th style="width:5%; text-align: Left;" class='setWidth'>#</th>
+                                    <th style="width:25%;text-align: Left;" class='setWidth'>From</th>
+                                    <th style="width:20%;text-align: Left;" class='setWidth'>To</th>
+                                    <th style="width:25%;text-align: Left;" class='setWidth'>Report Entered By</th>
+                                    <th style="width:20%; text-align: Left;" class='setWidth'>Report Entered On</th>*@
+                                    <th style="display:none"></th>
+                                    <th class='setWidth0'></th>
+                                    <th class='setWidth1'>#</th>
+                                    <th class='setWidth2'>From</th>
+                                    <th class='setWidth3'>To</th>
+                                    <th class='setWidth4'>Report Entered By</th>
+                                    <th class='setWidth5'>Report Entered On</th>
+                                    <th class='setWidth6' style="display:none;">From ID</th>
+                                    <th class='setWidth7' style="display:none;">TO ID</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyDamagedInventoryGrid"></tbody>
+                        </table>
+
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

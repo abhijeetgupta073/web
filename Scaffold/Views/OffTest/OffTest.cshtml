@@ -1,0 +1,343 @@
+﻿
+@{
+    ViewBag.Title = "OffTest";
+}
+
+<style>
+</style>
+
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+
+</head>
+
+<script>
+
+    function GetOffSystemInspectionData() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        var LocationID = $('#ddlLocaSite').val();
+
+        $.ajax({
+            type: "POST",
+            url: "/OffTest/CheckOffTestDataForOffline",
+            data: JSON.stringify({ id: id, SiteID: SiteID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            maxJsonLength: 50000000,
+            async: false,
+            success: function (response) {
+
+                if (!response.Checked) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/OffTest/GetOffSystemInspectionData",
+                        data: JSON.stringify({ id: id, SiteID: SiteID, LocationID: LocationID }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        maxJsonLength: 50000000,
+                        async: false,
+                        success: function (response) {
+                            var str = "";
+                            var GetData = response;
+                            $('#DivtblOffSystemInspectionListMessage').hide();
+                            $('#OffSystemInspectionList').show();
+
+
+                            $('#tblOffSystemInspectionList').DataTable().clear();
+                            $('#tblOffSystemInspectionList').DataTable().destroy();
+
+                            if (GetData.length > 0) {
+
+                                for (var i = 0; i < GetData.length; i++) {
+                                    var Status = GetData[i].Status == null ? "" : GetData[i].Status;
+                                    if (Status != 'NotStarted' && Status != 'Pipeline') {
+                                        var RegisterId = GetData[i].REGISTERId == null ? "" : GetData[i].REGISTERId;
+                                        var ScaffRef = GetData[i].ShowRegisterID == null ? "" : GetData[i].ShowRegisterID;
+                                        var ClientScaffref = GetData[i].ClientScaffref == null ? "" : GetData[i].ClientScaffref;
+                                        var Location = GetData[i].Location == null ? "" : GetData[i].Location;
+
+                                        str += "<tr>"
+                                        str += "<td class='setWidth0' style='display:none'></td>"
+                                        if (Status.toUpperCase() == "Red".toUpperCase() || Status.toUpperCase() == "Green".toUpperCase() || Status.toUpperCase() == "Yellow".toUpperCase()) {
+
+                                            str += "<td class='setWidth1'><img src='/images/" + Status + ".jpg' class='img-responsive' style='height: 22px;width: 22px;float: left;'/></td>";
+                                        }
+                                        else {
+                                            str += "<td class='setWidth1'>" + Status + "</td>"
+                                        }
+                                        str += "<td class='setWidth1' style='display:none;'>" + Status + "</td>" // For Export Column Funclity
+                                        str += "<td class='setWidth1'>" + ScaffRef + "</td>"
+                                        str += "<td class='setWidth2'>" + SiteLocation + "</td>"
+                                        str += "<td class='setWidth3'>" + Location + "</td>"
+                                    }
+                                }
+
+                                $('#tbodyOffSystemInspectionList').append(str);
+
+                                $('.ChkAllID').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    if (CheckBoxAll == true) {
+                                        $('.ChkTransID').prop('checked', true);
+                                    } else {
+                                        $('.ChkTransID').prop('checked', false);
+                                    }
+
+                                });
+                                $('.ChkTransIDDePlank').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    if (CheckBoxAll == true) {
+                                        $('#ChkTransID_' + id).prop('checked', true);
+                                        $('#OutOffServiceRegisterId_' + id).prop('checked', false);
+                                        $('#TieDownRegisterId_' + id).prop('checked', false);
+
+                                    } else {
+                                        $('#ChkTransID_' + id).prop('checked', false);
+
+                                    }
+
+                                });
+
+                                $('.ChkTransIDTieDown').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    if (CheckBoxAll == true) {
+                                        $('#ChkTransID_' + id).prop('checked', true);
+                                        $('#DePlankRegisterId_' + id).prop('checked', false);
+                                        $('#OutOffServiceRegisterId_' + id).prop('checked', false);
+
+
+                                    } else {
+                                        $('#ChkTransID_' + id).prop('checked', false);
+
+                                    }
+
+                                });
+                                $('.ChkTransIDOutOffServ').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    if (CheckBoxAll == true) {
+                                        $('#ChkTransID_' + id).prop('checked', true);
+                                    } else {
+                                        $('#ChkTransID_' + id).prop('checked', false);
+                                    }
+
+                                });
+
+                                $('#LoadingPanel1').hide();
+                            }
+                            $('#LoadingPanel1').hide();
+                            table = $('#tblOffSystemInspectionList').DataTable({
+                                "bSort": false,
+                                "processing": true,
+                                searching: true,
+                                "bLengthChange": true,
+                                //"bInfo": false,
+                                autoWidth: true,
+                                scrollX: true,
+                                scrollY: true,
+                                scrollCollapse: true,
+                                scrollY: "60vh",
+                                "paging": false,
+                                //"lengthMenu": [10, 25, 50, 100, 200],
+                                //"pageLength": 50,
+
+                                dom: 'Bfrtip',
+                                buttons: [
+
+                                    {
+                                        extend: 'csvHtml5',
+                                        title: 'Off System Inspecton List',
+                                        exportOptions: {
+                                            // columns: [1,2,3, 4, 5, 6, 7]
+                                            columns: [2, 3, 4, 5, 6, 7, 8, 9, 12, 14]
+                                        },
+                                    }
+                                ],
+
+                            });
+
+                            //if (RegisterID == "" || RegisterID == null) {
+                            //    table.column(7).visible(false);
+                            //} else {
+                            //    table.column(6).visible(false);
+                            //}
+
+                            //  $('#LoadingPanel1').hide();
+                        }
+                    })
+
+                }
+                else {
+                    var res = { Result: response.Result, Message: response.Message };
+                    CustomAlert(res);
+
+                    $('#DivtblOffSystemInspectionListMessage').show();
+                    $('#OffSystemInspectionList').hide();
+
+                    if ($.fn.DataTable.isDataTable('#tblOffSystemInspectionListMessage')) {
+                        $('#tblOffSystemInspectionListMessage').DataTable().clear().destroy();
+                    }
+
+                    $('#tbodyOffSystemInspectionListMessage').empty();
+
+                    let str = `
+    <tr style="background-color: yellow;">
+        <td class="text-center" style="color: red; font-size: 20px;">${response.Message}</td>
+    </tr>
+`;
+                    $('#tbodyOffSystemInspectionListMessage').append(str);
+
+                    $('#tblOffSystemInspectionListMessage').DataTable();
+
+                    $('#LoadingPanel1').hide();
+                    $('#GetOfflineLinkModalForInspection').show();
+
+                }
+
+
+            }
+        });
+    }
+
+    function btnGoOfflie_Click() {
+
+        // Step 1: Extract the link from the URL
+        const currentUrl = window.location.href;
+
+        // Step 2: Retrieve the domain name, ID, and userRole from URL parameters
+        const urlObj = new URL(currentUrl);
+        const domainName = urlObj.origin; // This gives you the domain name (e.g., https://www.example.com)
+        const ClientId = urlObj.searchParams.get("id");
+        const UserId = urlObj.searchParams.get("UID");
+        const UserRole = urlObj.searchParams.get("UserRole");
+        var Siteid = $('#ddlSitesLoc').val();
+        if (Siteid != '-1') {
+            var encryData = Encrypt([Siteid]);
+            Siteid = encryData[0];
+            const newUrl = `${domainName}/OffTestList.html?ClientId=${ClientId}&UserId=${UserId}&Siteid=${Siteid}&UserRole=${UserRole}`;
+
+            // Step 4: Display the new link in an alert
+            ////alert(`Your new link is: ${newUrl}`);
+
+
+            $.ajax({
+                url: '/OffSystemInspection/btnGoOfflie_Click',
+                async: false,
+                data: { id: ClientId, UserId: UserId, Siteid: Siteid },
+                success: function (response) {
+
+                    if (response.Result == "Success") {
+
+                        var Res = { Result: response.Result, Message: response.Message }
+                        CustomAlert(Res);
+                        $('#GetOfflineModal').modal('hide');
+
+                        $('#LoadingPanel1').hide();
+                        GetOffSystemInspectionData();
+
+
+                        //navigator.clipboard.writeText(newUrl).then(function () {
+                        //    alert(`URL copied to clipboard: ${newUrl}`);
+                        //}, function (err) {
+                        //    console.error('Could not copy text: ', err);
+                        //});
+                        //window.open(newUrl, '_blank');
+                        window.location.href = newUrl;
+
+                    }
+                    else if (response.Result == "FailedToGoOffline") {
+                        var Res = { Result: "Failed", Message: response.Message }
+                        CustomAlert(Res);
+                        $('#GetOfflineModal').modal('hide');
+                        $('#LoadingPanel1').hide();
+                        //window.open(newUrl, '_blank');
+                        window.location.href = newUrl;
+
+
+                    }
+                    else {
+                        var Res = { Result: response.Result, Message: response.Message }
+                        CustomAlert(Res);
+                        $('#GetOfflineModal').modal('hide');
+                        $('#LoadingPanel1').hide();
+                        //window.open(newUrl, '_blank');
+                        window.location.href = newUrl;
+
+                        //navigator.clipboard.writeText(newUrl).then(function () {
+                        //    alert(`URL copied to clipboard: ${newUrl}`);
+                        //}, function (err) {
+                        //    console.error('Could not copy text: ', err);
+                        //});
+
+
+                    }
+                }
+            });
+
+        }
+        else {
+            var response = { Result: "Failed", Message: "Please Select Site." }
+            CustomAlert(response);
+            $('#GetOfflineModal').modal('hide');
+            $('#LoadingPanel1').hide();
+        }
+    }
+
+</script>
+
+<div class="row">
+    <div class="col-lg-8 col-md-4 col-sm-4 col-xs-12">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span id="lblTestOffline" Font-Size="16px" Font-Bold="true">Test Offline</span></b></h4>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12" style="display: flex; justify-content: center; margin-bottom: 10px;">
+        <button id="btnGoOffline" class="btn w3-btn" style="width: -webkit-fill-available; height: 33px; background-color: #4169E1; border: none; color: white; " onclick="btnGoOfflie_Click()">
+            <i class="fa fa-internet-explorer"></i>&nbsp;Go Offline
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="OffSystemInspectionList" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblOffSystemInspectionList" class="table table-striped " style="width:100%">
+                <thead style="background-color: #efefef; color: #716262;width: 100%;">
+                    <tr>
+                        <th class="setWidth0" style="display:none;"></th>
+                        <th class="setWidth0">Status</th>
+                        <th class="setWidth1">Scaf Ref #</th>
+                        <th class="setWidth2">Site</th>
+                        <th class="setWidth3">Location</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyOffSystemInspectionList" style="width:100%"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="DivtblOffSystemInspectionListMessage" width: 100%; margin-top:5px; display:none;">
+            <table id="tblOffSystemInspectionListMessage" class="table table-striped" style="width:100%">
+                <thead style="background-color: #efefef; color: #716262; width: 100%;">
+                    <tr>
+                        <th> </th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyOffSystemInspectionListMessage" style="width:100%"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

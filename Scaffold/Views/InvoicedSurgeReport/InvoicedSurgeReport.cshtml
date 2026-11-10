@@ -1,0 +1,441 @@
+﻿
+@{
+    ViewBag.Title = "InvoicedSurgeReport";
+}
+
+
+
+<style>
+    .j-alertBox-Failed2 {
+        color: #fcfcfc;
+        background-color: #c33d3d;
+        position: fixed;
+        top: 65px;
+        width: 54%;
+        z-index: 10000;
+        left: 28%;
+        padding-top: 10px;
+        /*padding: 6px;*/
+        padding-left: 20px;
+        padding-right: 20px;
+        border-radius: 4px 4px 4px 4px;
+    }
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #dataforgrid_length {
+        margin-top: -16px;
+    }
+
+    .select-editable {
+        position: relative;
+        background-color: white;
+        border: solid grey 1px;
+        width: 140px;
+        height: 30px;
+        margin-top: 16px;
+        margin-left: -50px;
+    }
+
+        .select-editable select {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            font-size: 14px;
+            border: none;
+            width: 120px;
+            margin: 0;
+        }
+
+        .select-editable input {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100px;
+            padding: 1px;
+            font-size: 12px;
+            border: none;
+        }
+
+            .select-editable select:focus, .select-editable input:focus {
+                outline: none;
+            }
+    @@media (min-width:820px) and (max-width:1180px)
+    {
+        .j-alertBox-Failed2 {
+            color: #fcfcfc;
+            background-color: #c33d3d;
+            position: fixed;
+            top: 120px;
+            width: 54%;
+            z-index: 10000;
+            left: 35%;
+            padding-top: 10px;
+            /*padding: 6px;*/
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 4px 4px 4px 4px;
+        }
+
+    }
+    @@media (min-width:768px) and (max-width:1024px) {
+        .j-alertBox-Failed2 {
+            color: #fcfcfc;
+            background-color: #c33d3d;
+            position: fixed;
+            top: 120px;
+            width: 54%;
+            z-index: 10000;
+            left: 35%;
+            padding-top: 10px;
+            /*padding: 6px;*/
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 4px 4px 4px 4px;
+        }
+    }
+</style>
+
+<script>
+    $(function () {
+        GetSubCategories();
+
+
+    });
+
+
+
+    var Gobalcategory = "";
+    var GobalhireMeasurement = "";
+    function GetSubCategories() {
+
+        var str = "";
+
+        str += '<table id="dataforgrid" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+        str += "<th style='width:2%'>#</th>";
+        str += "<th  style='text-align:center;'>Tonnage Hire Rate in $</th>";
+        str += "<th  style='text-align:center;'>Tonnage Surge Rate in $</th>";
+        str += "<th  style='text-align:center;'>Surge Applied Tonnage</th></tr ></thead > <tbody>";
+
+        var id = getParameterByName('id');
+
+        $.ajax({
+            url: '/InvoicedSurgeReport/GetSubCategoryData',
+            type: 'POST',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getdata = response.getData;
+                var Clientdata = response.getData2;
+                str += "<tr id='row_9999' style='display:none'><td  style='width:2%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                str += "<td  style='text-align:center;display:none'>0</td>";
+                str += "<td  style='text-align:center;'></td>";
+                str += "<td  style='text-align:center;'></td>";
+                str += "<td  style='text-align:center;'></td>";
+                str += "<td  style='text-align:center;'></td></tr>";
+
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var SurgeRate_ID = getdata[i].SurgeRate_ID == null ? "" : getdata[i].SurgeRate_ID;
+                        var TonnageHireRate = getdata[i].TonnageHireRate == null ? "" : getdata[i].TonnageHireRate;
+                        var TonnageSurgeRate = getdata[i].TonnageSurgeRate == null ? "" : getdata[i].TonnageSurgeRate;
+                        var SurgeAppliedTonnage = getdata[i].SurgeAppliedTonnage == null ? "" : getdata[i].SurgeAppliedTonnage;
+                        //var AgreedHire = getdata[i].AgreedHire == null ? "" : getdata[i].AgreedHire;
+
+
+                        if (TonnageHireRate) {
+
+                            var AddDoller = "$";
+                            var TonnageHireRate = AddDoller + TonnageHireRate;
+                        }
+
+
+                        if (TonnageSurgeRate) {
+
+                            var AddDoller = "$";
+                            var TonnageSurgeRate = AddDoller + TonnageSurgeRate;
+                        }
+
+                        str += "<td  style='width:2%;display: inline-flex;'><a id='rowpencil' onclick='EditeSurgeDetails()' class='expand fa fa-pencil'></td>";
+                        str += "<td  style='text-align:center;display:none'>" + SurgeRate_ID + "</td>";
+                        str += "<td  style='text-align:center;'>" + TonnageHireRate + "</td>";
+                        str += "<td  style='text-align:center;'>" + TonnageSurgeRate + "</td>";
+                        str += "<td  style='text-align:center;'>" + SurgeAppliedTonnage + "</td></tr>";
+                        /*                        str += "<td  style='text-align:center;'>" + AgreedHire + "</td>*/
+
+                    }
+
+                }
+                else {
+                    $('#CustomAlert').removeClass('j-alertBox-Failed1');
+                    $('#CustomAlert').addClass('j-alertBox-Failed2').css('display', 'block');
+                    var Client = Clientdata[0].Name;
+                    var Response = { Result: "Failed", Message: "No Surge Rate available for the client - " + Client };
+                    CustomAlert(Response);
+                }
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+
+                $("#LoadingPanel1").css("display", "none");
+
+                $(".fa-trash").click(function () {
+                    var subCateId = $(this).parent().parent().children()[1].innerText;
+                    $("#SurgeRate_ID").val(subCateId);
+                    $("#Deletemodal").css("display", "block");
+                });
+
+
+
+                var table = $('#dataforgrid').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    searching: true,
+                    info: false,
+                    "pageLength": 50,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    fixedHeader: true,
+                    fixedColumns: {
+                        leftColumns: 11,
+                    },
+
+                    dom: 'lBfrtip',
+                    buttons: [
+
+                        {
+                            extend: 'csvHtml5',
+                            title: 'Sub Category',
+                            exportOptions: {
+                                columns: [2, 3, 4, 5]
+                            }
+                        }
+                    ],
+
+
+                    initComplete: function () {
+                        $(this.api().table().container()).find('input').parent().wrap('<form>').parent().attr('autocomplete', 'off'); // Auto Fill In Text box when ID Or Password Save on Crome Browser
+                        $("#dataforgrid_length").children().html('<button id="btnaddSubCategory"  type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:-34px;">&nbsp;Add New Sub Category</button><button id="btnExport" type="button" class="w3-btn w3-teal Export" style="margin-left:185px;margin-top: -5px;;height:27px;padding-top:3px;"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>');
+
+                        $("#btnaddSubCategory").click(function () {
+
+                            var trow1 = $(this).parent().parent().siblings();
+                            var trow = $(this).parent().parent().siblings()[2].childNodes[0];
+                            // var trow = $(this).parent().parent().siblings()[2].children[1].children[0].children[1].childNodes[0];
+                            var row = table.row(trow);
+                            var c = 0;
+                            row.child(Editing(c)).show();
+
+                        });
+
+                        $(".Export").click(function () {
+                            $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+                        });
+                    },
+
+                    "columnDefs": [
+                        { "width": "100px", "targets": 'fullsize' }
+                    ],
+
+                    "drawCallback": function () {
+
+                        $('.fa-angle-right').click(function (eve) {
+                            eve.stopImmediatePropagation();
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+                            var visible = $(this).parent().parent().hasClass("shown");
+                            var anglechange = $(this).hasClass("fa-angle-right");
+                            if (anglechange == true) {
+                                var x = tr.children()[0];
+                                $(this).removeClass("fa-angle-right");
+                                $(this).addClass("fa-angle-down");
+                            }
+                            else {
+                                $(this).addClass("fa-angle-right");
+                                $(this).removeClass("fa-angle-down");
+                            }
+                            if (visible == true) {
+                                // This row is already open - close it
+                                $(this).parent().parent().next('tr').remove();
+                                $(this).parent().parent().removeClass('shown');
+                            }
+                            else {
+                                // Open this row
+                                row.child(format(row.data())).show();
+                                row.child.show();
+                                tr.addClass('shown');
+                            }
+                        });
+                    }
+
+                });
+
+                // scrolling Top when Click On Next Button
+
+                table.on('page.dt', function () {
+                    $('.dataTables_scrollBody').animate({
+                        scrollTop: 0
+                    }, 300);
+                });
+            }
+        });
+    }
+
+    function EditeSurgeDetails() {
+        $('#txtHideEditebtn').css("display", "block")
+        $.ajax({
+            url: '/InvoicedSurgeReport/GetSubCategoryData',
+            type: 'post',
+            data: {},
+            async: false,
+            success: function (response) {
+
+                var getdata = response;
+
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var SurgeRate_ID = getdata[i].SurgeRate_ID == null ? "" : getdata[i].SurgeRate_ID;
+                        var TonnageHireRate = getdata[i].TonnageHireRate == null ? "" : getdata[i].TonnageHireRate;
+                        var TonnageSurgeRate = getdata[i].TonnageSurgeRate == null ? "" : getdata[i].TonnageSurgeRate;
+                        var SurgeAppliedTonnage = getdata[i].SurgeAppliedTonnage == null ? "" : getdata[i].SurgeAppliedTonnage;
+                        //var AgreedHire = getdata[i].AgreedHire == null ? "" : getdata[i].AgreedHire;
+
+                        $('#txtHireRate').val(TonnageHireRate);
+                        $('#txtSurgeRate').val(TonnageSurgeRate);
+                        $('#txtSurgeAppliedTonnage').val(SurgeAppliedTonnage);
+                        //    $('#txtAgreedHire').val(AgreedHire);
+                    }
+
+                }
+            }
+        });
+    }
+
+    function SaveSurgeData() {
+
+        var hireRate = $('#txtHireRate').val();
+        var SurgeRate = $('#txtSurgeRate').val();
+        var SurgeAppliedTonnage = $('#txtSurgeAppliedTonnage').val();
+        var Clientid = getParameterByName('id');
+        // var AgreedHire = $('#txtAgreedHire').val();
+
+        if ((hireRate == "") || (SurgeRate == "") || (SurgeAppliedTonnage == "")) {
+
+            var Response = { Result: "Failed", Message: "Please Fill The Data." };
+            CustomAlert(Response);
+        }
+        else {
+            $.ajax({
+                url: '/InvoicedSurgeReport/SaveSurgeData',
+                type: 'post',
+                data: { hireRate: hireRate, SurgeRate: SurgeRate, SurgeAppliedTonnage: SurgeAppliedTonnage, Clientid: Clientid },
+                async: false,
+                success: function (response) {
+                    if (response.Result == 'Success') {
+                        CustomAlert(response);
+                        GetSubCategories();
+
+                        $('#txtHireRate').val('');
+                        $('#txtSurgeRate').val('');
+                        $('#txtSurgeAppliedTonnage').val('');
+                        /*  $('#txtAgreedHire').val('');*/
+
+                        $('#txtHideEditebtn').css("display", "none")
+                    } else {
+                        CustomAlert(response);
+                    }
+                }
+            });
+        }
+    }
+
+
+
+
+</script>
+<input type="hidden" id="hdnTableData" />
+<input type="hidden" id="SurgeRate_ID" />
+<div class="row">
+    <div class=" col-lg-12 col-md-12 col-sm-12">
+        <h4 class="heading" style="color: #0070ba;font-size:15px;"><b><i class="fa fa-shopping-cart"></i>&nbsp;Surge Rate Variables</b></h4>
+    </div>
+</div>
+
+<div class="row" id="txtHideEditebtn" style="display:none">
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="width: 160Px; margin-left: 5px;">
+        <label>Tonnage Hire Rate:</label>
+    </div>
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+        <input type="text" id="txtHireRate" style="width: 105Px;" class="form-control" required />
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="width: 160Px; margin-left: 25px;">
+        <label>Tonnage Surge Rate:</label>
+    </div>
+
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+        <input type="text" id="txtSurgeRate" style="width: 105Px;" class="form-control" required />
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="width: 202Px; margin-left: 25px;;">
+        <label>Surge Applied Tonnage:</label>
+    </div>
+
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+        <input type="text" id="txtSurgeAppliedTonnage" style="width: 105Px;" class="form-control" required />
+    </div>
+
+    @*<div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="width: 155Px; margin-left: 25px;;">
+            <label>Agreed Hire:</label>
+        </div>
+
+
+        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style=" margin-left: -47Px;">
+            <input type="text" id="txtAgreedHire" style="width: 105Px;" class="form-control" />
+        </div>*@
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+        <input type="submit" id="btnsubmit" value="Save" class="btn btn-primary" onclick="SaveSurgeData()" style="color: white; margin-left: 42%; height: 28px; padding-top: 3px; width: 78px;" />'
+    </div>
+</div>
+
+<div class="row">
+    <div id="divbuttonID"></div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+

@@ -1,0 +1,2290 @@
+﻿@model Scaffold.Models.DeliveryDocketViewModel
+@{
+    ViewBag.Title = "DeliveryDocket";
+}
+
+ 
+   <link href="~/Content/Css/signature-pad.css" rel="stylesheet" />
+   <link href="~/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+   <script src="~/Content/js/html2canvas.js"></script>
+   <script src="~/Content/js/DeliveryDocket.js?V1=3"></script>
+
+    <!-- jQuery library -->
+    @*<script src="~/Content/js/jquery.min.js"></script>
+    <script src="~/Content/js/bootstrap.min.js"></script>*@
+  
+    @*<%--
+    <script src="/Assets/js/signInsp.js"></script>--%>*@
+    @* Added on 20Feb2025 *@
+    <script>
+        $(document).ready(function () {
+            $("#hdnClientID").val('@ViewBag.ClientID');
+            var logo = '@ViewBag.ClientImage';
+            $("#imageScaffold").attr('src', '@ViewBag.ClientImage');
+        });
+    </script>
+    <style>
+      
+        #Canvas1 {
+            width: 700px !important;
+        }
+
+
+        #Canvas2 {
+            width: 700px !important;
+        }
+
+        #Canvas3 {
+            width: 700px !important;
+        }
+
+        #printcanvas {
+            width: 700px !important;
+        }
+
+        .panel_toolbox > li > a:hover {
+            background: none;
+        }
+
+        #lockimg {
+            height: 10px;
+            width: 20px;
+            float: right;
+            margin: 5px;
+        }
+
+        .MainContainer {
+            width: 100%;
+        }
+
+        #save, #save img {
+            height: 6vh;
+        }
+
+
+        span.InspectionListTitle {
+            font-size: 14px;
+            color: #0091d6;
+            font-weight: 600;
+        }
+
+        th {
+            padding: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: left;
+            color: grey;
+            background-color: #eeeeee;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 5px;
+            font-size: 13px;
+            text-align: left;
+            color: grey;
+            border: 1px solid lightgrey;
+            border-collapse: collapse;
+        }
+
+
+        fieldset {
+            font-family: Georgia;
+            border-radius: 3px;
+            border: 2px solid black;
+            margin: 5px;
+            padding: 10px;
+        }
+
+        legend {
+            display: block;
+            width: 61%;
+            padding: 0;
+            margin-bottom: 20px;
+            font-size: 21px;
+            line-height: inherit;
+            color: #333;
+            border: 0;
+        }
+
+        .row {
+            margin-top: 5px;
+        }
+
+        label {
+            color: black !important;
+            font-size: 12px;
+        }
+
+        @@media (min-width: 1200px) {
+            .headinfo label {
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .headinfo span {
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .responsiveSign {
+                height: 70vh;
+            }
+        }
+    </style>
+<script src="~/Content/js/signature_pad.js"></script>
+<script src="~/Content/js/html2canvas.js"></script>
+
+
+
+@*<script>
+
+    $(document).ready(function () {
+        var GetisSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && !navigator.userAgent.match('CriOS');
+        if (GetisSafari == false) {
+            $(".nonsafari").css("display", "block");
+            $(".safari").css("display", "none");
+
+            var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                $(".mobileApp").css("display", "block");
+                $(".desktopApp").css("display", "none");
+                $(".hideAudioMob").css("display", "none");
+            } else {
+                $(".mobileApp").css("display", "none");
+                $(".desktopApp").css("display", "block");
+            }
+        } else {
+            $(".nonsafari").css("display", "none");
+            $(".safari").css("display", "block");
+            $(".hideAudioMob").css("display", "none");
+        }
+
+
+
+        $("#getSign").on("click", function () {
+            // $("#btnOpenModel4").click();
+            $("#btnsignModal").click();
+        });
+    });
+
+    $(document).on("change", ".mob_file_image", function (evt) {
+        $("#Imageblock").css("display", "none");
+        // var $mobImagesource = $('#ContentPlaceHolder1_imagetruck');
+        var $mobImagesource = $('#imagetruck');
+        var base64mobdata;
+        var reader = new FileReader();
+        reader.readAsDataURL(this.files[0]);
+        reader.onloadend = function () {
+            base64mobdata = reader.result;
+            console.log(base64mobdata);
+            $mobImagesource[0].src = base64mobdata;
+            // $("#ContentPlaceHolder1_tempimg").val(base64mobdata);
+            $("#tempimg").val(base64mobdata);
+        }
+
+        // $("#ContentPlaceHolder1_imagetruck").css("display", "block");
+        $("#imagetruck").css("display", "block");
+
+    });
+
+    $(document).on("change", ".file_video", function (evt) {
+        $("#Imageblock").css("display", "none");
+        // var $mobImagesource = $('#ContentPlaceHolder1_imagetruck');
+        var $mobImagesource = $('#imagetruck');
+        var base64mobdata;
+        var reader = new FileReader();
+        reader.readAsDataURL(this.files[0]);
+        reader.onloadend = function () {
+            base64mobdata = reader.result;
+            console.log(base64mobdata);
+            $mobImagesource[0].src = base64mobdata;
+            $("#tempimg").val(base64mobdata);
+        }
+
+        $("#imagetruck").css("display", "block");
+    });
+
+    $(document).on("change", ".mob_file_image1", function (evt) {
+        //alert();
+        $("#Imageblock1").css("display", "none");
+        // var $mobImagesource1 = $('#ContentPlaceHolder1_image');
+        var $mobImagesource1 = $('#image');
+        var reader = new FileReader();
+        reader.readAsDataURL(this.files[0]);
+        reader.onloadend = function () {
+            base64mobdata = reader.result;
+            console.log(base64mobdata);
+            $mobImagesource1[0].src = base64mobdata;
+            // $("#ContentPlaceHolder1_tempimg2").val(base64mobdata);
+            $("#tempimg2").val(base64mobdata);
+        }
+
+        // $("#ContentPlaceHolder1_image").css("display", "block");
+        $("#image").css("display", "block");
+    });
+
+    $(document).on("change", ".file_video1", function (evt) {
+        //alert();
+        $("#Imageblock1").css("display", "none");
+        // var $mobImagesource1 = $('#ContentPlaceHolder1_image');
+        var $mobImagesource1 = $('#image');
+        var reader = new FileReader();
+        reader.readAsDataURL(this.files[0]);
+        reader.onloadend = function () {
+            base64mobdata = reader.result;
+            console.log(base64mobdata);
+            $mobImagesource1[0].src = base64mobdata;
+            // $("#ContentPlaceHolder1_tempimg2").val(base64mobdata);
+            $("#tempimg2").val(base64mobdata);
+        }
+
+        // $("#ContentPlaceHolder1_image").css("display", "block");
+        $("#image").css("display", "block");
+
+    });
+
+
+    flag = false;
+    function maindepothide() {
+        if (flag == false) {
+            $('#maindepot').css('display', 'none');
+            flag = true;
+        }
+        else if (flag == true) {
+            $('#maindepot').css('display', 'block');
+            flag = false;
+        }
+
+    }
+    flag1 = false;
+    function mainsitehide() {
+        if (flag1 == false) {
+            $('#mainsite').css('display', 'none');
+            flag1 = true;
+        }
+        else if (flag1 == true) {
+            $('#mainsite').css('display', 'block');
+            flag1 = false;
+        }
+    }
+
+    function SaveSketch() {
+        //alert("hello");
+        var mycanvas = document.getElementById('colors_sketch');
+        var canvas1 = document.getElementById('canvas1234');
+        //canvas1.restore();
+        var context1 = canvas1.getContext('2d');
+
+        var dataUri = $("#colors_sketch")[0].toDataURL();
+        $("#sketch_data").val(dataUri);
+
+        //$(".hdnAudiobefore").css("display", "block");
+        $("#sigModal .modal-header .close").click();
+
+        $(".hdnSignaturebefore").css("display", "block");
+
+        context1.drawImage(mycanvas, 0, 0, 640, 480);
+    };
+
+    $(document).ready(function () {
+        $("#getSign").on("click", function () {
+            $(".hdnSignaturebefore").css("display", "none");
+            var canvas = document.getElementById('canvas1234'),
+             ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, 640, 480);
+
+            $("#btnSigModal").click();
+        });
+    });
+
+    $(document).ready(function () {
+        $("#getSign1").on("click", function () {
+            // $("#btnOpenModel4").click();
+            $("#btnsignModal1").click();
+        });
+    });
+
+    function SaveSketch() {
+        //alert("hello");
+        var mycanvas = document.getElementById('colors_sketch');
+        var canvas1 = document.getElementById('canvas12345');
+        //canvas1.restore();
+        var context = canvas1.getContext('2d');
+
+        var dataUri = $("#colors_sketch")[0].toDataURL();
+        $("#sketch_data1").val(dataUri);
+
+        //$(".hdnAudiobefore").css("display", "block");
+        $("#sigModal .modal-header .close").click();
+
+        $(".hdnSignaturebefore").css("display", "block");
+
+        context.drawImage(mycanvas, 0, 0, 640, 480);
+    };
+
+    $(document).ready(function () {
+        $("#getSign1").on("click", function () {
+            $(".hdnSignaturebefore").css("display", "none");
+            var canvas = document.getElementById('canvas12345'),
+             ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, 640, 480);
+
+            $("#btnSigModal1").click();
+        });
+    });
+
+
+    $(document).ready(function () {
+        $("#getSignature2").on("click", function () {
+            // $("#btnOpenModel4").click();
+            $("#btnsignModal2").click();
+        });
+    });
+
+
+    function SaveSketch() {
+        //alert("hello");
+        var mycanvas2 = document.getElementById('colors_sketch');
+        var canvas2 = document.getElementById('canvas123456');
+        //canvas1.restore();
+        var context2 = canvas2.getContext('2d');
+
+        var dataUri = $("#colors_sketch")[0].toDataURL();
+        $("#sketch_data2").val(dataUri);
+
+        //$(".hdnAudiobefore").css("display", "block");
+        $("#sigModal .modal-header .close").click();
+
+        $(".hdnSignaturebefore").css("display", "block");
+
+        context2.drawImage(mycanvas2, 0, 0, 640, 480);
+    };
+
+    $(document).ready(function () {
+        $("#getSignature2").on("click", function () {
+            $(".hdnSignaturebefore").css("display", "none");
+            var canvas2 = document.getElementById('canvas123456'),
+             ctx = canvas2.getContext("2d");
+            ctx.clearRect(0, 0, 640, 480);
+
+            $("#btnSigModal2").click();
+        });
+    });
+
+    $(document).ready(function () {
+        $("#getSignature3").on("click", function () {
+            // $("#btnOpenModel4").click();
+            $("#btnsignModal3").click();
+        });
+    });
+
+
+    function SaveSketch() {
+        //alert("hello");
+        var mycanvas3 = document.getElementById('colors_sketch');
+        var canvas3 = document.getElementById('canvas1234567');
+        //canvas1.restore();
+        var context3 = canvas3.getContext('2d');
+
+        var dataUri = $("#colors_sketch")[0].toDataURL();
+        $("#sketch_data3").val(dataUri);
+
+        //$(".hdnAudiobefore").css("display", "block");
+        $("#sigModal .modal-header .close").click();
+
+        $(".hdnSignaturebefore").css("display", "block");
+
+        context3.drawImage(mycanvas3, 0, 0, 640, 480);
+    };
+
+    $(document).ready(function () {
+        $("#getSignature3").on("click", function () {
+            $(".hdnSignaturebefore").css("display", "none");
+            var canvas3 = document.getElementById('canvas1234567'),
+             ctx = canvas3.getContext("2d");
+            ctx.clearRect(0, 0, 640, 480);
+
+            $("#btnSigModal3").click();
+        });
+    });
+
+
+
+    function RemoveSignatureBlock() {
+        $(".signature-pad").css("display", "none");
+    }
+    function HideSignatureBlock() {
+        $("#signature-pad").css("display", "none");
+    }
+
+
+    $(document).ready(function () {
+        //alert("hello");
+        //$("#getCamera").on("click", function () {
+        //    alert("hello");
+        //});
+        //$("#ContentPlaceHolder1_getCamera").on("click", function () {
+        $("#getCamera").on("click", function () {
+            $("#cancelsnap").on("click", function () {
+                $("#btnOpenModel4").css("display", "none");
+                cameraStream.stop();
+
+            });
+            $("#btnOpenModel4").css("display", "block");
+
+            $(".hdnCamerabefore").css("display", "none");
+            // Grab elements, create settings, etc.
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            // var video = document.getElementById('video');
+            var video = document.querySelector('video#video');
+
+            var cameraStream = null;
+
+            var mediaConfig = { video: true };
+            var errBack = function (e) {
+                console.log('An error has occurred!', e)
+            };
+
+            // Put video listeners into place
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(mediaConfig).then(function (stream) {
+                    //video.src = window.URL.createObjectURL(stream);
+                    video.srcObject = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                });
+            }
+
+                /* Legacy code below! */
+            else if (navigator.getUserMedia) { // Standard
+                navigator.getUserMedia(mediaConfig, function (stream) {
+                    video.src = stream;
+                    video.play();
+
+                    cameraStream = stream.getTracks()[0];
+
+                }, errBack);
+            } else if (navigator.webkitGetUserMedia) { // WebKit-prefixed
+                navigator.webkitGetUserMedia(mediaConfig, function (stream) {
+                    video.src = window.webkitURL.createObjectURL(stream);
+                    video.play();
+
+                    cameraStream = stream.getTracks()[0];
+
+                }, errBack);
+            } else if (navigator.mozGetUserMedia) { // Mozilla-prefixed
+                navigator.mozGetUserMedia(mediaConfig, function (stream) {
+                    video.src = window.URL.createObjectURL(stream);
+                    video.play();
+
+                    cameraStream = stream.getTracks()[0];
+
+                }, errBack);
+            }
+
+            // Trigger photo take
+            document.getElementById('snap').addEventListener('click', function () {
+                //$("#myModal4 .modal-header .close").click();
+                $("#btnOpenModel4").css("display", "none");
+                $(".hdnCamerabefore").css("display", "block");
+                $("#imagetruck").css("display", "none");
+                context.drawImage(video, 0, 0, 640, 480);
+
+
+                var image = document.getElementById("canvas").toDataURL("image/png");
+                $("#tempimg").val(image);
+
+                cameraStream.stop();
+            });
+        });
+    });
+
+
+    $(document).ready(function () {
+
+        $("#getCamera1").on("click", function () {
+
+            $("#cancelsnap1").on("click", function () {
+                $("#btnModel2").css("display", "none");
+                cameraStream.stop();
+            });
+            $("#btnModel2").css("display", "block");
+
+            $(".hdnSecondCameraBefore").css("display", "none");
+            // Grab elements, create settings, etc.
+            var canvas = document.getElementById('SecondCanvas');
+            var context = canvas.getContext('2d');
+            // var video = document.getElementById('video1');
+            var video = document.querySelector('video#video1');
+
+            var cameraStream = null;
+
+            var mediaConfig = { video: true };
+            var errBack = function (e) {
+                console.log('An error has occurred!', e)
+            };
+
+            // Put video listeners into place
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(mediaConfig).then(function (stream) {
+                    //video.src = window.URL.createObjectURL(stream);
+                    video.srcObject = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                });
+            }
+
+                /* Legacy code below! */
+            else if (navigator.getUserMedia) { // Standard
+                navigator.getUserMedia(mediaConfig, function (stream) {
+                    video.src = stream;
+                    video.play();
+
+                    cameraStream = stream.getTracks()[0];
+
+                }, errBack);
+            } else if (navigator.webkitGetUserMedia) { // WebKit-prefixed
+                navigator.webkitGetUserMedia(mediaConfig, function (stream) {
+                    video.src = window.webkitURL.createObjectURL(stream);
+                    video.play();
+
+                    cameraStream = stream.getTracks()[0];
+
+                }, errBack);
+            } else if (navigator.mozGetUserMedia) { // Mozilla-prefixed
+                navigator.mozGetUserMedia(mediaConfig, function (stream) {
+                    video.src = window.URL.createObjectURL(stream);
+                    video.play();
+
+                    cameraStream = stream.getTracks()[0];
+
+                }, errBack);
+            }
+
+            // Trigger photo take
+            document.getElementById('Snap2').addEventListener('click', function () {
+                //$("#myModal4 .modal-header .close").click();
+                $("#btnModel2").css("display", "none");
+                $(".hdnSecondCameraBefore").css("display", "block");
+                $("#image").css("display", "none");
+                context.drawImage(video, 0, 0, 640, 480);
+
+
+                var image = document.getElementById("SecondCanvas").toDataURL("image/png");
+                $("#tempimg2").val(image);
+
+                cameraStream.stop();
+            });
+        });
+    });
+
+    //Video Code Starts Here
+
+    $(document).ready(function () {
+
+        $("#getVideo").on("click", function () {
+            $(".hdnVideobefore").css("display", "none");
+            // $("#btnVideoModal").click();
+            $("#btnVideoModal").css("display", "block");
+            $("#cancelvideo").css("display", "block");
+
+            $("#cancelvideo").on("click", function () {
+                $("#btnVideoModal").css("display", "none");
+                $("#tempVideo").val("");
+
+                var mediaStream = window.stream;
+
+                //Media Stream Stop Code starts here
+
+                mediaStream.getAudioTracks()[0].stop();
+                mediaStream.getVideoTracks()[0].stop();
+            });
+
+            var mediaSource = new MediaSource();
+            mediaSource.addEventListener('sourceopen', handleSourceOpen, false);
+            var mediaRecorder;
+            var recordedBlobs;
+            var sourceBuffer;
+
+            //var imga = document.getElementById('myvideo');
+
+            var gumVideo = document.querySelector('video#gum');
+            var recordedVideo = document.querySelector('video#recorded');
+
+            var recordButton = document.querySelector('button#record1');
+            var playButton = document.querySelector('button#play');
+            var downloadButton = document.querySelector('button#download');
+            recordButton.onclick = toggleRecording;
+            playButton.onclick = play;
+            downloadButton.onclick = download;
+
+            // Use old-style gUM to avoid requirement to enable the
+            // Enable experimental Web Platform features flag in Chrome 49
+
+            navigator.getUserMedia = navigator.getUserMedia ||
+              navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+            var constraints = {
+                audio: true,
+                video: true
+            };
+
+            navigator.getUserMedia(constraints, successCallback, errorCallback);
+
+            function successCallback(stream) {
+                console.log('getUserMedia() got stream: ', stream);
+                window.stream = stream;
+                if (window.URL) {
+                    //gumVideo.src = window.URL.createObjectURL(stream);
+                    gumVideo.srcObject = stream;
+                } else {
+                    // gumVideo.src = stream;
+                    gumVideo.srcObject = stream;
+                }
+            }
+
+            function errorCallback(error) {
+                console.log('navigator.getUserMedia error: ', error);
+            }
+
+            function handleSourceOpen(event) {
+                console.log('MediaSource opened');
+                sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+                console.log('Source buffer: ', sourceBuffer);
+            }
+
+            function handleDataAvailable(event) {
+                if (event.data && event.data.size > 0) {
+                    recordedBlobs.push(event.data);
+                }
+            }
+
+            function handleStop(event) {
+                console.log('Recorder stopped: ', event);
+            }
+
+            function toggleRecording() {
+                if (recordButton.textContent === 'Start Recording') {
+                    $("#cancelvideo").css("display", "none");
+                    startRecording();
+                } else {
+                    stopRecording();
+                    recordButton.textContent = 'Start Recording';
+                    playButton.disabled = false;
+                    downloadButton.disabled = false;
+                    $("#cancelvideo").css("display", "none");
+                    $("#btnVideoModal").css("display", "none");
+                    $(".hdnVideobefore").css("display", "block");
+                    $("#VideoBlock").css("display", "none");
+                    play();
+                }
+            }
+
+            //The nested try blocks will be simplified when Chrome 47 moves to Stable
+            function startRecording() {
+                var options = { mimeType: 'video/webm', bitsPerSecond: 100000 };
+                recordedBlobs = [];
+                try {
+                    mediaRecorder = new MediaRecorder(window.stream, options);
+                } catch (e0) {
+                    console.log('Unable to create MediaRecorder with options Object: ', e0);
+                    try {
+                        options = { mimeType: 'video/webm,codecs=vp9', bitsPerSecond: 100000 };
+                        mediaRecorder = new MediaRecorder(window.stream, options);
+                    } catch (e1) {
+                        console.log('Unable to create MediaRecorder with options Object: ', e1);
+                        try {
+                            options = 'video/vp8'; // Chrome 47
+                            mediaRecorder = new MediaRecorder(window.stream, options);
+                        } catch (e2) {
+                            alert('MediaRecorder is not supported by this browser.\n\n' +
+                                'Try Firefox 29 or later, or Chrome 47 or later, with Enable experimental Web Platform features enabled from chrome://flags.');
+                            console.error('Exception while creating MediaRecorder:', e2);
+                            return;
+                        }
+                    }
+                }
+                console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
+                recordButton.textContent = 'Stop Recording';
+                playButton.disabled = true;
+                downloadButton.disabled = true;
+                mediaRecorder.onstop = handleStop;
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.start(10); // collect 10ms of data
+                console.log('MediaRecorder started', mediaRecorder);
+            }
+
+            function stopRecording() {
+
+                mediaRecorder.stop();
+                console.log('Recorded Blobs: ', recordedBlobs);
+
+                var mediaStream = window.stream;
+
+                //Media Stream Stop Code starts here
+
+                mediaStream.getAudioTracks()[0].stop();
+                mediaStream.getVideoTracks()[0].stop();
+
+                //Media Stream Stop Code Ends Here
+
+                recordedVideo.controls = true;
+                var base64data;
+                var superBuffer = new Blob(recordedBlobs, { type: 'video/webm' });
+
+                //var as = window.URL.createObjectURL(superBuffer);
+                //alert(as);
+                var reader = new window.FileReader();
+                reader.readAsDataURL(superBuffer);
+
+                var reader = new FileReader();
+                reader.readAsDataURL(superBuffer);
+                reader.onloadend = function () {
+                    base64data = reader.result;
+
+                    console.log(base64data);
+                    $("#tempVideo").val(base64data);
+                }
+
+            }
+
+            function play() {
+                var superBuffer = new Blob(recordedBlobs, { type: 'video/webm' });
+                //recordedVideo.src = window.URL.createObjectURL(superBuffer);
+
+                var reader = new FileReader();
+                reader.readAsDataURL(superBuffer);
+                reader.onloadend = function () {
+                    var base64data1 = reader.result;
+
+                    //console.log(base64data);
+                    // $("#tempVideo").val(base64data);
+                    recordedVideo.src = base64data1;
+                }
+
+                //recordedVideo.srcObject = superBuffer;
+
+                //recordedVideo.src = window.URL.createObjectURL(superBuffer);
+            }
+
+            function download() {
+                var blob = new Blob(recordedBlobs, { type: 'video/webm' });
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.style.display = 'block';
+                a.href = url;
+
+                a.download = 'test.webm';
+                document.body.appendChild(a);
+                a.click();
+
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+            }
+        });
+    });
+
+    //Video Code Ends Here
+
+    var wrapper = document.getElementById("signature-pad");
+    var clearButton = wrapper.querySelector("[data-action=clear]");
+    var changeColorButton = wrapper.querySelector("[data-action=change-color]");
+    var undoButton = wrapper.querySelector("[data-action=undo]");
+    var savePNGButton = wrapper.querySelector("[data-action=save-png]");
+    var saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
+    var saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
+    var canvas = document.getElementById("drawcanvas");
+
+    var mycanvas = document.getElementById("printcanvas");
+    var context = mycanvas.getContext('2d');
+    var signaturePad = new SignaturePad(canvas, {
+        // It's Necessary to use an opaque color when saving image as JPEG;
+        // this option can be omitted if only saving as PNG or SVG
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+
+    // Adjust canvas coordinate space taking into account pixel ratio,
+    // to make it look crisp on mobile devices.
+    // This also causes canvas to be cleared.
+    function resizeCanvas() {
+
+        // When zoomed out to less than 100%, for some very strange reason,
+        // some browsers report devicePixelRatio as less than 1
+        // and only part of the canvas is cleared then.
+        var ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+        //This part causes the canvas to be cleared
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        //canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+
+        // This library does not listen for canvas changes, so after the canvas is automatically
+        // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+        // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+        // that the state of this library is consistent with visual state of the canvas, you
+        // have to clear it manually.
+        signaturePad.clear();
+    }
+
+    // On mobile devices it might make more sense to listen to orientation change,
+    // rather than window resize events.
+    window.onresize = resizeCanvas;
+    resizeCanvas();
+
+    function download(dataURL, filename) {
+        var blob = dataURLToBlob(dataURL);
+        var url = window.URL.createObjectURL(blob);
+
+        var a = document.createElement("a");
+        a.style = "display: none";
+        a.href = url;
+        a.download = filename;
+
+        document.body.appendChild(a);
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+    }
+
+    function GetSign() {
+        // alert("hello");
+        if (signaturePad.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            $(".hdnSignImageBlock").css("display", "none");
+            $("#printcanvas").css("display", "block");
+            context.drawImage(canvas, 0, 0, 640, 480);
+            var dataURL = signaturePad.toDataURL();
+            console.log(dataURL);
+            $("#sketch_data").val(dataURL);
+            //alert(dataURL);
+            // download(dataURL, "signature.png");
+        }
+    }
+
+    // One could simply use Canvas#toBlob method instead, but it's just to show
+    // that it can be done using result of SignaturePad#toDataURL.
+    function dataURLToBlob(dataURL) {
+        // Code taken from https://github.com/ebidel/filer.js
+        var parts = dataURL.split(';base64,');
+        var contentType = parts[0].split(":")[1];
+        var raw = window.atob(parts[1]);
+        var rawLength = raw.length;
+        var uInt8Array = new Uint8Array(rawLength);
+
+        for (var i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        return new Blob([uInt8Array], { type: contentType });
+    }
+
+    clearButton.addEventListener("click", function (event) {
+        signaturePad.clear();
+        $("#printcanvas").css("display", "none");
+        $(".hdnSignImageBlock").css("display", "none");
+    });
+
+    undoButton.addEventListener("click", function (event) {
+        var data = signaturePad.toData();
+
+        if (data) {
+            data.pop(); // remove the last dot or line
+            signaturePad.fromData(data);
+        }
+    });
+
+    changeColorButton.addEventListener("click", function (event) {
+        var r = Math.round(Math.random() * 255);
+        var g = Math.round(Math.random() * 255);
+        var b = Math.round(Math.random() * 255);
+        var color = "rgb(" + r + "," + g + "," + b + ")";
+
+        signaturePad.penColor = color;
+    });
+
+    savePNGButton.addEventListener("click", function (event) {
+        if (signaturePad.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad.toDataURL();
+            download(dataURL, "signature.png");
+        }
+    });
+
+    saveJPGButton.addEventListener("click", function (event) {
+        if (signaturePad.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad.toDataURL("image/jpeg");
+            download(dataURL, "signature.jpg");
+        }
+    });
+
+    saveSVGButton.addEventListener("click", function (event) {
+        if (signaturePad.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad.toDataURL('image/svg+xml');
+            download(dataURL, "signature.svg");
+        }
+    });
+
+    $(document).ready(function () {
+        //Making Acknowlege Section Green On load
+        //if ($("#confirmcheck").prop("checked") == true) {
+        //    $("#selected").css("background-color", "rgba(176, 255, 175, 0.88)");
+        //} else {
+        //    $("#selected").css("background-color", "#fff");
+        //}
+
+        //Code to make one checkbox checked at a Time starts
+        $('.encapsulatecheck').on("change", function () {
+            $('.encapsulatecheck').not(this).prop("checked", false);
+        });
+        //Code to make one checkbox checked at a Time Ends
+
+        //$("#confirmcheck").on("change", function () {
+
+        //    if ($("#confirmcheck").prop("checked") == true) {
+        //        $("#selected").css("background-color", "rgba(176, 255, 175, 0.88)");
+        //    } else {
+        //        $("#selected").css("background-color", "#fff");
+        //    }
+        //});
+
+    });
+
+
+    $(window).resize(function (e) {
+        resizeCanvas1();
+        resizeCanvas();
+    });
+
+    //Signature Code 2 Starts Here
+    var wrapper1 = document.getElementById("signature-pad1");
+    var clearButton1 = wrapper1.querySelector("[data-action=clear1]");
+    var changeColorButton1 = wrapper1.querySelector("[data-action=change-color1]");
+    var undoButton1 = wrapper1.querySelector("[data-action=undo1]");
+    var savePNGButton1 = wrapper1.querySelector("[data-action=save-png1]");
+    var saveJPGButton1 = wrapper1.querySelector("[data-action=save-jpg1]");
+    var saveSVGButton1 = wrapper1.querySelector("[data-action=save-svg1]");
+    var canvas1 = document.getElementById("drawcanvas1");
+
+    var mycanvas1 = document.getElementById("Canvas1");
+    var context1 = mycanvas1.getContext('2d');
+    var signaturePad1 = new SignaturePad(canvas1, {
+        // It's Necessary to use an opaque color when saving image as JPEG;
+        // this option can be omitted if only saving as PNG or SVG
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+
+    // Adjust canvas coordinate space taking into account pixel ratio,
+    // to make it look crisp on mobile devices.
+    // This also causes canvas to be cleared.
+    function resizeCanvas1() {
+
+        //alert("bye");
+
+        // When zoomed out to less than 100%, for some very strange reason,
+        // some browsers report devicePixelRatio as less than 1
+        // and only part of the canvas is cleared then.
+        var ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+        //This part causes the canvas to be cleared
+        canvas1.width = canvas1.offsetWidth * ratio;
+        canvas1.height = canvas1.offsetHeight * ratio;
+        //canvas.height = canvas.offsetHeight * ratio;
+        canvas1.getContext("2d").scale(ratio, ratio);
+
+        // This library does not listen for canvas changes, so after the canvas is automatically
+        // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+        // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+        // that the state of this library is consistent with visual state of the canvas, you
+        // have to clear it manually.
+        signaturePad1.clear();
+    }
+
+    // On mobile devices it might make more sense to listen to orientation change,
+    // rather than window resize events.
+    window.onresize = resizeCanvas1;
+    resizeCanvas1();
+
+
+    function download(dataURL, filename) {
+        var blob = dataURLToBlob(dataURL);
+        var url = window.URL.createObjectURL(blob);
+
+        var a = document.createElement("a");
+        a.style = "display: none";
+        a.href = url;
+        a.download = filename;
+
+        document.body.appendChild(a);
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+    }
+
+    function GetSignature() {
+        //alert("hello");
+        if (signaturePad1.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            $(".hdnSignImageBlock1").css("display", "none");
+            $("#Canvas1").css("display", "block");
+            context1.drawImage(canvas1, 0, 0, 640, 480);
+            var dataURL1 = signaturePad1.toDataURL();
+
+            $("#sketch_data1").val(dataURL1);
+            //alert(dataURL);
+            // download(dataURL, "signature.png");
+        }
+    }
+
+    // One could simply use Canvas#toBlob method instead, but it's just to show
+    // that it can be done using result of SignaturePad#toDataURL.
+    function dataURLToBlob(dataURL) {
+        // Code taken from https://github.com/ebidel/filer.js
+        var parts = dataURL.split(';base64,');
+        var contentType = parts[0].split(":")[1];
+        var raw = window.atob(parts[1]);
+        var rawLength = raw.length;
+        var uInt8Array = new Uint8Array(rawLength);
+
+        for (var i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        return new Blob([uInt8Array], { type: contentType });
+    }
+
+    clearButton1.addEventListener("click", function (event) {
+        signaturePad1.clear();
+        $("#Canvas1").css("display", "none");
+        $(".hdnSignImageBlock1").css("display", "none");
+    });
+
+    undoButton1.addEventListener("click", function (event) {
+        var data = signaturePad1.toData();
+
+        if (data) {
+            data.pop(); // remove the last dot or line
+            signaturePad1.fromData(data);
+        }
+    });
+
+    changeColorButton1.addEventListener("click", function (event) {
+        var r = Math.round(Math.random() * 255);
+        var g = Math.round(Math.random() * 255);
+        var b = Math.round(Math.random() * 255);
+        var color = "rgb(" + r + "," + g + "," + b + ")";
+
+        signaturePad.penColor = color;
+    });
+
+    savePNGButton1.addEventListener("click", function (event) {
+        if (signaturePad1.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad1.toDataURL();
+            download(dataURL, "signature.png");
+        }
+    });
+
+    saveJPGButton1.addEventListener("click", function (event) {
+        if (signaturePad1.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad1.toDataURL("image/jpeg");
+            download(dataURL, "signature.jpg");
+        }
+    });
+
+    saveSVGButton1.addEventListener("click", function (event) {
+        if (signaturePad1.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad1.toDataURL('image/svg+xml');
+            download(dataURL, "signature.svg");
+        }
+    });
+    //Signature Code 2 Ends Here
+
+
+    $(window).resize(function (e) {
+        resizeCanvas1();
+        resizeCanvas2();
+        resizeCanvas();
+    });
+
+    //Signature Code 2 Starts Here
+    var wrapper2 = document.getElementById("signature-pad2");
+    var clearButton2 = wrapper2.querySelector("[data-action=clear2]");
+    var changeColorButton2 = wrapper2.querySelector("[data-action=change-color2]");
+    var undoButton2 = wrapper2.querySelector("[data-action=undo2]");
+    var savePNGButton2 = wrapper2.querySelector("[data-action=save-png2]");
+    var saveJPGButton2 = wrapper2.querySelector("[data-action=save-jpg2]");
+    var saveSVGButton2 = wrapper2.querySelector("[data-action=save-svg2]");
+    var canvas2 = document.getElementById("drawcanvas2");
+
+    var mycanvas2 = document.getElementById("Canvas2");
+    var context2 = mycanvas2.getContext('2d');
+    var signaturePad2 = new SignaturePad(canvas2, {
+        // It's Necessary to use an opaque color when saving image as JPEG;
+        // this option can be omitted if only saving as PNG or SVG
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+
+    // Adjust canvas coordinate space taking into account pixel ratio,
+    // to make it look crisp on mobile devices.
+    // This also causes canvas to be cleared.
+    function resizeCanvas2() {
+
+        //alert("bye");
+
+        // When zoomed out to less than 100%, for some very strange reason,
+        // some browsers report devicePixelRatio as less than 1
+        // and only part of the canvas is cleared then.
+        var ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+        //This part causes the canvas to be cleared
+        canvas2.width = canvas2.offsetWidth * ratio;
+        canvas2.height = canvas2.offsetHeight * ratio;
+        //canvas.height = canvas.offsetHeight * ratio;
+        canvas2.getContext("2d").scale(ratio, ratio);
+
+        // This library does not listen for canvas changes, so after the canvas is automatically
+        // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+        // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+        // that the state of this library is consistent with visual state of the canvas, you
+        // have to clear it manually.
+        signaturePad2.clear();
+    }
+
+    // On mobile devices it might make more sense to listen to orientation change,
+    // rather than window resize events.
+    window.onresize = resizeCanvas2;
+    resizeCanvas2();
+
+
+    function download(dataURL, filename) {
+        var blob = dataURLToBlob(dataURL);
+        var url = window.URL.createObjectURL(blob);
+
+        var a = document.createElement("a");
+        a.style = "display: none";
+        a.href = url;
+        a.download = filename;
+
+        document.body.appendChild(a);
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+    }
+
+    function GetSignature2() {
+        //alert("hello");
+        if (signaturePad2.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            $(".hdnSignImageBlock2").css("display", "none");
+            $("#Canvas2").css("display", "block");
+            context2.drawImage(canvas2, 0, 0, 640, 480);
+            var dataURL2 = signaturePad2.toDataURL();
+            //alert(dataURL2);
+            $("#sketch_data2").val(dataURL2);
+            //alert(dataURL);
+            // download(dataURL, "signature.png");
+            var currentDate = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                "Aug", "Sep", "Oct", "Nov", "Dec"];
+            var dd = currentDate.getDate();
+            if (dd < 10) {
+                dd = '0' + dd;
+            }
+            var date = dd + '-' + months[currentDate.getMonth()] + '-' + currentDate.getFullYear();
+            var datereceived = $("#Datepicker_dateInput").val();
+            //alert(daterecived);
+            if (datereceived == "") {
+                $("#Datepicker_dateInput").val(date);
+            }
+            $("#hdnfld").val(date);
+        }
+    }
+
+    // One could simply use Canvas#toBlob method instead, but it's just to show
+    // that it can be done using result of SignaturePad#toDataURL.
+    function dataURLToBlob(dataURL) {
+        // Code taken from https://github.com/ebidel/filer.js
+        var parts = dataURL.split(';base64,');
+        var contentType = parts[0].split(":")[1];
+        var raw = window.atob(parts[1]);
+        var rawLength = raw.length;
+        var uInt8Array = new Uint8Array(rawLength);
+
+        for (var i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        return new Blob([uInt8Array], { type: contentType });
+    }
+
+    clearButton2.addEventListener("click", function (event) {
+        signaturePad2.clear();
+        $("#Canvas2").css("display", "none");
+        $(".hdnSignImageBlock2").css("display", "none");
+    });
+
+    undoButton2.addEventListener("click", function (event) {
+        var data = signaturePad2.toData();
+
+        if (data) {
+            data.pop(); // remove the last dot or line
+            signaturePad2.fromData(data);
+        }
+    });
+
+    changeColorButton2.addEventListener("click", function (event) {
+        var r = Math.round(Math.random() * 255);
+        var g = Math.round(Math.random() * 255);
+        var b = Math.round(Math.random() * 255);
+        var color = "rgb(" + r + "," + g + "," + b + ")";
+
+        signaturePad.penColor = color;
+    });
+
+    savePNGButton2.addEventListener("click", function (event) {
+        if (signaturePad2.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad2.toDataURL();
+            download(dataURL, "signature.png");
+        }
+    });
+
+    saveJPGButton2.addEventListener("click", function (event) {
+        if (signaturePad2.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad2.toDataURL("image/jpeg");
+            download(dataURL, "signature.jpg");
+        }
+    });
+
+    saveSVGButton2.addEventListener("click", function (event) {
+        if (signaturePad2.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad2.toDataURL('image/svg+xml');
+            download(dataURL, "signature.svg");
+        }
+    });
+    //Signature Code 2 Ends Here
+
+
+    $(window).resize(function (e) {
+        resizeCanvas1();
+        resizeCanvas2();
+        resizeCanvas3();
+        resizeCanvas();
+    });
+
+    //Signature Code 2 Starts Here
+    var wrapper3 = document.getElementById("signature-pad3");
+    var clearButton3 = wrapper3.querySelector("[data-action=clear3]");
+    var changeColorButton3 = wrapper3.querySelector("[data-action=change-color3]");
+    var undoButton3 = wrapper3.querySelector("[data-action=undo3]");
+    var savePNGButton3 = wrapper3.querySelector("[data-action=save-png3]");
+    var saveJPGButton3 = wrapper3.querySelector("[data-action=save-jpg3]");
+    var saveSVGButton3 = wrapper3.querySelector("[data-action=save-svg3]");
+    var canvas3 = document.getElementById("drawcanvas3");
+
+    var mycanvas3 = document.getElementById("Canvas3");
+    var context3 = mycanvas3.getContext('2d');
+    var signaturePad3 = new SignaturePad(canvas3, {
+        // It's Necessary to use an opaque color when saving image as JPEG;
+        // this option can be omitted if only saving as PNG or SVG
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+
+    // Adjust canvas coordinate space taking into account pixel ratio,
+    // to make it look crisp on mobile devices.
+    // This also causes canvas to be cleared.
+    function resizeCanvas3() {
+
+        //alert("bye");
+
+        // When zoomed out to less than 100%, for some very strange reason,
+        // some browsers report devicePixelRatio as less than 1
+        // and only part of the canvas is cleared then.
+        var ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+        //This part causes the canvas to be cleared
+        canvas3.width = canvas3.offsetWidth * ratio;
+        canvas3.height = canvas3.offsetHeight * ratio;
+        //canvas.height = canvas.offsetHeight * ratio;
+        canvas3.getContext("2d").scale(ratio, ratio);
+
+        // This library does not listen for canvas changes, so after the canvas is automatically
+        // cleared by the browser, SignaturePad#isEmpty might still return false, even though the
+        // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
+        // that the state of this library is consistent with visual state of the canvas, you
+        // have to clear it manually.
+        signaturePad3.clear();
+    }
+
+    // On mobile devices it might make more sense to listen to orientation change,
+    // rather than window resize events.
+    window.onresize = resizeCanvas3;
+    resizeCanvas3();
+
+
+    function download(dataURL, filename) {
+        var blob = dataURLToBlob(dataURL);
+        var url = window.URL.createObjectURL(blob);
+
+        var a = document.createElement("a");
+        a.style = "display: none";
+        a.href = url;
+        a.download = filename;
+
+        document.body.appendChild(a);
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+    }
+
+    function GetSignature3() {
+        //alert("hello");
+        if (signaturePad3.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            $(".hdnSignImageBlock3").css("display", "none");
+            $("#Canvas3").css("display", "block");
+            context3.drawImage(canvas3, 0, 0, 640, 480);
+            var dataURL3 = signaturePad3.toDataURL();
+
+            $("#sketch_data3").val(dataURL3);
+            $("#chkpopup").css("display", "block");
+        }
+    }
+
+    // One could simply use Canvas#toBlob method instead, but it's just to show
+    // that it can be done using result of SignaturePad#toDataURL.
+    function dataURLToBlob(dataURL) {
+        // Code taken from https://github.com/ebidel/filer.js
+        var parts = dataURL.split(';base64,');
+        var contentType = parts[0].split(":")[1];
+        var raw = window.atob(parts[1]);
+        var rawLength = raw.length;
+        var uInt8Array = new Uint8Array(rawLength);
+
+        for (var i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        return new Blob([uInt8Array], { type: contentType });
+    }
+
+    clearButton3.addEventListener("click", function (event) {
+        signaturePad3.clear();
+        $("#Canvas3").css("display", "none");
+        $(".hdnSignImageBlock3").css("display", "none");
+    });
+
+    undoButton3.addEventListener("click", function (event) {
+        var data = signaturePad3.toData();
+
+        if (data) {
+            data.pop(); // remove the last dot or line
+            signaturePad3.fromData(data);
+        }
+    });
+
+    changeColorButton3.addEventListener("click", function (event) {
+        var r = Math.round(Math.random() * 255);
+        var g = Math.round(Math.random() * 255);
+        var b = Math.round(Math.random() * 255);
+        var color = "rgb(" + r + "," + g + "," + b + ")";
+
+        signaturePad.penColor = color;
+    });
+
+    savePNGButton3.addEventListener("click", function (event) {
+        if (signaturePad3.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad3.toDataURL();
+            download(dataURL, "signature.png");
+        }
+    });
+
+    saveJPGButton3.addEventListener("click", function (event) {
+        if (signaturePad3.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad3.toDataURL("image/jpeg");
+            download(dataURL, "signature.jpg");
+        }
+    });
+
+    saveSVGButton3.addEventListener("click", function (event) {
+        if (signaturePad3.isEmpty()) {
+            alert("Please provide a signature first.");
+        } else {
+            var dataURL = signaturePad3.toDataURL('image/svg+xml');
+            download(dataURL, "signature.svg");
+        }
+    });
+    //Signature Code 2 Ends Here
+
+
+
+
+
+</script>*@
+
+  
+
+    @*<asp:HiddenField ID="hdnNewImage" runat="server" />
+    <asp:HiddenField ID="lblInspectionLicence" runat="server" />*@
+    <input type="hidden" id="hdnClientID" />
+    <input type="hidden" id="hdnNewImage"  />
+    <input type="hidden" id="lblInspectionLicence" runat="server" />
+    <input type="hidden" id="tempimg" name="tempimg" />
+    <input type="hidden" id="tempimg2" name="tempimg2" />
+    <input type="hidden" id="sketch_data" name="sketch_data" />
+    <input type="hidden" id="sketch_data1" name="sketch_data1" />
+    <input type="hidden" id="sketch_data2" name="sketch_data2" />
+    <input type="hidden" id="sketch_data3" name="sketch_data3" />
+   
+    <div class="container" style="border: 1px solid;" id="group1" runat="server">
+        @*<%--<div class="col-lg-4 col-md-9 col-sm-4 col-xs-4 headinfo" style="margin: 6px 0 0 0;">
+        </div>--%>*@
+        <div class="row">
+            <div class="col-lg-5 col-md-3 col-sm-2 col-xs-1"></div>
+            <div class="col-lg-1 col-md-2 col-sm-3 col-xs-2"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+                @*<asp:LinkButton runat="server" ID="TopSubmit" CssClass="btn btn-success" Text="Submit" OnClick="DelieveryDocketUpload" Style="width: 100%"></asp:LinkButton>*@
+                <button  id="TopSubmit" Class="btn btn-success" OnClick="DelieveryDocketUpload()" Style="width: 100%">Submit</button>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+                @*<asp:LinkButton runat="server" ID="TopPrint" CssClass="btn btn-primary" Text="Print" OnClick="btnPrint_Click" Style="width: 100%;"></asp:LinkButton>*@
+                <button  id="TopPrint" Class="btn btn-primary" OnClick="btnPrint_Click()" Style="width: 100%;">Print</button>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-3 col-xs-3">
+                @*<asp:LinkButton runat="server" ID="LinkButton1" CssClass="btn btn-danger" Text="Close" OnClick="btnclose_Click" Style="width: 100%; float: right"></asp:LinkButton>*@
+                <button id="LinkButton1" Class="btn btn-danger"  OnClick="btnclose_Click()" Style="width: 100%; float: right">Close</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 col-sm-5 col-xs-12 col-md-5">
+                @*<img id="imageScaffold"  style="height: 90px;" src="~/img/logo1.png" />*@
+                @*<img runat="server" class="img-responsive " id="imageScaffold" style="height: 90px;" src="~/img/logo1.png" />*@
+                <img runat="server" class="img-responsive " id="imageScaffold" style="height: 90px;" src="~/img/logo1.png" />
+            </div>
+            <div class="col-lg-5 col-sm-5 col-xs-12 col-md-5">
+            </div>
+            <div class="col-lg-1 col-sm-1 col-xs-12 col-md-1">
+            </div>
+            <div class="col-lg-6 col-sm-6 col-xs-12 col-md-6">
+                <h1 style="font-weight: bold; text-align: right">DELIVERY DOCKET</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6 col-sm-2 col-xs-4 col-md-4">
+            </div>
+            <div class="col-lg-2 col-sm-2 col-xs-4 col-md-4">
+            </div>
+            <div id="Confirmation" class="col-lg-12 col-sm-2 col-xs-4 col-md-4" style="display: none">
+                <div class="col-lg-11 col-sm-2 col-xs-4 col-md-4" style="text-align: right">
+                    <label style="font-weight: bold; font-size: 27px;">Delivery Confirmed </label>
+                </div>
+                <div class="col-lg-1 col-sm-2 col-xs-4 col-md-4">
+                    <img src="~/images/lock.png" class="img-responsive" style="height: 50px;" id="lockimg1"  />
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            @*<%--<div class="col-lg-6 col-sm-2 col-xs-4 col-md-4">
+                --%>*@
+                <div class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                    <label style="font-weight: normal;">Client </label>
+                </div>
+
+                <div class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                    @*<asp:TextBox ID="lblclientname" ReadOnly="true" runat="server" Width="100%" CssClass="form-control" Style="background-color: white !important" ForeColor="Black"></asp:TextBox>*@
+                    <input type="text" id="lblclientname" value="@Model.ClientName" disabled="disabled"   Class="form-control" Style="background-color: white !important; Width:100%" ForeColor="Black"/>
+                </div>
+
+                @*<%-- <label id="lblclientname" runat="server" style="font-weight: bold;"></label>--%>
+                <%--
+            </div>--%>*@
+            <div class="col-lg-2 col-sm-2 col-xs-12 col-md-2"></div>
+            <div class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label>Date of Arriving at Site</label>
+            </div>
+            <div class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                @*<asp:TextBox ID="lbldate" runat="server" ReadOnly="true" Width="100%" ForeColor="Black" CssClass="form-control" Style="background-color: white !important"></asp:TextBox>*@
+                <input type="text" id="lbldate"  disabled="disabled"  ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%"/>
+            </div>
+        </div>
+        <div class="row">
+
+            <div id="divlblsitename" class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label divlblsitenamestyle="font-weight: normal;">Site Name </label>
+            </div>
+            <div id="divlblsitename1" class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                @*<asp:TextBox ID="lblsitename" ReadOnly="true" runat="server" Width="100%" ForeColor="Black" CssClass="form-control" Style="background-color: white !important"></asp:TextBox>*@
+                <input type="text" id="lblsitename" value="@Model.SiteLocation" disabled="disabled" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+
+            <div  id="divlblfrom" class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label style="font-weight: normal;">From: </label>
+            </div>
+            <div id="divlblfrom1"  class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                @*<asp:TextBox ID="lblsitename" ReadOnly="true" runat="server" Width="100%" ForeColor="Black" CssClass="form-control" Style="background-color: white !important"></asp:TextBox>*@
+                <input type="text" id="lblfrom" value="Third Party" disabled="disabled" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+
+            <div class="col-lg-2 col-sm-2 col-xs-12 col-md-2"></div>
+            <div class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label>Transfer Number</label>
+            </div>
+            <div class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                @*<asp:TextBox ID="txttransferNo" ReadOnly="true" Style="color: black; background-color: white !important" runat="server" Width="100%" CssClass="form-control"></asp:TextBox>*@
+                <input type="text" id="txttransferNo" value="@Model.TransferNumber" disabled="disabled" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+        </div>
+        <div class="row">
+            <div id="divlblsiteaddress" class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label style="font-weight: normal;">Site Address </label>
+            </div>
+            <div id="divlblsiteaddress1" class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                <input type="text" id="lblsiteaddress" value="@Model.Address" disabled="disabled" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+            <div id="divlblto" class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label style="font-weight: normal;">TO: </label>
+            </div>
+            <div id="divlvlto1" class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                <input type="text" id="lblto" value="Depot" disabled="disabled" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+
+            <div class="col-lg-2 col-sm-2 col-xs-12 col-md-2"></div>
+            <div class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label>Total Items</label>
+            </div>
+            <div class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                @*<asp:TextBox ID="txtTotalItem" ReadOnly="true" Style="color: black; background-color: white !important" runat="server" Width="100%" CssClass="form-control"></asp:TextBox>*@
+               <input type="text" id="txtTotalItem" disabled="disabled" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+        </div>
+        <div class="row">
+
+            <div id="divlblmaindepot" class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                @*<label style="font-weight: normal;">Date of Leaving Main Depot </label>*@
+                <label style="font-weight: normal;">Delivered Date: </label>
+            </div>
+            <div id="divlblthirdparty" class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                @*<label style="font-weight: normal;">Date of Leaving Third Party </label>*@
+                <label style="font-weight: normal;">Delivered Date: </label>
+            </div>
+            <div class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+
+                @*<Telerik:RadDatePicker ID="datePicker1" runat="server" Enabled="true" DateFormat="String.Date.Time" Width="100%" DateInput-DateFormat="dd-MMM-yyyy" DateInput-DisplayDateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                <input type="text" id="datePicker1"  ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+                @*<%--<asp:TextBox ID="txtdateodleaving" ReadOnly="true" Style="color: black; display:none" runat="server" Width="100%"></asp:TextBox>--%>*@
+            </div>
+
+            @*<%--<Telerik:RadDatePicker ID="RadDatePicker2" runat="server" Enabled="true" DateFormat="String.Date.Time" Width="30%" DateInput-DateFormat="dd-MMM-yyyy" DateInput-DisplayDateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>--%>*@
+
+            <div class="col-lg-2 col-sm-2 col-xs-12 col-md-2"></div>
+            <div class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label>Total Weight (Tonnes)</label>
+            </div>
+            <div class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+                @*<asp:TextBox ID="txtTotalWeight" ReadOnly="true" Style="color: black; background-color: white !important" runat="server" Width="100%" CssClass="form-control"></asp:TextBox>*@
+                <input type="text" id="txtTotalWeight" disabled="disabled" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+        </div>
+
+        <div class="row">
+
+            
+            <div id="divlblcomment" class="col-lg-2 col-sm-2 col-xs-6 col-md-2">
+                <label style="font-weight: normal;">Request Comment</label>
+            </div>
+            <div class="col-lg-10 col-sm-3 col-xs-6 col-md-3">
+                <input type="text" id="txtReqComment" disabled="disabled" value="@Model.Comment" ForeColor="Black" Class="form-control" Style="background-color: white !important; Width:100%" />
+            </div>
+            <div class="col-lg-2 col-sm-2 col-xs-12 col-md-2"></div>
+            <div class="col-lg-2 col-sm-2 col-xs-6 col-md-2"></div>
+            <div class="col-lg-3 col-sm-3 col-xs-6 col-md-3">
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        @*<%--Dynamic HTML Table created--%>*@
+        @*<asp:PlaceHolder ID="PlaceHolder1" runat="server" />*@
+
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="DeliveryDocket" style="color: black; width: 100%;margin-top:5px;">
+                    <table id="tblDeliveryDocket" class="table table-striped " style="display:block">
+                        <thead style="background-color: #efefef; color: #716262;">
+                            <tr>
+                                <td style='width:150px'>Material Type</td>
+                                <td style='width:150px'>Item Code</td>
+                                <td style='width:450px'>Item Desc</td>
+                                <td>Quantity</td>
+                                <td style='width:150px'>Item Weight(kg)</td>
+                                <td style='width:150px'>Total Weight(kg)</td>
+                                
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyDeliveryDocket"></tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4">
+                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                    <h4 style="margin-top: 6px; font-size: 15px" id="H5" ><i class="fa fa-list"></i>&nbsp;Sign-off’s-Main Depot <span style="margin-left: 5px;" id="Span5" ></span></h4>
+                    <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                        <li>
+                            <a class="collapse-link" onclick="maindepothide();"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="maindepot" class="col-lg-8 col-md-12 col-sm-12 col-xs-12" style="display: block">
+
+                    <div class="col-lg-5 col-md-6 col-sm-8 col-xs-10">
+                        <div class="nonsafari">
+                            <div class="desktopApp" style="display: none;">
+                                <button type="button" id="getCamera" class="btn w3-btn w3-ripple w3-blue-grey">Capture Photo</button>
+                            </div>
+
+                            <div class="mobileApp" style="display: none;">
+                                @*<%--<div runat="server" id="mob_ImageBlock" style="display: none; width: 50%;">
+                                    <asp:Image runat="server" src="" ID="mobImage" CssClass="img-responsive img-thumbnail chngeimg" />
+                                </div>--%>*@
+                                <label for="mob_file_image" class="custom-file-upload">
+                                    <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                                </label>
+                                <input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn" accept="image/*;capture=camera">
+                            </div>
+
+                            <div runat="server" id="Imageblock" class="hdnCamerabefore" style="display: none; width: 50%;">
+                                @*<asp:Image runat="server" src="" ID="imga" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                                <img id="imga"  Class="img-responsive img-thumbnail chngeimg" src="" />
+                            </div>
+                        </div>
+
+                        <div class="safari">
+                            <div id="selectphoto" style="display: none; width: 50%;">
+                                @*<asp:Image runat="server" ID="Image2" CssClass="img-thumbnail img-responsive changeimg" src="../images/noimg.jpg" ClientIDMode="Static" />*@
+                                <img id="Image2"  Class="img-thumbnail img-responsive changeimg" src="~/images/noimg.jpg" />
+                            </div>
+                            <div runat="server" id="safariImageBlock" style="display: none; width: 50%;">
+                                @*<asp:Image runat="server" src="" ID="Image3" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                                <img id="Image3"  Class="img-thumbnail img-responsive" src="" />
+                            </div>
+                            <label for="file_video" class="custom-file-upload">
+                                <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                            </label>
+                            <input type="file" name="file" id="file_video" class="file_video custombtn" accept="image/*;capture=camera">
+                        </div>
+                    </div>
+                    <div class="row"></div>
+                    @*<%--<video id="gum-local" autoplay playsinline></video>--%>*@
+
+                    <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                        @*<asp:Image ID="imagetruck" runat="server" Width="510px" Height="360px" CssClass="img-thumbnail img-responsive" src="../images/noimg.jpg" />*@
+                        <img id="imagetruck" Style="Width:510px; Height:360px"  Class="img-thumbnail img-responsive" src="~/images/noimg.jpg" />
+                        <div  id="Photoblock" class="hdnCamerabefore" style="display: none; width: 580px">
+                            <canvas id="canvas" width="640" height="480" style="width: 510px; height: 360px"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7"></div>
+
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px;">
+                            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-3">
+                                <label style="margin-left: -10px">Picked By:</label>
+                            </div>
+                            <div class="col-lg-9 col-md-9 col-sm-4 col-xs-2">
+                                @*<%--<asp:TextBox ID="txtpickedby" runat="server" Width="328px" ForeColor="Black"></asp:TextBox>--%>*@
+                                @*<asp:DropDownList ID="txtpickedby" runat="server" CausesValidation="false" ForeColor="Black" Width="328px" Height="25px" CssClass="form-control"></asp:DropDownList>*@
+                                <select id="txtpickedby"  ForeColor="Black" style="width:328px;height:25px;" Class="form-control"></select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        </div>
+
+                    </div>
+
+
+
+
+
+                    <div class="row">
+                        <label style="margin-left: 10px">Signature </label>
+                        <div class="hdnSignaturebefore" style="display: none;">
+                            <canvas id="canvas1234" style="border: 1px solid; background-color: #fff; width: 400px; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                        </div>
+
+                        <div id="signature-pad" class="signature-pad" style="margin-left: 10px; width: 684px; height: 303px;">
+                            <div class="signature-pad--body abcd">
+                                <canvas id="drawcanvas" style="background: none; width: 100%; height: 195px;"></canvas>
+                            </div>
+                            <br />
+                            <div class="signature-pad--footer">
+                                <div class="signature-pad--actions">
+                                    <div>
+                                        <button type="button" id="clearbtn" class="btn w3-btn w3-ripple w3-blue-grey" data-action="clear"><span class="icon"><i class="fa fa-refresh" aria-hidden="true"></i></span><span class="text">Clear</span></button>
+                                        <button type="button" id="colorbtn" class="button" style="display: none;" data-action="change-color">Change color</button>
+                                        <button type="button" id="undobtn" class="btn w3-btn w3-ripple w3-blue-grey" data-action="undo"><span class="icon"><i class="fa fa-undo" aria-hidden="true"></i></span><span class="text">Undo</span></button>
+                                    </div>
+                                    <div>
+
+                                        <button type="button" onclick="GetSign();" class="btn w3-btn w3-ripple w3-blue-grey" id="getContext"><span class="icon" style="display: none;"><i class="fa fa-check-circle-o" aria-hidden="true"></i></span><span class="text">Confirm Signature</span></button>
+                                        <button type="button" id="pngbtn" class="button save" style="display: none;" data-action="save-png">Save as PNG</button>
+                                        <button type="button" id="jpgbtn" class="button save" style="display: none;" data-action="save-jpg">Save as JPG</button>
+                                        <button type="button" id="svgbtn" class="button save" style="display: none;" data-action="save-svg">Save as SVG</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <canvas id="printcanvas"  style="display: none; border: 1px solid; background-color: #fff; width: 100%; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                        <br />
+                        <div  id="hdnSignImageBlock" class="hdnSignImageBlock" style="display: none; width: 60%; margin-left: 10px">
+                            @*<asp:Image runat="server" src="" ID="signimg1" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                            <img id="signimg1"  Class="img-responsive img-thumbnail chngeimg" src="" />
+                        </div>
+                    </div>
+                    <div class="row"></div>
+                    <div class="row">
+                        <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4">
+                            <label>Driver Name: </label>
+                            @*<%--<label>(Name):</label>--%>*@
+                        </div>
+                        <div class="col-lg-9 col-md-9 col-sm-4 col-xs-4">
+                            @*<asp:TextBox ID="txtTransport1" runat="server" Width="328px" ForeColor="Black" CssClass="form-control" Style="background-color: white !important"></asp:TextBox>*@
+                            <input type="text" id="txtTransport1" ForeColor="Black" Class="form-control" Style="background-color: white !important; width:328px;"/>
+
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-3 col-md-3 col-sm-4 col-xs-4">
+                            <label>Transport Company:</label>
+                        </div>
+                        <div class="col-lg-9 col-md-9 col-sm-4 col-xs-4">
+                            @*<asp:TextBox ID="txtTransport2" runat="server" Width="328px" ForeColor="Black" CssClass="form-control" Style="background-color: white !important"></asp:TextBox>*@
+                            <input type="text" id="txtTransport2"  ForeColor="Black" Class="form-control" Style="background-color: white !important;width:328px;" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11">
+                        </div>
+                        @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  20 May 2019 Start--%>*@
+                        <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1" style="position:absolute; bottom:0;opacity:0">
+                            @*<asp:TextBox ID="TextBox1" runat="server" CausesValidation="true" CssClass="form-control"></asp:TextBox>*@
+                        </div>
+                        @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  20 May 2019  End--%>*@
+                    </div>
+                    <div class="row">
+                        <label style="margin-left: 10px">Signature Of Driver </label>
+                        <div class="hdnSignaturebefore" style="display: none;">
+                            <canvas id="canvas12345" style="border: 1px solid; background-color: #fff; width: 400px; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                        </div>
+
+                        <div id="signature-pad1" class="signature-pad" style="margin-left: 10px; width: 684px; height: 303px">
+                            <div class="signature-pad--body abcd">
+                                <canvas id="drawcanvas1" style="background: none; width: 100%; height: 195px;"></canvas>
+                            </div>
+                            <br />
+                            <div class="signature-pad--footer">
+                                <div class="signature-pad--actions">
+                                    <div>
+                                        <button type="button" id="btnclear" class="btn w3-btn w3-ripple w3-blue-grey" data-action="clear1"><span class="icon"><i class="fa fa-refresh" aria-hidden="true"></i></span><span class="text">Clear</span></button>
+                                        <button type="button" id="btncolor" class="button" style="display: none;" data-action="change-color1">Change color</button>
+                                        <button type="button" id="btnundo" class="btn w3-btn w3-ripple w3-blue-grey" data-action="undo1"><span class="icon"><i class="fa fa-undo" aria-hidden="true"></i></span><span class="text">Undo</span></button>
+                                    </div>
+                                    <div>
+
+                                        <button type="button" onclick="GetSignature();" class="btn w3-btn w3-ripple w3-blue-grey" id="getContext2"><span class="icon" style="display: none;"><i class="fa fa-check-circle-o" aria-hidden="true"></i></span><span class="text">Confirm Signature</span></button>
+                                        <button type="button" id="btnpng" class="button save" style="display: none;" data-action="save-png1">Save as PNG</button>
+                                        <button type="button" id="btnjpg" class="button save" style="display: none;" data-action="save-jpg1">Save as JPG</button>
+                                        <button type="button" id="btnsvg" class="button save" style="display: none;" data-action="save-svg1">Save as SVG</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <canvas id="Canvas1"  style="display: none; border: 1px solid; background-color: #fff; width: 100%; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                        <br />
+                        <div  id="hdnSignImageBlock1" class="hdnSignImageBlock1" style="display: none; width: 60%; margin-left: 10px">
+                            @*<asp:Image runat="server" src="" ID="signimg2" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                            <img  src="" id="signimg2" Class="img-responsive img-thumbnail chngeimg" />
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-6 col-xs-6">
+                            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9"></div>
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4">
+                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                    <h4 style="margin-top: 6px; font-size: 15px" id="H6" ><i class="fa fa-list"></i>&nbsp;Sign-off’s-Site <span style="margin-left: 5px;" id="Span1" ></span></h4>
+                    <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+                        <li>
+                            <a class="collapse-link" onclick="mainsitehide();"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                </div>
+
+
+
+                <div class="row">
+                    <div id="mainsite" class="col-lg-8">
+                        <div class="col-lg-6">
+                            @*<%--<button type="button" id="getCamera1" class="btn w3-btn w3-ripple w3-blue-grey">Capture Photo</button>--%>*@
+                            <div class="nonsafari">
+                                <div class="desktopApp" style="display: none;">
+                                    <button type="button" id="getCamera1" class="btn w3-btn w3-ripple w3-blue-grey">Capture Photo</button>
+                                </div>
+
+                                <div class="mobileApp" style="display: none;">
+                                    @*<%-- <div runat="server" id="Div3" style="display: none; width: 50%;">
+                                        <asp:Image runat="server" src="" ID="mobImage1" CssClass="img-responsive img-thumbnail chngeimg" />
+                                    </div>--%>*@
+                                    <label for="mob_file_image1" class="custom-file-upload">
+                                        <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                                    </label>
+                                    <input type="file" name="file" id="mob_file_image1" class="mob_file_image1 custombtn" accept="image/*;capture=camera">
+                                </div>
+
+                                <div  id="Imageblock1" class="hdnCamerabefore" style="display: none; width: 50%;">
+                                    @*<asp:Image runat="server" src="" ID="Image4" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                                    <img src="" id="Image4" Class="img-responsive img-thumbnail chngeimg" />
+                                </div>
+                            </div>
+
+                            <div class="safari">
+                                <div id="selectphoto1" style="display: none; width: 50%;">
+                                    @*<asp:Image runat="server" ID="Image5" CssClass="img-thumbnail img-responsive changeimg" src="~/images/noimg.jpg" ClientIDMode="Static" />*@
+                                    <img  id="Image5" CssClass="img-thumbnail img-responsive changeimg" src="~/images/noimg.jpg"  />
+                                </div>
+                                <div  id="safariImageBlock1" style="display: none; width: 50%;">
+                                    @*<asp:Image runat="server" src="" ID="Image6" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                                    <img  src="" id="Image6" Class="img-responsive img-thumbnail chngeimg" />
+                                </div>
+                                <label for="file_video" class="custom-file-upload">
+                                    <i class="fa fa-camera-retro" aria-hidden="true"></i>Capture/Upload Photo
+                                </label>
+                                <input type="file" name="file" id="file_video1" class="file_video1 custombtn" accept="image/*;capture=camera">
+                            </div>
+                        </div>
+                        <div class="row"></div>
+                        <div class="col-lg-9">
+                            @*<asp:Image ID="image" runat="server" src="../images/noimg.jpg" Width="510px" Height="360px" CssClass="img-thumbnail img-responsive" />*@
+                            <img id="image"  src="~/images/noimg.jpg" style="Width:510px; Height:360px" Class="img-thumbnail img-responsive" />
+                            <div  id="photoblock2" class="hdnSecondCameraBefore" style="display: none;">
+                                <canvas id="SecondCanvas" width="640" height="480" style="width: 510px; height: 360px;"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="row"></div>
+
+                        <div class="row">
+                            <div class="col-lg-11">
+                                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-6">
+                                    <label style="margin-left: -10px; font-size: 15px"><u>For Scaffold Company </u></label>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-11">
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                    <label style="margin-left: -10px">Date Received On Site: </label>
+                                </div>
+                                <div class="col-lg-9 col-md-6 col-sm-6 col-xs-6">
+                                    @*<Telerik:RadDatePicker ID="Datepicker" Style="margin-left: 10px" Width="328px" runat="server" DateFormat="String.Date.Time" DateInput-DateFormat="dd-MMM-yyyy" DateInput-DisplayDateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                                    <input type="text" id="Datepicker" ForeColor="Black" Class="form-control" Style="background-color: white !important;Width:328px;margin-left: 10px"></>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                                <label>Received By </label>
+                                <label>(Name):</label>
+                            </div>
+                            <div class="col-lg-9 col-md-2 col-sm-4 col-xs-4">
+                                @*<asp:TextBox ID="txtReceived" runat="server" Width="328px" ForeColor="Black" CssClass="form-control" Style="background-color: white !important"></asp:TextBox>*@
+                                <input type="text" id="txtReceived"   ForeColor="Black" Class="form-control" Style="background-color: white !important;Width:328px"></>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                                <label>Position:</label>
+                            </div>
+                            <div class="col-lg-9 col-md-2 col-sm-4 col-xs-4">
+                                @*<%-- <asp:TextBox ID="txtposition" runat="server" Width="328px" ForeColor="Black"></asp:TextBox>--%>*@
+                               @* <asp:DropDownList ID="txtposition" runat="server" Width="328px" ForeColor="Black" CausesValidation="false" Height="25px" CssClass="form-control"></asp:DropDownList>*@
+                                <select id="txtposition" class="form-control" style="Width:328px;height:25px"></select>
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <label style="margin-left: 10px">Signature </label>
+                            <div class="hdnSignaturebefore" style="display: none;">
+                                <canvas id="canvas123456" style="border: 1px solid; background-color: #fff; width: 400px; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            </div>
+
+                            <div id="signature-pad2" class="signature-pad" style="margin-left: 10px; width: 684px; height: 303px;">
+                                <div class="signature-pad--body abcd">
+                                    <canvas id="drawcanvas2" style="background: none; width: 100%; height: 195px;"></canvas>
+                                </div>
+                                <br />
+                                <div class="signature-pad--footer">
+                                    <div class="signature-pad--actions">
+                                        <div>
+                                            <button type="button" id="btnclear1" class="btn w3-btn w3-ripple w3-blue-grey" data-action="clear2"><span class="icon"><i class="fa fa-refresh" aria-hidden="true"></i></span><span class="text">Clear</span></button>
+                                            <button type="button" id="btncolor1" class="button" style="display: none;" data-action="change-color2">Change color</button>
+                                            <button type="button" id="btnundo1" class="btn w3-btn w3-ripple w3-blue-grey" data-action="undo2"><span class="icon"><i class="fa fa-undo" aria-hidden="true"></i></span><span class="text">Undo</span></button>
+                                        </div>
+                                        <div>
+
+                                            <button type="button" onclick="GetSignature2();" class="btn w3-btn w3-ripple w3-blue-grey" id="getContext1"><span class="icon" style="display: none;"><i class="fa fa-check-circle-o" aria-hidden="true"></i></span><span class="text">Confirm Signature</span></button>
+                                            <button type="button" id="btnpng1" class="button save" style="display: none;" data-action="save-png2">Save as PNG</button>
+                                            <button type="button" id="btnjpg1" class="button save" style="display: none;" data-action="save-jpg2">Save as JPG</button>
+                                            <button type="button" id="btnsvg1" class="button save" style="display: none;" data-action="save-svg2">Save as SVG</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <canvas id="Canvas2"  style="display: none; border: 1px solid; background-color: #fff; width: 100%; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            <br />
+                            <div  id="hdnSignImageBlock2" class="hdnSignImageBlock2" style="display: none; width: 60%; margin-left: 10px">
+                                @*<asp:Image runat="server" src="" ID="signimg3" CssClass="img-responsive img-thumbnail chngeimg" />*@
+                                <img  src="" id="signimg3" CssClass="img-responsive img-thumbnail chngeimg" />
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="hdnfld" runat="server" />
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label style="font-size: 15px"><u>For Client</u>  </label>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                                <label>Accepted By  </label>
+                                <label>(Name):</label>
+                            </div>
+                            <div class="col-lg-9 col-md-2 col-sm-4 col-xs-4">
+                                @*<asp:TextBox ID="txtAccepted" runat="server" Width="328px" ForeColor="Black" CssClass="form-control" Style="background-color: white !important"></asp:TextBox>*@
+                                <input type="text" id="txtAccepted"   Class="form-control" Style="background-color: white !important;width:328px;"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                                <label>Position:</label>
+                            </div>
+                            <div class="col-lg-9 col-md-2 col-sm-4 col-xs-4">
+                                @*<%--<asp:TextBox ID="txtAcceptedposi" runat="server" Width="328px" ForeColor="Black"></asp:TextBox>--%>*@
+                                @*<asp:DropDownList ID="txtAcceptedposi" runat="server" Width="328px" ForeColor="Black" CausesValidation="false" Height="25px" CssClass="form-control"></asp:DropDownList>*@
+                                <select id="txtAcceptedposi" class="form-control" style="width:328px;height:25px"></select>
+                            </div>
+                        </div>
+                        <div class="row" style="position:absolute; bottom:0;opacity:0">
+                            @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  20 May 2019 Start--%>*@
+                            <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1">
+                                @*<asp:TextBox ID="txtAccepted1" runat="server" CausesValidation="true" CssClass="form-control"></asp:TextBox>*@
+                            </div>
+
+                            @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  20 May 2019  End--%>*@
+
+                        </div>
+
+                        <div class="row">
+                            <label style="margin-left: 10px">Signature </label>
+                            <div class="hdnSignaturebefore" style="display: none;">
+                                <canvas id="canvas1234567" style="border: 1px solid; background-color: #fff; width: 400px; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            </div>
+
+                            <div id="signature-pad3" class="signature-pad" style="margin-left: 10px; width: 684px; height: 303px">
+                                <div class="signature-pad--body abcd">
+                                    <canvas id="drawcanvas3" style="background: none; width: 100%; height: 195px;"></canvas>
+                                </div>
+                                <br />
+                                <div class="signature-pad--footer">
+                                    <div class="signature-pad--actions">
+                                        <div>
+                                            <button type="button" id="btnclear2" class="btn w3-btn w3-ripple w3-blue-grey" data-action="clear3"><span class="icon"><i class="fa fa-refresh" aria-hidden="true"></i></span><span class="text">Clear</span></button>
+                                            <button type="button" id="btncolor2" class="button" style="display: none;" data-action="change-color3">Change color</button>
+                                            <button type="button" id="btnundo2" class="btn w3-btn w3-ripple w3-blue-grey" data-action="undo3"><span class="icon"><i class="fa fa-undo" aria-hidden="true"></i></span><span class="text">Undo</span></button>
+                                        </div>
+                                        <div>
+
+                                            <button type="button" onclick="GetSignature3();" class="btn w3-btn w3-ripple w3-blue-grey" id="getContext3"><span class="icon" style="display: none;"><i class="fa fa-check-circle-o" aria-hidden="true"></i></span><span class="text">Confirm Signature</span></button>
+                                            <button type="button" id="btnpng2" class="button save" style="display: none;" data-action="save-png3">Save as PNG</button>
+                                            <button type="button" id="btnjpg2" class="button save" style="display: none;" data-action="save-jpg3">Save as JPG</button>
+                                            <button type="button" id="btnsvg2" class="button save" style="display: none;" data-action="save-svg3">Save as SVG</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <canvas id="Canvas3" style="display: none; border: 1px solid; background-color: #fff; width: 100%; height: 150px; margin: 15px 0 0 0px;" width="640" height="480"></canvas>
+                            <br />
+                            <div runat="server" id="hdnSignImageBlock3" class="hdnSignImageBlock3" style="display: none; width: 60%; margin-left: 10px">
+                                <img  src="" id="signimg4" Class="img-responsive img-thumbnail chngeimg" />
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                <label>Receipt Confirmation </label>
+                                @*<asp:CheckBox ID="confirmcheck" runat="server" Checked="false" name="confirmcheck" />*@
+                                <input type="checkbox" id="confirmcheck"  name="confirmcheck" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        @*<%--<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>--%>*@
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+            @*<asp:LinkButton runat="server" ID="btnSubmit" CssClass="btn btn-success" Text="Submit" OnClick="DelieveryDocketUpload" Style="width: 100%"></asp:LinkButton>*@
+            <button  id="btnSubmit" Class="btn btn-success"  OnClick="DelieveryDocketUpload()" Style="width: 100%">Submit</button>
+        </div>
+        <div class="col-lg-1 col-md-1 col-sm-1 "></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-1"></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+            @*<asp:LinkButton runat="server" ID="btnPrint" CssClass="btn btn-primary" Text="Print" OnClick="btnPrint_Click" Style="width: 100%;"></asp:LinkButton>*@
+            <button id="btnPrint" Class="btn btn-primary"  OnClick="btnPrint_Click()" Style="width: 100%;">Print</button>
+        </div>
+        <div class="col-lg-1 col-md-1 col-sm-1 "></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-1"></div>
+        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+            @*<asp:LinkButton runat="server" ID="btnclose" CssClass="btn btn-danger" Text="Close" OnClick="btnclose_Click" Style="width: 100%;"></asp:LinkButton>*@
+            <button id="btnclose" Class="btn btn-danger"  OnClick="btnclose_Click()" Style="width: 100%;">Close</button>
+        </div>
+    </div>
+
+    <div id="chkpopup"  class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h7" >Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+
+
+                    <label  id="Label1">Are you sure you want to confirm receipt?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="chkpopupyes" runat="server" OnClick="chkpopupyes_Click"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="chkpopupyes"  OnClick="chkpopupyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="chkpopupno" runat="server" OnClick="chkpopupno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="chkpopupno" OnClick="chkpopupno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<%--Model to Show Video code Starts--%>*@
+    <div id="btnVideoModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h1">Capture Your Image</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <video id="gum" style="width:100%; height:auto" autoplay muted></video>
+                    <button id="play" style="display: none;" disabled>Play</button>
+                    <button id="download" style="display: none;" disabled>Download</button>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="record1" class="btn w3-btn w3-ripple w3-blue-grey">Start Recording</button>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" style="display: none;" id="cancelvideo" class="btn btn-danger">Cancel</button>
+                        </div>
+                    </div>
+                </p>
+            </div>
+
+        </div>
+    </div>
+    @*<%--Model to Show Video code Ends--%>*@
+
+
+    <div id="btnOpenModel4" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h3" >Capture Your Image</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <video id="video" style="width:100%; height:auto" autoplay></video>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="cancelsnap" class="btn btn-danger">Cancel</button>
+                        </div>
+                    </div>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <div id="btnModel2" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h2" >Capture Your Image</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <video id="video1" style="width:100%; height:auto" autoplay></video>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="Snap2" class="btn btn-primary">Snap Photo</button>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                            <button type="button" id="cancelsnap1" class="btn btn-danger">Cancel</button>
+                        </div>
+                    </div>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+    @*<%--           signature start block  --%>*@
+
+    <div class="container">
+        <button style="display: none;" id="btnSigModal" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#sigModal">Open Modal</button>
+        <div class="modal fade" id="sigModal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Capture Your Digital Signature</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div id="Div1">
+                            <div class="tools">
+                            </div>
+                            <br />
+                            <canvas id="colors_sketch" style="border: 1px solid; background-color: #fff; width: 489px; height: 150px; margin: 0 0 0 20px;" width="300" height="100"></canvas>
+
+                            <br />
+
+                            <a href="#colors_sketch" data-tool="marker"><u>Click here to start signature.</u></a>
+                            <br />
+                            <a href="#colors_sketch" data-tool="eraser"><u>Click here and above signature box to Erase the signature.</u></a>
+                            <br />
+                            <button type="button" class="btn w3-btn w3-ripple w3-blue" onclick="SaveSketch()">Confirm Signature</button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<%--<asp:SqlDataSource ID="ddlposition" runat="server" ConnectionString='<%$ ConnectionStrings:connectionstring %>' SelectCommand="select distinct Position from tblClientRepresentation where ClientId=@ClientId">
+            <SelectParameters>
+                <asp:QueryStringParameter Name="ClientId" DbType="Int32" QueryStringField="id" />
+            </SelectParameters>
+        </asp:SqlDataSource>--%>*@
+    </div>
+
+
+    <div id="confirmModal"  class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h4" >Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+
+                    <label  id="Label6">No changes can be made to this Delivery Docket once confirmed.</label><br />
+                    <label  id="Label7">Do you wish to confirm?</label>
+                </p>
+
+                <div class="row" style="margin-top: 21px; padding-bottom: 20px;">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4"></div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        @*<asp:LinkButton ID="btnConfirmok" OnClick="btnConfirmok_Click" runat="server" CssClass="btn w3-btn w3-ripple w3-green "><i class="glyphicon glyphicon-ok-circle"></i> Ok</asp:LinkButton>*@
+                        <button id="btnConfirmok" OnClick="btnConfirmok_Click()"  Class="btn w3-btn w3-ripple w3-green "><i class="glyphicon glyphicon-ok-circle"></i> Ok</button>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        <button id="btnConfirmCancel" OnClick="btnConfirmCancel_Click()" Class="btn w3-btn w3-ripple w3-red"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</button>
+                        @*<asp:LinkButton ID="btnConfirmCancel" OnClick="btnConfirmCancel_Click" runat="server" CssClass="btn w3-btn w3-ripple w3-red"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</asp:LinkButton>*@
+                        @*<%--<asp:LinkButton Text="ok" ID="ok" OnClick="ok_Click" runat="server" CssClass="btn w3-btn w3-ripple w3-red"></asp:LinkButton>--%>*@
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+

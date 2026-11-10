@@ -1,0 +1,461 @@
+﻿
+@{
+    ViewBag.Title = "Cyclone";
+}
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<script>
+    $(document).ready(function () {
+        $('#liCyclone').removeClass('active').addClass('active');
+        ShowJobInfoDetails();
+        $('#maindivCyclone').css('display', 'block');
+        setTimeout(function () {
+
+            CycAction();
+        }, 1500)
+        $('#maindivCyclone').css('display', 'block');
+        $('#ddlCycloneAction').change(function () {
+
+            CycAction();
+            $('#txtTotalDeBoardEdit').val("");
+            $('#txtTotalReInstateEdit').val("");
+            $('#txtDeBoardItemEdit').val("");
+            $('#txtreInstateEdit').val("");
+        });
+    });
+    function CycAction() {
+        var CycloneAction = $('#ddlCycloneAction').val();
+        var ManHrsDis = $('#txrManHrsDis').val();
+        var ManHrsErect = $('#txtManHrsErect').val();
+
+        if (CycloneAction == "Full Strip") {
+            $('#chkuseentervalue').prop('disabled', true);
+            $('#chkuseentervalue').prop('checked', false);
+            if ((ManHrsDis == "" && ManHrsErect == "") || (ManHrsDis == "0.00" && ManHrsErect == "0.00")) {
+                $('#divAlert').css('visibility', 'visible');
+
+            }
+            else {
+                $('#divAlert').css('visibility', 'hidden');
+            }
+        }
+        else if (CycloneAction == "De-Plank Only" || CycloneAction == "Tie-Down") {
+            $('#divAlert').css('visibility', 'hidden');
+            $('#chkuseentervalue').prop('disabled', false);
+            $('#chkuseentervalue').prop('checked', true);
+
+        }
+        else {
+            $('#divAlert').css('visibility', 'hidden');
+            $('#chkuseentervalue').prop('disabled', true);
+            $('#chkuseentervalue').prop('checked', false);
+
+        }
+
+    }
+
+    function btnsave_Click() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        //public ActionResult btnsave_Click(string RID,string txtTotalDeBoardEdit,string chkuseentervalue,string ddlCycloneAction,string ddlPriorityRiskRating,string txtTotalReInstateEdit,string txtreInstateEdit,string txtDeBoardItemEdit,string txtcomments)
+        var RID = getParameterByName('RID');
+        var txtTotalDeBoardEdit = $('#txtTotalDeBoardEdit').val();
+        var chkuseentervalue = $('#chkuseentervalue').prop('checked');
+        var ddlCycloneAction = $('#ddlCycloneAction').val();
+        var ddlPriorityRiskRating = $('#ddlPriorityRiskRating').val();
+        var txtTotalReInstateEdit = $('#txtTotalReInstateEdit').val();
+        var txtreInstateEdit = $('#txtreInstateEdit').val();
+        var txtDeBoardItemEdit = $('#txtDeBoardItemEdit').val();
+        var txtcomments = $('#txtcomments').val();
+        var ddlRangeOfOutBoard = $('#ddlRangeOfOutBoard').val();
+        $.ajax({
+            type: "POST",
+            url: "/Cyclone/btnsave_Click",
+            data: JSON.stringify({ RID: RID, txtTotalDeBoardEdit: txtTotalDeBoardEdit, chkuseentervalue: chkuseentervalue, ddlCycloneAction: ddlCycloneAction, ddlPriorityRiskRating: ddlPriorityRiskRating, txtTotalReInstateEdit: txtTotalReInstateEdit, txtreInstateEdit: txtreInstateEdit, txtDeBoardItemEdit: txtDeBoardItemEdit, txtcomments: txtcomments, ddlRangeOfOutBoard: ddlRangeOfOutBoard }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var GetData = response;
+                if (response.Result == "Success") {
+                    CustomAlert(response);
+                    $("#LoadingPanel1").css("display", "none");
+                    ShowJobInfoDetails();
+                } else {
+                    CustomAlert(response);
+                    $("#LoadingPanel1").css("display", "none");
+                }
+            }
+        });
+    }
+
+
+    function chkuseentervalue_CheckedChanged() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        $('#LoadingPanel1').show();
+        if ($('#chkuseentervalue').prop('checked') == false) {
+            $('#divConfirmation').css('display', 'block');
+        }
+        //if (chkuseentervalue.Checked == false) {
+        //    divConfirmation.Style.Add("display", "block");
+        //}
+        $('#LoadingPanel1').hide();
+    }
+    function btnConfirYes_Click() {
+        $('#txtTotalDeBoardEdit').val('');
+        $('#txtTotalReInstateEdit').val('');
+        $('#txtDeBoardItemEdit').val('');
+        $('#txtreInstateEdit').val('');
+        $('#divConfirmation').css('display', 'none');
+        // txtTotalDeBoardEdit.Text = "";
+        //txtTotalReInstateEdit.Text = "";
+        //txtDeBoardItemEdit.Text = "";
+        //txtreInstateEdit.Text = "";
+        //divConfirmation.Style.Add("display", "none");
+    }
+
+    function btnConfirNo_Click() {
+        //chkuseentervalue.Checked = true;
+        $('#chkuseentervalue').prop('checked', true)
+        // divConfirmation.Style.Add("display", "none");
+        $('#divConfirmation').css('display', 'none');
+    }
+    //Added By Shubham Gupta On 16/08/2024
+    function updateRiskRating() {
+        if (IsSiteStatus == "InActive") {
+            CustomAlert({
+                Result: "Failed", Message: "This site is InActive. This Action is not allowed."
+            });
+            return false;
+        }
+        var cycloneAction = document.getElementById('ddlCycloneAction').value;
+        var riskRatingDropdown = document.getElementById('ddlPriorityRiskRating');
+
+        if (cycloneAction === 'No Action') {
+            riskRatingDropdown.value = 'None';
+        } else {
+            riskRatingDropdown.value = '';
+        }
+    }
+</script>
+
+
+<script>
+    //$(document).ready(function () {
+    //    $('.double-scroll').doubleScroll();
+    //});
+    $(document).ready(function () {
+        //    $("#ulalwaysactive").css("display", "none");
+
+        var screensize = $(window).width();
+
+        if (screensize < 1150 && screensize > 650) {
+            ($BODY.hasClass('nav-md'))
+            $('#CreateNewDropDown').css("margin-top", "2px");
+            $BODY.removeClass('nav-md').addClass('nav-sm');
+            $LEFT_COL.removeClass('scroll-view');
+            //$('#BlackSection').css('display', 'block');
+            $('#imgLogo').parent().css('display', 'none');
+            $('#imgLogo1').css('display', 'block').css("height", "38px");
+        }
+
+
+        else {
+            if (screensize < (650)) {
+                $BODY.removeClass('nav-sm')
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "52px");
+
+
+                $('.xsfieldset').css('margin-left', '-22px').css("width", "100%");
+            }
+            else {
+                $('#CreateNewDropDown').css("margin-top", "6px");
+                $BODY.removeClass('nav-sm').addClass('nav-md');
+                //$('#BlackSection').css('display', 'none');
+                $('#imgLogo').parent().css('display', 'block');
+                $('#imgLogo1').css('display', 'none');
+                $('#leftbarsection').css('margin-top', '40px');
+            }
+
+        }
+    });
+</script>
+
+<style>
+    .form-control {
+        height: 28px !important;
+    }
+
+    .x_content {
+        padding: 0 0px 6px;
+    }
+
+    .input-group {
+        margin-bottom: 0px;
+    }
+
+    #FormSection label {
+        color: gray !important;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .nav-sm span.fa, .nav-sm .menu_section h3 {
+        display: block !important;
+    }
+
+    .w3-card-4, .w3-hover-shadow:hover {
+        box-shadow: 0 0px 0px 0 rgba(0,0,0,0.2),0 0px 0px 0 rgba(0,0,0,0.19) !important;
+    }
+
+    .panel_toolbox > li > a:hover {
+        background: none;
+    }
+
+    .rgCommandTable td:nth-child(1) {
+        display: block !important;
+    }
+
+    .spancolorandsize {
+        font-size: 12px !important;
+    }
+
+    label {
+        font-size: 12px;
+    }
+
+    /*#ctl00_ContentPlaceHolder1_txtTotalDeboardTotal, #ctl00_ContentPlaceHolder1_txtTotalreinstate,
+        #ctl00_ContentPlaceHolder1_txtCountDeBoard, #ctl00_ContentPlaceHolder1_txtCountReinstate, #ctl00_ContentPlaceHolder1_txtTotalDeBoardEdit, #ctl00_ContentPlaceHolder1_txtTotalReInstateEdit, #ctl00_ContentPlaceHolder1_txtDeBoardItemEdit, #ctl00_ContentPlaceHolder1_txtreInstateEdit {*/
+
+    #txtTotalDeboardTotal, #txtTotalreinstate,
+    #txtCountDeBoard, #txtCountReinstate, #txtTotalDeBoardEdit, #txtTotalReInstateEdit, #txtDeBoardItemEdit, #txtreInstateEdit {
+        border-color: #e5e5e5 !important;
+        border-radius: 4px !important;
+    }
+</style>
+<div class="tab-content" id="maindivCyclone" style="display:none">
+    <div class="row">
+        <div class="title_left col-lg-5 col-md-5 col-sm-5">
+            <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-qrcode"></i>&nbsp;<span id="lblclient" Font-Size="16px" Font-Bold="true">Cyclone</span></b></h4>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-2">
+        </div>
+
+    </div>
+    @Html.Partial("_RegisterPartiaView")
+
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-sx-12">
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div style="height: auto" class="x_panel w3-padding-0 w3-card-4">
+                        <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                            <h4 style="margin-top: 6px; font-size: 15px" id="lblVaccinations"><i class="fa fa-list"></i>&nbsp;Cyclone Details <span style="margin-left: 5px;" id="VacCount"></span></h4>
+
+                            <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                <li>
+                                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                </li>
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content" style="margin-bottom: 3px!important;">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-5 col-sm-7 col-xs-12" style="float: left; margin-top: 14px;">
+                                    <label id="lblRangeOfOutBoard" style="color: gray !important; font-size: 15px; font-weight: 500;">Within 10 metres of OutBoard or in the Open ?</label>
+                                </div>
+                                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-6" style="float: left; margin-top: 12px; padding-left: 0px;">
+                                    <select id="ddlRangeOfOutBoard" Class="form-control">
+                                        <option value="0">NO</option>
+                                        <option value="1">YES</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-5 col-md-5 col-sm-5" id="divAlert" style="visibility:hidden;text-align:center;justify-content:space-around;padding:15px">
+                                    <label style="color:white !important;background-color:red;font-size:18px !important">For Full Strip Preparation Hrs  are taken from 'Man Hrs Dismantle' Job Detail Page</label>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                    @*<asp:LinkButton runat="server" ID="btnsave" Style="margin-top: 14px; float: right" CausesValidation="true" ValidationGroup="Save" CssClass="w3-btn w3-small w3-green btnheight" OnClick="btnsave_Click">
+                                            <span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span>
+                                        </asp:LinkButton>*@
+                                    <button id="btnsave" Style="margin-top: 14px; float: right" Class="w3-btn w3-small w3-green btnheight" OnClick="btnsave_Click()">
+                                        <span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                    <label>Cyclone Action<span style="color: red">&nbsp*</span></label>
+                                    <select id="ddlCycloneAction" class="form-control" onchange="updateRiskRating()">
+                                        <option Value="">Select----</option>
+                                        <option value="De-Plank Only">De-Plank Only</option>
+                                        <option value="Full Strip">Full Strip</option>
+                                        <option value="No Action">No Action</option>
+                                        <option value="Tie-Down">Tie-Down</option>
+                                    </select>
+                                    @*<asp:DropDownList ID="ddlCycloneAction" runat="server" CssClass="form-control">
+                                            <asp:ListItem Text="Select----" Value=""></asp:ListItem>
+                                            <asp:ListItem Text="De-Plank Only" Value="De-Plank Only"></asp:ListItem>
+                                            <asp:ListItem Text="Full Strip" Value="Full Strip"></asp:ListItem>
+                                            <asp:ListItem Text="No Action" Value="No Action"></asp:ListItem>
+                                            <asp:ListItem Text="Tie-Down" Value="Tie-Down"></asp:ListItem>
+                                        </asp:DropDownList>*@
+                                    @*<asp:RequiredFieldValidator ID="rfvtxtcyclonaction" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="ddlCycloneAction" ErrorMessage="* Required" ValidationGroup="Save" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                    <label>Risk Rating</label>
+                                    <select id="ddlPriorityRiskRating" class="form-control">
+                                        <option value=""></option>
+                                        <option value="High">High</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Low">Low</option>
+                                        <option value="None">None</option>
+                                    </select>
+                                    @*<asp:DropDownList ID="ddlPriorityRiskRating" runat="server" CssClass="form-control">
+                                            <asp:ListItem Text="" Value=""></asp:ListItem>
+                                            <asp:ListItem Text="High" Value="High"></asp:ListItem>
+                                            <asp:ListItem Text="Medium" Value="Medium"></asp:ListItem>
+                                            <asp:ListItem Text="Low" Value="Low"></asp:ListItem>
+                                        </asp:DropDownList>*@
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                    <label>Man Hrs Erect</label>
+                                    <input type="text" id="txtManHrsErect" style="Width:100%" disabled Class="form-control" />
+                                </div>
+
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                    <label>Man Hrs Dismantle</label>
+                                    <input type="text" id="txrManHrsDis" style="Width:100%" disabled Class="form-control" />
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" id="divchk" style="float: left; width: 1px;">
+                                    @*<asp:CheckBox ID="chkuseentervalue" runat="server" Checked="true" AutoPostBack="true" OnCheckedChanged="chkuseentervalue_CheckedChanged" />*@
+                                    <input type="checkbox" id="chkuseentervalue" checked onchange="chkuseentervalue_CheckedChanged()" />
+                                </div>
+                                <div class="col-lg-11 col-md-11 col-sm-11 col-xs-11" style="float: left">
+                                    <label id="lbluseentervalue" style="color: gray !important; font-size: 11px; font-weight: 500;">Use Entered Value (For De-Plank Only / Tie-Down)</label>
+                                </div>
+                            </div>
+                            <div class="row " id="Entervlue">
+                                <fieldset class="Entervlue">
+                                    <legend>
+                                        <label><i class="fa fa-edit "></i>&nbsp;Entered Value</label>
+                                    </legend>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Preparation Hrs</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtTotalDeBoardEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" min="0" id="txtTotalDeBoardEdit" class="form-control" />
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Total Re-Instate Hrs</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtTotalReInstateEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" min="0" id="txtTotalReInstateEdit" class="form-control" />
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>De-Board Item Count</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtDeBoardItemEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" min="0" id="txtDeBoardItemEdit" class="form-control" />
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Re-Instate Item Count</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtreInstateEdit" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" min="0" id="txtreInstateEdit" style="Width:100%" class="form-control" />
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="row" id="calculationValue" runat="server">
+
+                                <fieldset class="calculationValue">
+                                    <legend>
+                                        <label><i class="fa fa-calculator "></i>&nbsp;Calculated Value</label>
+                                    </legend>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Preparation Hrs</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtTotalDeboardTotal" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" id="txtTotalDeboardTotal" style="Width:100%" disabled class="form-control" />
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Total Re-Instate Hrs</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtTotalreinstate" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="5"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" id="txtTotalreinstate" style="Width:100%" disabled class="form-control" />
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>De-Board Item Count</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtCountDeBoard" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" id="txtCountDeBoard" style="Width:100%" disabled class="form-control" />
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+                                        <label>Re-Instate Item Count</label>
+                                        @*<Telerik:RadNumericTextBox ID="txtCountReinstate" Enabled="false" runat="server" Width="100%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>*@
+                                        <input type="number" id="txtCountReinstate" style="Width:100%" disabled class="form-control" />
+                                    </div>
+                                </fieldset>
+                            </div>
+                            @*<%-- start add comment textbox 06-mar-2019--%>*@
+                            <div class="row">
+                                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                                    <label>Comments</label>
+                                    @*<asp:TextBox ID="txtcomments" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="10" Style="max-width: 576px; min-width: 100%; height: 100px !important"></asp:TextBox>*@
+                                    <textarea id="txtcomments" Class="form-control" Rows="10" Style="max-width: 576px; min-width: 100%; height: 100px !important"></textarea>
+                                </div>
+                                @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019 Start--%>*@
+                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                </div>
+
+                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" style="opacity: 0">
+                                    @*<Telerik:RadNumericTextBox ID="RadNumericTextBox1" runat="server" Width="1%" CssClass="form-control" MinValue="0" NumberFormat-DecimalDigits="2"></Telerik:RadNumericTextBox>*@
+                                    <input type="number" id="RadNumericTextBox1" Class="form-control" />
+                                </div>
+                                @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019  End--%>*@
+                            </div>
+                            @*<%-- //end comment textbox 06-mar-2019--%>*@
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divConfirmation" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey ">
+            <h4 class="w3-text-white" id="H1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="c1">Are you sure you do not need the Entered Value?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px;">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btnConfirYes_Click" ID="btnConfirYes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnConfirYes_Click()" id="btnConfirYes()"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnConfirNo_Click" ID="btnConfirNo" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btnConfirNo_Click()" id="btnConfirNo"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

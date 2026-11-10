@@ -1,0 +1,227 @@
+﻿
+@{
+    ViewBag.Title = "ScaffoldMaterialListPhase2";
+}
+
+@*<link href="Assets/css/select2.min.css" rel="stylesheet" />
+    <script src="Assets/js/select2.min.js"></script>*@
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<script src="~/Content/js/ScaffoldMaterialListPhase2.js?V1=6"></script>
+
+<script>
+    $(function () {
+        var id = '@ViewBag.HireInventory';
+        $('#hdnHireInventory').val('@ViewBag.HireInventory');
+        if ($('#hdnHireInventory').val() == "True") {
+            $('#btnHireReport').css('display', 'Block');
+        }
+    });
+</script>
+
+<style>
+    /*Window Size 67 %*/
+    @@media (min-width: 1900px) and (max-width: 2050px) {
+        #freeze {
+            width: 100% !important;
+        }
+
+        #ExportTo {
+            width: 100% !important;
+        }
+
+        #btnrequest {
+            width: 100% !important;
+        }
+
+        #btnReturn {
+            width: 100% !important;
+        }
+
+        #btnDamage {
+            width: 100% !important;
+        }
+    }
+
+    @@media only screen and (max-width: 600px) {
+
+        #btnReturn {
+            width: 107% !important;
+        }
+
+        #btnDamage {
+            width: 107% !important;
+        }
+    }
+
+    @@media (min-width: 768px) and (max-width: 1024px) {
+
+        #btnReturn {
+            width: 107% !important;
+        }
+
+        #btnDamage {
+            width: 107% !important;
+        }
+    }
+
+    label {
+        font-size: 12px;
+    }
+
+
+    .setWidth1, .setWidth2, .setWidth4, .setWidth5, .setWidth6, .setWidth7 {
+        min-width: 90px !important;
+    }
+
+    .setWidth8, .setWidth9 {
+        min-width: 80px !important;
+    }
+
+    .setWidth10, .setWidth11, .setWidth12 {
+        min-width: 80px !important;
+    }
+
+    .setWidth3 {
+        min-width: 180px !important;
+    }
+</style>
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-tasks"></i>&nbsp;<span id="lblclient" Font-Size="16px" Font-Bold="true">Job Inventory List</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2">
+    </div>
+    @*<asp:HiddenField ID="OptStatusHidden" runat="server" />
+        <asp:HiddenField ID="rowcount" runat="server" />*@
+    <input type="hidden" id="OptStatusHidden" />
+    <input type="hidden" id="rowcount" />
+    <input type="hidden" id="hdnSiteLocID" value="@ViewBag.SiteID" />
+    <input type="hidden" id="hdnHireInventory" />
+</div>
+
+@Html.Partial("_RegisterPartiaView")
+
+<div class="row">
+    <div class="col-lg-12"></div>
+</div>
+<div class="row">
+
+
+    <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+        <div class="col-lg-2 col-sm-4 col-md-2 col-xs-11" style="margin-top: -16px">
+            <label style="font-size: 14px">Filter By</label>
+            @*<asp:DropDownList ID="ddlMaterialType" CssClass="form-control" runat="server" AutoPostBack="true" Style="height: 26px !important; padding-top: 4px !important; width: 107% !important"
+                                  OnSelectedIndexChanged="ddlMaterialType_SelectedIndexChanged" AppendDataBoundItems="true">
+                </asp:DropDownList>*@
+            <select id="ddlMaterialType" class="form-control" onchange="ddlMaterialType_SelectedIndexChanged()"></select>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6" style="margin-top: 5px">
+            @*<asp:LinkButton ID="btnrequest" runat="server" Style="padding-left: 5px; width: 107%; height: 28px; padding-top: 6px; font-size: 12px;" CssClass="btn  btn-primary w3-btn w3-blue" OnClick="btnrequest_Click">Request Items</asp:LinkButton>*@
+            <button id="btnrequest" Style="padding-left: 5px; width: 107%; height: 28px; padding-top: 6px; font-size: 12px;" Class="btn  btn-primary w3-btn w3-blue" OnClick="btnrequest_Click()">Request Items</button>
+        </div>
+        <div class="col-md-2 col-sm-4 col-lg-1 col-xs-6" style="margin-top: 5px">
+            @*<asp:LinkButton ID="btnReturn" runat="server" Style="padding-left: 9px; width: 120%; height: 28px; font-size: 12px; padding-top: 6px;" CssClass="btn  btn-primary w3-btn w3-blue" OnClick="btnReturn_Click">Return Items</asp:LinkButton>*@
+            <button id="btnReturn" runat="server" Style="padding-left: 9px; width: 120%; height: 28px; font-size: 12px; padding-top: 6px;" Class="btn  btn-primary w3-btn w3-blue" OnClick="btnReturn_Click()">Return Items</button>
+        </div>
+        <div class="col-md-2 col-sm-4 col-lg-1 col-xs-6" style="margin-top: 5px">
+            @*<asp:LinkButton ID="btnDamage" runat="server" Style="padding-left: 5px; width: 120%; height: 28px; font-size: 12px; padding-top: 6px;" CssClass="btn  btn-primary w3-btn w3-blue" OnClick="btnDamage_Click">Damage Items</asp:LinkButton>*@
+            <button id="btnDamage" Style="padding-left: 5px; width: 120%; height: 28px; font-size: 12px; padding-top: 6px;" Class="btn  btn-primary w3-btn w3-blue" OnClick="btnDamage_Click()">Damage Items</button>
+        </div>
+        <div class="col-md-2 col-sm-4 col-lg-2 col-xs-6" style="margin-top: 5px">
+            @*<asp:LinkButton ID="freeze" Style="width: 107%; padding-left: 5px; height: 28px; font-size: 12px; padding-top: 6px;"
+                CssClass="btn  btn-primary w3-btn w3-green" runat="server" OnClick="freeze_Click">Capture Final Items</asp:LinkButton>*@
+            <button id="freeze" Style="width: 107%; padding-left: 5px; height: 28px; font-size: 12px; padding-top: 6px;"
+                    Class="btn  btn-primary w3-btn w3-green" OnClick="freeze_Click()">
+                Capture Final Items
+            </button>
+        </div>
+        <div class="col-md-1 col-sm-2 col-lg-1 col-xs-3" style="margin-top: 5px">
+            @*<asp:LinkButton ID="ExportTo" runat="server" Style="padding-left: 5px; width: 116%; height: 28px; font-size: 12px; padding-top: 6px;" CssClass="btn  btn-primary w3-btn w3-teal" OnClick="ExportTo_Click"><i class="fa fa-print"></i> Print</asp:LinkButton>*@
+            <button id="ExportTo" Style="padding-left: 5px; width: 116%; height: 28px; font-size: 12px; padding-top: 6px;" Class="btn  btn-primary w3-btn w3-teal" OnClick="ExportTo_Click()"><i class="fa fa-print"></i> Print</button>
+        </div>
+        <div class="col-md-1 col-sm-2 col-lg-1 col-xs-3" style="margin-top: 5px">
+
+            @*<asp:LinkButton ID="Viewlist" runat="server" Style="width: 107%; padding-left: 5px; height: 28px; font-size: 12px; padding-top: 6px;" CssClass="btn  btn-primary w3-btn w3-teal" OnClick="Viewlist_Click"><i class="fa fa-list"></i> List</asp:LinkButton>*@
+            <button id="Viewlist" Style="width: 107%; padding-left: 5px; height: 28px; font-size: 12px; padding-top: 6px;" Class="btn  btn-primary w3-btn w3-teal" OnClick="Viewlist_Click()"><i class="fa fa-list"></i> List</button>
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-4  col-xs-6" style="margin-top: 5px" id="divHireReport" runat="server">
+            @*<asp:LinkButton ID="btnHireReport" runat="server" OnClick="btnHireReport_Click" CssClass="btn  btn-primary w3-btn w3-teal" Style="padding-left: 5px; width: 92%; height: 28px; font-size: 12px; padding-top: 6px;"><i class="fa fa-print"></i>&nbsp;Daily Hire Report</asp:LinkButton>*@
+            <button id="btnHireReport" OnClick="btnHireReport_Click()" Class="btn  btn-primary w3-btn w3-teal" Style="padding-left: 5px; width: 92%; height: 28px;display:none; font-size: 12px; padding-top: 6px;"><i class="fa fa-print"></i>&nbsp;Daily Hire Report</button>
+        </div>
+    </div>
+</div>
+
+<div class="row"></div>
+<div class="row" style="width:98%;display:none;" id="divTotalDailyHireCost">
+    <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12"></div>
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-7">
+        <label><b>Total Daily Job Hire Cost:</b></label>
+    </div>
+    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2" style="float:left;margin-left:-20px;width: 110px;">
+        @*<asp:TextBox ID="txtTotalDailyHireCost" runat="server" CssClass="form-control" Enabled="false"></asp:TextBox>*@
+        <input type="text" id="txtTotalDailyHireCost" value="@ViewBag.TotalDailyHireCost" Class="form-control" disabled />
+    </div>
+</div>
+@*<%--
+    <div class="row">
+    </div>--%>*@
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="RegisterInventoryList" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblRegisterInventoryList" class="table table-striped " style="width: 100%">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th class="setWidth0" style="display:none;"></th>
+                        <th class="setWidth1">Material Type</th>
+                        <th class="setWidth2">Item Code</th>
+                        <th class="setWidth3">Item Desc</th>
+                        <th class="setWidth4">Delivered Qty</th>
+                        <th class="setWidth5">Return Qty</th>
+                        <th class="setWidth6">Damage Qty</th>
+                        <th class="setWidth7">On Job</th>
+                        <th class="setWidth8">Item Weight (kg)</th>
+                        <th class="setWidth9">Total Weight (kg)</th>
+                        <th class="setWidth10">UOM</th>
+                        <th class="setWidth11">Daily Hire Rate</th>
+                        <th class="setWidth12">Total Daily Hire Cost</th>
+
+                    </tr>
+                </thead>
+                <tbody id="tbodyRegisterInventoryList" style="width:100%"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 98%">
+    <div class="clearfix"></div>
+
+    <div class="double-scroll">
+    </div>
+
+</div>
+<div id="freezepopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 158px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure that you want to finalise the material list?</label>
+                @*<%-- <label runat="server" id="Label7">Do you wish to confirm?</label>--%>*@
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnoptimizeyes" runat="server" OnClick="btnoptimizeyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnoptimizeyes" OnClick="btnoptimizeyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnoptimizeno" runat="server" OnClick="btnoptimizeno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnoptimizeno" OnClick="btnoptimizeno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>

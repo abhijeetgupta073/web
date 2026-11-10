@@ -1,0 +1,431 @@
+﻿
+@{
+    ViewBag.Title = "RequestedBy";
+}
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #dataforgrid_length {
+        margin-top: -16px;
+    }
+    /*Window Size 67 %*/
+    @@media (min-width: 1900px) and (max-width: 2050px) {
+        #btnExport {
+            margin-bottom: -43px;
+        }
+    }
+    /*.dataTables_length {
+    display: none !important;
+    }*/
+</style>
+
+<script>
+    $(function () {
+
+        ddlSiteDropdown();
+        GetRequestBy();
+
+        var registerid = getParameterByName('RID');
+
+        if (registerid != null && registerid != "" && registerid != "0") {
+            $('#btnBack').show();
+        } else {
+            $('#btnBack').hide();
+        }
+    });
+
+    function ddlSitesLocation() {
+        GetRequestBy();
+    }
+
+    //function ddlSiteDropdown() {
+    //    var id = getParameterByName('id');
+    //    var SiteLocId = getParameterByName('SiteLocId');
+    //    $.ajax({
+    //        url: '/RequestedBy/ddlSiteDropdown',
+    //        type: 'POST',
+    //        data: JSON.stringify({ id: id, SiteLocId: SiteLocId }),
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        async: false,
+    //        success: function (response) {
+    //            data = response;
+    //            var optionAppend = "<option value='0'>Select Site</option>";
+    //            $.each(data, function (index, obj) {
+    //                optionAppend += "<option value=" + obj.SiteLocID + ">" + obj.SiteLocation + "</option>";
+    //            });
+    //            $('#ddlSitesLoc').empty().append(optionAppend);
+    //        }
+    //    });
+    //}
+    function ddlSiteDropdown() {
+        var id = getParameterByName('id');
+        var SiteLocId = getParameterByName('SiteLocId');
+        $.ajax({
+            url: '/RequestedBy/ddlSiteDropdown',
+            type: 'POST',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                data = response;
+                var optionAppend = "<option value='0'>Select Site</option>";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.SiteLocID + ">" + obj.SiteLocation + "</option>";
+                });
+                $('#ddlSitesLoc').empty().append(optionAppend);
+                if (SiteLocId && SiteLocId !== "0") {
+                    $('#ddlSitesLoc').val(SiteLocId);
+                }
+            }
+        });
+    }
+
+
+    let Status = '';
+
+    function GetRequestBy() {
+        var str = "";
+        str += '<table id="dataforgrid" class="table table-striped display" style="width:100%;table-layout:fixed;font-size:12px">';
+        str += "<thead><tr>";
+        str += "<th style=''>#</th>";
+        str += "<th style='text-align:center;display:none'>RequestByID</th>";
+        str += "<th style='text-align:center;display:none'>SiteLocID</th>";
+        str += "<th>Requested By</th>";
+        str += "<th>Status</th>";
+        str += "</tr></thead><tbody>";
+
+        var id = getParameterByName('id');
+        let siteId = $('#ddlSitesLoc').val();
+        siteId = siteId == null ? '' : siteId;
+
+        $.ajax({
+            url: '/RequestedBy/GetRequestByData',
+            type: 'POST',
+            data: JSON.stringify({ id: id, SiteID: siteId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                var getdata = response;
+
+                str += "<tr id='row_9999' style='display:none'><td  style='width:10%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                str += "<td  style='text-align:center;display:none'>0</td>";
+                str += "<td  style='text-align:center;display:none'>0</td>";
+                str += "<td  style='text-align:center;'></td>";
+                str += "<td  style='text-align:center;'></td></tr>";
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var RequestByID = getdata[i].RequestById == null ? "" : getdata[i].RequestById;
+                        var SiteLocID = getdata[i].SiteLocId == null ? "" : getdata[i].SiteLocId;
+                        var RequestBy = getdata[i].RequestBy == null ? "" : getdata[i].RequestBy;
+                        var Status = getdata[i].Status == null ? "" : getdata[i].Status;
+                        var statusText = Status == 1 ? "Active" : "InActive";
+
+                        str += "<tr>";
+                        str += "<td>";
+                        str += "<a class='fa fa-pencil rb-edit'></a>&nbsp;&nbsp;";
+                        str += "<a class='fa fa-trash rb-delete'></a>";
+                        str += "</td>";
+                        str += "<td style='text-align:center;display:none'>" + RequestByID + "</td>";
+                        str += "<td style='text-align:center;display:none'>" + SiteLocID + "</td>";
+                        str += "<td>" + RequestBy + "</td>";
+                        str += "<td>" + statusText + "</td>";
+                        str += "</tr>";
+                    }
+                    $("#LoadingPanel1").css("display", "none");
+                }
+
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+
+                var table = $('#dataforgrid').DataTable({
+                    bSort: false,
+                    processing: true,
+                    searching: true,
+                    info: false,
+                    pageLength: 50,
+                    autoWidth: true,
+                    scrollX: true,
+                    scrollCollapse: true,
+                    scrollY: "60vh",
+                    fixedHeader: true,
+                    fixedColumns: {
+                        leftColumns: 1
+                    },
+                    dom: 'lBfrtip',
+                    buttons: [{
+                        extend: 'csvHtml5',
+                        title: 'Requested By',
+                        exportOptions: {
+                            columns: [3, 4]
+                        }
+                    }],
+                    initComplete: function () {
+                        $("#dataforgrid_length").children().html(
+                            '<button id="btnaddRequestBy" type="button" class="w3-btn w3-teal fa fa-plus" style="margin-bottom:-43px;">&nbsp;Add New Requested By</button>' +
+                            '<button id="btnExport" type="button" class="w3-btn w3-teal Export" style="margin-left:202px;height:26px;padding-top:3px; margin-bottom:-7px;">' +
+                            '<i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>'
+                        );
+
+                        $("#btnaddRequestBy").click(function () {
+                            if (ValidateInactiveSite()) return false;
+                            if ($('#ddlSitesLoc').val() != 0) {
+                                var trow = $(this).parent().parent().siblings()[2].childNodes[0];
+                                var row = table.row(trow);
+                                row.child(EditingRequestBy(0)).show();
+                            } else {
+                                CustomAlert({ Result: "Failed", Message: "Please Select Site." });
+                            }
+                        });
+                        $(".Export").click(function () {
+                            $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+                        });
+
+                        $('#dataforgrid tbody').on('click', '.rb-delete', function () {
+                            if (ValidateInactiveSite()) return false;
+                            var tr = $(this).closest('tr');
+                            var rowData = table.row(tr).data();
+                            var RequestById = rowData[1];
+                            $("#hdnRequestedByID").val(RequestById);
+                            $("#Deletemodal").css("display", "block");
+                        });
+
+                        $('#dataforgrid tbody').on('click', '.rb-edit', function () {
+                            if (ValidateInactiveSite()) return false;
+                            var tr = $(this).closest('tr');
+                            var row = table.row(tr);
+                            var visible = tr.hasClass("Edit");
+
+                            if (visible) {
+                                row.child.hide();
+                                tr.removeClass('Edit');
+                            } else {
+                                row.child(EditingRequestBy(row.data())).show();
+                                tr.addClass('Edit');
+                                var Status = row.data()[4];
+                                var StatusValue = (Status.toLowerCase() === "active") ? "1" : "0";
+                                tr.next('tr').find('#ddlRequestByStatus').val(StatusValue);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+
+    function EditingRequestBy(d) {
+        var id = getParameterByName('id');
+        $.ajax({
+            success: function (response) {
+            },
+            complete: function () {
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#savechange").click(function () {
+                    var $prevTr = $(this).closest('tr').prev('tr');
+                    var RequestedByID = 0;
+
+                    if ($prevTr.length > 0 && $prevTr.children().length > 1) {
+                        var cellText = $prevTr.children().eq(1).text().trim();
+                        RequestedByID = cellText !== '' ? parseInt(cellText) || 0 : 0;
+                    }
+                    var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+                    var secondrow = $(this).parent().parent().prev('div').children().find('input[type=number]');
+                    var sropdownval = $(this).parent().parent().prev('div').children().find('select');
+
+                    var RequestedBy = firstrow[0].value;
+                    var Status = sropdownval[0].value;
+                    let ddlSitesLoc = $('#ddlSitesLoc').val();
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+
+                    if (RequestedBy != "") {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/RequestedBy/SaveRequestedByData",
+                            data: JSON.stringify({ "RequestedByID": RequestedByID, "RequestedBy": RequestedBy, "ddlStatus": Status, "id": id, "UID": UID, "ddlSitesLoc": ddlSitesLoc }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response;
+                                if (result.Result == 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    GetRequestBy();
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                            }
+                        })
+                    } else {
+                        var Response = { Result: "Failed", Message: "Please Enter  Requested By." };
+                        CustomAlert(Response);
+                        $("#LoadingPanel1").css("display", "none");
+                        $("#btnsubmit").click();
+                    }
+                });
+            }
+        });
+
+        if (d == 0) {
+            return '<div class="col-lg-12">' +
+                '<div class="col-lg-4">' +
+                'Requested By <a style="color:red">*</a><input type="text" class="form-control" style="width:100%" required>' +
+                '</div><div class="col-lg-4">' +
+                'Status<select id="ddlRequestByStatus" style="width:100%" class="form-control" required><option value="1">Active</option><option value="0">InActive</option></select>' +
+                '</div></div>' +
+                '<div class="col-lg-12">' +
+                '<div class="col-lg-2">' +
+                '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>' +
+                '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>' +
+                '</div><div class="col-lg-2">' +
+                '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>' +
+                '</div><div class="col-lg-6"></div><div class="col-lg-2">' +
+                '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />' +
+                '</div></div>';
+        }
+        else {
+            var Status = d[4]; 
+            return '<div class="col-lg-12">' +
+                '<div class="col-lg-4">' +
+                'Requested By <a style="color:red">*</a><input type="text" class="form-control" value="' + d[3] + '" style="width:100%" required>' + // RequestBy name index 3 par
+                '</div><div class="col-lg-4">' +
+                'Status<select id="ddlRequestByStatus" style="width:100%" class="form-control" required>' +
+                '<option value="1">Active</option><option value="0">InActive</option></select>' +
+                '</div></div>' +
+                '<div class="col-lg-12">' +
+                '<div class="col-lg-2">' +
+                '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>' + // Update for edit
+                '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>' +
+                '</div><div class="col-lg-2">' +
+                '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>' +
+                '</div><div class="col-lg-6"></div><div class="col-lg-2">' +
+                '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />' +
+                '</div></div>';
+        }
+
+    }
+
+    function btnyes_Click() {
+
+        var RequestedById = $('#hdnRequestedByID').val();
+        var SitelocId = $('#ddlSitesLoc').val();
+        var ClientId = getParameterByName('id');
+        $.ajax({
+            url: '/RequestedBy/DeleteRequestedBy',
+            type: 'post',
+            data: { RequestedById: RequestedById, SitelocId: SitelocId, ClientId: ClientId },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response.Result == 'Success') {
+                    CustomAlert(response);
+                    GetRequestBy();
+                } else {
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+
+    function goBack() {
+        var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var RegisterId = getParameterByName('RID');
+        if (RegisterId != "") {
+            window.location.href = '/Register/Register?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientID + '&RID=' + RegisterId;
+        }
+    }
+
+    function ValidateInactiveSite() {
+        var siteName = $('#ddlSitesLoc option:selected').text();
+
+        if (siteName && siteName.toLowerCase().includes("(inactive)")) {
+            CustomAlert({
+                Result: "Failed",
+                Message: "This site is InActive. You cannot make any changes."
+            });
+            return true;
+        }
+
+        return false;
+    }
+  
+</script>
+
+
+<input type="hidden" id="hdnRequestedByID" />
+
+<div class="row">
+    <div class="col-lg-6 col-md-3 col-sm-4">
+        <h4 class="heading" style="color: #0070ba; font-size: 15px;">
+            <b>
+                <i class="fa fa-shopping-cart"></i>&nbsp;Requested By List
+            </b>
+        </h4>
+    </div>
+    <div class="col-lg-3 col-md-1 col-sm-1 col-xs-12 text-right p-0">
+        <button id="btnBack" Style="height: 24px; padding-top: 3px;display:none" Class="w3-btn w3-small  nln-bg w3-text-white" OnClick="goBack()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</button>
+    </div>
+
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+        <label id="siteddl">Site:</label>
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-10">
+        <select id="ddlSitesLoc" onchange="ddlSitesLocation();" style="Width:100%" class="form-control">
+        </select>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-xs-12 col-lg-9 col-md-12 col-sm-12">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>

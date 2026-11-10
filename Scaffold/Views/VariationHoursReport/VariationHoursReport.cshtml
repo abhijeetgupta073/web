@@ -1,0 +1,473 @@
+﻿<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+
+    /* Make sure the table can scroll horizontally on small screens */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    #gridMaterialType_length {
+        margin-top: -16px;
+    }
+
+    #gridVariationHoursReport {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+        #gridVariationHoursReport th, #gridVariationHoursReport td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            color: black;
+        }
+
+        #gridVariationHoursReport th {
+            /*background-color: black;
+            color: black;*/
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #gridVariationHoursReport td {
+            background-color: white;
+            color: black;
+        }
+
+    #LoadingPanel1 {
+        display: none;
+    }
+
+    .dataTables_wrapper .dt-buttons {
+        margin-bottom: 10px;
+        margin-left: 90%;
+        display: none;
+    }
+
+    .dataTables_length {
+        display: none;
+    }
+
+    button.dt-button:first-child, div.dt-button:first-child, a.dt-button:first-child, input.dt-button:first-child {
+        background-color: #009688 !important;
+        color: #fff !important;
+    }
+
+    .date-range label {
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    #txtToDate, #txtFromDate {
+        color: black;
+    }
+
+    .export-btn {
+        padding: 5px 10px;
+        background-color: #009688;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        margin-left: 10px;
+        margin-left: 40%;
+        margin-bottom: 10px;
+        width: 100%;
+        display: inline-block;
+    }
+
+    .date-range {
+        margin-left: 28px;
+    }
+
+    #btnExport {
+        float: right;
+        width: 100%;
+    }
+
+    #btnFilter {
+        margin-left: 8px
+    }
+
+    .input-container {
+        position: relative;
+        display: block;
+    }
+
+        .input-container input {
+            width: 100%;
+            padding-right: 30px;
+            box-sizing: border-box;
+        }
+
+    @@media (min-width: 768px) {
+        .export-btn {
+            width: auto;
+        }
+
+        #btnFilter, #btnReset {
+            width: auto;
+        }
+
+        .date-range {
+            display: flex;
+            align-items: center;
+        }
+
+            .date-range label {
+                margin-right: 10px;
+            }
+
+        .input-container {
+            width: auto;
+        }
+
+            .input-container input {
+                width: auto;
+            }
+
+        .date-range > * {
+            margin-right: 10px;
+        }
+    }
+
+    .calendar-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #888;
+    }
+
+        .calendar-icon i {
+            font-size: 16px;
+            color: black;
+        }
+
+    .responsive-container {
+        width: 100%;
+        padding: 15px;
+        box-sizing: border-box;
+        overflow-x: auto;
+    }
+
+    @@media (max-width: 1200px) {
+        .responsive-container {
+            padding: 10px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .responsive-container {
+            padding: 8px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .responsive-container {
+            padding: 5px;
+        }
+    }
+
+    .dflex {
+        display: flex;
+        align-items: center;
+    }
+
+    .wfitContent {
+        min-width: fit-content;
+    }
+</style>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <h4 class="heading" style="color: #0070ba; font-size: 15px;">
+            <b>
+                <i class="fa fa-clock"></i>&nbsp;Variation Hours Report
+            </b>
+        </h4>
+    </div>
+</div>
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 date-range" style=" margin-left: 3px;">
+    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12 dflex">
+        <label id="siteddl" style=" margin-left:0px; font-weight: bold; ">Site:</label>
+        <select id="ddlSites" onchange="ddlSites_SelectedIndexChanged()" style="width:100%" Class="form-control"></select>
+    </div>
+
+    <div class="col-lg-3 col-md-2 col-sm-12 col-xs-12 dflex">
+        <label for="txtFromDate" class="wfitContent">
+            From Date:
+        </label>
+        <div style="position: relative; width: 93%; margin-left: 6px;">
+            <input type="text"
+                   id="txtFromDate"
+                   placeholder="Select From Date"
+                   style="width: 100%; padding: 4px 30px 4px 10px; border: 1px solid #ccc; border-radius: 4px;" readonly />
+            <span class="calendar-icon" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+            </span>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-2 col-sm-12 col-xs-12 dflex">
+        <label for="txtToDate" class="wfitContent">
+            To Date:
+        </label>
+        <div style="position: relative; width: 93%; margin-left: 6px;">
+            <input type="text"
+                   id="txtToDate"
+                   placeholder="Select To Date"
+                   style="width: 100%; padding: 4px 30px 4px 10px; border: 1px solid #ccc; border-radius: 4px;" readonly />
+            <span class="calendar-icon" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+            </span>
+        </div>
+    </div>
+
+
+    <div class="col-lg-3 col-md-2 col-sm-12 col-xs-12">
+        <button id="btnFilter" style="padding: 5px 10px; background-color: #009688; margin-left: -17px; color: #fff; border: none; cursor: pointer;">Search</button>
+        <button id="btnReset" style="padding: 5px 10px; background-color: #f44336; color: #fff; border: none; cursor: pointer;">Reset</button>
+        <button id="btnExporttoCsv" style="padding: 5px 10px; background-color: #009688; color: #fff; border: none; cursor: pointer;  float: right; " onclick="exportToCsv()">Export to Excel</button>
+
+    </div>
+
+
+</div>
+
+@*<div id="LoadingPanel1">Loading...</div>*@
+<div id="loaddata" class="responsive-container">
+</div>
+
+<script>
+    $(function () {
+        SiteDropDown();
+        var Siteid = $('#ddlSites').val();
+        if (Siteid == undefined) {
+            Siteid = "";
+        }
+        GetVariationHoursReport();
+
+    });
+    $("#txtFromDate, #txtToDate").datepicker({
+        dateFormat: "dd-M-yy",
+        changeMonth: true,
+        changeYear: true,
+        onSelect: function (dateText, inst) {
+            $(this).val(dateText);
+        }
+    });
+    $("#btnFilter").on("click", function () {
+        var Fromdate = $("#txtFromDate").val();
+        var ToDate = $("#txtToDate").val();
+        if (Fromdate === "" && ToDate === "") {
+            var Response = { Result: "Failed", Message: "Please select both From Date and To Date." };
+            CustomAlert(Response);
+            return;
+        } else if (Fromdate === "") {
+            var Response = { Result: "Failed", Message: "Please select From Date." };
+            CustomAlert(Response);
+            return;
+        } else if (ToDate === "") {
+            var Response = { Result: "Failed", Message: "Please select To Date." };
+            CustomAlert(Response);
+            return;
+        }
+        var fromDateObj = $("#txtFromDate").datepicker('getDate');
+        var toDateObj = $("#txtToDate").datepicker('getDate');
+        if (fromDateObj !== null && toDateObj !== null && fromDateObj > toDateObj) {
+            var Response = { Result: "Failed", Message: "From Date must not be greater than To Date." };
+            CustomAlert(Response);
+            $("#txtFromDate").val("");
+            $("#txtToDate").val("");
+            return;
+        }
+        GetVariationHoursReport(Fromdate, ToDate);
+    });
+
+
+    function GetVariationHoursReport(Fromdate, ToDate) {
+        $("#LoadingPanel1").css("display", "block");
+        Fromdate = Fromdate || "All";
+        ToDate = ToDate || "All";
+        var id = getParameterByName('id');
+        var Siteid = $('#ddlSites').val();
+        $.ajax({
+            url: '/VariationHoursReport/GetVariationHoursReport',
+            type: 'POST',
+            data: JSON.stringify({ Fromdate: Fromdate, ToDate: ToDate, id: id, Siteid: Siteid }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getdata = response;
+                var str = "";
+
+                str += '<table id="gridVariationHoursReport" class="table table-striped display">';
+                str += "<thead><tr>";
+                str += "<th style='text-align:center;width:5%;color:black;font-weight:bold;'>Scaff Ref #</th>";
+                str += "<th style='text-align:center;width:8%;color:black;font-weight:bold;'>Built Date</th>";
+                str += "<th style='text-align:center;width:8%;color:black;font-weight:bold;'>Dismantle Date</th>";
+                str += "<th style='text-align:center;width:8%;color:black;font-weight:bold;'>Variation Date</th>";
+                str += "<th style='text-align:center;width:10%;color:black;font-weight:bold;'>Standing Days<br>(To Date)</th>";
+                str += "<th style='text-align:center;width:15%;color:black;font-weight:bold;'>Job Description</th>";
+                str += "<th style='text-align:center;width:13%;color:black;font-weight:bold;'>Work Carried Out</th>";
+                str += "<th style='text-align:center;width:8%;color:black;font-weight:bold;'>Variation Hours<br>(Total Daily Hours)</th>";
+                str += "<th style='text-align:center;width:8%;color:black;font-weight:bold;'>Variation Hours<br> (To Date)</th>";
+                str += "<th style='text-align:center;width:8%;color:black;font-weight:bold;'>Total Variation<br>Hours</th>";
+                str += "<th style='text-align:center;width:10%;color:black;font-weight:bold;'>Entered By</th>";
+                str += "</tr></thead><tbody>";
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var ScaffRef = getdata[i].ScaffRef == null ? "" : getdata[i].ScaffRef;
+                        var BuiltDate = getdata[i].BuiltDate == null ? "" : getdata[i].BuiltDate;
+                        var DismantleDate = getdata[i].DateOfDismantle == null ? "" : getdata[i].DateOfDismantle;
+                        var HireDaysToDate = getdata[i].HireDaysToDate == null ? "" : getdata[i].HireDaysToDate;
+                        var Date = getdata[i].Date == null ? "" : getdata[i].Date;
+                        var Description = getdata[i].JobDescription == null ? "" : getdata[i].JobDescription;
+                        var JobDescription = (Description.length > 50)
+                            ? Description.substring(0, 50) + '.....'
+                            : Description;
+                        var WorkCarriedOut = getdata[i].WorkCarriedOut == null ? "" : getdata[i].WorkCarriedOut;
+                        var VariationInHrs = getdata[i].VariationInHrs == null ? "" : getdata[i].VariationInHrs;
+                        var VariationHrsToDate = getdata[i].VariationHrsToDate == null ? "" : getdata[i].VariationHrsToDate;
+                        var TotalVariationHrs = getdata[i].TotalVariationHrs == null ? "" : getdata[i].TotalVariationHrs;
+                        var EnteredBy = getdata[i].EnteredBy == null ? "" : getdata[i].EnteredBy;
+
+
+                        str += "<tr>";
+                        str += "<td style='text-align:center;width:5%;'>" + ScaffRef + "</td>";
+                        str += "<td style='text-align:center;width:8%'>" + DateFormat(BuiltDate) + "</td>";
+                        str += "<td style='text-align:center;width:8%'>" + DateFormat(DismantleDate) + "</td>";
+                        str += "<td style='text-align:center;width:10%'>" + DateFormat(Date) + "</td>";
+                        str += "<td style='text-align:center;width:8%'>" + HireDaysToDate + "</td>";
+                        str += "<td style='text-align:center;width:15%' title='" + Description + "'>" + JobDescription + "</td>";
+                        str += "<td style='text-align:center;width:12%'>" + WorkCarriedOut + "</td>";
+                        str += "<td style='text-align:center;width:8%'>" + VariationInHrs + "</td>";
+                        str += "<td style='text-align:center;width:8%'>" + VariationHrsToDate + "</td>";
+                        str += "<td style='text-align:center;width:8%'>" + TotalVariationHrs + "</td>";
+                        str += "<td style='text-align:center;width:10%'>" + EnteredBy + "</td>";
+                        str += "</tr>";
+                    }
+                } else {
+
+                    $("#LoadingPanel1").css("display", "none")
+                    str += "<tr><td colspan='11' style='text-align:center;'>No data available</td></tr>";
+                }
+
+                str += "</tbody></table>";
+                $("#loaddata").html(str);
+
+                $('#gridVariationHoursReport').DataTable({
+                    "bSort": false,
+                    "processing": true,
+                    "searching": true,
+                    "info": false,
+                    "pageLength": 50,
+                    "autoWidth": true,
+                    "scrollX": true,
+                    "scrollY": "60vh",
+                    "scrollCollapse": true,
+                    "fixedHeader": true,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        {
+                            extend: 'excelHtml5',
+                            title: 'Variation Hours Report',
+                            text: '<i class="fa fa-file-excel-o"></i> Export to CSV', // Add icon, but this button will be hidden
+                            exportOptions: {
+                                columns: ':visible',
+                                format: {
+                                    body: function (data, row, column, node) {
+                                        if (column === 5) {
+                                            return getdata[row].JobDescription || "";
+                                        }
+                                        return data;
+                                    }
+                                }
+                            },
+                            customize: function (xlsx) {
+                                var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                $('row c[r^="F1"]', sheet).attr('s', '52');
+                                $('col', sheet).each(function (i, col) {
+                                    if (i === 5) {
+                                        $(col).attr('width', '30');
+                                    } else if (i === 6) {
+                                        $(col).attr('width', '30');
+                                    } else if (i === 10) {
+                                        $(col).attr('width', '30');
+                                    }
+                                    else {
+                                        $(col).attr('width', '15');
+                                    }
+                                });
+                                //$('row c[r^="A1"]', sheet).each(function () {
+                                //    $(this).remove(); // Remove the title cell from the first row
+                                //});
+                            }
+                        }
+                    ],
+
+                });
+
+
+                $("#LoadingPanel1").css("display", "none");
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                $("#LoadingPanel1").css("display", "none");
+                var Response = { Result: "Failed", Message: errorThrown };
+                CustomAlert(Response);
+            }
+        });
+    }
+
+    document.getElementById('btnReset').addEventListener('click', function () {
+        document.getElementById('txtFromDate').value = '';
+        document.getElementById('txtToDate').value = '';
+        document.getElementById('ddlSites').value = '';
+        GetVariationHoursReport();
+    });
+
+    function ddlSites_SelectedIndexChanged() {
+        $('#LoadingPanel1').css('display', 'block');
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var Siteid = $('#ddlSites').val();
+        if (Siteid == "" || Siteid == undefined) {
+            Siteid = "";
+        }
+        document.getElementById('txtFromDate').value = '';
+        document.getElementById('txtToDate').value = '';
+        GetVariationHoursReport();
+    }
+    function SiteDropDown() {
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        $('#LoadingPanel1').css('display', 'block');
+        $.ajax({
+            type: "POST",
+            url: "/RegisterList/SiteDropDown",
+
+            data: JSON.stringify({ id: id, UID: UID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+
+                var SiteData = response;
+                if (SiteData.length > 0) {
+                    $("#ddlSites").append('<option value="0"></option>');
+                    for (var i = 0; i < SiteData.length; i++) {
+                        $("#ddlSites").append("<option value='" + SiteData[i].SiteLocID + "'>" + SiteData[i].SiteLocation + "</option>");
+                    }
+                }
+            }
+
+        })
+    }
+
+    function exportToCsv() {
+        $('.buttons-excel').click();
+    }
+</script>
+    

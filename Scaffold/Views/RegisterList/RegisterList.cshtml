@@ -1,0 +1,1521 @@
+﻿
+@{
+    ViewBag.Title = "RegisterList";
+}
+
+<link href="~/Content/Css/jquery.datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Content/js/instascan.min.js"></script>
+
+<script src="~/Content/js/instascan.js"></script>
+<script type="text/javascript" src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+
+<script src="~/Content/js/qrcode.min.js?v1=1"></script>
+<script src="~/Content/js/bootbox.min.js"></script>
+@*<script src="~/Content/js/OfflineRegister.js?v1=3"></script>
+    <script src="~/Content/js/OfflineInspection.js"></script>*@
+<script src="~/Content/js/RegisterList.js?V1=77.2"></script>
+<script src="~/Content/js/jquery.datetimepicker.js"></script>
+<script src="~/Content/Js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+
+</head>
+
+<style>
+    .scafRefLegend {
+        text-align: center;
+        margin-bottom: 4px;
+    }
+
+    .scafLegendText {
+        display: inline-block;
+        font-size: 12px;
+        color: #555;
+      /*  border: 2px solid red;*/
+        padding: 2px 8px;
+        white-space: nowrap;
+    }
+    .tooltip-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltiptext {
+        visibility: hidden;
+        width: 160px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%; /* Position above the button */
+        left: 50%;
+        margin-left: -80px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        /* Adds a slight shadow around the tooltip */
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+        /* The arrow/pointer below the tooltip */
+        .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%; /* Positioned at the bottom of the tooltip */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+    .tooltip-container:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .button-30-blue {
+        background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+    }
+
+    .button-30-current {
+        background-image: radial-gradient(100% 100% at 100% 0, #a1abe0 0%, #303F9F 100%);
+    }
+
+    .button-30-purple {
+        background-image: radial-gradient(100% 100% at 100% 0, #cabbcc 0%, #7B1FA2 100%);
+    }
+
+    .button-30-green {
+        background-image: radial-gradient(100% 100% at 100% 0, #95a87b 0%, #388E3C 100%);
+    }
+
+    .button-30-orange {
+        background-image: radial-gradient(100% 100% at 100% 0, #581661 0%, #90921e 100%);
+    }
+
+    .button-30-teal {
+        background-image: radial-gradient(100% 100% at 100% 0, #337ab7 0%, #00796B 100%);
+    }
+
+    .button-30-gray {
+        background-image: radial-gradient(100% 100% at 100% 0, #607d8b 0%, #757575 100%);
+    }
+
+    .button-30-cyan {
+        background-image: radial-gradient(100% 100% at 100% 0, #607d8b 0%, #A39480 100%);
+    }
+
+    .button-30 {
+        align-items: center;
+        appearance: none;
+        /*        background-image: radial-gradient(100% 100% at 100% 0, #5adaff 0, #5468ff 100%);
+    */ border: 2px;
+        border-radius: 3px;
+        box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(58, 65, 111, .5) 0 -3px 0 inset;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-flex;
+        font-family: "JetBrains Mono",monospace;
+        height: 26px;
+        justify-content: center;
+        line-height: 1;
+        list-style: none;
+        overflow: hidden;
+        padding-left: 16px;
+        padding-right: 16px;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        transition: box-shadow .15s,transform .15s;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        white-space: nowrap;
+        will-change: box-shadow,transform;
+        font-size: 14px;
+    }
+
+        .button-30:focus {
+            box-shadow: #006400 0 0 0 5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #006400 0 -3px 0 inset;
+        }
+
+        .button-30:hover {
+            box-shadow: #006400 0 0 0 5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #006400 0 -3px 0 inset;
+            transform: translateY(-2px);
+        }
+
+        .button-30:active {
+            box-shadow: #3c4fe0 0 3px 7px inset;
+            transform: translateY(2px);
+        }
+
+    .calendar-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: black;
+    }
+
+    #PipelineStartDate {
+        width: 100%;
+        padding-right: 30px; /* Adjust as needed to prevent text overlap */
+        box-sizing: border-box;
+    }
+
+    #BuildDate {
+        width: 100%;
+        padding-right: 30px; /* Adjust as needed to prevent text overlap */
+        box-sizing: border-box;
+    }
+
+    .calendar-icon {
+        cursor: pointer;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+    /*.setWidth1,.setWidth2,.setWidth41 {
+         min-width: 16px !important;
+     }
+    .setWidth15,.setWidth30,.setWidth38,.setWidth39 {
+         min-width: 60px !important;
+         max-width: 60px !important;
+     }
+      .setWidth3,.setWidth4,.setWidth5,.setWidth12,.setWidth40{
+         min-width: 70px !important;
+     }
+       .setWidth6,.setWidth8,.setWidth9,.setWidth10,.setWidth14,.setWidth16,.setWidth17,.setWidth18,.setWidth23,.setWidth24,.setWidth25,.setWidth26,.setWidth30,.setWidth31,.setWidth32,.setWidth34{
+         min-width: 90px !important;
+     }
+       .setWidth13,.setWidth20,.setWidth21,.setWidth22,.setWidth27,.setWidth28,.setWidth29,.setWidth36,.setWidth37{
+         min-width: 110px !important;
+     }
+       .setWidth7,.setWidth19 {
+         min-width: 120px !important;
+     }
+    .setWidth11,.setWidth33,.setWidth35{
+         min-width: 200px !important;
+     }*/
+
+    .setWidth1, .setWidth2, .setWidth41 {
+        min-width: 16px !important;
+    }
+
+    .setWidth15, .setWidth30, .setWidth38, .setWidth37 {
+        /*min-width: 60px !important;*/
+        max-width: 60px !important;
+    }
+
+    .setWidth6 {
+        min-width: 140px !important;
+        max-width: 140px !important;
+        width: 140px !important;
+    }
+
+    .setWidth3, .setWidth4, .setWidth12, .setWidth39, .setWidth40 {
+        /*min-width: 70px !important;*/
+        max-width: 90px !important
+    }
+
+    .setWidth5 {
+        max-width: 100px !important
+    }
+
+    .setWidth8, .setWidth9, .setWidth10, .setWidth14, .setWidth16, .setWidth17, .setWidth18, .setWidth23, .setWidth24, .setWidth25, .setWidth26, .setWidth30, .setWidth31, .setWidth32, .setWidth34, .setWidth36, .setWidth13 {
+        /*min-width: 90px !important;*/
+        max-width: 99px !important;
+    }
+
+    .setWidth13, .setWidth20, .setWidth21, .setWidth22, .setWidth27, .setWidth28, .setWidth29, .setWidth42 {
+        /*min-width: 110px !important;*/
+    }
+
+    .setWidth7, .setWidth19 {
+        /*min-width: 120px !important;*/
+    }
+
+    .setWidth33, .setWidth35 {
+        /*min-width: 200px !important;*/
+    }
+
+    .setWidth11 {
+        min-width: 328px !important;
+    }
+
+    .setWidth8, .setWidth6 {
+        /*display:inline-table;*/ /*// Commented on 23-May-2022*/
+        word-break: break-word; /*uncommented on 21 feb 2023 */
+    }
+
+    .thSearch {
+        border-radius: 5px;
+        border: 1px solid;
+    }
+
+    .requiredColumn {
+        border-color: red;
+    }
+
+    .table thead {
+        background-color: lightgray;
+        /*padding: 10px 18px;*/
+        border-bottom: 0px !important;
+        /*color: black;
+           font-size: 15px;*/
+    }
+
+    .table {
+        border-collapse: collapse;
+    }
+
+        .table td, .table th {
+            border: 1px solid #ddd;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .table tr:hover {
+            background-color: #ddd;
+        }
+</style>
+<style>
+    .RadInput_Metro .riHover, html body .RadInputMgr_Metro {
+        border-color: #e5e5e5 !important;
+    }
+
+    .rgFilterRow .riSingle .riTextBox {
+        border-radius: 4px;
+    }
+
+    .rgFilterBox {
+        border-radius: 4px;
+    }
+
+    .RadComboBoxDropDown_Simple .rcbHovered {
+        background-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbInner {
+        border-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbActionButton {
+        border-color: #ffffff !important;
+        background-color: #ffffff !important;
+        /*height: 24px !important;*/
+    }
+
+    html .RadComboBox .rcbInner, html .RadComboBox .rcbActionButton {
+        border-radius: 4px;
+        /*height: 27px;*/
+    }
+
+
+    #siteddl {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    #ddlLocations {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+    #ddlbuilding {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+    #lblWorkGroup {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lbldisciplines {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+    #lblSubGroup {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+    #lblSupervisor {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+    #lblbuilding {
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    #divbuilding .col-lg-4 {
+        min-width: 140px;
+    }
+    td {
+        text-align: left;
+    }
+
+    .double-scroll {
+        width: auto;
+    }
+
+    #ctl00_ContentPlaceHolder1_GridRegiterList_ctl00_ctl02_ctl00_RebindGridButton {
+        color: white !important;
+        font-weight: 500;
+    }
+
+    .RadGrid_Metro .rgHeader {
+        color: #767676;
+        background-color: lightgray;
+    }
+
+
+
+    @@media (max-width:714px) {
+        #showBuilt {
+            font-size: 10px;
+        }
+
+        #bttnShowAll {
+            font-size: 10px;
+            width: 100% !important;
+            display: none !important;
+        }
+
+        #btnShowall2 {
+            font-size: 10px;
+            width: 100% !important;
+            display: block !important;
+        }
+
+        #getCamera {
+            font-size: 10px;
+            width: 100% !important;
+            display: none !important;
+        }
+
+        #btngetCamera {
+            font-size: 10px;
+            width: 100% !important;
+            display: block !important;
+        }
+
+        #btnaddrigistergrid {
+            font-size: 10px;
+            display: none !important;
+        }
+
+        #btnaddregjob {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        #bttnshowcompleted {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #ExportToCsvButton {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #txtFlagRegister {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #bttnShowCurrent {
+            font-size: 10px;
+            width: 100% !important;
+            display: none !important;
+        }
+
+        #btnshoqcurrent2 {
+            font-size: 10px;
+            width: 100% !important;
+            display: block !important;
+        }
+
+        #btnofline {
+            font-size: 10px;
+            width: 100% !important;
+            /*display: block !important;*/
+            display: none !important;
+        }
+
+        #btnOfflineLink {
+            font-size: 10px;
+            width: 100% !important;
+            /*display: none !important;*/
+            display: block !important;
+        }
+    }
+
+    @@media (min-width:1090px) and (max-width:1500px) {
+        .Divmargin-top {
+            margin-top: 10px;
+        }
+
+        #btnshoqcurrent2 {
+            display: none !important;
+        }
+
+        #btnShowall2 {
+            display: none !important;
+        }
+
+        #btnaddregjob {
+            display: none !important;
+        }
+
+        #btngetCamera {
+            display: none !important;
+        }
+
+        #btnofline {
+            display: none !important;
+        }
+
+        #showBuilt {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 100%;
+            display: block !important;
+        }
+
+        #bttnShowAll {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 85% !important;
+            display: block !important;
+        }
+
+        #getCamera {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 85% !important;
+            display: block !important;
+        }
+
+        #btnOfflineLink {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 85% !important;
+            display: block !important;
+        }
+
+        #btnaddrigistergrid {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 100%;
+            display: block !important;
+        }
+
+        #bttnshowcompleted {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 100%;
+            display: block !important;
+        }
+
+        #ExportToCsvButton {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 100%;
+            display: block !important;
+        }
+
+        #txtFlagRegister {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 100%;
+            display: block !important;
+        }
+
+        #bttnShowCurrent {
+            margin-top: 0px;
+            font-size: 12px;
+            width: 100%;
+            display: block !important;
+        }
+    }
+
+    @@media (min-width:700px) and (max-width:1090px) {
+        #btnGetOfflineRegisterData {
+            font-size: 10px;
+            width: 90% !important;
+        }
+
+        #showBuilt {
+            font-size: 10px;
+            width: 100% !important;
+        }
+
+        #btnOfflineLink {
+            font-size: 10px;
+            width: 100% !important;
+            display: block !important;
+            margin-top: 0px !important;
+        }
+
+        #bttnShowAll {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #getCamera {
+            font-size: 10px;
+            width: 100%;
+            padding-left: 10px;
+            margin-top: 0px !important;
+        }
+
+        #btnaddrigistergrid {
+            font-size: 10px;
+            width: 100%;
+            margin-top: 0px !important;
+        }
+
+        #bttnshowcompleted {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #txtFlagRegister {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #ExportToCsvButton {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #bttnShowCurrent {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #btnshoqcurrent2 {
+            display: none !important;
+        }
+
+        #btnShowall2 {
+            display: none !important;
+        }
+
+        #btnaddregjob {
+            display: none !important;
+        }
+
+        #btngetCamera {
+            display: none !important;
+        }
+
+        #btnofline {
+            display: none !important;
+        }
+    }
+
+    @@media (min-width:844px) and (max-width:990px) {
+        #showBuilt {
+            font-size: 10px;
+        }
+
+        #bttnShowAll {
+            font-size: 10px;
+        }
+
+        #getCamera {
+            font-size: 10px;
+            margin-top: 9px;
+        }
+
+        #btnaddrigistergrid {
+            font-size: 10px;
+            margin-top: 9px;
+        }
+
+        #bttnshowcompleted {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #ExportToCsvButton {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #txtFlagRegister {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #bttnShowCurrent {
+            font-size: 10px;
+            width: 100%;
+        }
+
+        #btnshoqcurrent2 {
+            display: none !important;
+        }
+
+        #btnShowall2 {
+            display: none !important;
+        }
+
+        #btnaddregjob {
+            display: none !important;
+        }
+
+        #btngetCamera {
+            display: none !important;
+        }
+
+        #btnofline {
+            display: none !important;
+        }
+    }
+
+    @@media (min-width:768px) and (max-width:835px) {
+
+        #bttnShowAll {
+            font-size: 10px;
+        }
+
+        #getCamera {
+            margin-top: 9px !important;
+            font-size: 10px;
+            width: 100% !important;
+        }
+
+        #btnOfflinedocs {
+            margin-top: 9px !important;
+            width: 100% !important;
+            /*display: none !important;*/
+            display: block !important;
+        }
+
+        #btnGetOfflineRegisterData {
+            margin-top: 9px !important;
+            width: 100% !important;
+            /*display: none !important;*/
+            display: block !important;
+        }
+
+        #btnOfflineLink {
+            margin-top: 9px;
+            font-size: 10px;
+            width: 100% !important;
+            /*display: none !important;*/
+            display: block !important;
+        }
+
+
+        #btnofline {
+            font-size: 10px;
+            /*display: block !important;*/
+            display: none !important;
+            padding-left: 5px;
+        }
+
+        #btnaddrigistergrid {
+            font-size: 10px;
+            margin-top: 9px !important;
+        }
+
+
+        #btnOfflineLink {
+            margin-top: 9px;
+        }
+
+        #ExportToCsvButton {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+
+        #txtFlagRegister {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+    }
+
+    @@media (min-width:200px) and (max-width:550px) {
+        #btnaddregjob {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        #btnofline {
+            font-size: 10px;
+            width: 50px !important;
+            /*display: block !important;*/
+            display: none !important;
+        }
+
+        #bttnshowcompleted {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+
+        #ExportToCsvButton {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+
+        #txtFlagRegister {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+
+        #bttnShowCurrent {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+
+        #showBuilt {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+
+        #bttnShowAll {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+
+        #getCamera {
+            font-size: 10px;
+        }
+
+        #btnOfflinedocs {
+            margin-top: 9px !important;
+            width: 100% !important;
+            /*display: none !important;*/
+            display: block !important;
+        }
+
+        #btnGetOfflineRegisterData {
+            margin-top: 9px !important;
+            width: 100% !important;
+            /*display: none !important;*/
+            display: block !important;
+        }
+
+        #btnOfflineLink {
+            font-size: 10px;
+            padding-left: 0px;
+            width: 100% !important;
+            /*display: none !important;*/
+            display: block !important;
+        }
+
+        #btnaddrigistergrid {
+            font-size: 10px;
+            padding-left: 0px;
+        }
+    }
+
+    #bttnShowAll {
+        /*box-shadow: 5px 10px #888888;*/
+    }
+
+
+    .buttonRed {
+        height: 26px;
+        padding-top: 4px;
+        /*box-shadow: inset 0 1px #fdfdfd, inset 0 0 0 1px #eaeaea, 0 1px #a8a8a8, 0 3px #bbbbbb, 0 4px #a8a8a8, 0 5px 2px rgba(0, 0, 0, 0.25);*/
+    }
+
+    .buttonBlue {
+        height: 26px;
+        padding-top: 4px;
+        /*box-shadow: inset 0 1px #fdfdfd, inset 0 0 0 1px #eaeaea, 0 1px #a8a8a8, 0 3px #bbbbbb, 0 4px #a8a8a8, 0 5px 2px rgba(0, 0, 0, 0.25);*/
+    }
+
+    .buttonPurple {
+        height: 26px;
+        padding-top: 4px;
+        /*box-shadow: inset 0 1px #fdfdfd, inset 0 0 0 1px #eaeaea, 0 1px #a8a8a8, 0 3px #bbbbbb, 0 4px #a8a8a8, 0 5px 2px rgba(0, 0, 0, 0.25);*/
+    }
+
+    .buttonGreen {
+        height: 26px;
+        padding-top: 4px;
+        /*box-shadow: inset 0 1px #fdfdfd, inset 0 0 0 1px #eaeaea, 0 1px #a8a8a8, 0 3px #bbbbbb, 0 4px #a8a8a8, 0 5px 2px rgba(0, 0, 0, 0.25);*/
+    }
+
+    .buttonAdd {
+        /*box-shadow: inset 0 1px #fdfdfd, inset 0 0 0 1px #eaeaea, 0 1px #a8a8a8, 0 3px #bbbbbb, 0 4px #a8a8a8, 0 5px 2px rgba(0, 0, 0, 0.25);*/
+    }
+
+    .ButtonQRCode {
+        /*box-shadow: inset 0 1px #fdfdfd, inset 0 0 0 1px #eaeaea, 0 1px #a8a8a8, 0 3px #bbbbbb, 0 4px #a8a8a8, 0 5px 2px rgba(0, 0, 0, 0.25) !important;*/
+    }
+
+    .btnOffline {
+        box-shadow: inset 0 1px #fdfdfd, inset 0 0 0 1px #eaeaea, 0 1px #a8a8a8, 0 3px #bbbbbb, 0 4px #a8a8a8, 0 5px 2px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .w3-btn:hover, .w3-btn-block:hover, .w3-btn-floating:hover, .w3-btn-floating-large:hover {
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19) !important;
+    }
+
+    input[type=file] {
+        width: 90px;
+    }
+
+    .heading {
+        margin-bottom: 0px !important;
+    }
+
+    .button-30-masterjob {
+        background-image: radial-gradient(100% 100% at 100% 0, #9c27b0 0%, #4a148c 100%);
+    }
+</style>
+<script>
+       function SetDefaultValues() {
+           $('#hdnLoginUserID').val('@ViewBag.UserId');
+           $('#hdnOfflineEnabled').val('@ViewBag.OfflineEnabled');
+           if ($('#hdnOfflineEnabled').val() == 'True') {
+               $('#divOffline').css('display', 'block');
+               //$('#divOfflineInspection').css('display', 'block');//Commented on on 23-July-2021
+               $('#divOfflineUploadData').css('display', 'block');
+               //divOffline.Visible = false;
+               //divOfflineInspection.Visible = false;
+               //divOfflineUploadData.Visible = false;
+           }
+           //Added on on 23-July-2021
+           $('#hdnOfflineInspEnable').val('@ViewBag.OfflineInspEnable');
+           if ($('#hdnOfflineInspEnable').val() == 'True') {
+               $('#divOfflineInspection').css('display', 'block');
+               $('#divOfflineUploadData').css('display', 'block');
+           }
+           var EnUserRole = getParameterByName('UserRole');
+           var DecriptValues = Decrypt([EnUserRole]);
+           var UserRole = DecriptValues[0];//Added on 16-May-2022
+           if (UserRole == 75) {
+               $('#divOffline').css('display', 'none');
+               $('#divOfflineUploadData').css('display', 'none');
+               $('#divOfflineInspection').css('display', 'none');
+           }
+
+                $('#hdnSiteID').val('@ViewBag.SiteID');
+                $('#hdnLocationID').val('@ViewBag.LocationID');
+                $('#hdndisciplines').val('@ViewBag.Disciplines'.replace('&amp;', '&'));
+                $('#hdnWorkGroup').val('@ViewBag.WorkGroup');
+           $('#hdnSubGroup').val('@ViewBag.SubGroup');
+           $('#hdnBuilding').val('@ViewBag.BuildingName');
+            }
+
+</script>
+
+<input type="hidden" id="hdnOfflineStatus" />
+<input type="hidden" id="hdnCurrentDate" />
+<input type="hidden" id="hdnClientID" />
+<input type="hidden" id="hdnRegisterID" />
+<input type="hidden" id="hdnSiteID" />
+<input type="hidden" id="hdnLocationID" />
+<input type="hidden" id="hdndisciplines" />
+<input type="hidden" id="hdnLoginUserID" />
+<input type="hidden" id="hdnOfflineEnabled" />
+<input type="hidden" id="hdnOfflineInspEnable" />
+<input type="hidden" id="hdnWorkGroup" />
+<input type="hidden" id="hdnSubGroup" />
+<input type="hidden" id="hdnBuilding" />
+<div id="customLoader" style="display:none;position: fixed; z-index: 999; height: 100%; width: 100%; top: 0; left: 0; background-color: black; filter: alpha(opacity=60); opacity: 0.3; -moz-opacity: 0.8;">
+    <div style="z-index: 99999; margin: 16% 48%; padding: 10px; width: 150px; border-radius: 10px; filter: alpha(opacity=100); opacity: 1; -moz-opacity: 1;">
+        <img src="/Images/loading.gif" style="height: 128px; width: 128px;" />
+        <p class="w3-margin-left"><b>Please Wait.......</b></p>
+    </div>
+</div>
+<div class="row">
+    <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span id="lblRigister" Font-Size="16px" Font-Bold="true">Job Register</span></b></h4>
+</div>
+<div class="row">
+
+    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4 hidden-xs tooltip-container">
+        @*<asp:LinkButton CssClass="w3-btn w3-red buttonRed " CausesValidation="false" ID="bttnshowcompleted" Style="width: 85%;" OnClick="bttnshowcompleted_Click" runat="server"><i class="fa fa-filter "></i>&nbsp;Show Completed </asp:LinkButton>*@
+        <button Class="button-30 button-30-blue" id="bttnshowcompleted" Style="width: 100%;" OnClick="bttnshowcompleted_Click()"><i class="fa fa-filter "></i>&nbsp;Show Completed </button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 tooltip-container">
+        @*<asp:LinkButton CssClass="w3-btn  w3-indigo buttonBlue" CausesValidation="false" ID="bttnShowCurrent" Style="width: 85%;" OnClick="bttnShowCurrent_Click" runat="server"><i class="fa fa-filter "></i>&nbsp; Show Current </asp:LinkButton>
+            <asp:LinkButton CssClass="w3-btn  w3-indigo buttonBlue" CausesValidation="false" ID="btnshoqcurrent2" Style="width: 85%; display: none" OnClick="bttnShowCurrent_Click" runat="server"><i class="fa fa-filter "></i></asp:LinkButton>*@
+
+        <button Class="button-30 button-30-current" id="bttnShowCurrent" Style="width: 100%;" OnClick="bttnShowCurrent_Click()"><i class="fa fa-filter "></i>&nbsp; Show Current </button>
+        <button Class="button-30 button-30-current" id="btnshoqcurrent2" Style="width: 100%; display: none" OnClick="bttnShowCurrent_Click()"><i class="fa fa-filter "></i></button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 hidden-xs tooltip-container">
+        @*<asp:LinkButton CssClass="w3-btn  w3-purple buttonPurple" CausesValidation="false" ID="showBuilt" Style="width: 85%;" OnClick="showBuilt_Click" runat="server"><i class="fa fa-filter "></i>&nbsp; Show Built </asp:LinkButton>*@
+        <button Class="button-30 button-30-purple" id="showBuilt" Style="width: 100%;" OnClick="showBuilt_Click()"><i class="fa fa-filter "></i>&nbsp; Show Built </button>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 tooltip-container">
+        @*<asp:LinkButton CssClass="w3-btn  w3-green buttonGreen " ID="bttnShowAll" Style="width: 85%;" OnClick="bttnShowAll_Click" runat="server"><i class="fa fa-filter "></i>&nbsp;Show All</asp:LinkButton>
+            <asp:LinkButton CssClass="w3-btn  w3-green buttonGreen " ID="btnShowall2" Style="width: 85%; display: none" OnClick="bttnShowAll_Click" runat="server"><i class="fa fa-filter "></i></asp:LinkButton>*@
+        <button Class="button-30 button-30-green" id="bttnShowAll" Style="width: 100% !important; " OnClick="bttnShowAll_Click()"><i class="fa fa-filter "></i>&nbsp;Show All</button>
+        <button Class="button-30 button-30-green" id="btnShowall2" Style="width: 100%; display: none" OnClick="bttnShowAll_Click()"><i class="fa fa-filter "></i></button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="padding: 0;">
+        <div id="btnalldivMasterJobsOnly">
+            <button class="button-30 button-30-masterjob" id="bttnMasterJobsOnly" style="width: 100%; height: 27px;" OnClick="bttnMasterJobsOnly_Click()">
+                <i class="fa fa-filter"></i>&nbsp;Master Jobs
+            </button>
+            <button class="button-30 button-30-masterjob" id="bttnMasterJobsOnly2" style="width: 100%; display: none;" OnClick="bttnMasterJobsOnly_Click()">
+                <i class="fa fa-filter"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 tooltip-container" id="btnalldivAddJob">
+        @*<asp:LinkButton CssClass="w3-btn w3-teal buttonAdd" CausesValidation="false" Style="height: 26px; width: 85%; padding-top: 3px" ID="btnaddrigistergrid" OnClick="btnaddnew_Click" runat="server"><i class="fa fa-plus "></i>&nbsp;Add Job</asp:LinkButton>
+            <asp:LinkButton CssClass="w3-btn w3-teal buttonAdd" CausesValidation="false" Style="height: 26px; width: 85%; padding-top: 3px; display: none" ID="btnaddregjob" OnClick="btnaddnew_Click" runat="server"><i class="fa fa-plus "></i>&nbsp;</asp:LinkButton>*@
+        <button Class="button-30 button-30-teal" Style="height: 26px; width: 100%; padding-top: 3px" id="btnaddrigistergrid" OnClick="btnaddnew_Click()"><i class="fa fa-plus"></i>&nbsp;Add Job</button>
+        <button Class="button-30 button-30-teal" Style="height: 26px; width: 100%; padding-top: 3px; display: none" id="btnaddregjob" OnClick="btnaddnew_Click()"><i class="fa fa-plus "></i>&nbsp;</button>
+    </div>
+
+</div>
+
+
+<div class="row">
+    <!--<div class="col-lg-2 col-md-3 col-sm-4 col-xs-5" id="divOffline" style="display:none">-->
+    @*<asp:LinkButton runat="server" ID="btnOfflineLink" Style="height: 26px; background-color: #bfc3c5; color: white;" CausesValidation="true" Width="80%" CssClass="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click"><i class="fa fa-wifi" aria-hidden="true"></i>&nbsp;Offline Register</asp:LinkButton>
+        <asp:LinkButton runat="server" ID="btnofline" Style="height: 26px; background-color: #bfc3c5; color: white; display: none" CausesValidation="true" Width="80%" CssClass="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click"><i class="fa fa-wifi" aria-hidden="true"></i>&nbsp;Offline Register</asp:LinkButton>*@
+    <!--<button id="btnOfflineLink" Style="height: 26px; font-size:small;background-color: #bfc3c5; color: white; Width:100%" Class="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click()"><i class="fa fa-wifi" aria-hidden="true"></i>&nbsp;Offline Job</button>
+        <button id="btnoflinee" Style="height: 26px; font-size:small;background-color: #bfc3c5; color: white; display: none; Width:100%" Class="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click"><i class="fa fa-wifi" aria-hidden="true"></i>&nbsp;Offline Job</button>
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-7" id="divOfflineInspection" style="display:none">-->
+    @*<asp:LinkButton runat="server" ID="btnOfflinedocs" Style="height: 26px; font-size:small; background-color: #bfc3c5; color: white;" CausesValidation="false" Width="85%" CssClass="btn btn-dark btnheight btnOffline" Onclick="btnOfflinedocs_Click"><i class="fa fa-wifi" aria-hidden="true"></i> Offline Inspection</asp:LinkButton>*@
+    <!--<button id="btnOfflinedocs" Style="height: 26px; font-size:small; background-color: #bfc3c5; color: white; Width:100%" Class="btn btn-dark btnheight btnOffline" Onclick="btnOfflinedocs_Click()"><i class="fa fa-wifi" aria-hidden="true"></i> Offline Inspection</button>
+    </div>-->
+    @*<div class="col-lg-2 col-md-3 col-sm-4 col-xs-7" id="divOfflineUploadData" style="display:none">*@
+    @*<asp:LinkButton runat="server" ID="btnGetOfflineRegisterData" Style="height: 26px; font-size:small; background-color: #bfc3c5; color: white;" CausesValidation="false" Width="100%" CssClass="btn btn-dark btnheight btnOffline" OnClientClick="UploadOfflineRegisterData();return false;"><i class="fa fa-wifi" aria-hidden="true"></i> Upload Data to Cloud</asp:LinkButton>*@
+    @*<button id="btnGetOfflineRegisterData" Style="height: 26px; font-size:small; background-color: #bfc3c5; color: white; Width:100%" Class="btn btn-dark btnheight btnOffline" OnClick="UploadOfflineRegisterData();return false;"><i class="fa fa-wifi" aria-hidden="true"></i> Upload Data to Cloud</button>*@
+    @*</div>*@
+    @*<%--add code on 13/02/2020.--%>*@
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-7" id="divCompleted" style="margin-top:11px; display: inline-flex; padding-left:12px;">
+        @*<asp:CheckBox runat="server" ID="checkHideCompleted" Checked="true" OnCheckedChanged="checkHideCompleted_CheckedChanged" AutoPostBack="true" />*@
+        <input type="checkbox" id="checkHideCompleted" onchange="checkHideCompleted_CheckedChanged()" checked />
+        <label style="margin-left: 8px;"><b>Hide Completed </b></label>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-1 col-xs-2">
+
+    </div>
+    <div class="col-lg-4 col-md-4 col-sm-1 col-xs-2">
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-1 col-xs-2">
+
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3 tooltip-container" id="btnQRCode" style="margin-top: 3px;">
+        <button type="button" id="getCamera" class="button-30 button-30-cyan ButtonQRCode" style="background-color: #450bf7; height: 26px; width: 100%; padding-top: 3px; color: white;"><i class="fa fa-qrcode"></i>&nbsp;Scan QR Code</button>
+        <button type="button" id="btngetCamera" class="button-30 button-30-cyan ButtonQRCode" style="background-color: #450bf7; height: 26px; width: 100%; padding-top: 3px; color: white; display: none"><i class="fa fa-qrcode"></i></button>
+    </div>
+
+</div>
+
+
+<div class="row">
+    @*<%-- <div class="col-lg-2 col-md-2 col-sm-1 col-xs-2" id="divOffline" runat="server">
+            <asp:LinkButton runat="server" ID="btnOfflineLink" Style="height: 26px; background-color: #bfc3c5; color: white;" CausesValidation="true" Width="80%" CssClass="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click"><i class="fa fa-wifi" aria-hidden="true"></i>&nbsp;Offline</asp:LinkButton>
+            <asp:LinkButton runat="server" ID="btnofline" Style="height: 26px; background-color: #bfc3c5; color: white; display: none" CausesValidation="true" Width="80%" CssClass="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click"><i class="fa fa-wifi" aria-hidden="true"></i></asp:LinkButton>
+        </div>--%>*@
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+            <label id="siteddl">Sites</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-9">
+            @*<asp:DropDownList ID="ddlSitesLoc" AutoPostBack="true" runat="server" AppendDataBoundItems="true" OnSelectedIndexChanged="ddlSites_SelectedIndexChanged" Width="100%" CssClass="form-control">
+                </asp:DropDownList>*@
+            <select id="ddlSites" onchange="ddlSites_SelectedIndexChanged()" style="width:100%" Class="form-control"></select>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+            <label id="ddlLocations">Location</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-9">
+            @*<asp:DropDownList ID="ddlLocaSite" AutoPostBack="true" OnSelectedIndexChanged="ddlLocaSite_SelectedIndexChanged" AppendDataBoundItems="true" runat="server" Width="100%" CssClass="form-control">
+                </asp:DropDownList>*@
+            <select id="ddlLocaSite" onchange="ddlLocaSite_SelectedIndexChanged()" style="Width:100%" Class="form-control"></select>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="divbuilding" style="display:flex;align-items:center;">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+            <label id="lblbuilding" style="white-space:nowrap;">Building / Module No.</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-9">
+            <select id="ddlBuilding" onchange="ddlBuilding_SelectedIndexChanged()" class="form-control"></select>
+        </div>
+    </div>
+
+</div>
+<div class="row" style="margin-top: 0px;" id="divWorkSubGroupsRegisterList">
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 Divmargin-top">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+            <label id="lblWorkGroup">Work Groups</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-9">
+            <select id="ddlWorkGroup" onchange="ddlWorkGroup_SelectedIndexChanged()" style="Width:100%" Class="form-control"></select>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 Divmargin-top">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+            <label id="lblSubGroup">Sub Groups</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-9">
+            <select id="ddlSubGroup" onchange="ddlSubGroup_SelectedIndexChanged()" style="Width:100%" Class="form-control"></select>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" id="divSupervisorRegisterList">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3">
+            <label id="lblSupervisor">Supervisor</label>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-9">
+            <select id="ddlSupervisor" onchange="ddlSupervisor_SelectedIndexChanged()" style="Width:100%" Class="form-control"></select>
+        </div>
+    </div>
+</div>
+@*</div>*@
+
+<div class="row">
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6">
+        <button type="button" id="ExportToCsvButton" class="button-30 button-30-teal" style="Width: 100%" onclick="ExportToCsvButton_Click()"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6">
+        <button type="button" id="txtFlagRegister" class="button-30 button-30-green" style="Width:100%" onclick="JobPendingForUpdate();"><i class="fa fa-caret-square-o-right"></i>&nbsp;Compliance Audit</button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6">
+        <button type="button" id="divClearAllButton" class="button-30 button-30-cyan" style="Width: 100%; background: #8c8181; " onclick="ClearAllFilter();"><i class="fa fa-close"></i>&nbsp;Clear All</button>
+    </div>
+    @*<div class="col-lg-1 col-sm-1 col-md-1 col-xs-1">
+            <asp:Button ID="txtFlagRegister" runat="server" CommandName="FlagRegister" CssClass="btn w3-btn w3-blue" Text="Job Pending For Update" Style="margin-left: -119px;" />
+        </div>*@
+
+    <div class="col-sm-6">
+        @*<%--<asp:HiddenField ID="imgload" Value="" runat="server" />--%>*@
+        <input type="hidden" id="tempimg" name="tempimg" />
+        <input type="hidden" id="hdnfrom" name="tempimg" />
+
+        @*<asp:LinkButton ID="btnQRCodeClick" runat="server" OnClick="btnQRCodeClick_Click" Style="display: none"></asp:LinkButton>*@
+        <button id="btnQRCodeClick" OnClick="btnQRCodeClick_Click()" Style="display: none"></button>
+
+        <div class="col-lg-2 col-md-2 col-sm-1 col-xs-0">
+            @*<%--<button type="button" id="getCamera" class="btn w3-btn w3-btn ButtonQRCode" style="background-color: #450bf7; height: 26px; width: 85%; padding-top: 3px">QR Code</button>--%>*@
+            <div class="nonsafari">
+                <div id="Div1" class="hdnCamerabefore" style="display: none; width: 200px;">
+                    <canvas id="canvas" width="640" height="480" style="width: 336px; height: 180px"></canvas>
+                </div>
+                <div class="row"></div>
+                <div class="row">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="RegisterList" style="color: black; width: 100%;margin-top:5px;">
+            @*<table id="tblRegisterList" class="table table-striped cell-border" style="width: 100%">*@
+            @*<thead style="background-color: #efefef; color: #716262;">*@
+            @*<table id="tblRegisterList" class="table" style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th class="setWidth0" style="display:none;" colorder="0" columnName="hidden0"></th>
+                            <th class="setWidth1" id="ChkCopyHistorical" colorder="1" columnName="Copy">Copy</th>
+                            <th class="setWidth1" id="UniqueInspection" style="display:none" colorder="2" columnName="GoOffline">Go Offline</th>
+                            <th class="setWidth2" colorder="3" columnName="Edit">Edit</th>
+                            <th class="setWidth3" colorder="4" columnName="JobStatus1">Job Status</th>
+                            <th class="setWidth3" style="display:none;" colorder="5" columnName="JobStatus2">Job Status</th>
+                            <th class="setWidth4" colorder="6" columnName="ScafRef">Scaf Ref #</th>
+                            <th class="setWidth5" colorder="7" columnName="ClientScafRef">Client Scaf Ref</th>
+                            <th class="setWidth6" colorder="8" columnName="WONo">WO No.</th>
+                            <th class="setWidth7" colorder="9" columnName="Location">Location</th>
+                            <th class="setWidth8" colorder="10" columnName="BuildingModuleNo">Building / Module No.</th>
+                            <th class="setWidth9" colorder="11" columnName="FloorLevel">Floor Level</th>
+                            <th class="setWidth10" colorder="12" columnName="Bearing">Bearing</th>
+                            <th class="setWidth11" colorder="13" columnName="ReasonForAccess1">Reason for Access. (Provide Detailed Description)</th>
+                            <th class="setWidth11" style="display:none;" colorder="14" columnName="ReasonForAccess2">Reason for Access. (Provide Detailed Description)</th>
+                            <th class="setWidth12" colorder="15" columnName="AssetFuncLoc">Asset # / Func. Loc</th>
+                            <th class="setWidth13" colorder="16" columnName="DateBuilt">Date Built</th>
+                            <th class="setWidth14" colorder="17" columnName="DaysSinceLastInsp">Days Since Last Insp.</th>
+                            <th class="setWidth15" colorder="18" columnName="Tonnage">Tonnage</th>
+                            <th class="setWidth16" colorder="19" columnName="DesignType">Design Type</th>
+                            <th class="setWidth17" colorder="20" columnName="MaterialType">Material Type</th>
+                            <th class="setWidth18" colorder="21" columnName="DutyRating">Duty Rating</th>
+                            <th class="setWidth19" colorder="22" columnName="DateOfDismantle">Date of Dismantle</th>
+                            <th class="setWidth20" colorder="23" columnName="InspectedBy">Inspected By</th>
+                            <th class="setWidth21" colorder="24" columnName="StandingDaysToDate">Standing Days to Date</th>
+                            <th class="setWidth22" colorder="25" columnName="TotalStandingDays">Total Standing Days</th>
+                            <th class="setWidth23" colorder="26" columnName="SAPNumber">SAP Number</th>
+                            <th class="setWidth24" colorder="27" columnName="ProjectType">Project Type</th>
+                            <th class="setWidth25" colorder="28" columnName="OwnerRef">Owner Ref</th>
+                            <th class="setWidth26" colorder="29" columnName="OwnerName">Owner Name</th>
+                            <th class="setWidth27" colorder="30" columnName="Site">Site</th>
+                            <th class="setWidth42" id="UniqueLongTermStructure" colorder="31" columnName="LongTermStructure">Long Term Structure</th>
+                            <th class="setWidth28" id="UniqueDiscipline" colorder="32" columnName="SubOwner">Sub Owner</th>
+                            <th class="setWidth29" id="UniqueDisciplineRep" colorder="33" columnName="SubOwnerRep">Sub Owner Rep</th>
+                            <th class="setWidth29" id="UniqueWorkGroup" colorder="34" columnName="WorkGroup">Work Group</th>
+                            <th class="setWidth29" id="UniqueSubGroup" colorder="35" columnName="SubGroup">Sub Group</th>
+                            <th class="setWidth30" colorder="36" columnName="ManHrsErect">Man Hrs Erect</th>
+                            <th class="setWidth31" colorder="37" columnName="ManHrsDismantle">Man Hrs Dismantle</th>
+                            <th class="setWidth32" colorder="38" columnName="ShiftAllocation">Shift Allocation</th>
+                            <th class="setWidth33" id="CreatedBy" colorder="39" columnName="CreatedBy">Created By</th>
+                            <th class="setWidth34" id="CreatedOn" colorder="40" columnName="CreatedOn">Created On</th>
+                            <th class="setWidth35" id="UpdatedBy" colorder="41" columnName="UpdatedBy">Updated By</th>
+                            <th class="setWidth36" id="UpdatedOn" colorder="42" columnName="UpdatedOn">Updated On</th>
+                            <th class="setWidth37" colorder="43" columnName="Length">Length</th>
+                            <th class="setWidth38" colorder="44" columnName="Width">Width</th>
+                            <th class="setWidth39" colorder="45" columnName="HeightTWP">Height(TWP)</th>
+                            <th class="setWidth40" id="SiteLocationStatus" colorder="46" columnName="SiteStatus">Site Status</th>
+                            <th class="setWidth40" id="LockedIn" colorder="47" columnName="LockedIn">Locked In</th>
+                            <th class="setWidth26" id="UniqueRequiresisolation" colorder="48" columnName="RequiresIsolation">Requires Isolation</th>
+                            <th class="setWidth26" id="UniqueRequiresisolation" colorder="49" columnName="Supervisor">Supervisor</th>
+                            <th class="setWidth41" id="btndelete" colorder="50" columnName="Delete"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyRegisterList" style="width:100%"></tbody>
+                </table>*@
+            <table id="tblRegisterList" class="table" style="width:100%">
+                <thead></thead>
+                <tbody id="tbodyRegisterList"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@*<div class="double-scroll" style="background:white">
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 98%">
+        </div>
+    </div>*@
+
+<div id="divdelete" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="c1">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeleteyes" runat="server" OnClick="btndeleteyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteyes" OnClick="btndeleteyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndeleteno" runat="server" OnClick="btndeleteno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" OnClick="btndeleteno_Click()"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="GetOfflineModal" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Offline Link</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label1">Do you want to go offline?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnofflineconfirm" runat="server" OnClientClick="if(!ChangeRID()){ return false}" OnClick="btnofflineconfirm_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" OnClick="btnofflineconfirm_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnofflinecancel" runat="server" OnClick="btnofflinecancel_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnofflinecancel" OnClick="btnofflinecancel_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="btnOpenModel" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4">Scan QR Code</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                @*<%--<video id="video" width="100%" height="auto" autoplay></video>--%>*@
+                <video id="preview" style="width:100%; height:auto" class="video-background" playsinline></video>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        <button type="button" id="snap" class="btn btn-primary">Go to Job</button>
+                    </div>
+                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                        <button type="button" id="Inspection" class="w3-btn w3-green">Add Inspection</button>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                        <button type="button" id="cancelsnap" class="btn btn-danger">Cancel</button>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+@* Added on (30-04-2024) to take a confirmation do you want to copy job or not *@
+<!--<div id="divCopyHistPopup" class="w3-modal" style="display: none">
+    <input type="hidden" id="hiddenRegid" />
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 155px; width: 375px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h10" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="lblMessagecopyhist"> </label>
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2" style="margin-right: -24px;margin-top:-2px;">
+                <label> With Inventory </label>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">-->
+@*<input type="checkbox" checked id="CheckInvnt" />*@
+@*commented as per the client request on  27-06-2024 by ssourabh*@
+<!--<input type="checkbox"  id="CheckInvnt" />
+            </div>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnFloorMarkYes" OnClick="btncopyhistYesClick()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnFloorMarkNo" onclick="btncopyhistNoClick();return false;"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>-->
+@* Modifyed  on (01-08-2024 ) to take a confirmation do you want to copy job or not *@
+
+<div id="divCopyHistPopup" class="w3-modal" style="display: none">
+    <input type="hidden" id="hiddenRegid" />
+    <input type="hidden" id="hiddenOldRegid" />
+    <input type="hidden" id="hiddenOldLocId" />
+    <input type="hidden" id="hiddenOldSiteId" />
+    <input type="hidden" id="hiddenOldFloorid" />
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 300px; width: 75%; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h10" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="lblMessagecopyhist"> </label>
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                <div class="col-xs-6 col-lg-9 col-md-6 col-sm-6">
+                    <label style="margin-right:20px ;font-size:large"> As a Live Job ?</label>
+                </div>
+                <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3">
+                    <input type="radio" name="SelectJobType" value="0" style="vertical-align: -webkit-baseline-middle" />
+                </div>
+            </div>
+
+            <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4">
+                <div class="col-xs-6 col-lg-8 col-md-6 col-sm-6">
+                    <label style="font-size:large"> With Inventory ?</label>
+
+                </div>
+                <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1">
+
+                    <input type="checkbox" id="WithInventoryForLiveJob" value="1" style="vertical-align: -webkit-baseline-middle" />
+                </div>
+
+            </div>
+            <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4">
+                <div class="col-xs-6 col-lg-5 col-md-6 col-sm-6">
+                    <label style="font-size:large">Built Date </label>
+
+                </div>
+                <div class="col-xs-6 col-lg-7 col-md-6 col-sm-6">
+                    <div class="input-container">
+                        <input type="text" id="BuildDate" class="form-control" readonly />
+                        <span class="calendar-icon ClassA">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                <div class="col-xs-6 col-lg-9 col-md-6 col-sm-6">
+                    <label style="margin-right:20px;font-size:large;"> As a Pipeline Job ?</label>
+
+                </div>
+                <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3">
+                    <input type="radio" name="SelectJobType" value="1" style="vertical-align: -webkit-baseline-middle" />
+
+                </div>
+
+            </div>
+            <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4">
+                <div class="col-xs-6 col-lg-8 col-md-6 col-sm-6">
+                    <label style="font-size:large"> With Inventory ?</label>
+
+                </div>
+                <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1">
+
+                    <input type="checkbox" id="WithInventoryForPipelineJob" value="1" style="vertical-align: -webkit-baseline-middle" />
+                </div>
+
+            </div>
+            <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4">
+                <div class="col-xs-6 col-lg-5 col-md-6 col-sm-6">
+                    <label style="font-size:large">Pipeline Start Date </label>
+
+                </div>
+                <div class="col-xs-6 col-lg-7 col-md-6 col-sm-6">
+                    <div class="input-container">
+                        <input type="text" id="PipelineStartDate" class="form-control" readonly />
+                        <span class="calendar-icon ClassB ">
+                            <i class="fa fa-calendar" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <hr />
+        <div>
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12" style="text-align:center">
+                <h4 style="margin-top:auto">Complete Job Copy ??</h4>
+            </div>
+
+        </div>
+
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4">
+
+            </div>
+            <div class="col-xs-2 col-lg-1 col-md-2 col-sm-2">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnFloorMarkYes" OnClick="btncopyhistYesClick()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-1 col-md-2 col-sm-2">
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnFloorMarkNo" onclick="btncopyhistNoClick();return false;"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+            <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4"></div>
+
+        </div>
+
+    </div>
+</div>
+<div id="Adddocs" class="w3-modal">
+    <div class="w3-modal-content w3-round-medium w3-animate-input" style="margin-top: 4%; width: 303px; color: black; height: 280px;">
+        <header class="w3-container nln-gray-bg">
+            <div class="row">
+                <div class="col-lg-9 col-sm-9 col-md-9 col-xs-9">
+                    <h5 class="w3-text-white">Add Inspection</h5>
+                </div>
+
+                <div class="col-lg-3 col-sm-3 col-md-3 col-xs-3">
+                    <button type="button" onclick="hide()" style="background-color: #686e78 !important; float: right; border: none; color: red; font-weight: bold; font-size: 32px; height: 40px; margin-top: 1px;" data-dismiss="modal">&times;</button>
+                </div>
+            </div>
+
+        </header>
+
+        <div class="w3-container">
+            <div class="row w3-padding-top">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <label id="lblChecklist">Scaffold Inspection List</label>
+                        @*<asp:DropDownList ID="ddlChecklistInsp" runat="server" AppendDataBoundItems="true" CssClass="form-control">
+                            </asp:DropDownList>*@
+                        <select id="ddlChecklistInsp" Class="form-control">
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 dateclass ">
+                        @*<%-- <label class="listyle">Inspection Date<span style="color: red">&nbsp*</span></label>--%>*@
+                        <label class="listyle">Scheduled Inspection Date<span style="color: red">&nbsp*</span></label>
+                    </div>
+                    <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12 dateclass ">
+                        @*<Telerik:RadDateTimePicker ID="rdpInspectiondate" Width="100%" DateInput-DateFormat="dd-MMM-yyyy hh:mm tt" runat="server"></Telerik:RadDateTimePicker>*@
+                        <input type="text" id="rdpInspectiondate" style="Width:100%" class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label class="listyle">Inspected By<span style="color: red">&nbsp*</span></label>
+                        @*<Telerik:RadComboBox Width="100%" DataTextField="Name" Skin="Simple" RenderMode="Lightweight" DataSourceID="SqlDataSource1" DataValueField="UserId" EmptyMessage="Select---" CausesValidation="false" runat="server" ID="ddlddlInspectedByadd" MarkFirstMatch="true"></Telerik:RadComboBox>
+                            <asp:RequiredFieldValidator runat="server" ID="reqdoc" ValidationGroup="Save" ControlToValidate="ddlddlInspectedByadd" ErrorMessage="* Required" CssClass="rdf-text rdf-initial">
+                            </asp:RequiredFieldValidator>*@
+                        <select style="Width:100%" id="ddlddlInspectedByadd" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                        <label></label>
+                        @*<asp:LinkButton Width="100%" runat="server" CausesValidation="true" ValidationGroup="Save" ID="btnsave" OnClick="btnsave_Click" CssClass=" w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</asp:LinkButton>*@
+                        <button style="Width:100%" id="btnsave" OnClick="btnsave_Click()" Class="w3-btn w3-green w3-hover-dark-grey w3-padding-small"><i class="fa fa-save"></i>&nbsp;Save</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        @*<%--<div class="row">
+                <div class="col-lg-2">
+                    <asp:LinkButton ID="lblLink" runat="server" OnClick="lblLink_Click"><i class="fa fa-link"></i>Link</asp:LinkButton>
+                </div>
+            </div>--%>*@
+        <div>
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="visibility: hidden">
+                <label class="listyle">Comments</label>
+                <textarea id="txtComments"></textarea>
+                @*<asp:TextBox TextMode="MultiLine" Style="padding: 0px" runat="server" Width="100%" ID="txtComments"></asp:TextBox>*@
+            </div>
+        </div>
+        <div class="row w3-padding-top">
+            <div class="col-lg-6 col-sm-6 col-md-6">
+            </div>
+            <div class="col-lg-6 col-sm-6 col-md-6">
+                <input type="hidden" id="hiddenforfilename" />
+            </div>
+        </div>
+        <br />
+    </div>
+
+</div>
+@*<asp:SqlDataSource runat="server" ID="SqlDataSource1" ConnectionString='<%$ ConnectionStrings:connectionstring %>'></asp:SqlDataSource>*@
+
+

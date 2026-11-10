@@ -1,0 +1,407 @@
+﻿
+@{
+    ViewBag.Title = "UserAccessLevel";
+}
+
+
+@*<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" rel="stylesheet" type="text/css" />*@
+<script src="~/Content/js/chosen.jquery.js"></script>
+<link href="~/Content/Css/chosen.css" rel="stylesheet" />
+
+
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #dataforgrid_length {
+        display: none !important;
+    }
+</style>
+
+<script>
+    $(function () {
+
+        GetUserAccessLevel();
+
+    });
+
+    function GetUserAccessLevel() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/UserAccessLevel/GetUserAccessLevelData',
+            type: 'POST',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getdata = response;
+                var str = "";
+
+                str += '<table id="dataforgrid" class="table table-striped display" style="width:120%;table-layout:fixed;font-size:12px">';
+                str += "<thead><tr>";
+                str += "<th style='width:5%'>#</th>";
+                str += "<th  style='text-align:center;display:none'>UserAccesslevelId</th>";
+                str += "<th  style='text-align:left;width:20%'>Page Name</th>";
+                str += "<th  style='text-align:left;width:20%'>Button Name</th>";
+                str += "<th  style='text-align:left;width:10%'>Type</th>";
+                str += "<th  style='text-align:left;width:2%;display:none'>RoleNumber</th>";
+                str += "<th  style='text-align:left;width:60%'>Hide From Role</th></tr></thead><tbody>";
+
+                if (getdata.length > 0) {
+                    for (var i = 0; i < getdata.length; i++) {
+                        var UserAccesslevelId = getdata[i].Id == null ? "" : getdata[i].Id;
+                        var Pagename = getdata[i].Pagename == null ? "" : getdata[i].Pagename;
+                        var ButtonName = getdata[i].ButtonName == null ? "" : getdata[i].ButtonName;
+                        var buttonType = getdata[i].buttonType == null ? "" : getdata[i].buttonType;
+                        var RoleNumber = getdata[i].HideFromRole == null ? "" : getdata[i].HideFromRole;
+                        var Role = getdata[i].Role == null ? "" : getdata[i].Role;
+
+                        if (i == 0) {
+                            str += "<tr id='row_9999' style='display:none'><td  style='width:2%;'><a class='expand fa fa-angle-right' style='font-size:19px;'></a></td>";
+                            str += "<td  style='text-align:center;display:none'>0</td>";
+                            str += "<td  style='text-align:left;width:10%'></td>";
+                            str += "<td  style='text-align:left;width:10%'></td>";
+                            str += "<td  style='text-align:left;width:10%'></td>";
+                            str += "<td  style='text-align:left;width:2%;display:none'></td>";
+                            str += "<td  style='text-align:left;width:10%'></td></tr>";
+                        }
+
+                        str += "<td  style='width:2%;display:inline-flex;'><a id='rowpencil' class='expand fa fa-pencil'></a></td>";
+                        str += "<td  style='text-align:center;display:none'>" + UserAccesslevelId + "</td>";
+                        str += "<td  style='text-align:left;width:10%'>" + Pagename + "</td>";
+                        str += "<td  style='text-align:left; width:10%'>" + ButtonName + "</td>";
+                        str += "<td  style='text-align:left; width:10%'>" + buttonType + "</td>";
+                        str += "<td  style='text-align:left;width:2%;display:none'>" + RoleNumber + "</td>";
+                        str += "<td  style='text-align:left;width:10%'>" + Role + "</td></tr>";
+                    }
+                    str += "</tbody></table>";
+                    $("#loaddata").html(str);
+
+                    $("#LoadingPanel1").css("display", "none");
+
+                    //$(".fa-trash").click(function () {
+                    //    var emailContent = $(this).parent().parent().children()[1].innerText;
+                    //    $("#hdnEmailContentId").val(emailContent);
+                    //    $("#Deletemodal").css("display", "block");
+                    //});
+
+                    $(".fa-pencil").click(function () {
+                        var visible = $(this).parent().parent().hasClass("Edit");
+                        var tr = $(this).closest('tr');
+                        var row = table.row(tr);
+                        if (visible == true) {
+                            $(this).parent().parent().next('tr').remove();
+                            $(this).parent().parent().removeClass('Edit');
+                        }
+                        else {
+                            row.child(Editing(row.data())).show();
+                            row.child.show();
+                            tr.addClass('Edit');
+                        }
+                    });
+
+                    var table = $('#dataforgrid').DataTable({
+                        "bSort": false,
+                        "processing": true,
+                        searching: true,
+                        info: false,
+                        "pageLength": 50,
+                        autoWidth: true,
+                        scrollX: true,
+                        scrollCollapse: true,
+                        scrollY: "60vh",
+                        fixedHeader: true,
+                        fixedColumns: {
+                            leftColumns: 11,
+                        },
+
+                        dom: 'lBfrtip',
+                        buttons: [
+
+                            {
+                                extend: 'csvHtml5',
+                                title: 'Email Content',
+                                exportOptions: {
+                                    columns: [2, 3, 4]
+                                }
+                            }
+                        ],
+
+                        initComplete: function () {
+
+                            $(".Export").click(function () {
+                                $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+                            });
+                        },
+
+                        "columnDefs": [
+                            { "width": "100px", "targets": 'fullsize' }
+                        ],
+
+                        "drawCallback": function () {
+
+                            $('.fa-angle-right').click(function (eve) {
+                                eve.stopImmediatePropagation();
+                                var tr = $(this).closest('tr');
+                                var row = table.row(tr);
+                                var visible = $(this).parent().parent().hasClass("shown");
+                                var anglechange = $(this).hasClass("fa-angle-right");
+                                if (anglechange == true) {
+                                    var x = tr.children()[0];
+                                    $(this).removeClass("fa-angle-right");
+                                    $(this).addClass("fa-angle-down");
+                                }
+                                else {
+                                    $(this).addClass("fa-angle-right");
+                                    $(this).removeClass("fa-angle-down");
+                                }
+                                if (visible == true) {
+                                    // This row is already open - close it
+                                    $(this).parent().parent().next('tr').remove();
+                                    $(this).parent().parent().removeClass('shown');
+                                }
+                                else {
+                                    // Open this row
+                                    row.child(format(row.data())).show();
+                                    row.child.show();
+                                    tr.addClass('shown');
+                                }
+                            });
+                        }
+                    });
+                    // scrolling Top when Click On Next Button
+
+                    table.on('page.dt', function () {
+                        $('.dataTables_scrollBody').animate({
+                            scrollTop: 0
+                        }, 300);
+                    });
+                }
+                else {
+                    str += "</tbody></table>";
+                    $("#loaddata").html(str);
+                    $('#dataforgrid').DataTable({
+                        "bSort": false,
+                        "processing": true,
+                        searching: true,
+                        info: false,
+                        "pageLength": 50,
+                    });
+                    $("#LoadingPanel1").css("display", "none");
+                }
+            }
+        });
+    }
+
+    function Editing(d) {
+
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/UserAccessLevel/ddlUserAccessLevel",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+
+                var userRole = response;
+                if (userRole.length > 0) {
+                    for (var m = 0; m < userRole.length; m++) {
+                        var user = userRole[m].RoleName;
+                        var rowmat = "";
+                        if (d == 0) {
+                            rowmat = "0";
+                        }
+                        else {
+                            rowmat = d[3];
+                        }
+
+                        if (user != rowmat) {
+                            $("#ddlhideFromRole").append("<option value='" + userRole[m].RoleNumber + "'>" + userRole[m].RoleName + "</option>");
+                        }
+                    }
+                }
+            },
+            complete: function () {
+                $('#ddlhideFromRole').val(d[5].split(',')).select2({
+                    allowClear: true
+                });
+
+                //$('#ddlhideFromRole').val(d[5].split(',')).select2({
+                //    allowClear: true
+                //});
+                $(".CancelChangeClass").click(function () {
+                    $(this).parent().parent().parent().parent().prev('tr').removeClass('Edit');
+                    $(this).parent().parent().parent().parent().remove();
+                });
+
+                $("#savechange").click(function () {
+
+                    var PageNameId = $(this).parent().parent().parent().parent().prev('tr').children()[1].innerText;
+                    var firstrow = $(this).parent().parent().prev('div').children().find('input[type=text]');
+                    var sropdownval = $(this).parent().parent().prev('div').children().find('select');
+
+                    var pageName = firstrow[0].value;
+                    var buttonName = firstrow[1].value;
+                    var buttonType = firstrow[2].value;
+                    var hideFromRole = sropdownval[0].value;
+                    let hireFromRole1 = $('#ddlhideFromRole').val();
+                    let HideFromRole = '';
+                    if (hireFromRole1 == '' || hireFromRole1 == null) {
+                        HideFromRole = '';
+                    }
+                    else {
+                        for (var i = 0; i < hireFromRole1.length; i++) {
+                            HideFromRole = HideFromRole + hireFromRole1[i] + ',';
+                        }
+                    }
+                    var id = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+
+                    if (pageName != "") {
+                        $("#LoadingPanel1").css("display", "block");
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/UserAccessLevel/EditUserAccessData",
+                            data: JSON.stringify({ "PageNameId": PageNameId, "HideFromRole": HideFromRole, "id": id, "UID": UID }),
+                            contentType: "application/json; charset=utf-8",
+                            dataType: "json",
+                            success: function (response) {
+                                var result = response;
+                                if (result.Result = 'Success') {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                    GetUserAccessLevel();
+                                }
+                                else {
+                                    $("#LoadingPanel1").css("display", "none");
+                                    CustomAlert(response);
+                                }
+                                // $('#hdnOldQty').val("");
+                            }
+                        })
+                    } else {
+                        $("#LoadingPanel1").css("display", "none");
+                        $("#btnsubmit").click();
+                    }
+                });
+            }
+        });
+        if (d == 0) {
+            //return '<div class="col-lg-12">'
+            //    + '<div class="col-lg-2">'
+            //    + 'Page Name<input type="text" class="form-control" value="' + d[2] + '" style="width:100%" disabled required>'
+            //    + '</div><div class="col-lg-2">'
+            //    + 'Button Name <input type="text" class="form-control" value="' + d[3] + '" style="width:100%" required>'
+            //    + '</div><div class="col-lg-2">'
+            //    + 'Type <input type="text" class="form-control" value="' + d[4] + '" style="width:100%" required>'
+            //    + '</div><div class="col-lg-6" style="display: inline-grid;">'
+            //    //+ 'Hide From Role<select id="ddlhideFromRole" class="chosen-select" multiple></select>'
+            //    + 'Hide From Role<select id="ddlhideFromRole" class="form-control" multiple></select>'
+            //    + '</div></div>'
+            //    + '<div class="col-lg-12">'
+            //    + '<div class="col-lg-2">'
+            //    + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+            //    + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+            //    + '</div><div class="col-lg-2">'
+            //    + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+            //    + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+            //    + '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />'
+            //    + '</div></div>'
+
+        }
+        else {
+
+            return '<div class="col-lg-12">'
+                + '<div class="col-lg-2">'
+                + 'Page Name<input type="text" class="form-control" value="' + d[2] + '" style="width:100%" disabled required>'
+                + '</div><div class="col-lg-2">'
+                + 'Button Name <input type="text" class="form-control" value="' + d[3] + '" style="width:100%" disabled required>'
+                + '</div><div class="col-lg-2">'
+                + 'Type <input type="text" class="form-control" value="' + d[4] + '" style="width:100%" disabled required>'
+                + '</div><div class="col-lg-6" style="display: inline-grid;">'
+                //+ 'Hide From Role<select id="ddlhideFromRole" class="chosen-select" multiple></select>'
+                + 'Hide From Role<select id="ddlhideFromRole" class="form-control" multiple></select>'
+                + '</div></div>'
+                + '<div class="col-lg-12">'
+                + '<div class="col-lg-2">'
+                + '<input type="button" id="savechange" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%"/>'
+                + '<input type="submit" id="btnsubmit" class="btn btn-primary" value="Save" style="color:white;margin-top:6px;width:100%;display:none"/>'
+                + '</div><div class="col-lg-2">'
+                + '<input type="button" id="cancelchange" class="btn CancelChangeClass" value="Cancel" style="color:black;background: lightgrey;margin-top:6px;width:100%"/>'
+                + '</div><div class="col-lg-6"></div><div class="col-lg-2">'
+                + '<input id="psudouserid" type="text" class="form-control" value="" style="width:1% ; margin-top:6px; float:right;opacity:0" />'
+                + '</div></div>'
+
+        }
+
+    }
+
+
+    function btnyes_Click() {
+
+        var EmailContentId = $('#hdnEmailContentId').val();
+
+        $.ajax({
+            url: '/Email_Content/DeleteDocument',
+            type: 'post',
+            data: { EmailContentId: EmailContentId },
+            async: false,
+            success: function (response) {
+                $("#Deletemodal").css("display", "none");
+                if (response.Result == 'Success') {
+                    CustomAlert(Response);
+                    GetEmailContent();
+                }
+            }
+        });
+    }
+
+
+
+
+</script>
+<input type="hidden" id="hdnTableData" />
+<input type="hidden" id="hdnEmailContentId" />
+<div class="row">
+    <div class=" col-lg-12 col-md-12 col-sm-12">
+        <h4 class="heading" style="color: #0070ba;font-size:15px;"><i class="fa fa-users"></i><b>&nbsp;User Access Level</b></h4>
+    </div>
+</div>
+
+<div class="row">
+    <div id="divbuttonID"></div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="loaddata" style="color: black; width: 100%"></div>
+    </div>
+</div>
+
+<div id="Deletemodal" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <span class="w3-closebtn"></span>
+            <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label>Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+
+            <div class="col-lg-4 col-sm-4 col-md-4 col-xs-4"></div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-right: 21px">
+                <button id="btnyes" Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnyes_Click()"> <i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button id="btnno" Class="w3-btn nln-bg w3-hover-border-dark-grey" OnClick="$('#Deletemodal').hide();"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+

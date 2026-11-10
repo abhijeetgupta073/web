@@ -1,0 +1,681 @@
+﻿@model Scaffold.Models.CommonInventoryColumnViewMoidel
+
+@{
+    ViewBag.Title = "SiteRequest";
+}
+
+<script src="~/Content/js/SiteRequest.js?V1=45"></script>
+
+<script>
+    $(document).ready(function () {
+        var ReqDate = $("#txtrequesteddate").val();
+        var RequiredDate = $("#txtrequireddate").val();
+        if (ReqDate == null || ReqDate == "") {
+            $('#txtrequesteddate').val(new Date().DateMonthFormat());
+        }
+            $("#txtrequesteddate").datepicker({
+                dateFormat: 'dd-M-yy',
+                // maxDate: 0,
+                closeText: 'Close',
+
+            });
+
+
+        $("#txtrequireddate").datepicker({
+            dateFormat: 'dd-M-yy',
+            // maxDate: 0,
+            closeText: 'Close',
+        });
+
+    //$(document).ready(function () {
+    //    var ReqDate = $("#txtrequesteddate").val();
+    //    var RequiredDate = $("#txtrequireddate").val();
+
+    //    if (!ReqDate) {
+    //        $('#txtrequesteddate').val(new Date().DateMonthFormat());
+    //        $("#txtrequesteddate").datepicker({
+    //            dateFormat: 'dd-M-yy',
+    //            // maxDate: 0,
+    //            closeText: 'Close',
+    //        });
+    //    }
+
+        //if (!RequiredDate) {
+        //    $('#txtrequireddate').val(new Date().DateMonthFormat());
+        //    $("#txtrequireddate").datepicker({
+        //        dateFormat: 'dd-M-yy',
+        //        // maxDate: 0,
+        //        closeText: 'Close',
+        //    });
+        //}
+
+
+        dropdownSupplier();
+        @*setTimeout(function () {
+            $('#ddlSupplier').val('@Model.Supplier');
+        }, 500)*@
+        var UserRole = getParameterByName('UserRole');
+        var DecUserRole = parseInt(Decrypt(UserRole));
+        if (DecUserRole == 75) {
+            $('#AnchorYardInventory').css('display', 'none');
+            $('#AnchorDepotInventory').css('display', 'none');
+            $('#AnchorSiteInventory').css('display', 'none');
+        }
+
+        var from = getParameterByName('from');
+        var To = getParameterByName('To');
+
+        var DecriptData = [from, To];
+        var DecrData = Decrypt(DecriptData);
+        var from = DecrData[0];
+        var To = DecrData[1];
+
+        $('#hdnfrom').val(from);
+        $('#hdnTo').val(To);
+
+
+    });
+
+    function dropdownSupplier() {
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/SiteRequest/dropdownSupplier",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var GetData = response;
+                if (GetData.length > 0) {
+                    $("#ddlSupplier").append('<option value=""></option>');
+                    for (var i = 0; i < GetData.length; i++) {
+                        $("#ddlSupplier").append("<option value='" + GetData[i].Supplier + "'>" + GetData[i].Supplier + "</option>");
+
+                    }
+
+                }
+                var Supplier = '@Model.Supplier';
+                Supplier = Supplier.replace('&#39;', "'")
+                if (Supplier != "") {
+                   // $('#ddlSupplier').val('@Model.Supplier');
+                    $("#ddlSupplier option:contains(" + Supplier + ")").attr('selected', 'selected');
+                }
+            }
+        })
+    }
+</script>
+<style>
+    .dataTables_length {
+        display: none;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    .Notes {
+        color: red;
+        padding: 8px;
+        font-family: Arial;
+    }
+</style>
+
+<div class="clearfix"></div>
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liYard">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotInventory">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSiteInventory">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+            <li id="liJob" class="active" style="width: 227px">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            @*<%--
+                <li id="liSite">
+                    <a id="AnchorDelInventory" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Delivery Inventory</span>
+                    </a>
+                </li>--%>*@
+        </ul>
+    </div>
+</div>
+
+
+@Html.HiddenFor(model => Model.ClientID, new { id = "hdnid" })
+@Html.HiddenFor(model => Model.UserID, new { id = "hdnUID" })
+@*@Html.HiddenFor(model => Model.fromID, new { id = "hdnRid" })*@
+@Html.HiddenFor(model => Model.RequestStatus, new { id = "hdnconfirm" })
+@*@Html.HiddenFor(model => Model.FromName, new { id = "hdnfrom" })*@
+@Html.HiddenFor(model => Model.FromNameID, new { id = "hdnfromid" })
+@Html.HiddenFor(model => Model.ToNameId, new { id = "hdnToId" })
+@*@Html.HiddenFor(model => Model.ToName, new { id = "hdnTo" })*@
+@Html.HiddenFor(model => Model.RequestId, new { id = "hdnReqId" })
+@Html.HiddenFor(model => Model.pageID, new { id = "hdnPage" })
+@Html.HiddenFor(model => Model.RequestedPerson, new { id = "hdnRequestedPerson" })
+@Html.HiddenFor(model => Model.RequestedDate, new { id = "hdnRequestedDate" })
+@Html.HiddenFor(model => Model.Description, new { id = "hdnDescription" })
+@Html.HiddenFor(Model => Model.FromtocheckID, new { id = "hdnfromtocheck" })
+
+<input type="hidden" id="hdnfrom" />
+<input type="hidden" id="hdnTo" />
+<input type="hidden" id="hdnQty" />
+<input type="hidden" id="hdnOldQty" />
+<input type="hidden" id="hdnInvId" />
+<input type="hidden" id="hdnflagforjobinsertion" value="false" />
+<input type="hidden" id="hdnRid" Value="0" />
+<input type="hidden" id="hdntextdisable" Value="false" />
+<input type="hidden" id="hdngetpage" Value="" />
+<input type="hidden" id="hdngetMsg" />
+<input type="hidden" id="hdntablelength" Value="" />
+<input type="hidden" id="hdnredirect" />
+<input type="hidden" id="hdnmaterialTypeval" />
+<input type="button" id="btnredirection" OnClick="btnredirection_Click()" Style="display: none" />
+
+
+@*<asp:HiddenField ID="hdnprevid" runat="server" />
+    <asp:HiddenField ID="hdnconfirm" runat="server" />
+    <asp:HiddenField ID="hdnRid" runat="server" Value="0" />
+    <asp:HiddenField ID="hdnPage" runat="server" />
+    <asp:HiddenField ID="hdnQty" runat="server" />
+    <asp:HiddenField ID="hdnOldQty" runat="server" />
+    <asp:HiddenField ID="hdnInvId" runat="server" />
+    <asp:HiddenField ID="hdnflagforjobinsertion" runat="server" Value="false" />
+    <asp:HiddenField ID="hdnid" runat="server" />
+    <asp:HiddenField ID="hdnReqId" runat="server" />
+    <asp:Button ID="btnredirection" runat="server" OnClick="btnredirection_Click" Style="display: none" />
+    <asp:HiddenField ID="hdnUID" runat="server" />
+    <asp:HiddenField ID="hdnfrom" runat="server" />
+    <asp:HiddenField ID="hdnfromid" runat="server" />
+    <asp:HiddenField ID="hdnTo" runat="server" />
+    <asp:HiddenField ID="hdnToId" runat="server" />
+    <asp:HiddenField ID="hdntextdisable" runat="server" Value="false" />
+    <asp:HiddenField ID="hdngetpage" runat="server" Value="" />
+    <asp:HiddenField ID="hdngetMsg" runat="server" />
+    <asp:HiddenField ID="hdntablelength" runat="server" Value="" />
+    <asp:HiddenField ID="hdnredirect" runat="server" />
+    <asp:HiddenField ID="hdnmaterialTypeval" runat="server" />*@
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+            <div class="row">
+                <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3">
+                    @*<asp:Label ID="lblto" CssClass="labeltext" Text="To:" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtto" ReadOnly="true" CssClass="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" runat="server"></asp:TextBox>*@
+                    <label id="lblto" Class="labeltext">To</label>
+                    <input id="txtto" disabled="disabled" value="@Model.ToName" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                </div>
+                <div class="col-lg-3 col-md-5 col-sm-5 col-xs-4">
+                    @*<asp:Label ID="lblfrom" CssClass="labeltext" Text="From:" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtfrom" CssClass="form-control labeltext" ReadOnly="true" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" runat="server"></asp:TextBox>*@
+                    <label id="lblfrom" Class="labeltext">From</label>
+                    <input id="txtfrom" disabled="disabled" value="@Model.FromName" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                    @*<input id="txtfrom" disabled="disabled" value="@Model.siteName" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />*@
+                </div>
+
+
+                <div class="col-lg-2 col-md-5 col-sm-5 col-xs-5">
+                    @*<asp:Label ID="lbl" CssClass="labeltext" Text="Requested By:" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtrequestedby" ReadOnly="true" CssClass="form-control labeltext" Style="color: black; font-size: 12px!important; border: 1px solid lightgray; height: 25px !important" runat="server"></asp:TextBox>*@
+                    <label id="lbl" Class="labeltext">Requested By</label>
+                    <input id="txtrequestedby" disabled="disabled" value="@Model.RequestedPerson" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4">
+                    @*<asp:Label ID="lblrequestdate" CssClass=" labeltext" Text="Date:" runat="server"></asp:Label>
+                        <Telerik:RadDatePicker ID="txtrequesteddate" runat="server" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                    <label id="lblrequestdate" Class="labeltext">Request Date</label>
+                    <input id="txtrequesteddate" value="@Model.fromtime" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4" id="requiredDateDiv">
+                    <label id="lblrequireddate" Class="labeltext">Required Date</label>
+                    <input id="txtrequireddate" value="@Model.RequiredDate" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+                <div class="col-lg-2 col-md-4 col-sm-4 col-xs-4">
+                    @*<asp:Label ID="lblTransId" CssClass="labeltext" Text="Transaction ID:" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtTransId" ReadOnly="true" CssClass="form-control labeltext" Style="color: black; font-size: 12px!important; border: 1px solid lightgray; height: 25px !important" runat="server"></asp:TextBox>*@
+                    <label id="lblTransId" Class="labeltext">Transaction ID</label>
+                    <input id="txtTransId" disabled="disabled" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+            </div>
+
+            <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4">
+                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                    <h4 style="margin-top: 6px; font-size: 15px" id="H5" runat="server"><i class="fa fa-list"></i>&nbsp;Request Inventory Details <span style="margin-left: 5px;" id="Span5" runat="server"></span></h4>
+                    <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+                        @*<asp:LinkButton CssClass="w3-btn w3-green buttonBlue btn" Visible="true" CausesValidation="false" ID="Back" Style="width: 100%;" OnClick="Back_Click" runat="server"><i class="fa fa-backward"></i>&nbsp;Save & Go Back </asp:LinkButton>
+                            <asp:LinkButton CssClass="btn" Visible="true" CausesValidation="false" ID="btnbackSite" Style="width: 100%; background: none; color: black" OnClick="Back_Click" runat="server"><i class="fa fa-backward"></i>&nbsp;Back </asp:LinkButton>*@
+
+                        @*<button type="button" Class="w3-btn w3-green buttonBlue btn" Visible="true" CausesValidation="false" ID="Back" Style="width: 100%;" OnClick="Back_Click" ><i class="fa fa-backward"></i>&nbsp;Save & Go Back</button>
+                            <button type="button" Class="w3-btn w3-green buttonBlue btn" Visible="true" CausesValidation="false" id="btnbackSite" Style="width: 100%;" OnClick="Back_Click"><i class="fa fa-backward"></i>&nbsp;Back</button>*@
+                        <li>
+                            <a id="Back" style="cursor: pointer;" class="w3-btn w3-green buttonBlue btn" onclick="Back_Click();"><i class="fa fa-backward"></i>&nbsp;Save & Go Back</a>
+                        </li>
+                        <li>
+                            <a id="btnbackSite" style="cursor: pointer; background: none; color:black" class="w3-btn btn" onclick="ShowBackPopup();"><i class="fa fa-backward"></i>&nbsp;Back</a>
+                        </li>
+
+                    </ul>
+
+                </div>
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6  col-xs-12 ajectrow">
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            @*<asp:Label ID="lbltab" runat="server" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE ICON to save data</asp:Label>*@
+                            <label id="lbltab" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE ICON to save data</label>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            @*<asp:Label ID="lblnote" runat="server" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Yellow indicates insufficient Quantity</asp:Label>*@
+                            <label id="lblnote" Style="font-size: 11px; color: #151414;"><strong style="color:red">*</strong> Yellow indicates insufficient Quantity</label>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            @*<asp:Label ID="lblJobMsg" runat="server" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press <strong style="font-weight:bold">Save & Go Back </strong>to Confirm Request-Delivery</asp:Label>*@
+                            <label id="lblJobMsg" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press <strong style="font-weight:bold">Save & Go Back </strong>to Confirm Request-Delivery</label>
+                        </div>
+                    </div>
+
+                    @*<%--<div id="filtermattype" class="filter" runat="server" style="display: block;">
+                        --%>
+                        <%--<div class="col-lg-1 col-sm-1 col-md-3 col-xs-2">
+
+                            <label style="font-size:12px">Material</label>
+                        </div>--%>*@
+                    <div id="ddlmat" class="col-lg-2 col-md-2 col-sm-3  col-xs-12">
+                        @*<asp:Label ID="lblmaterial" CssClass="labeltext" Text="Filter By MaterialType" runat="server"></asp:Label>
+                            <asp:DropDownList Style="width: 100%; border-color: lightgray; height: 26px !important; padding-top: 4px !important;"
+                                              runat="server" ID="ddlMaterialType" MarkFirstMatch="true" CssClass="form-control" onchange="MaterialChange();" AppendDataBoundItems="true" Skin="Metro" AutoPostBack="false">
+                            </asp:DropDownList>*@
+                        <label id="lblmaterial" Class="labeltext">Filter By MaterialType</label>
+                        <select id="ddlMaterialType" class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="MaterialChange()"></select>
+                    </div>
+                    <div id="ddlSupp" class="col-lg-2  col-md-2 col-sm-4 col-xs-12">
+                        <label id="lblSupplier" Class="labeltext">Supplier</label>
+                        <a title="Add new Supplier" onclick="addnewSupplier();" ID="btnSupplier" Style="float: right;cursor:pointer; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller"></i>Add</a>
+                        <select id="ddlSupplier" class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important"></select>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12" style="margin-top: 2px">
+                        @*<asp:Label ID="lbldesc" CssClass="labeltext" Text="Description" Style="display: none" runat="server"></asp:Label>
+                            <asp:Label ID="lblJobDesc" CssClass="labeltext" Text="Delivery Description" Style="display: none" runat="server"></asp:Label>
+                            <asp:TextBox ID="txtdesc" CssClass="form-control labeltext" ReadOnly="false" AutoCompleteType="Disabled" Style="width: 100%; height: 25px !important; color: black; font-size: 12px!important; border: 1px solid lightgray;" runat="server"></asp:TextBox>*@
+                        <label id="lbldesc" Class="labeltext" style="display:block">Description</label>
+                        <label id="lblTralblJobDescnsId" Class="labeltext" style="display:none">Delivery Description</label>
+                        <input id="txtdesc" value="@Model.Description" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12" id="chkdisplay" style="display: none; margin-top: 26px; padding: 0px">
+
+                        @*<asp:CheckBox ID="ckbox" runat="server" OnCheckedChanged="ckbox_CheckedChanged" AutoPostBack="true" Text="Return All" Style="font-size: 12px !important" />*@
+                        <input type="checkbox" id="ckbox" onchange="ckbox_CheckedChanged()" Style="font-size: 12px !important" />
+                        <label style="margin-left: 6px;">Request All</label>
+
+                    </div>
+ <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12" style="margin-top: 20px">
+                        <button type="button" Class="w3-btn  w3-green buttonBlue" id="btnSaveAll" Style="height: 26px !important; display: none; width: 105%; padding-top: 3px; color: black; background: #eee; margin-left: -5%;" onclick="btnSaveAll_Click()">Save All</button>
+                    </div>
+                    <div class="col-lg-4 col-md-2 col-sm-3 col-xs-12"></div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                        <div class="col-lg-1 col-md-2 col-sm-3 col-xs-5" id="txtitemsHide">
+                            <label># of Items</label>
+                            <input type="text" id="txtitems" class="form-control" disabled="disabled" />
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="txttotaltonnageHide">
+                            <label>Total Tonnage</label>
+                            <input type="text" id="txttotaltonnage" class="form-control" disabled="disabled" />
+                        </div>
+
+
+
+
+                        <div class="col-lg-6 col-md-2 col-sm-3 col-xs-12" style="margin-top: 2px">
+                            <label id="lblComment" Class="labeltext" style="display:block">Comment</label>
+
+                            <input id="txtComment" value="@Model.Comment" Class="form-control labeltext" Style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                        </div>
+                        <div id="jobdropdown" style="display:none;">
+                            <div class="col-lg-3 col-md-3 col-sm-4  col-xs-9" style="margin-left: 1px">
+                                @*<asp:Label ID="lblJob" CssClass="labeltext" Text="Copy Historical Job Material List" runat="server"></asp:Label>*@
+                                <label id="lblJob" Class="labeltext">Copy Historical Job Material List</label>
+                                <input type="text" id="ddljob" class="form-control" />
+                            </div>
+                            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3" style="margin-top: 19px; margin-left: -1px;">
+                                @*<asp:LinkButton ID="btnSelect" runat="server" CssClass="btn btn-primary" Style="border: 1px solid #82CAFA; width: 100%; height: 27px; padding-top: 3px; margin-left: -38px;" OnClick="btnSelect_Click">Select</asp:LinkButton>*@
+                                <button type="button" Class="btn btn-primary" Style="border: 1px solid #82CAFA; width: 100%; height: 27px; padding-top: 3px;" OnClick="btnSelect_Click()">Select</button>
+                                @*<%--<a id="btnSelect" class="btn btn-primary" style="border: 1px solid #82CAFA; width: 100%; height: 23px; padding-top: 1px; margin-left: -38px;" onclick="openjobpopup()">Select</a>--%>*@
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-top: 19px; margin-left: -1px;">
+                            <button type="button" Class="w3-btn  w3-green buttonBlue" id="btnrefresh" Style="height: 26px !important; display: block; width: 105%; padding-top: 3px; color: black; background: #eee; margin-left: -5%;" onclick="btnrefresh_Click()">Refresh</button>
+                        </div>
+
+                        @*<div class="col-lg-2  col-md-2 col-sm-4 col-xs-12"></div>*@
+
+
+
+                        <input type="hidden" id="hdnfield" />
+                        <input type="hidden" id="jobvalue" />
+                        <input type="hidden" id="getgridcount" />
+                        <input type="hidden" id="hdnScaffref" />
+                        @*<asp:HiddenField runat="server" ID="getgridcount" />*@
+                        <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6"></div>
+                        <div id="forinventory" class="col-lg-2 col-md-3 col-sm-3 col-xs-6" style="display: block; margin-top: 18px; margin-left: 8%;">
+                            @*<%-- <div class="col-lg-2 col-md-5 col-sm-2 col-xs-5" id="saverow" runat="server" style="display: none">
+                                    <asp:LinkButton CssClass="w3-btn  w3-cyan buttonBlue" CausesValidation="false" ID="btnsave" Style="width: 100%; display: block; color: white !important; height: 26px; padding-top: 4px; padding-left: 6px" OnClientClick="SaveChangesInGrid(); return false;" runat="server"><i class="fa fa-save"></i>&nbsp;Save </asp:LinkButton>
+                                </div>--%>*@
+                            @*<asp:LinkButton CssClass="w3-btn  w3-green buttonBlue" ID="btnconfirm" Style="width: 100%; display: block; height: 26px; padding-top: 4px" OnClick="btnconfirm_Click" runat="server">&nbsp;Confirm Request </asp:LinkButton>*@
+                            <button type="button" Class="w3-btn  w3-green buttonBlue" id="btnconfirm" Style="height: 26px !important; display: block; width: 107%; margin-top: 2px !important; padding-top: 3px; color: black; background: #eee; " onclick="btnconfirm_Click()">Confirm Request</button>
+
+                            <div id="lockimage" class="col-lg-12 col-md-12 col-sm-6 col-xs-6" runat="server" style="display: none">
+                                <img src="/images/lock.png" class="img-responsive" id="imglock" title="red pin" style="float: right; height: 50px; object-fit: contain; background-color: white;" />
+                            </div>
+                        </div>
+                        @*<div class="col-lg-1 col-md-2 col-sm-3 col-xs-5" id="txtitemsHide" style=" margin-left: -32%;">
+                                <label># of Items</label>
+                                <input type="text" id="txtitems" class="form-control" disabled="disabled" />
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="txttotaltonnageHide" style="margin-left: -22%;">
+                                <label>Total Tonnage</label>
+                                <input type="text" id="txttotaltonnage" class="form-control" disabled="disabled" />
+                            </div>*@
+
+                        <div id="forjobinventory" style="display: none">
+
+                        </div>
+                        @*<%--  <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" id="confirma" style="margin-top: 18px !important" runat="server">
+                                <asp:Label ID="lblblank" CssClass="labeltext" Text="&nbsp" runat="server"></asp:Label>
+                                <asp:LinkButton CssClass="w3-btn w3-green buttonBlue" Style="padding-left: 4px; height: 27px; float: right; padding-top: 4px;"
+                                                ID="btnreqstcomfirm" OnClientClick="SaveChangesInGrid(); return false;" runat="server">&nbsp;Confirmation</asp:LinkButton>
+                            </div>--%>*@
+                    </div>
+
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                    <div class="clearfix"></div>
+
+                    <div id="loaddata"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div id="confmodal" runat="server" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 158px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h1" runat="server">Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label runat="server" id="c1">No changes can be made to this request once confirmed..</label>
+                    <label runat="server" id="Label7">Do you wish to confirm?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnconfirmyes" runat="server" OnClientClick="SaveChangesInGrids(); return false;" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnconfirmnoSelect" runat="server" OnClick="btnconfirmnoSelect_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<div id="myModal" class="w3-modal" style="display: none !important">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 95%; width: 60%;">
+        <div class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; text-align: right;">
+            @*<asp:Button runat="server" CssClass="btn btn-primary" Style="border: 1px solid #82CAFA; margin-right: 4px;" Text="Select" Width="100px" ID="btnSelectJob" OnClick="btnSelectJob_Click" />*@
+            <button Class="btn btn-primary" Style="border: 1px solid #82CAFA; margin-right: 4px;" Width="100px" id="btnSelectJob" OnClick="btnSelectJob_Click()">Select</button>
+            <button ID="btnclose" Class="fa fa-close" Style="color: black" OnClick="btnclose_Click()"></button>
+            @*<asp:LinkButton ID="btnclose" runat="server" CssClass="fa fa-close" Style="color: black" OnClick="btnclose_Click"></asp:LinkButton>*@
+        </div>
+        <div id="HistoricalMessage" class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; margin-left:10px;">
+            <span class="Notes"> <b>NOTE !  A Job Must Be Finalised Before Using It To Copy Historical Data</b></span>
+        </div>
+        <div id="NoJobHeader" class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; margin-left:10px; display:none;">
+            <span class="Notes"> <b style="color:red;">NOTE !  No Jobs to copy historical data</b></span>
+        </div>
+        <div class="w3-container">
+            @*<asp:HiddenField ID="hdfieldId" runat="server" />*@
+            <input type="hidden" id="hdfieldId" />
+            <input type="hidden" id="hdnlblOptimizeStatus" />
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div id="SiteJobGrid" style="color: black; width: 100%;margin-top:5px;">
+                        <table id="tblSiteJobGrid" class="table table-striped " style="display:none">
+                            <thead style="background-color: #efefef; color: #716262;">
+                                <tr>
+                                    <td style="display:none"></td>
+                                    <td>Select</td>
+                                    <td>Location</td>
+                                    <td>Building No</td>
+                                    <td>Asset No</td>
+                                    <td>Asset Description</td>
+                                    <td>Scaf Ref</td>
+                                    <td>Mat. Finalised</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodySiteJobGrid"></tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div id="Requestconfirm" runat="server" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h2" runat="server">Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+
+
+                    <label runat="server" id="Label2">Do you wish to Confirm Scaffold Materials to job?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="requestyes" runat="server" OnClientClick="SaveChangesInGrid(); return false;"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="requestno" runat="server" OnClick="requestno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="rowCountConfirm" runat="server" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h3" runat="server">Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label runat="server" id="Label1">Please click on save to avoid loosing the enter data.</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="rowCountConfYes" runat="server" OnClientClick="SaveChangesInGrid(); return false;"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="rowCountConfNo" runat="server" OnClick="rowCountConfNo_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<div id="divConfirmReq" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 186px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey" id="P1">
+                <label id="lblConfirmMsg">Do you want to confirm Request for Request Id=<label id="lbltrandid" style="font-weight: bold"></label><label>- Description =</label><label id="lbldescCon" style="font-weight: bold"></label><label>- Supplier =</label><label id="lblSupp" style="font-weight: bold"></label>..?</label>
+            </p>
+            <p class="w3-padding-top w3-text-grey" id="P2">
+                <label>Do you want to confirm Request - Delivery?</label>
+                <label>Press YES to Save and Confirm.</label>
+                <label>Press NO to Delete Data Entered.</label>
+                <br />
+                <label>Press Cancel to Ignore.</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-2 col-md-2 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnConfirmReqYes" runat="server" OnClick="btnConfirmReqYes_Click"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnConfirmReqYes" OnClick="btnConfirmReqYes_Click('once')"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnConfirmReqNo" runat="server" OnClick="btnConfirmReqNo_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnConfirmReqNo" OnClick="btnConfirmReqNo_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-4">
+                @*<asp:LinkButton CssClass="btn btn-dark" ID="btncancel" runat="server" OnClick="btncancel_Click"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</asp:LinkButton>*@
+                <button Class="btn btn-dark" id="btncancel" OnClick="btncancel_Click()"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divCreateSupplier" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 160px; width: 300px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h9"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Supplier<a id="closesupplier" class="close" style="float: right; color: white" onclick="btnSupplierClose();">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                <label id="LabelAdd1" runat="server" style="font-size: 15px">Add New Supplier<span style="color: red">&nbsp*</span></label>
+                <input type="text" id="txtSupplier" Class="form-control" />
+                @*<asp:TextBox ID="txtSupplier" runat="server" CausesValidation="true" CssClass="form-control"></asp:TextBox>
+                    <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" CssClass="rdf-initial rdf-text" Style="margin-top: 0px;" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtSupplier" ValidationGroup="SaveSupp"></asp:RequiredFieldValidator>*@
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                @*<asp:Button runat="server" ID="btnSupplierSave" ValidationGroup="SaveSupp" Width="100%" CssClass="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSupplierSave_Click" Text="Save" />*@
+                <button id="btnSupplierSave" style="Width:100%" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSupplierSave_Click()">Save</button>
+            </div>
+            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                @*<asp:Button runat="server" ID="btnSupplierClose" OnClientClick="btnSupplierClose();" Width="100%" CssClass="w3-btn w3-small w3-red btnheight imagesize" Text="Cancel" />*@
+                <button id="btnSupplierClose" onclick="btnSupplierClose();" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="chkpopup" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h7" runat="server">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+
+
+                <label runat="server" id="Label1">Are you sure you want to Request all items?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="chkpopupyes" runat="server" OnClick="chkpopupyes_Click"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="chkpopupyes" runat="server" OnClick="chkpopupyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="chkpopupno" runat="server" OnClick="chkpopupno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="chkpopupno" OnClick="chkpopupno_Click()"><i class="glyphicon glyphicon-remove-circle"></i>&nbsp;No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="MyMaterialAvailableModal" class="w3-modal" style="display: none !important">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" @*style="height: 90%; width: 60%;"*@>
+        <div class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; text-align: right;">
+            <button type="button" id="ExportToCsvButton" class="w3-btn w3-teal" style="Width:14%" onclick="ExportToCsvButton_Click()"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+            <button ID="btnclose" class="w3-green w3-btn w3-teal" Style="color: black" OnClick="btnCONTINUEMaterial_Click()">CONTINUE</button>
+            <button ID="btnclose" class="w3-red w3-btn" Style="color: black" OnClick="btnCANCELMaterial_Click()">CANCEL</button>
+        </div>
+        <div class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; margin-left:10px;">
+            <span class="Notes"> <b style="color:red;">Warning! There are insufficient Qty available for the following items on site. Please add to site inventory before copying historical data. </b></span>
+        </div>
+        @*<div  class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; margin-left:10px;">
+
+            </div>*@
+        <div class="w3-container">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div id="MaterialAvailableJobGrid" style="color: black; width: 100%;margin-top:5px;">
+                        <table id="tblMaterialAvailableGrid" class="table table-striped " width="100%">
+                            <thead style="background-color: #efefef; color: #716262;">
+                                <tr>
+                                    <td style="display:none;">Inventory Id</td>
+                                    <td>Material Type</td>
+                                    <td>Item Code</td>
+                                    <td>Item Description</td>
+                                    <td>Requested Quantity</td>
+                                    <td>Available Quantity</td>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divUnsavedChanges" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="max-width: 480px; margin-top: 120px;">
+        <header class="w3-container" style="background-color:#6c6c6c;">
+            <h4 class="w3-text-white">
+                <i class="fa fa-exclamation-circle" style="color:#f1c40f;"></i>&nbsp;Unsaved Changes
+            </h4>
+        </header>
+        <div class="w3-container" style="padding-top:15px;">
+            <p class="w3-text-grey" style="font-size:15px;">
+                You have unsaved inventory changes on this page. Please select the appropriate  button.
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px; text-align:center;">
+            <div class="col-xs-12">
+                <a class="w3-btn w3-green w3-hover-dark-grey" style="margin-right:10px;" onclick="saveAndContinue()">
+                    <i class="fa fa-save"></i>&nbsp;Save &amp; Continue
+                </a>
+                <a class="w3-btn w3-orange w3-hover-dark-grey" style="margin-right:10px;" onclick="dontSaveAndContinue()">
+                    <i class="fa fa-sign-out"></i>&nbsp;Don't Save &amp; Continue
+                </a>
+                <a class="w3-btn w3-red w3-hover-dark-grey" onclick="cancelLeave()">
+                    <i class="fa fa-times-circle"></i>&nbsp;Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,176 @@
+﻿
+@{
+    ViewBag.Title = "DepotRequestInventory";
+}
+
+
+
+<script src="~/Content/js/DepotRequestInventory.js?V1=5"></script>
+
+<script>
+    $(document).ready(function () {
+        var table = $('#tblRequestInventory').DataTable({
+            "bSort": false,
+            "processing": true,
+            searching: true,
+            "bLengthChange": false,
+            "bInfo": false,
+            autoWidth: false,
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: "60vh",
+
+        });
+
+    });
+
+
+
+</script>
+
+<style>
+    .setWidth1, .setWidth2, .setWidth3 {
+        min-width: 10px !important;
+    }
+
+    .setWidth4, .setWidth19 {
+        min-width: 60px !important;
+    }
+
+    .setWidth7, .setWidth15 {
+        min-width: 70px !important;
+    }
+
+    .setWidth18, .setWidth5, .setWidth6, .setWidth21 {
+        min-width: 80px !important;
+    }
+
+    .setWidth9, .setWidth13 {
+        min-width: 200px !important;
+    }
+
+    .setWidth10 {
+        min-width: 1px !important;
+    }
+
+    .setWidth11, .setWidth12, .setWidth16, .setWidth17 {
+        min-width: 180px !important;
+    }
+
+    .setWidth8, .setWidth14, .setWidth20, .setWidth21 {
+        min-width: 120px !important;
+    }
+</style>
+
+<div class="clearfix"></div>
+<input type="hidden" id="hdnTransID" />
+<input type="hidden" id="hdnEmailTransID" />
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liCompany" runat="server">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotRequest" class="active" runat="server">
+                <a id="AnchorDepotRequestInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Request Inventory</span>
+                </a>
+            </li>
+            <li id="liSiteInventory" runat="server">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+            <li id="liJob"  style="width: 227px">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            <li id="liSite" runat="server">
+                <a id="AnchorReturnInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                </a>
+            </li>
+            <li id="LiDamaged" runat="server">
+                <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+            <div class="row">
+        
+       
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+                        <button type="button" Class="w3-btn w3-teal w3-small" id="ExportToCsv" Style="color:white; height: 26px !important; width: 100%; margin-top: 4px !important;" onclick="ExportToReqCsvButton_Click()"><i class="fa fa-file-excel-o"></i>&nbsp;Export To CSV</button>
+                    </div>
+                
+                <div id="showreqdel" runat="server" style="display: block;">
+                    <div class="col-lg-2  col-md-2 col-sm-3 col-xs-6">
+                        <button type="button" Class="btn btn-primary" id="btnnewrequest" Style="height: 26px !important; width: 100%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="btnnewrequest_Click1()"><i class="fa fa-plus"></i>&nbsp;Add Request</button>
+                    </div>
+                    <div class="col-lg-2  col-md-2 col-sm-3 col-xs-6">
+                        <button type="button" Class="btn btn-primary" id="btnedit" Style="height: 26px !important; width: 100%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="btnrequest_Click()"><i class='expand fa fa-pencil-square-o '></i>&nbsp;Edit Request</button>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+                        <button type="button" Class="btn btn-primary" id="Delivery" Style="height: 26px !important; width: 100%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="Delivery_Click()">
+                            <i class="fa fa-truck" aria-hidden="true"></i>&nbsp;Deliveries
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+
+
+         </div>
+
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="clearfix"></div>
+
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div id="RequestInventoryGrid" style="color: black; width: 100%;margin-top:5px;">
+                            <table id="tblRequestInventory" class="table table-striped" style="width:100%">
+                                <thead style="background-color: #efefef; color: #716262;">
+                                    <tr>
+                                        <th class="setWidth0" style="display:none;"></th>
+                                        <th class="setWidth1" id="UniqueDelete"></th>
+                                        <th class="setWidth2" id="UniqueImage"></th>
+                                        <th class="setWidth3">#</th>
+                                        <th class="setWidth4">Trans Id</th>
+                                        <th class="setWidth5">Delivered Date</th>
+                                        <th class="setWidth9">Description</th>
+                                        <th class="setWidth10" style="display:none">From ID</th>
+                                        <th class="setWidth11">From</th>
+                                        <th class="setWidth12">To</th>
+                                        <th class="setWidth13" style="display:none">To ID</th>
+                                        <th class="setWidth14">Request Status</th>
+                                        <th class="setWidth15">Delivery Status</th>
+                                        <th class="setWidth16">Requestor</th>
+                                        <th class="setWidth17">Deliverer</th>
+                                        <th class="setWidth18">Requested Date</th>
+                                        <th class="setWidth19">(Requested) No. of Items</th>
+                                        <th class="setWidth20">Total Weight (Tonnes)</th>
+                                        <th class="setWidth21">Last Email Sent On</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyTblRequestInventory"></tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

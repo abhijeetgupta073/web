@@ -1,0 +1,1798 @@
+﻿
+@{
+    ViewBag.Title = "OffSystemInspection";
+}
+@*commented on 14-04-2021 there is no effect on fronend after commenting code below *@
+@*<script type="text/javascript" src="https://webrtc.github.io/adapter/adapter-latest.js"></script>*@
+
+<style>
+
+
+    .calendar-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: black;
+    }
+
+    #rdpInspDate {
+        width: 100%;
+        padding-right: 30px; /* Adjust as needed to prevent text overlap */
+        box-sizing: border-box;
+    }
+
+    .calendar-icon {
+        cursor: pointer;
+    }
+
+    #btnprint {
+        font-size: 15px;
+    }
+
+    .respText {
+        font-size: 15px;
+    }
+
+    #siteddl {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    #lblInspDate {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblBuilding {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblFloorLevel {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblComment {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblBearing {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblInspectedby {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #ddlLocations {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #listyle {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lblWorkGroup {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: -2px;
+    }
+
+    #lbldisciplines {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+
+    td {
+        text-align: left;
+    }
+
+    .double-scroll {
+        width: auto;
+    }
+
+    .setWidth1, .setWidth2 {
+        min-width: 50px !important;
+    }
+
+    .setWidth6, .setWidth9 {
+        min-width: 60px !important;
+    }
+
+    .setWidth3, .setWidth4, .setWidth5, .setWidth7, .setWidth8, .setWidth10 {
+        min-width: 80px !important;
+    }
+
+    .setWidth12 {
+        min-width: 100px !important;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    #tblOffSystemInspectionList_filter {
+        margin-right: 11px;
+    }
+
+    @@media (min-width:820px) and (max-width:1180px) {
+        #hiddendiv {
+            display: none
+        }
+    }
+
+    .w3-modal {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+    }
+
+    body.modal-open {
+        pointer-events: none;
+    }
+
+    #GetOfflineModal {
+        pointer-events: auto;
+    }
+</style>
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes"></meta>
+
+</head>
+<script>
+    $(document).ready(function () {
+        BindallDropdown();
+        dropdownlocation();
+        dropdownSubOwner();
+        dropdownBuilding();
+        dropdownFloorLevel();
+        dropdownWorkgroup();
+        dropdownBearing();
+        GetOffSystemInspectionData();
+
+        if ('@ViewBag.ddlddlInspectedByadd' != "") {
+            $('#ddlddlInspectedByadd').val('@ViewBag.ddlddlInspectedByadd');
+        }
+
+        var today = new Date();
+
+        $("#rdpInspDate").val(today.DateMonthFormat());
+
+        $("#rdpInspDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            maxDate: new Date(),
+            closeText: 'Close',
+
+        });
+
+        $('.calendar-icon').click(function () {
+            $('#rdpInspDate').focus();
+        });
+
+
+    });
+
+</script>
+
+<script>
+
+    function BindallDropdown() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/OffSystemInspection/BindallDropdown',
+            async: false,
+            data: { id: id },
+            success: function (response) {
+
+                data = response;
+
+                var ddSite = "<option value='-1'>Select Site</option>";
+                $.each(response.ddlsites, function (idx, obj) {
+                    if (obj != null) {
+                        // ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                        if (response.ddlsites.length === 1) {
+                            // If there is only one site, set ddSite to that site and break the loop
+                            ddSite = '<option value="' + obj.SiteLocID + '" selected>' + obj.SiteLocation + '</option>';
+                        } else {
+                            // If there are multiple sites, append the options normally
+                            ddSite += '<option value="' + obj.SiteLocID + '">' + obj.SiteLocation + '</option>';
+                        }
+                    }
+                });
+
+                var ddlInspectedBy = "<option value=''  disabled selected='selected'>Select--</option>";
+
+                $.each(response.ddlInspectedBy, function (idx, obj) {
+                    if (obj != null) {
+                        ddlInspectedBy += '<option value="' + obj.UserId + '">' + obj.name + '</option>';
+                    }
+                });
+
+
+
+                $('#ddlSitesLoc').empty().append(ddSite);
+                $('#ddlddlInspectedByadd').empty().append(ddlInspectedBy);
+
+            }
+        });
+    }
+    function dropdownlocation() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        $.ajax({
+            url: '/OffSystemInspection/dropdownlocation',
+            async: false,
+            data: { id: id, SiteID: SiteID },
+            success: function (response) {
+
+                var ddlLocation = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlLocation += '<option value="' + obj.areaid + '">' + obj.area + '</option>';
+                    }
+                });
+
+                $('#ddlLocaSite').empty().append(ddlLocation);
+
+            }
+        });
+    }
+
+    function dropdownBuilding() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        var LocationID = $('#ddlLocaSite').val();
+        $.ajax({
+            url: '/OffSystemInspection/dropdownBuilding',
+            async: false,
+            data: { id: id, SiteID: SiteID, LocationID: LocationID },
+            success: function (response) {
+
+                var ddlBuilding = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlBuilding += '<option value="' + obj.buildingid + '">' + obj.buildingno + '</option>';
+                    }
+                });
+
+                $('#ddlBuilding').empty().append(ddlBuilding);
+                $('#ddlBuilding').select2({
+                    placeholder: '  Select buildings',
+                    allowClear: true
+                });
+            }
+        });
+    }
+
+
+    function dropdownSubOwner() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        var LocationID = $('#ddlLocaSite').val();
+        var BuildingId = $('#ddlBuilding').val();
+        var FloorLevelId = $('#ddlFloorLevel').val();
+        $.ajax({
+            url: '/OffSystemInspection/dropdownSubOwner',
+            async: false,
+            data: { id: id, SiteID: SiteID, LocationID: LocationID, BuildingId: BuildingId, FloorLevelId: FloorLevelId },
+            success: function (response) {
+
+                var ddlSubOwner = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlSubOwner += '<option value="' + obj.ScaffoldOwner + '">' + obj.ScaffoldOwner + '</option>';
+                    }
+                });
+
+                $('#ddlSubOwner').empty().append(ddlSubOwner);
+
+                if (response.length === 0) {
+
+                    $('#ddlSubOwner').prop('disabled', true);
+
+
+                } else {
+
+
+                    $('#ddlSubOwner').prop('disabled', false);
+
+
+                }
+
+            }
+        });
+    }
+    //Added on 02-August-2022 end here
+
+    function dropdownFloorLevel() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        var LocationID = $('#ddlLocaSite').val();
+        var BuildingId = $('#ddlBuilding').val();
+
+        if (BuildingId == 'All' || BuildingId == "" || BuildingId == null || BuildingId == undefined) {
+            var ddlFloorLevel = "<option value=''>All</option>";
+            $('#ddlFloorLevel').empty().append(ddlFloorLevel);
+        }
+        else {
+            $.ajax({
+                url: '/OffSystemInspection/dropdownFloorLevel',
+                type: 'POST',
+                data: { id: id, SiteID: SiteID, LocationID: LocationID, BuildingId: BuildingId },
+                success: function (response) {
+
+                    var ddlFloorLevel = "<option value=''>All</option>";
+                    $.each(response, function (idx, obj) {
+                        if (obj != null) {
+                            ddlFloorLevel += '<option value="' + obj.FloorLevelId + '">' + obj.FloorLevel + '</option>';
+                        }
+                    });
+                    $('#ddlFloorLevel').empty().append(ddlFloorLevel);
+                }
+            });
+        }
+    }
+
+    function dropdownWorkgroup() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        var LocationID = $('#ddlLocaSite').val();
+        var BuildingId = $('#ddlBuilding').val();
+        var FloorLevelId = $('#ddlFloorLevel').val();
+        $.ajax({
+            url: '/OffSystemInspection/dropdownWorkGroup',
+            async: false,
+            data: { id: id, SiteID: SiteID, LocationID: LocationID, BuildingId: BuildingId, FloorLevelId: FloorLevelId },
+            success: function (response) {
+
+                var ddlWorkgroup = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlWorkgroup += '<option value="' + obj.WorkGroup + '">' + obj.WorkGroup + '</option>';
+                    }
+                });
+
+                $('#ddlWorkgroup').empty().append(ddlWorkgroup);
+
+            }
+        });
+    }
+    function dropdownBearing() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        var LocationID = $('#ddlLocaSite').val();
+        var BuildingId = $('#ddlBuilding').val();
+        var FloorLevelId = $('#ddlFloorLevel').val();
+        var Workgroup = $('#ddlWorkgroup').val();
+        $.ajax({
+            url: '/OffSystemInspection/dropdownBearing',
+            type: 'POST',
+            data: { id: id, SiteID: SiteID, LocationID: LocationID, BuildingId: BuildingId, FloorLevelId: FloorLevelId, Workgroup: Workgroup },
+            success: function (response) {
+
+                var ddlBearing = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlBearing += '<option value="' + obj.Bearing + '">' + obj.Bearing + '</option>';
+                    }
+                });
+
+                $('#ddlBearing').empty().append(ddlBearing);
+
+            }
+        });
+    }
+
+    function msgbuilding() {
+        var LocationID = $('#ddlLocaSite').val();
+        if (LocationID == 'All' || LocationID == "" || LocationID == null || LocationID == undefined) {
+            var response = { Result: "Failed", Message: "Please Select Location Before Selecting Building." }
+            CustomAlert(response);
+        }
+    }
+
+    function msgfloorlevel() {
+        var BuildingId = $('#ddlBuilding').val();
+        if (BuildingId == 'All' || BuildingId == "" || BuildingId == null || BuildingId == undefined) {
+            var response = { Result: "Failed", Message: "Please Select Building Before Selecting FloorLevel." }
+            CustomAlert(response);
+        }
+    }
+
+    function msglocation() {
+        var SiteID = $('#ddlSitesLoc').val();
+        if (SiteID == '-1' || SiteID == "" || SiteID == null || SiteID == undefined) {
+            var response = { Result: "Failed", Message: "Please Select Site Before Selecting Location." }
+            CustomAlert(response);
+        }
+    }
+
+    function ddlSites_SelectedIndexChanged() {
+        dropdownlocation();
+        dropdownSubOwner();
+        dropdownBuilding();
+        dropdownFloorLevel(); //Added On 09-July-2022
+        dropdownWorkgroup();
+        dropdownBearing();
+        GetOffSystemInspectionData();
+    }
+    function ddlLocaSite_SelectedIndexChanged() {
+        dropdownBuilding();
+        dropdownSubOwner();
+        dropdownFloorLevel(); //Added On 09-July-2022
+        dropdownWorkgroup();
+        dropdownBearing();
+        GetOffSystemInspectionData();
+    }
+    function ddlBuilding_SelectedIndexChanged() {
+        dropdownSubOwner();
+        dropdownFloorLevel(); //Added On 09-July-2022
+        dropdownWorkgroup();
+        dropdownBearing();
+        GetOffSystemInspectionData();
+    }
+    function ddlSubOwner_SelectedIndexChanged() {
+        dropdownBearing();
+        GetOffSystemInspectionData();
+
+    }
+    function ddlFloorLevel_SelectedIndexChanged() {
+        /*dropdownSubOwner();*/
+        dropdownBearing();
+        dropdownWorkgroup();//Added on 02-August-2022
+        GetOffSystemInspectionData();
+    }
+    function ddlWorkGroup_SelectedIndexChanged() {
+        dropdownBearing();
+        GetOffSystemInspectionData();
+    }
+    function ddlBearing_SelectedIndexChanged() {
+        GetOffSystemInspectionData();
+    }
+    var table = "";
+    var OffSystemDataArr = [];
+
+    function GetOffSystemInspectionData() {
+        var id = getParameterByName('id');
+        var SiteID = $('#ddlSitesLoc').val();
+        var LocationID = $('#ddlLocaSite').val();
+        var ddlSubOwner = $('#ddlSubOwner').val();
+        var ddlBuilding = $('#ddlBuilding').val();
+        var hdnTimeOffSet = $('#hdnTimeOffSetForAllPage').val();   // Getting Values From Layout Page
+        var FloorLevel = $('#ddlFloorLevel').val(); // Added On 09-July-2022
+        var WorkGroup = $('#ddlWorkgroup').val();
+        var Bearing = $('#ddlBearing').val();
+        $('#LoadingPanel1').show();
+        // $('#tblOffSystemInspectionList').show();
+
+        $.ajax({
+            type: "POST",
+            url: "/OffSystemInspection/CheckIsInspectionDataForOffline",
+            data: JSON.stringify({ id: id, SiteID: SiteID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            maxJsonLength: 50000000, //Added on 26-07-2023 Set the maximum JSON length here, e.g., 50,000,000 characters
+            async: false,
+            success: function (response) {
+
+                if (!response.Checked) {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/OffSystemInspection/GetOffSystemInspectionData",
+                        //data: JSON.stringify({ id: id, SiteID: SiteID, LocationID: LocationID, ddlSubOwner: ddlSubOwner,  hdnTimeOffSet: hdnTimeOffSet }),
+                        //data: JSON.stringify({ id: id, SiteID: SiteID, LocationID: LocationID, ddlSubOwner: ddlSubOwner, hdnTimeOffSet: hdnTimeOffSet, ddlBuilding: ddlBuilding, FloorLevel: FloorLevel }),
+                        data: JSON.stringify({ id: id, SiteID: SiteID, LocationID: LocationID, ddlSubOwner: ddlSubOwner, hdnTimeOffSet: hdnTimeOffSet, ddlBuilding: ddlBuilding, FloorLevel: FloorLevel, WorkGroup: WorkGroup, Bearing: Bearing }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        maxJsonLength: 50000000, //Added on 26-07-2023 Set the maximum JSON length here, e.g., 50,000,000 characters
+                        async: false,
+                        success: function (response) {
+                            var str = "";
+                            var GetData = response;
+                            $('#DivtblOffSystemInspectionListMessage').hide();
+                            $('#OffSystemInspectionList').show();
+                            $('#ChkAllInspections').show();
+                            $('#btnSaveInspect').prop('disabled', false);
+
+                            $('#tblOffSystemInspectionList').DataTable().clear();
+                            $('#tblOffSystemInspectionList').DataTable().destroy();
+
+                            if (GetData.length > 0) {
+
+                                for (var i = 0; i < GetData.length; i++) {
+                                    var Status = GetData[i].Status == null ? "" : GetData[i].Status;
+                                    if (Status != 'NotStarted' && Status != 'Pipeline') {
+                                        var RegisterId = GetData[i].REGISTERId == null ? "" : GetData[i].REGISTERId;
+                                        //var ClientID = GetData[i].ClientID == null ? "" : GetData[i].ClientID;
+                                        var ScaffRef = GetData[i].ShowRegisterID == null ? "" : GetData[i].ShowRegisterID;
+                                        var ClientScaffref = GetData[i].ClientScaffref == null ? "" : GetData[i].ClientScaffref;
+                                        //var WONumber = GetData[i].WONumber == null ? "" : GetData[i].WONumber;
+                                        var Location = GetData[i].Location == null ? "" : GetData[i].Location;
+                                        var BuildingNo = GetData[i].BuildingNo == null ? "" : GetData[i].BuildingNo;
+                                        var FloorLevel = GetData[i].FloorLevel == null ? "" : GetData[i].FloorLevel;
+                                        var Bearing = GetData[i].Bearing == null ? "" : GetData[i].Bearing;
+                                        var Description1 = GetData[i].Description == null ? "" : GetData[i].Description;
+                                        //var Description = (Description1.length > 40) ? Description1.substring(0, 40) + '.....' : Description1;
+                                        var AssetNo = GetData[i].AssetNo == null ? "" : GetData[i].AssetNo;
+                                        //var DateTagged = GetData[i].DateTagged == null ? "" : GetData[i].DateTagged;
+                                        //var DaysSinceLastInsp = GetData[i].DaysSinceLastInsp == null ? "" : GetData[i].DaysSinceLastInsp;
+                                        //var Tonnage = GetData[i].Tonnage == null ? "" : GetData[i].Tonnage;
+                                        //var DesignType = GetData[i].DesignType == null ? "" : GetData[i].DesignType;
+                                        //var MaterialType = GetData[i].MaterialType == null ? "" : GetData[i].MaterialType;
+                                        //var DutyRating = GetData[i].DutyRating == null ? "" : GetData[i].DutyRating;
+                                        //var DateOFDismantle = GetData[i].DateOFDismantle == null ? "" : GetData[i].DateOFDismantle;
+                                        var InspectedBy = GetData[i].InspectedBy == null ? "" : GetData[i].InspectedBy;
+                                        //var HireDaysToDate = GetData[i].HireDaysToDate == null ? "" : GetData[i].HireDaysToDate;
+                                        //var TotalHireDays = GetData[i].TotalHireDays == null ? "" : GetData[i].TotalHireDays;
+                                        //var SAPNumber = GetData[i].SAPNumber == null ? "" : GetData[i].SAPNumber;
+                                        //var ScafType = GetData[i].ScafType == null ? "" : GetData[i].ScafType;
+                                        //var ClientRef = GetData[i].ClientRef == null ? "" : GetData[i].ClientRef;
+                                        //var OwnerName = GetData[i].OwnerName == null ? "" : GetData[i].OwnerName;
+                                        var SiteLocation = GetData[i].SiteLocation == null ? "" : GetData[i].SiteLocation;
+                                        //var ScaffoldOwner = GetData[i].ScaffoldOwner == null ? "" : GetData[i].ScaffoldOwner;
+                                        //var discipline = GetData[i].discipline == null ? "" : GetData[i].discipline;
+                                        var RecentInspDate = GetData[i].RecentInspDate == null ? "" : GetData[i].RecentInspDate;
+                                        var ClientScaffref = GetData[i].ClientScaffref == null ? "" : GetData[i].ClientScaffref;
+
+                                        str += "<tr>"
+                                        str += "<td class='setWidth0' style='display:none'></td>"
+                                        if (Status.toUpperCase() == "Red".toUpperCase() || Status.toUpperCase() == "Green".toUpperCase() || Status.toUpperCase() == "Yellow".toUpperCase()) {
+
+                                            str += "<td class='setWidth1'><img src='/images/" + Status + ".jpg' class='img-responsive' style='height: 22px;width: 22px;float: left;'/></td>";
+                                        }
+                                        else {
+                                            str += "<td class='setWidth1'>" + Status + "</td>"
+                                        }
+                                        str += "<td class='setWidth1' style='display:none;'>" + Status + "</td>" // For Export Column Funclity
+                                        str += "<td class='setWidth1'>" + ScaffRef + "</td>"
+                                        str += "<td class='setWidth2'>" + SiteLocation + "</td>"
+                                        str += "<td class='setWidth3'>" + Location + "</td>"
+                                        str += "<td class='setWidth4'>" + BuildingNo + "</td>"
+                                        str += "<td class='setWidth5'>" + AssetNo + "</td>"
+                                        str += "<td class='setWidth6'>" + FloorLevel + "</td>"
+                                        //str += "<td class='setWidth7'>" + DateFormat(RecentInspDate) + "</td>"
+                                        str += "<td class='setWidth8'>" + Bearing + "</td>"
+                                        str += "<td class='setWidth10' style='cursor:pointer;' title='Click here to do Off System Inspection Update .'><input type='checkbox' id='ChkTransID_" + RegisterId + "' class='ChkTransID setWidth10' value=" + RegisterId + " ChkRegisterId_='" + RegisterId + "' /></td>"
+                                        str += "<td class='setWidth9' style='cursor:pointer;' title='Click here to mark Inspection as Out Of Service .'><input type='checkbox' class='ChkTransIDOutOffServ setWidth9' id='OutOffServiceRegisterId_" + RegisterId + "'/></td>"
+                                        str += "<td class='setWidth0' style='cursor:pointer;' title='Click here to mark Inspection as De-Planked .'><input type='checkbox' class='ChkTransIDDePlank setWidth9' id='DePlankRegisterId_" + RegisterId + "'/></td>"
+                                        str += "<td class='setWidth13' style='cursor:pointer;' title='Click here to mark Inspection as Tied Down .'><input type='checkbox' class='ChkTransIDTieDown setWidth9' id='TieDownRegisterId_" + RegisterId + "'/></td>"
+
+                                        str += "<td class='setWidth11'><input id='txtcomment_" + RegisterId + "' type='text' class='setWidth11' /></td>"
+                                        str += "<td class='setWidth7'>" + RecentInspDate + "</td>"
+                                        str += "<td class='setWidth8'>" + InspectedBy + "</td>"
+                                        str += "<td class='setWidth8'>" + ClientScaffref + "</td></tr>"
+                                    }
+                                }
+
+                                $('#tbodyOffSystemInspectionList').append(str);
+
+                                $('.ChkAllID').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    if (CheckBoxAll == true) {
+                                        $('.ChkTransID').prop('checked', true);
+                                    } else {
+                                        $('.ChkTransID').prop('checked', false);
+                                    }
+
+                                });
+                                $('.ChkTransIDDePlank').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    if (CheckBoxAll == true) {
+                                        $('#ChkTransID_' + id).prop('checked', true);
+                                        $('#OutOffServiceRegisterId_' + id).prop('checked', false);
+                                        $('#TieDownRegisterId_' + id).prop('checked', false);
+
+                                    } else {
+                                        $('#ChkTransID_' + id).prop('checked', false);
+
+                                    }
+
+                                });
+
+                                $('.ChkTransIDTieDown').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    if (CheckBoxAll == true) {
+                                        $('#ChkTransID_' + id).prop('checked', true);
+                                        $('#DePlankRegisterId_' + id).prop('checked', false);
+                                        $('#OutOffServiceRegisterId_' + id).prop('checked', false);
+
+
+                                    } else {
+                                        $('#ChkTransID_' + id).prop('checked', false);
+
+                                    }
+
+                                });
+                                $('.ChkTransIDOutOffServ').click(function () {
+                                    event.stopImmediatePropagation();
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    if (CheckBoxAll == true) {
+                                        $('#ChkTransID_' + id).prop('checked', true);
+                                    } else {
+                                        $('#ChkTransID_' + id).prop('checked', false);
+                                    }
+
+                                });
+
+                                $('#LoadingPanel1').hide();
+                            }
+                            $('#LoadingPanel1').hide();
+                            table = $('#tblOffSystemInspectionList').DataTable({
+                                "bSort": false,
+                                "processing": true,
+                                searching: true,
+                                "bLengthChange": true,
+                                //"bInfo": false,
+                                autoWidth: true,
+                                scrollX: true,
+                                scrollY: true,
+                                scrollCollapse: true,
+                                scrollY: "60vh",
+                                "paging": false,
+                                //"lengthMenu": [10, 25, 50, 100, 200],
+                                //"pageLength": 50,
+
+                                dom: 'Bfrtip',
+                                buttons: [
+
+                                    {
+                                        extend: 'csvHtml5',
+                                        title: 'Off System Inspecton List',
+                                        exportOptions: {
+                                            // columns: [1,2,3, 4, 5, 6, 7]
+                                            columns: [2, 3, 4, 5, 6, 7, 8, 9, 12, 14]
+                                        },
+                                    }
+                                ],
+
+                            });
+
+                            //if (RegisterID == "" || RegisterID == null) {
+                            //    table.column(7).visible(false);
+                            //} else {
+                            //    table.column(6).visible(false);
+                            //}
+
+                            //  $('#LoadingPanel1').hide();
+                        }
+                    })
+
+                }
+                else {
+                    // Display the custom alert message
+                    var res = { Result: response.Result, Message: response.Message };
+                    CustomAlert(res);
+
+                    // Show the message div and hide the DataTable initially
+                    if ($.fn.DataTable.isDataTable('#OffSystemInspectionList')) {
+                        $('#OffSystemInspectionList').DataTable().clear().destroy();
+                    }
+                    $('#DivtblOffSystemInspectionListMessage').show();
+                    $('#OffSystemInspectionList').show(); // Initially hide the DataTable list
+
+                    // Destroy any existing instance of the DataTable if it exists
+                    if ($.fn.DataTable.isDataTable('#tblOffSystemInspectionListMessage')) {
+                        $('#tblOffSystemInspectionListMessage').DataTable().clear().destroy();
+                    }
+
+                    // Clear the tbody content for the new message
+                    $('#tbodyOffSystemInspectionListMessage').empty();
+
+                    // Create the yellow message row with red text
+                    let str = `
+    <tr style="background-color: yellow;">
+            <td class="text-center" style="color: red; font-size: 20px;" colspan="14">${response.Message}</td> <!-- Adjusted colspan to match the table structure -->
+    </tr>
+`;
+
+                    // Append the message row to the tbody
+                    $('#tbodyOffSystemInspectionListMessage').append(str);
+
+                    // Reinitialize the DataTable to handle this new message
+                    $.ajax({
+                        type: "POST",
+                        url: "/OffSystemInspection/GetOffSystemInspectionData",
+                        data: JSON.stringify({ id: id, SiteID: SiteID, LocationID: LocationID, ddlSubOwner: ddlSubOwner, hdnTimeOffSet: hdnTimeOffSet, ddlBuilding: ddlBuilding, FloorLevel: FloorLevel, WorkGroup: WorkGroup, Bearing: Bearing }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        maxJsonLength: 50000000,
+                        async: false,
+                        success: function (response) {
+                            $('#ChkAllInspections').hide();
+                            $('#btnSaveInspect').prop('disabled', true);
+                            $('#DivtblOffSystemInspectionListMessage').show(); // Hide message div after displaying the message
+                            $('#OffSystemInspectionList').show(); // Show the DataTable list
+
+                            // Clear and destroy existing DataTable
+                            $('#tblOffSystemInspectionList').DataTable().clear().destroy();
+
+                            var str = "";
+                            var GetData = response;
+
+                            if (GetData.length > 0) {
+                                for (var i = 0; i < GetData.length; i++) {
+                                    var Status = GetData[i].Status || "";
+                                    if (Status !== 'NotStarted' && Status !== 'Pipeline') {
+                                        var RegisterId = GetData[i].REGISTERId || "";
+                                        var ScaffRef = GetData[i].ShowRegisterID || "";
+                                        var ClientScaffref = GetData[i].ClientScaffref || "";
+                                        var Location = GetData[i].Location || "";
+                                        var BuildingNo = GetData[i].BuildingNo || "";
+                                        var FloorLevel = GetData[i].FloorLevel || "";
+                                        var Bearing = GetData[i].Bearing || "";
+                                        var Description1 = GetData[i].Description || "";
+                                        var AssetNo = GetData[i].AssetNo || "";
+                                        var InspectedBy = GetData[i].InspectedBy || "";
+                                        var SiteLocation = GetData[i].SiteLocation || "";
+                                        var RecentInspDate = GetData[i].RecentInspDate || "";
+
+                                        str += "<tr>"
+                                        str += "<td class='setWidth0' style='display:none'></td>"
+                                        if (Status.toUpperCase() === "RED" || Status.toUpperCase() === "GREEN" || Status.toUpperCase() === "YELLOW") {
+                                            str += "<td class='setWidth1'><img src='/images/" + Status + ".jpg' class='img-responsive' style='height: 22px;width: 22px;float: left;'/></td>";
+                                        } else {
+                                            str += "<td class='setWidth1'>" + Status + "</td>"
+                                        }
+                                        str += "<td class='setWidth1' style='display:none;'>" + Status + "</td>"
+                                        str += "<td class='setWidth1'>" + ScaffRef + "</td>"
+                                        str += "<td class='setWidth2'>" + SiteLocation + "</td>"
+                                        str += "<td class='setWidth3'>" + Location + "</td>"
+                                        str += "<td class='setWidth4'>" + BuildingNo + "</td>"
+                                        str += "<td class='setWidth5'>" + AssetNo + "</td>"
+                                        str += "<td class='setWidth6'>" + FloorLevel + "</td>"
+                                        str += "<td class='setWidth8'>" + Bearing + "</td>"
+                                        str += "<td class='setWidth10' style='cursor:pointer;'><input type='checkbox' id='ChkTransID_" + RegisterId + "' class='ChkTransID setWidth10' value=" + RegisterId + " ChkRegisterId_='" + RegisterId + "' /></td>"
+                                        str += "<td class='setWidth9' style='cursor:pointer;'><input type='checkbox' class='ChkTransIDOutOffServ setWidth9' id='OutOffServiceRegisterId_" + RegisterId + "'/></td>"
+                                        str += "<td class='setWidth0' style='cursor:pointer;'><input type='checkbox' class='ChkTransIDDePlank setWidth9' id='DePlankRegisterId_" + RegisterId + "'/></td>"
+                                        str += "<td class='setWidth13' style='cursor:pointer;'><input type='checkbox' class='ChkTransIDTieDown setWidth9' id='TieDownRegisterId_" + RegisterId + "'/></td>"
+                                        str += "<td class='setWidth11'><input id='txtcomment_" + RegisterId + "' type='text' class='setWidth11' /></td>"
+                                        str += "<td class='setWidth7'>" + RecentInspDate + "</td>"
+                                        str += "<td class='setWidth8'>" + InspectedBy + "</td>"
+                                        str += "<td class='setWidth8'>" + ClientScaffref + "</td></tr>"
+                                    }
+                                }
+
+                                $('#tbodyOffSystemInspectionList').append(str);
+
+                                // Handling checkbox interactions
+                                $('.ChkAllID').click(function () {
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    $('.ChkTransID').prop('checked', CheckBoxAll);
+                                });
+
+                                $('.ChkTransIDDePlank').click(function () {
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    $('#ChkTransID_' + id).prop('checked', CheckBoxAll);
+                                    if (CheckBoxAll) {
+                                        $('#OutOffServiceRegisterId_' + id).prop('checked', false);
+                                        $('#TieDownRegisterId_' + id).prop('checked', false);
+                                    }
+                                });
+
+                                $('.ChkTransIDTieDown').click(function () {
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    $('#ChkTransID_' + id).prop('checked', CheckBoxAll);
+                                    if (CheckBoxAll) {
+                                        $('#DePlankRegisterId_' + id).prop('checked', false);
+                                        $('#OutOffServiceRegisterId_' + id).prop('checked', false);
+                                    }
+                                });
+
+                                $('.ChkTransIDOutOffServ').click(function () {
+                                    var CheckBoxAll = $(this).prop('checked');
+                                    var id = this.id.split('_')[1];
+                                    $('#ChkTransID_' + id).prop('checked', CheckBoxAll);
+                                });
+
+                                $('#LoadingPanel1').hide();
+                            }
+
+                            // Initialize DataTable after populating data
+                            $('#tblOffSystemInspectionList').DataTable({
+                                "bSort": false,
+                                "processing": true,
+                                "bLengthChange": true,
+                                autoWidth: true,
+                                scrollX: true,
+                                scrollY: true,
+                                scrollCollapse: true,
+                                scrollY: "60vh",
+                                "paging": false,
+                                dom: 'Bfrtip',
+                                buttons: [
+                                    {
+                                        extend: 'csvHtml5',
+                                        title: 'Off System Inspection List',
+                                        exportOptions: {
+                                            columns: [2, 3, 4, 5, 6, 7, 8, 9, 12, 14]
+                                        },
+                                    }
+                                ],
+                            });
+
+                            // Disable all inputs in the DataTable (checkboxes, text fields, etc.)
+                            $('#tblOffSystemInspectionList input, #tblOffSystemInspectionList select').prop('disabled', true);
+
+                            // Hide the loading panel if it's visible
+                    $('#LoadingPanel1').hide();
+
+                            // Optionally, show the modal if required
+                    //$('#GetOfflineLinkModalForInspection').show();
+                            $('#OffSystemInspectionList').show();
+                        }
+                    });
+                }
+
+
+
+            }
+        });
+
+
+
+
+    }
+    function btnsaveyes() {
+        $("#divSave").css("display", "none");
+    }
+    function btnSaveInspect_Click() {
+        var ClientID = getParameterByName('id');
+
+        $('#LoadingPanel1').show();
+        var searchVal = ($('#tblOffSystemInspectionList_filter input').val());
+        if (searchVal != "") {
+            $('#LoadingPanel1').hide();
+            $("#divSave").css("display", "block");
+        } else {
+
+            OffSystemDataArr = [];
+            var ChkUpdateAllflag = false;
+            if ($('#ddlSitesLoc').val() != -1) {
+                if ($('#ddlddlInspectedByadd').val() != "" && $('#ddlddlInspectedByadd').val() != null) {
+                    if ($('#rdpInspDate').val() != "") {
+
+                        table.$('.ChkTransID').each(function () {
+                            if (this.checked) {
+                                ChkUpdateAllflag = true;
+                                // OffSystemDataArr.push(this.value);
+                                //var ClientID = getParameterByName('id');
+                                var UID = getParameterByName('UID');
+                                var InspectedBy = $('#ddlddlInspectedByadd').val();
+                                var txtUpperComment = $('#txtComment').val();
+                                var rdpInspDate = $('#rdpInspDate').val();
+                                var hdnTimeOffSet = $('#hdnTimeOffSet').val();
+                                var InspectionComments = "";
+                                var RegisterID = this.value;
+                                var comment = $("#txtcomment_" + (this.value)).val();
+                                if (comment != "") {
+                                    InspectionComments = comment;
+                                } else {
+                                    InspectionComments = txtUpperComment;
+                                }
+                                var StatusConfirmed = "Confirmed";
+                                if ($("#OutOffServiceRegisterId_" + (this.value)).prop('checked') == true) {
+                                    StatusConfirmed = 'Out of Service';
+                                }
+                                if ($("#DePlankRegisterId_" + (this.value)).prop('checked') == true) {
+                                    StatusConfirmed = 'De-Planked';
+                                }
+                                if ($("#TieDownRegisterId_" + (this.value)).prop('checked') == true) {
+                                    StatusConfirmed = 'Tied-Down';
+                                }
+                                var ArryVal = { ClientID: ClientID, UID: UID, RegisterID: RegisterID, StatusConfirmed: StatusConfirmed, InspectedBy: InspectedBy, InspectionComments: InspectionComments, InspectionDate: rdpInspDate, TimeOffSet: hdnTimeOffSet };
+                                OffSystemDataArr.push(ArryVal);
+                            }
+                        });
+                        if (ChkUpdateAllflag == true) {
+                            var Siteid = $('#ddlSitesLoc').val();
+                            var encryData = Encrypt([Siteid]);
+                            Siteid = encryData[0];
+                            $.ajax({
+                                type: 'post',
+                                url: '/OffSystemInspection/btnSaveInspect_Click',
+                                data: { model: OffSystemDataArr, Siteid: Siteid, ClientID: ClientID },
+                                //data: JSON.stringify({ model: OffSystemDataArr }),
+                                //contentType: "application/json; charset=utf-8",
+                                // data: JSON.stringify({ model: OffSystemDataArr }),
+                                //dataType: "json",
+                                async: true,
+                                success: function (response) {
+                                    $('#txtComment').val('');
+                                    var GetData = response;
+                                    CustomAlert(response);
+                                    $('.ChkAllID').prop('checked', false);
+                                    GetOffSystemInspectionData();
+                                    //   $('#LoadingPanel1').hide();
+                                }
+                            });
+                        } else {
+                            /*Commented On 07-03-2023 Alert Has Been Update*/
+                            /*var response = { Result: "Failed", Message: "Atleast One Job should have 'Update All' checked before clicking on Save Button. ." }*/
+                            var response = { Result: "Failed", Message: "At least One Job should have an 'Out Of Service' or 'Inspection' Box ticked before clicking on 'Save' Button." }
+                            CustomAlert(response);
+                            $('#LoadingPanel1').hide();
+                        }
+
+                    } else {
+                        var response = { Result: "Failed", Message: "Please Select Inspected Date ." }
+                        CustomAlert(response);
+                        $('#LoadingPanel1').hide();
+                    }
+                } else {
+                    var response = { Result: "Failed", Message: "Please Select Inspected By." }
+                    CustomAlert(response);
+                    $('#LoadingPanel1').hide();
+                }
+            } else {
+                var response = { Result: "Failed", Message: "Please Select Site." }
+                CustomAlert(response);
+                $('#LoadingPanel1').hide();
+            }
+        }
+    }
+    function ExportToCSV() {
+        $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+    }
+    function btnprint_Click() {
+        $('#LoadingPanel1').show();
+        if ($('#ddlSitesLoc').val() != -1) {
+            if ($('#ddlddlInspectedByadd').val() != "") {
+                if ($('#rdpInspDate').val() != "") {
+
+                    var ClientID = getParameterByName('id');
+                    var UID = getParameterByName('UID');
+                    var UserRole = getParameterByName('UserRole');
+                    var SiteID = $('#ddlSitesLoc').val();
+                    var LocationID = $('#ddlLocaSite').val();
+                    var SubOwner = $('#ddlSubOwner').val();
+                    var InspectionDate = $('#rdpInspDate').val();
+                    var hdnTimeOffSet = $('#hdnTimeOffSetForAllPage').val();   // Getting Values From Layout Page
+                    var BuildingId = $('#ddlBuilding').val() || "";
+                    var FloorLevel = $('#ddlFloorLevel').val();
+                    var Workgroup = $('#ddlWorkgroup').val();
+                    var Bearing = $('#ddlBearing').val();
+
+                    window.open('/OffSystemInspectionReport/showreport?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientID + '&SiteId=' + SiteID + '&LocId=' + LocationID + '&subowner=' + SubOwner + '&InspectionDate=' + InspectionDate + '&hdnTimeOffSet=' + hdnTimeOffSet + '&BuildingId=' + BuildingId + '&FloorLevel=' + FloorLevel + '&Workgroup=' + Workgroup + '&Bearing=' + Bearing);
+                    $("#LoadingPanel1").hide();
+                } else {
+                    var response = { Result: "Failed", Message: "Please Select Inspected Date ." }
+                    CustomAlert(response);
+                    $('#LoadingPanel1').hide();
+                }
+            } else {
+                var response = { Result: "Failed", Message: "Please Select Inspected By." }
+                CustomAlert(response);
+                $('#LoadingPanel1').hide();
+            }
+        } else {
+            var response = { Result: "Failed", Message: "Please Select Site." }
+            CustomAlert(response);
+            $('#LoadingPanel1').hide();
+        }
+    }
+
+
+    function GoOfflineClick() {
+
+        $('#LoadingPanel1').show();
+
+        // Step 1: Extract the link from the URL
+        const currentUrl = window.location.href;
+
+        // Step 2: Retrieve the domain name, ID, and userRole from URL parameters
+        const urlObj = new URL(currentUrl);
+        const domainName = urlObj.origin; // This gives you the domain name (e.g., https://www.example.com)
+        const ClientId = urlObj.searchParams.get("id");
+        const UserId = urlObj.searchParams.get("UID");
+        const UserRole = urlObj.searchParams.get("UserRole");
+        var Siteid = $('#ddlSitesLoc').val();
+        var DecriptUserId = Decrypt([UserId]);
+        @*if ("@TempData["userId"]" == DecriptUserId[0]) {*@
+        
+        if (Siteid != '-1') {
+
+            $.ajax({
+                url: '/OffSystemInspection/CheckThisUserIsInOfflinemode',
+                async: false,
+                data: { LoginUserId: UserId, clientId: ClientId, Siteid: Siteid },
+                success: function (response) {
+
+                    if (response.VerifyedUser == 1) {
+                        var encryData = Encrypt([Siteid]);
+                        Siteid = encryData[0];
+                        const newUrl = `${domainName}/OfflineOffSystemInspection.html?ClientId=${ClientId}&UserId=${UserId}&Siteid=${Siteid}&UserRole=${UserRole}`;
+
+                        // Step 4: Display the new link in an alert
+                        ////alert(`Your new link is: ${newUrl}`);
+
+
+                        $.ajax({
+                            url: '/OffSystemInspection/GoOfflineClick',
+                            async: false,
+                            data: { id: ClientId, UserId: UserId, Siteid: Siteid },
+                            success: function (response) {
+
+                                if (response.Result == "Success") {
+
+                                    var Res = { Result: response.Result, Message: response.Message }
+                                    CustomAlert(Res);
+                                    $('#GetOfflineModal').modal('hide');
+
+                                    $('#LoadingPanel1').hide();
+                                    GetOffSystemInspectionData();
+
+
+                                    //navigator.clipboard.writeText(newUrl).then(function () {
+                                    //    alert(`URL copied to clipboard: ${newUrl}`);
+                                    //}, function (err) {
+                                    //    console.error('Could not copy text: ', err);
+                                    //});
+                                    //window.open(newUrl, '_blank');
+                                    window.location.href = newUrl;
+
+                                }
+                                else if (response.Result == "FailedToGoOffline") {
+                                    var Res = { Result: "Failed", Message: response.Message }
+                                    CustomAlert(Res);
+                                    $('#GetOfflineModal').modal('hide');
+                                    $('#LoadingPanel1').hide();
+                                    //window.open(newUrl, '_blank');
+                                    //window.location.href = newUrl;
+
+
+                                }
+                                else {
+                                    var Res = { Result: response.Result, Message: response.Message }
+                                    CustomAlert(Res);
+                                    $('#GetOfflineModal').modal('hide');
+                                    $('#LoadingPanel1').hide();
+                                    //window.open(newUrl, '_blank');
+                                    window.location.href = newUrl;
+
+                                    //navigator.clipboard.writeText(newUrl).then(function () {
+                                    //    alert(`URL copied to clipboard: ${newUrl}`);
+                                    //}, function (err) {
+                                    //    console.error('Could not copy text: ', err);
+                                    //});
+
+
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        var res = {
+                            Result: "Failed", Message: "THE SYSTEM IS LOCKED IN OFF-LINE MODE BY:  Inspector " + response.UserName +"./n/n TO RE-SET THE SYSTEM: Contact Scafpac Admin at:<b> admin@scafpac.com.au </b>" }
+                        CustomAlert(res);
+                        alert("THE SYSTEM IS LOCKED IN OFF-LINE MODE BY: Inspector " + response.UserName +
+                            ".\n\nTO RE-SET THE SYSTEM: Contact Scafpac Admin at: admin@scafpac.com.au");
+
+                        $('#GetOfflineModal').modal('hide');
+                        $('#LoadingPanel1').hide();
+                    }
+
+
+                }
+
+            });
+
+
+
+        }
+        else {
+            var response = { Result: "Failed", Message: "Please Select Site." }
+            CustomAlert(response);
+            $('#GetOfflineModal').modal('hide');
+            $('#LoadingPanel1').hide();
+        }
+    }
+
+
+    function btnGoOfflie_Click() {
+        $('#GetOfflineModal').modal('show');
+    }
+
+    function GoOfflineNoClick() {
+        $('#GetOfflineModal').modal('hide');
+    }
+
+    function Refresh_Click() {
+        window.location.reload();
+    }
+    function YesclickForOfflinePage() {
+        $('#GetOfflineLinkModalForInspection').hide();
+
+        // Step 1: Extract the link from the URL
+        const currentUrl = window.location.href;
+
+        // Step 2: Retrieve the domain name, ID, and userRole from URL parameters
+        const urlObj = new URL(currentUrl);
+        const domainName = urlObj.origin; // This gives you the domain name (e.g., https://www.example.com)
+        const ClientId = urlObj.searchParams.get("id");
+        const UserId = urlObj.searchParams.get("UID");
+        var Siteid = $('#ddlSitesLoc').val();
+        var encryData = Encrypt([Siteid]);
+        Siteid = encryData[0];
+        const UserRole = urlObj.searchParams.get("UserRole");
+
+        const newUrl = `${domainName}/OfflineOffSystemInspection.html?ClientId=${ClientId}&UserId=${UserId}&Siteid=${Siteid}&UserRole=${UserRole}`;
+        //window.open(newUrl, '_blank');
+        window.location.href = newUrl;
+
+    }
+
+    function NoclickForOfflinePage() {
+
+        $('#GetOfflineLinkModalForInspection').hide();
+
+
+    }
+
+    function BringDataFromOfflineToOnline() {
+        // Step 1: Extract the link from the URL
+        const currentUrl = window.location.href;
+
+        // Step 2: Retrieve the domain name, ID, and userRole from URL parameters
+        const urlObj = new URL(currentUrl);
+        var ClientId = getParameterByName('id');
+        var Siteid = $('#ddlSitesLoc').val();
+        if (Siteid != '-1') {
+
+            var encryData = Encrypt([Siteid]);
+            Siteid = encryData[0];
+            var UserId = urlObj.searchParams.get("UID");
+
+            $.ajax({
+                type: 'Post',
+                url: '/OffSystemInspection/UpdateOfflineInspectionFlag',
+                async: false,
+                data: { LoginUserId: UserId, clientId: ClientId, Siteid: Siteid},
+                success: function (response) {
+                    if (response.Result == 'Success') {
+                        var Res = { Result: "Success", Message: response.Message }
+                        CustomAlert(Res);
+                        GetOffSystemInspectionData();
+                    }
+                    else {
+                        var Res = {
+                        //    Result: "Failed", Message: "Moving back from Offline to Online failed.Please contact Admin........."
+                            Result: "Failed", Message: response.Message 
+                        }
+                        CustomAlert(Res);
+                    }
+
+                }
+            });
+        }
+        else {
+            var response = { Result: "Failed", Message: "Please Select Site." }
+            CustomAlert(response);
+            $('#GetOfflineModal').modal('hide');
+            $('#LoadingPanel1').hide();
+        }
+    }
+
+
+    function BtnOnclickclerOfflinedata() {
+        var Siteid = $('#ddlSitesLoc').val();
+        if (Siteid != '-1') {
+            $('#clearOfflineDatainspectionModal').show();
+
+        }
+        else {
+            var response = { Result: "Failed", Message: "Please Select Site." }
+            CustomAlert(response);
+            $('#GetOfflineModal').modal('hide');
+            $('#LoadingPanel1').hide();
+        }
+    }
+    function BtnClerdataClickyes() {
+        $('#clearOfflineDatainspectionModal').hide();
+        BringDataFromOfflineToOnline();
+    }
+    function BtnClerdataClickNo() {
+        $('#clearOfflineDatainspectionModal').hide();
+    }
+
+</script>
+
+
+<input type="hidden" id="hdnTimeOffSet" value="0" runat="server" />
+
+<div class="row">
+    <div class="col-lg-8 col-md-4 col-sm-4 col-xs-12">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span id="lblOffSystemInspection" Font-Size="16px" Font-Bold="true">Off System Inspection</span></b></h4>
+    </div>
+</div>
+
+<div class="row">
+
+
+    @*<div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+            <button id="" class="btn w3-btn w3-teal" style="Width:75%; height:33px" onclick="btnGoOfflie_Click()"><i class="fa fa-internet-explorer"></i>&nbsp;Go Offline</button>
+
+        </div>*@
+
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12" style="display: flex; justify-content: center; margin-bottom: 10px;">
+        <button id="btnGoOffline" class="btn w3-btn" style="width: -webkit-fill-available; height: 33px; background-color: #4169E1; border: none; color: white; " onclick="btnGoOfflie_Click()">
+            <i class="fa fa-internet-explorer"></i>&nbsp;Go Offline
+        </button>
+    </div>
+    @*<div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+            <button id="btnUploadtoCloud" class="btn w3-btn w3-teal" style="Width:75%; height:33px" onclick="uploadDataToServer()"><i class="fa fa-cloud-upload"></i>&nbsp;Upload To cloud</button>
+
+        </div>*@
+
+
+
+
+
+    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12" style="display: flex; justify-content: center;margin-bottom: 10px; ">
+
+        <button id="ExportToCsvButton" class="btn w3-btn w3-teal" style="Width: -webkit-fill-available; height: 33px; margin-bottom: 10px;" onclick="ExportToCSV()"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12" style="display: flex; justify-content: center;margin-bottom: 10px; ">
+        @*<asp:LinkButton ID="btnprint" OnClick="btnprint_Click" runat="server" Width="90px" height="33px" CssClass="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</asp:LinkButton>*@
+        <button id="btnprint" OnClick="btnprint_Click()" style="Width: -webkit-fill-available; height: 33px; margin-bottom: 10px;" Class="w3-btn w3-blue"><i class="fa fa-print"></i>&nbsp;Print</button>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12" style="display: flex; justify-content: center;margin-bottom: 10px; ">
+        @*<asp:LinkButton runat="server" ID="btnSaveInspect" OnClick="btnSaveInspect_Click" CausesValidation="true" ValidationGroup="btnInspectSave" CssClass="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></asp:LinkButton>*@
+        <button id="btnSaveInspect" OnClick="btnSaveInspect_Click()" style="width: -webkit-fill-available; margin-bottom: 10px;" Class="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></button>
+    </div>
+
+
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12" style="display: flex; justify-content: center; margin-bottom: 10px;">
+        <button id="btnSaveInspect" onclick="Refresh_Click()" style="width: -webkit-fill-available; background-color: #808080; border: none; color: white; height: 33px;" class="w3-btn w3-small btnheight">
+            <i class="fa fa-refresh"></i>&nbsp;Refresh
+        </button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12" style="display: flex; justify-content: center; margin-bottom: 10px;">
+        <button id="btnClearOfflineData" onclick="BtnOnclickclerOfflinedata()" style="width: -webkit-fill-available; background-color: #8b2e93; border: none; color: white; height: 33px;" class="w3-btn w3-small btnheight">
+            <i class="fa fa-step-backward"></i>&nbsp;Clear Offline Data
+        </button>
+    </div>
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-2 col-xs-3">
+        <label id="siteddl">Sites</label>
+    </div>
+
+    <div class="col-lg-8 col-md-8 col-sm-10 col-xs-9">
+        @*<asp:DropDownList ID="ddlSitesLoc" AutoPostBack="true" runat="server" AppendDataBoundItems="true" OnSelectedIndexChanged="ddlSites_SelectedIndexChanged" Width="100%" CssClass="form-control">
+            </asp:DropDownList>*@
+        <select id="ddlSitesLoc" class="form-control" style="width:100%" onchange="ddlSites_SelectedIndexChanged()"></select>
+    </div>
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+        <label id="ddlLocations">Location</label>
+    </div>
+
+    <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+        @*<asp:DropDownList ID="ddlLocaSite" AutoPostBack="true" AppendDataBoundItems="true" OnSelectedIndexChanged="ddlLocaSite_SelectedIndexChanged" runat="server" Width="100%" CssClass="form-control">
+            </asp:DropDownList>*@
+        <select id="ddlLocaSite" class="form-control" style="width:100%" onchange="ddlLocaSite_SelectedIndexChanged()"></select>
+    </div>
+</div>
+<div class="col-lg-6 col-md-3 col-sm-6 col-xs-12">
+    <div class="col-lg-2 col-md-6 col-sm-3 col-xs-5">
+        <label id="lblBuilding">Building</label>
+    </div>
+
+    <div class="col-lg-10 col-md-6 col-sm-9 col-xs-7">
+        @*<asp:TextBox ID="txtComment" runat="server" CssClass="form-control"></asp:TextBox>*@
+        <select id="ddlBuilding" class="form-control" style="width:100%" onchange="ddlBuilding_SelectedIndexChanged()" onmouseover="msgbuilding()" multiple></select>
+    </div>
+</div>
+@*<div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2">
+        <label id="lblBuilding">Building</label>
+    </div>
+
+    <div class="col-lg-8 col-md-8 col-sm-9 col-xs-10">
+        <select id="ddlBuilding" class="form-control" style="width:100%" onchange="ddlBuilding_SelectedIndexChanged()" onclick="msgbuilding()" multiple></select>
+    </div>
+    </div>*@
+
+<div id="hiddendiv" class="row">
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+    <div class="col-lg-4 col-md-6 col-sm-3 col-xs-5">
+        <label id="lblFloorLevel">Floor Level</label>
+    </div>
+
+    <div class="col-lg-8 col-md-6 col-sm-9 col-xs-7">
+        <select onclick="msgfloorlevel()" id="ddlFloorLevel" class="form-control" style="width:100%" onchange="ddlFloorLevel_SelectedIndexChanged()"></select>
+    </div>
+</div>
+<div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-3 col-xs-2">
+        <label id="lblBearing">Bearing</label>
+    </div>
+
+    <div class="col-lg-8 col-md-8 col-sm-9 col-xs-10">
+        <select id="ddlBearing" class="form-control" style="width:100%" onchange="ddlBearing_SelectedIndexChanged()" onclick="msgbearing()"></select>
+    </div>
+</div>
+<div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+        <label id="lbldisciplines">Sub Owner</label>
+    </div>
+
+    <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+        @*<asp:DropDownList ID="ddlSubOwner" AutoPostBack="true" AppendDataBoundItems="true" OnSelectedIndexChanged="ddlSubOwner_SelectedIndexChanged" runat="server" Width="100%" CssClass="form-control">
+            </asp:DropDownList>*@
+        <select id="ddlSubOwner" class="form-control" style="width:100%" onchange="ddlSubOwner_SelectedIndexChanged()"></select>
+    </div>
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-sm-3 col-xs-3">
+        <label id="lblWorkGroup">Work Group</label>
+    </div>
+
+    <div class="col-lg-8 col-md-8 col-sm-9 col-xs-9">
+        <select id="ddlWorkgroup" class="form-control" style="width:100%" onchange="ddlWorkGroup_SelectedIndexChanged()"></select>
+    </div>
+</div>
+
+<div id="hiddendiv" class="row">
+</div>
+
+
+<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+    <div class="col-lg-4 col-md-6 col-sm-3 col-xs-5">
+        <label id="listyle">Inspector<span style="color: red">&nbsp*</span></label>
+    </div>
+
+    <div class="col-lg-8 col-md-6 col-sm-9 col-xs-7">
+
+        @*<Telerik:RadComboBox Width="100%" DataTextField="Name" Skin="Simple" RenderMode="Lightweight" DataSourceID="SqlDataSource1" DataValueField="UserId" EmptyMessage="Select---" CausesValidation="false" runat="server" ID="ddlddlInspectedByadd" MarkFirstMatch="true"></Telerik:RadComboBox>*@
+        <select id="ddlddlInspectedByadd" class="form-control"></select>
+    </div>
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+    <div class="col-lg-6 col-md-6 col-sm-3 col-xs-5">
+        <label id="lblInspDate">Inspection Date:</label>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-9 col-xs-6">
+        @*<Telerik:RadDatePicker ID="rdpInspDate" DateInput-DateFormat="dd-MMM-yyyy" Width="100%" runat="server"></Telerik:RadDatePicker>*@
+
+        <input type="text" id="rdpInspDate" DateInput-DateFormat="dd-MMM-yyyy" style="width:100%;color:black;" readonly />
+        @*<span class="calendar-icon">📅</span>*@
+        <span class="calendar-icon">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+        </span>
+
+    </div>
+</div>
+<div class="col-lg-6 col-md-3 col-sm-6 col-xs-12">
+    <div class="col-lg-2 col-md-6 col-sm-3 col-xs-5">
+        <label id="lblComment">Comments</label>
+    </div>
+
+    <div class="col-lg-10 col-md-6 col-sm-9 col-xs-7">
+        @*<asp:TextBox ID="txtComment" runat="server" CssClass="form-control"></asp:TextBox>*@
+        <input type="text" Class="form-control" id="txtComment" />
+    </div>
+</div>
+
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="DivtblOffSystemInspectionListMessage" width: 100%; margin-top:5px; display:none;">
+            <table id="tblOffSystemInspectionListMessage" class="table table-striped" style="width:100%">
+                <thead style="background-color: #efefef; color: #716262; width: 100%;">
+                    <tr>
+                        <th> </th>
+                    </tr>
+
+                </thead>
+                <tbody id="tbodyOffSystemInspectionListMessage" style="width:100%"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div id="OffSystemInspectionList" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblOffSystemInspectionList" class="table table-striped " style="width:100%">
+                <thead style="background-color: #efefef; color: #716262;width: 100%;">
+                    <tr>
+                        <th class="setWidth0" style="display:none;"></th>
+                        <th class="setWidth0">Status</th>
+                        <th class="setWidth0" style="display:none;">Status</th>
+                        <th class="setWidth1">Scaf Ref #</th>
+                        <th class="setWidth2">Site</th>
+                        <th class="setWidth3">Location</th>
+                        <th class="setWidth4">Building / Module No.</th>
+                        <th class="setWidth5">Asset # / Func. Loc</th>
+                        <th class="setWidth6">Floor Level</th>
+                        @*<th class="setWidth7">Recent Insp Date</th>*@
+                        <th class="setWidth8">Bearing</th>
+                        @* Commeted On 07-03-2023 Now Update All Has Been Renamed as Inspection *@
+                        @*<th class="setWidth10">Update All<input type='checkbox' class='ChkAllID setWidth10' ChkRegisterId_='" + RegisterId + "' /></th>*@
+                        @*<th class="setWidth10">Inspection<input type='checkbox' class='ChkAllID setWidth10' title="Tick this box to Update All Inspections" ChkRegisterId_='" + RegisterId + "' /></th>*@
+                        @*Comment on the 16 oct for hodi ccheck box all inspection and re arrange the order *@
+                        <th class="setWidth10">Inspection<div id="DivAllInspectionCheckBox"><input id="ChkAllInspections" type='checkbox' class='ChkAllID setWidth10' title="Tick this box to Update All Inspections" ChkRegisterId_='" + RegisterId + "' /></div></th>
+                        <th class="setWidth9">Out Of Service</th>
+                        <th class="setWidth0">De-Planked</th>
+                        <th class="setwidth13">Tied-Down</th>
+
+                        <th class="setWidth11">Comments</th>
+                        <th class="setWidth7">Recent Insp Date</th>
+                        <th class="setWidth8">Inspected By</th>
+                        <th class="setWidth8">Client Ref</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyOffSystemInspectionList" style="width:100%"></tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div id="divSave" class="w3-modal" runat="server" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 148px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey ">
+            <h4 class="w3-text-white" id="save"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label2">Please clear the SEARCH  and then click on Save Button ?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px;">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                <a class="w3-btn w3-green w3-hover-dark-grey" onclick="btnsaveyes()"
+                   id="btnsaveYes"><i class="glyphicon glyphicon-ok-circle "></i>&nbsp;OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="double-scroll" style="background:white">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="width: 98%">
+        @*<Telerik:RadAjaxPanel ID="RadAjaxPanel1" runat="server" ClientEvents-OnRequestStart="OnRequestStart" PostBackControls="ImageButton1" CssClass="demo-container no-bg">
+
+
+                <Telerik:RadGrid runat="server" ID="GridOffSystemInspecton" EnableLinqExpressions="false" AllowFilteringByColumn="true" AutoGenerateColumns="false" Skin="Metro" AllowPaging="true" ClientSettings-EnableAlternatingItems="false"
+                                 PageSize="50" OnNeedDataSource="GridOffSystemInspecton_NeedDataSource" OnItemCommand="GridOffSystemInspecton_ItemCommand" ClientSettings-EnableRowHoverStyle="true" GroupingSettings-CaseSensitive="false" MasterTableView-AllowSorting="true" Height="570px" AllowSorting="true" MasterTableView-CommandItemDisplay="Top" ClientSettings-AllowRowsDragDrop="true">
+
+                    <MasterTableView FilterExpression="([SiteLocationStatus] LIKE 'Active%')" DataKeyNames="RegisterID,DateTagged">
+                        <%--  <PagerStyle Position="Top" AlwaysVisible="true" />--%>
+                        <PagerStyle Mode="NextPrevAndNumeric" PageSizes="10,20,50" Position="Top" AlwaysVisible="true" />
+                        <CommandItemSettings ShowRefreshButton="false" ShowAddNewRecordButton="false" ShowExportToCsvButton="true" ExportToCsvText="Off System Inspecton List" />
+                        <CommandItemTemplate>
+                            <div class="row">
+                                <div class="col-lg-1 col-sm-1 col-md-1 col-xs-1">
+                                    <asp:Button ID="ExportToCsvButton" runat="server" CommandName="ExportToCsv" CssClass="rgExpCSV" />
+                                </div>
+                            </div>
+                        </CommandItemTemplate>
+                        <Columns>
+
+                            <Telerik:GridTemplateColumn HeaderText="Scaf Ref #" ItemStyle-Width="60px" AllowFiltering="true" AllowSorting="true" DataField="ShowRegisterID" CurrentFilterFunction="Contains" DataType="System.String" FilterControlWidth="60px" FilterDelay="1500" HeaderStyle-Width="50px" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblRegisterID" Text='<%#Eval("ShowRegisterID") %>'></asp:Label>
+                                </ItemTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn HeaderText="Site" AllowFiltering="true" AllowSorting="true" CurrentFilterFunction="Contains" SortExpression="SiteLocation" DataField="SiteLocation" DataType="System.String" FilterControlWidth="1" + databaseCon.Decrypt(clientId) + "px" HeaderStyle-Width="1" + databaseCon.Decrypt(clientId) + "px" ItemStyle-Width="130px" UniqueName="SiteLocation" FilterDelay="1500" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblSiteName" Width="130px" Text='<%#Eval("SiteLocation") %>'></asp:Label>
+                                </ItemTemplate>
+                                <FilterTemplate>
+                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" Width="130px" runat="server" ID="ddlFilterSite" DataSourceID="ddlsiteloc" DataValueField="SiteLocation" DataTextField="SiteLocation" MarkFirstMatch="true" OnClientSelectedIndexChanged="selectSite" AppendDataBoundItems="true" SelectedValue='<%# ((GridItem)Container).OwnerTableView.GetColumn("SiteLocation").CurrentFilterValue %>'>
+                                        <Items>
+                                            <Telerik:RadComboBoxItem Text="All" />
+                                        </Items>
+                                    </Telerik:RadComboBox>
+                                    <Telerik:RadScriptBlock runat="server" ID="radscriptsite">
+                                        <script type="text/javascript">
+                                            function selectSite(sender, args) {
+                                                var fill = $find("<%# ((GridItem)Container).OwnerTableView.ClientID %>");
+                                                 fill.filter("SiteLocation", args.get_item().get_value(), "EqualTo");
+                                               // fill.filter("SiteLocation", "+args.get_item().get_value()+", "EqualTo");
+                                            }
+                                        </script>
+                                    </Telerik:RadScriptBlock>
+                                </FilterTemplate>
+                            </Telerik:GridTemplateColumn>
+
+
+                            <Telerik:GridTemplateColumn UniqueName="Location" HeaderText="Location" AllowFiltering="true" AllowSorting="true" HeaderStyle-Width="100px" ItemStyle-Width="100px" CurrentFilterFunction="Contains" SortExpression="Location" DataField="Location" DataType="System.String" FilterControlWidth="100px" FilterDelay="1500" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblLocation" Text='<%#Eval("Location") %>'></asp:Label>
+                                </ItemTemplate>
+                                <FilterTemplate>
+                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" Style="width: 100px;" ID="ddlloca" runat="server" DataSourceID="ddllocationtype" DataTextField="Location" DataValueField="Location" AppendDataBoundItems="true" MarkFirstMatch="true" OnClientSelectedIndexChanged="selectloca" SelectedValue='<%#((GridItem)Container).OwnerTableView.GetColumn("Location").CurrentFilterValue%>'>
+                                        <Items>
+                                            <Telerik:RadComboBoxItem Text="All" />
+                                        </Items>
+                                    </Telerik:RadComboBox>
+                                    <Telerik:RadScriptBlock ID="scriptloca" runat="server">
+                                        <script type="text/javascript">
+                                            function selectloca(sender, args) {
+                                                var fillloc = $find("<%#((GridItem)Container).OwnerTableView.ClientID%>");
+                                                fillloc.filter("Location", args.get_item().get_value(), "EqualTo");
+                                            }
+                                        </script>
+                                    </Telerik:RadScriptBlock>
+                                </FilterTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn UniqueName="BuildingNo" HeaderText="Building / Module No." AllowFiltering="true" AllowSorting="true" DataField="BuildingNo" DataType="System.String" ShowFilterIcon="false" FilterDelay="1500" SortExpression="BuildingNo" HeaderStyle-Width="130px" ItemStyle-Width="130px" FilterControlWidth="100%" CurrentFilterFunction="Contains">
+                                <ItemTemplate>
+                                    <asp:Label ID="lblbuild" runat="server" Width="130px" Text='<%# Eval("BuildingNo") %>'></asp:Label>
+                                </ItemTemplate>
+                                <FilterTemplate>
+                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" Style="width: 130px;" ID="ddlbulid" runat="server" DataSourceID="ddlBuilding" DataTextField="BuildingNo" DataValueField="BuildingNo" AppendDataBoundItems="true" MarkFirstMatch="true" OnClientSelectedIndexChanged="SelectBuild" SelectedValue='<%#((GridItem)Container).OwnerTableView.GetColumn("BuildingNo").CurrentFilterValue %>'>
+                                        <Items>
+                                            <Telerik:RadComboBoxItem Text="All" />
+                                        </Items>
+                                    </Telerik:RadComboBox>
+                                    <Telerik:RadScriptBlock ID="scriptBuild" runat="server">
+                                        <script type="text/javascript">
+                                            function SelectBuild(sender, args) {
+                                                var fillBuild = $find("<%#((GridItem)Container).OwnerTableView.ClientID%>");
+                                                fillBuild.filter("BuildingNo", args.get_item().get_value(), "EqualTo");
+                                            }
+                                        </script>
+                                    </Telerik:RadScriptBlock>
+                                </FilterTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn HeaderText="Asset # / Func. Loc" AllowFiltering="true" UniqueName="AssetNo" AllowSorting="true" HeaderStyle-Width="100px" ItemStyle-Width="100px" CurrentFilterFunction="Contains" SortExpression="AssetNo" DataField="AssetNo" DataType="System.String" FilterControlWidth="100%" FilterDelay="1500" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblAssetNo" Width="100px" Text='<%#Eval("AssetNo") %>'></asp:Label>
+                                </ItemTemplate>
+                                <FilterTemplate>
+                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" Style="width: 110px;" ID="ddlsasset" runat="server" DataSourceID="ddlAsset" MarkFirstMatch="true" DataTextField="AssetNo" DataValueField="AssetNo" AppendDataBoundItems="true" OnClientSelectedIndexChanged="Selectasset" SelectedValue='<%#((GridItem)Container).OwnerTableView.GetColumn("AssetNo").CurrentFilterValue %>'>
+                                        <Items>
+                                            <Telerik:RadComboBoxItem Text="All" />
+                                        </Items>
+                                    </Telerik:RadComboBox>
+                                    <Telerik:RadScriptBlock runat="server" ID="scriptAsset">
+                                        <script type="text/javascript">
+                                            function Selectasset(sender, args) {
+                                                var fillmaterial = $find("<%# ((GridItem)Container).OwnerTableView.ClientID%>");
+                                                fillmaterial.filter("AssetNo", args.get_item().get_value(), "EqualTo");
+                                            }
+                                        </script>
+                                    </Telerik:RadScriptBlock>
+                                </FilterTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn UniqueName="FloorLevel" HeaderText="Floor Level" AllowFiltering="true" AllowSorting="true" HeaderStyle-Width="90px" SortExpression="FloorLevel" DataField="FloorLevel" DataType="System.String" FilterControlWidth="80px" FilterDelay="1500" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblFloorLevel" Text='<%#Eval("FloorLevel") %>'></asp:Label>
+                                </ItemTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <%--<Telerik:GridTemplateColumn HeaderText="Sub Owner" AllowFiltering="true" AllowSorting="true" CurrentFilterFunction="Contains" SortExpression="ScaffoldOwner" DataField="ScaffoldOwner" DataType="System.String" FilterControlWidth="100px" HeaderStyle-Width="100px" ItemStyle-Width="100px" UniqueName="ScaffoldOwner" FilterDelay="1500" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblScaffoldOwner" Width="100px" Text='<%#Eval("ScaffoldOwner") %>'></asp:Label>
+                                </ItemTemplate>
+                                <FilterTemplate>
+                                    <Telerik:RadComboBox Skin="Simple" RenderMode="Lightweight" Width="100px" runat="server" ID="ddlFilterScaffoldOwner" DataSourceID="ScaffoldOwner" DataValueField="ScaffoldOwner" DataTextField="ScaffoldOwner" MarkFirstMatch="true" OnClientSelectedIndexChanged="selectScaffoldOwner" AppendDataBoundItems="true" SelectedValue='<%# ((GridItem)Container).OwnerTableView.GetColumn("ScaffoldOwner").CurrentFilterValue %>'>
+                                        <Items>
+                                            <Telerik:RadComboBoxItem Text="All" />
+                                        </Items>
+                                    </Telerik:RadComboBox>
+                                    <Telerik:RadScriptBlock runat="server" ID="radscriptScaffoldOwner">
+                                        <script type="text/javascript">
+                                            function selectScaffoldOwner(sender, args) {
+                                                var fill = $find("<%# ((GridItem)Container).OwnerTableView.ClientID %>");
+                                                fill.filter("ScaffoldOwner", args.get_item().get_value(), "EqualTo");
+                                            }
+                                        </script>
+                                    </Telerik:RadScriptBlock>
+                                </FilterTemplate>
+                            </Telerik:GridTemplateColumn>--%>
+
+                            <Telerik:GridTemplateColumn HeaderText="Recent Insp Date" AllowFiltering="true" HeaderStyle-Width="100px" ItemStyle-Width="100px" DataField="RecentInspDate" SortExpression="RecentInspDate" HeaderStyle-HorizontalAlign="Center" DataType="System.DateTime" FilterControlWidth="100px" FilterDelay="1500" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblRecentInspDate" Width="100px" Text='<%#Eval("RecentInspDate", "{0:dd-MMM-yyyy}") %>'></asp:Label>
+                                </ItemTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn HeaderText="Inspected By" AllowFiltering="true" AllowSorting="true" HeaderStyle-Width="90px" ItemStyle-Width="90px" CurrentFilterFunction="Contains" SortExpression="InspectedBy" DataField="InspectedBy" UniqueName="InspectedBy" DataType="System.String" FilterControlWidth="90px" FilterDelay="1500" ShowFilterIcon="false">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblInspectedBy" Width="90px" Text='<%#Eval("InspectedBy") %>'></asp:Label>
+                                </ItemTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn Exportable="false" HeaderText="Out Of Service" HeaderStyle-Width="40px" ItemStyle-Width="40px" AllowFiltering="false" UniqueName="UniqueOutOfService">
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="chk_OutOfService" runat="server" width="40px" AutoPostBack="false" />
+                                </ItemTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn Exportable="false" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Right" HeaderStyle-Width="4%" AllowFiltering="false" UniqueName="UniqueInspect">
+                                <HeaderTemplate>
+                                    Update All
+                                    <asp:CheckBox ID="chk_AllInspect" runat="server" onclick="CheckAll(this);" AutoPostBack="false" ToolTip="Update All" />
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <asp:CheckBox ID="chk_Inspect" CssClass="chkAll" runat="server" onclick="Check(this);" AutoPostBack="false" ToolTip="Update All" />
+                                </ItemTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                            <Telerik:GridTemplateColumn Exportable="false" HeaderText="Comments" HeaderStyle-Width="220px" ItemStyle-Width="220px" AllowFiltering="false" UniqueName="UniqueInspComment">
+                                <ItemTemplate>
+                                    <asp:Label runat="server" ID="lblInspComment"></asp:Label>
+                                    <Telerik:RadTextBox ID="txtInspComment" runat="server" CssClass="form-control"></Telerik:RadTextBox>
+                                </ItemTemplate>
+                            </Telerik:GridTemplateColumn>
+
+                        </Columns>
+                    </MasterTableView>
+                </Telerik:RadGrid>
+            </Telerik:RadAjaxPanel>*@
+    </div>
+</div>
+@*<div class="modal fade" id="GetOfflineModal" role="dialog">
+        <div class="modal-dialog" style="width:390px;">
+            <div class="modad-content">
+                <div class="modal-header" style="background:#4680b9!important">
+                    <label style="color:white;">Do you want to go offline?</label>
+                </div>
+            </div>
+            <div class="modal-body" style="background-color:white;">
+                <div class="row">
+                    <div class="col-lg-7 col-md-7 col-sm-7"></div>
+                    <div class="col-lg-2 col-md-2 col-sm-2">
+                        <button type="button" class="btn btn-primary" id="btnDeleteOk" data-dismiss="modal" onclick="GoOfflineClick()">Yes</button>
+                    </div>
+
+                    <div class="col-lg-3 col-md-3 col-sm-3">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="" style="float:right; color:White!important">No</button>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+<div id="GetOfflineModal" class="w3-modal" runat="server" style="display: none; z-index: 9999;">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 148px; width: 365px; margin-top: 86px; z-index: 10000;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="save"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label2">Do you want to go offline?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px;">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                <a class="w3-btn w3-green w3-hover-dark-grey" onclick="GoOfflineClick()"
+                   id="btnsaveYes"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;Yes</a>
+            </div>
+
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                <a class="w3-btn w3-red w3-hover-dark-red" onclick="GoOfflineNoClick()"
+                   id="btnsaveNo"><i class="glyphicon glyphicon-ok-circle"></i>&nbsp;No</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="GetOfflineLinkModalForInspection" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Offline Inspection Link</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label1">Do you want to go offline Page?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnofflineconfirm" runat="server" OnClientClick="if(!ChangeRID()){ return false}" OnClick="btnofflineconfirm_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" OnClick="YesclickForOfflinePage()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnofflinecancel" runat="server" OnClick="btnofflinecancel_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnofflinecancel" OnClick="NoclickForOfflinePage()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@*<div id="clearOfflineDataModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Offline Inspection Link</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label1">Do you want to clear the offline inspection data? If you clear it, you will not be able to save any inspections completed in offline mode.</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" OnClick="BtnClerdataClickyes()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnofflinecancel" OnClick="BtnClerdataClickNo()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+<div id="clearOfflineDatainspectionModal" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 537px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Do you want to clear the offline inspection data?</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="Label1">If you clear it, you will not be able to save any inspections completed in offline mode.</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" OnClick="BtnClerdataClickyes()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnofflinecancel" OnClick="BtnClerdataClickNo()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,959 @@
+﻿
+@{
+    ViewBag.Title = "FloorLevelGallery";
+}
+
+<script src="/Content/js/html2canvas.js"></script>
+<script src="/Content/js/jquery.min.js"></script>
+<script src="/Content/js/bootstrap.min.js"></script>
+<link href="/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+
+        $('input[type="file"]').change(function (e) {
+            var output = document.getElementById('fileList');
+            //output.innerHTML = 'File Selected:';
+            output.innerHTML = '<ul>';
+
+            for (var i = 0; i <= e.target.files.length; i++) {
+                output.innerHTML += '<li>' + e.target.files.item(i).name + '</li>';
+            }
+            output.innerHTML += '</ul>';
+        });
+    //    $('input:radio[value=choose]').prop('checked', true);
+    //    $('input:radio[name="SelectType"]').change(
+    //        function () {
+    //            if ($(this).is(':checked') && $(this).val() == 'choose') {
+    //                // append goes here
+    //                $('#FileUploads').css('display', 'block');
+    //                $('#btnSelectFile').css('display', 'none');
+    //                $('#divSelectFile').css('display', 'none');
+    //            } else {
+    //                $('#btnSelectFile').css('display', 'block');
+    //                $('#FileUploads').css('display', 'none');
+    //                $('#fileList').css('display', 'none');
+    //                $('#txtdrawing').val('');
+    //            }
+    //        });
+
+    });
+
+    function HideSelect() {
+        $("#divSelectHide").css("display", "none");
+        $("#divChooseHide").css("display", "block");
+        $("#divddlFileSelect").css("display", "none");
+        $("#txtdrawing").val('');
+        $("#ddlFileSelect option").prop("selected", false);
+        $("#table1").css("display", "none");
+       // $("#hdnselectfile").click();
+       // OutputInnerhtml();
+        
+    }
+
+    function HideChoose() {
+        $("#divChooseHide").css("display", "none");
+        $("#divSelectHide").css("display", "block");
+        $("#txtdrawing").val('');
+        var output = document.getElementById('fileList');
+        output.innerHTML = '';
+        ShowDrawingImage();
+    }
+
+    function showSelectFile() {
+        $("#divddlFileSelect").css("display", "block");
+        $("#ddlFileSelect option").prop("selected", false);
+        $("#table1").css("display", "block");
+        // $("#hdnselectfile").click();
+        dropdownDrawing();
+        flag = false;
+        return flag;
+    }
+
+    $(document).ready(function () {
+        var from = getParameterByName('from');
+        if (from == "Job") // check Come From Job From
+        {
+            // btnbacktoSite.Visible = false;
+            // btnbacktositefloorlevelplan.Visible = false;
+            $('#btnbacktoJob').css('display', 'block');
+        }
+        else if (from == "Sitefloorlevelplan") {
+            // btnbacktoSite.Visible = false;
+            //  btnbacktoJob.Visible = false;
+            $('#btnbacktositefloorlevelplan').css('display', 'block');
+        }
+        else {
+            //  btnbacktoJob.Visible = false;
+            //  btnbacktositefloorlevelplan.Visible = false;
+            $('#btnbacktoSite').css('display', 'block');
+        }
+
+        SiteDropDownBind();
+        showthumnail();
+        //$('#ddlSites').change(function () {
+        //    dropdownlocation();
+        //});
+
+        //$('#ddlLocaSite').change(function () {
+        //    dropdownbuilding();
+        //});
+         // showthumnail();
+    });
+
+    function ddlLocaSite_SelectedIndexChanged() {
+        dropdownbuilding();
+        showthumnail();
+    }
+
+    function ddlBuilding_SelectedIndexChanged() {
+        DropdownFloorLevelBind();
+       showthumnail();
+    }
+    function ddlFileSelect_SelectedIndexChanged() {
+        ShowDrawingImage();
+    }
+
+    function ShowDrawingImage() {
+      
+            var id = getParameterByName('id');
+            var ddlFileSelect = $('#ddlFileSelect').val();
+            $('#txtdrawing').val(ddlFileSelect);
+            $.ajax({
+                url: '/FloorLevelGallery/shownewthumbnail',
+                type: 'POST',
+                data: JSON.stringify({ id: id,ddlFileSelect:ddlFileSelect}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (response) {
+                    $('#placeholderfordrawingimage').empty().append(response);
+                }
+            });
+
+        }
+
+
+    function SiteDropDownBind() {
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/FloorLevelGallery/SiteDropDownBind",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getData = response;
+                $("#ddlSites").html("");
+                $("#ddlSites").append('<option value=""></option>');
+                for (var i = 0; i < getData.length; i++) {
+                    $("#ddlSites").append('<option value="' + getData[i].SiteLocID + '">' + getData[i].SiteLocation + '</option>');
+                }
+            }
+        });
+    }
+
+
+    function dropdownlocation() {
+        var id = getParameterByName('id');
+        let ddlSites = $('#ddlSites').val();
+        $.ajax({
+            type: "POST",
+            url: "/FloorLevelGallery/dropdownlocation",
+            data: JSON.stringify({ id: id, ddlSites: ddlSites }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getData = response;
+                $("#ddlLocaSite").html("");
+                $("#ddlLocaSite").append('<option value="">Select Location</option>');
+                for (var i = 0; i < getData.length; i++) {
+                    $("#ddlLocaSite").append('<option value="' + getData[i].areaid + '">' + getData[i].area + '</option>');
+                }
+            }
+        });
+    }
+
+    function dropdownbuilding() {
+        var id = getParameterByName('id');
+        let ddlLocaSite = $('#ddlLocaSite').val();
+        $.ajax({
+            type: "POST",
+            url: "/FloorLevelGallery/dropdownbuilding",
+            data: JSON.stringify({ id: id, ddlLocaSite: ddlLocaSite }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getData = response;
+                $("#ddlBuilding").html("");
+                $("#ddlBuilding").append('<option value="">Select Building</option>');
+                for (var i = 0; i < getData.length; i++) {
+                    $("#ddlBuilding").append('<option value="' + getData[i].buildingid + '">' + getData[i].buildingno + '</option>');
+                }
+            }
+        });
+    }
+
+    function dropdownDrawing() {
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/FloorLevelGallery/dropdownDrawing",
+            data: JSON.stringify({ id: id}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getData = response;
+                $("#ddlFileSelect").html("");
+                $("#ddlFileSelect").append('<option value=""></option>');
+                for (var i = 0; i < getData.length; i++) {
+                    $("#ddlFileSelect").append('<option value="' + getData[i].DrawingName + '">' + getData[i].DrawingName + '</option>');
+                }
+            }
+        });
+    }
+
+    function ddlSites_SelectedIndexChanged() {
+        var id = getParameterByName('id');
+        //var ddlSites = $("#ddlSites").val();
+        var ddlSites = $("#ddlSites option:selected").text();
+        $.ajax({
+            type: "POST",
+            url: "/FloorLevelGallery/ddlSites_SelectedIndexChanged",
+            data: JSON.stringify({ id: id, ddlSites: ddlSites }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getData = response;
+                $("#ddlFloorLabel").html("");
+                // $("#ddlFloorLabel").append('<option value="All">All</option>');
+                for (var i = 0; i < getData.length; i++) {
+                    $("#ddlFloorLabel").append('<option value="' + getData[i].FloorLevelId + '">' + getData[i].FloorLevel + '</option>');
+                }
+            }
+        });
+        dropdownlocation();
+        dropdownbuilding();
+        showthumnail();
+    }
+
+    function DropdownFloorLevelBind() {
+        var id = getParameterByName('id');
+        var ddlSites = $("#ddlSites").val();
+        var ddlLocaSite = $('#ddlLocaSite').val();
+        var ddlBuilding = $('#ddlBuilding').val();
+        var siteName = $("#ddlSites option:selected").text();
+        $.ajax({
+            type: "POST",
+            url: "/FloorLevelGallery/DropdownFloorLevelBind",
+            data: JSON.stringify({ id: id, ddlSites: ddlSites, ddlLocaSite: ddlLocaSite, ddlBuilding: ddlBuilding, siteName: siteName }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getData = response;
+                $("#ddlFloorLabel").html("");
+                 for (var i = 0; i < getData.length; i++) {
+                    $("#ddlFloorLabel").append('<option value="' + getData[i].FloorLevelId + '">' + getData[i].FloorLevel + '</option>');
+                }
+            }
+        });
+
+        showthumnail();
+    }
+    function showthumnail() {
+
+        var id = getParameterByName('id');
+        var ddlSites = $("#ddlSites").val();
+        ddlSites = ddlSites == null ? 0 : ddlSites;
+        var ddlLocaSite = $('#ddlLocaSite').val();
+        ddlLocaSite = ddlLocaSite == null ? "" : ddlLocaSite;
+        var ddlBuilding = $('#ddlBuilding').val();
+        ddlBuilding = ddlBuilding == null ? "" : ddlBuilding;
+        $.ajax({
+            url: '/FloorLevelGallery/showthumnail',
+            type: 'POST',
+            data: JSON.stringify({ id: id, ddlSites: ddlSites, ddlLocaSite: ddlLocaSite, ddlBuilding: ddlBuilding}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                $('#placeholderforimage').empty().append(response);
+              
+                $('img').on('click', function () {
+                    var imageid = this.id;
+                    var SiteImageID = imageid.split('ppdl')[1];
+                    if (imageid != 'ppdl') {
+                        $('#ppdl').attr("src", this.src);
+                        $('#popups').css('display', 'block');
+                        $('#hdnImageId').val(SiteImageID);
+                    }
+
+                    else {
+
+                    }
+                });
+
+                $('.close').on('click', function () {
+                    $('#popups').css('display', 'none');
+                });
+
+            }
+
+        });
+
+    }
+
+
+    function btndeletedyes_Click() {
+        var id = getParameterByName('id');
+        var ddlSites = $("#ddlSites").val();
+        var hdnimgnames = $("#hdnimgnames").val();
+        var hdnImageId = $('#hdnImageId').val();
+        var ddlLocaSite = $('#ddlLocaSite').val();
+        ddlLocaSite = ddlLocaSite == null ? "" : ddlLocaSite;
+        var ddlBuilding = $('#ddlBuilding').val();
+        ddlBuilding = ddlBuilding == null ? "" : ddlBuilding;
+
+        $.ajax({
+            url: '/FloorLevelGallery/btndeletedyes_Click',
+            type: 'POST',
+            data: JSON.stringify({ id: id, ddlSites: ddlSites, hdnimgnames: hdnimgnames, ddlLocaSite: ddlLocaSite, ddlBuilding: ddlBuilding, hdnImageId: hdnImageId }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                $('#divdeleted').css("display", "none");
+                if (response.Result != "") {
+                    CustomAlert(response);
+                    showthumnail();
+                }
+            }
+
+        });
+    }
+
+    function addnewimages() {
+        $('#FileUploads').val('');
+        $('#txtdrawing').val('');
+        $('#btnchoose').prop('checked', true);
+        DropdownFloorLevelBind();
+        HideChoose();
+        HideSelect();
+       
+        //dropdownDrawing();
+        //ShowDrawingImage();
+        $("#ddlFloorLabel option").prop("selected", false);
+        $("#txtdescs").val(' ');
+        var siteID = $('#ddlSites').val(); 
+        let buildingId = $('#ddlBuilding').val();
+        let ddlLocaSite = $('#ddlLocaSite').val();
+        if (siteID != "") {
+            $("#divChooseSelectFile").css("display", "none");
+            $("#divCreatePops").css("display", "block");
+            $("#divdrawing").css("display", "none");
+            $('#divddlFileSelect').css('display', 'none');
+        } else {
+            //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+            //$('#ContentPlaceHolder1_art1').css("display", "block");
+            //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please Select Site And Then Add Floor Level Image .');
+            //hideAlert();
+            var Response = { Result: "Failed", Message: "Please Select Site And Then Add Floor Level Image ." };
+            CustomAlert(Response);
+        }
+        if (buildingId != "") {
+            DropdownFloorLevelBind();
+        } else {
+            if (siteID != "" && ddlLocaSite != "") {
+                $("#divCreatePops").css("display", "none");
+                var Response = { Result: "Failed", Message: "Please Select Building also And Then Add Floor Level Image." };
+                CustomAlert(Response);
+            }
+        }
+
+        if (siteID != "" && ddlLocaSite != "" && buildingId != "") {
+            $("#divChooseSelectFile").css("display", "block");
+            $("#divCreatePops").css("display", "block");
+            $("#divdrawing").css("display", "block");
+            // $('#divddlFileSelect').css('display', 'block');
+          
+        }
+
+    }
+
+
+    function btnnSave_Click() {
+        // var ValidationCheck = stopsave();
+        // return stopsave();
+        //   if (ValidationCheck == true) {
+        //if (true){
+
+        //  function stopsave() {
+        var filename = document.getElementById('fileList');
+        // var FloorLevel = $('#<%=ddlFloorLabel.ClientID %> option:selected').val();
+        // var Descripotion = $("#ContentPlaceHolder1_txtdescs").val();
+        var FloorLevel = $('#ddlFloorLabel').val();
+        var Descripotion = $("#txtdescs").val();
+        var flag = true;
+        if (FloorLevel == '' || FloorLevel == undefined) {
+            flag = false;
+            var Response = { Result: "Failed", Message: "Please Select Floor Level ." };
+            CustomAlert(Response);
+        } else {
+
+            if ($('#btnchoose').prop('checked') == true) {
+                if (filename.innerText == '') {
+                    //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                    //$('#ContentPlaceHolder1_art1').css("display", "block");
+                    //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please click on choose file to select the image for Floor Level .');
+                    //hideAlert();
+                    var Response = { Result: "Failed", Message: "Please click on choose file to select the image for Floor Level ." };
+                    CustomAlert(Response);
+
+                    flag = false;
+                    return flag;
+                } else {
+                    flag = true;
+                }
+            }
+            else if ($('#btnselect').prop('checked') == true) {
+                var SelectFile = $('#ddlFileSelect').val();
+                if (SelectFile == '' || SelectFile == undefined) {
+                    //$('#art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                    //$('#ContentPlaceHolder1_art1').css("display", "block");
+                    //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please select the Select File to select the image for Floor Level .');
+                    //hideAlert();
+                    var Response = { Result: "Failed", Message: "Please select the Select File to select the image for Floor Level ." };
+                    CustomAlert(Response);
+                    flag = false;
+                    return flag;
+                } else {
+                    flag = true;
+                }
+            }
+            else if (FloorLevel == '' || FloorLevel == undefined) {
+                //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                //$('#ContentPlaceHolder1_art1').css("display", "block");
+                //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please Select Floor Level .');
+                var Response = { Result: "Failed", Message: "Please Select Floor Level ." };
+                CustomAlert(Response);
+
+                // hideAlert();
+                flag = false;
+                return flag;
+            }
+            else if (Descripotion == '') {
+                //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                //$('#ContentPlaceHolder1_art1').css("display", "block");
+                //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please Fill The Description .');
+                var Response = { Result: "Failed", Message: "Please Fill The Description ." };
+                CustomAlert(Response);
+
+                // hideAlert();
+                flag = false;
+                return flag;
+            }
+            else {
+                flag = true;
+            }
+        }
+       // else {
+        if(flag==true){
+
+            $('#LoadingPanel1').css('display', 'block');
+
+            var fileData = new FormData();
+            var files;
+            var FileName;
+            // Checking whether FormData is available in browser
+            if (window.FormData !== undefined) {
+                if (files == null || files == "") {
+                    var FileUploads = $('#FileUploads').get(0);
+                    files = FileUploads.files;
+                }
+                var FileUploads = $('#FileUploads').get(0);
+                // Create FormData object
+                //  var fileData = new FormData();
+                if (files.length != 0) {
+
+                     FileName = files[0].name;
+                    var FileSize = files[0].size;
+                    var extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+                    fileData.append(files[0].name, files[0]);
+
+                }
+            }
+
+            var UID = getParameterByName('UID');
+            var id = getParameterByName('id');
+            var RID = getParameterByName('RID');
+
+            var ddlSites = $('#ddlSites').val();
+            var ddlFloorLabel = $('#ddlFloorLabel').val();
+            var txtdescs = $('#txtdescs').val();
+           // var SiteName = $('#ddlSites option:selected').text();
+            var FileUploads = $('#FileUploads').val();
+            let ddlLocaSite = $('#ddlLocaSite').val();
+            let ddlBuilding = $('#ddlBuilding').val();
+            ddlBuilding = ddlBuilding == null ? "" : ddlBuilding;
+            let txtdrawing = $('#txtdrawing').val();
+            let FloorLevelLandingName = $('#ddlFloorLabel option:selected').text();
+            let hdndrawing = $('#txtdrawing').val();
+            var  ddlFileSelect = $('#ddlFileSelect').val();
+            if ($('#btnchoose').prop('checked') == true) {
+                ddlFileSelect = "";
+            }
+           // let ddlFileSelect = $('#ddlFileSelect').val();
+
+            fileData.append('id', id);
+            fileData.append('RID', RID);
+            fileData.append('UID', UID);
+            fileData.append('ddlSites', ddlSites);
+            fileData.append('ddlLocaSite', ddlLocaSite);
+            fileData.append('ddlFloorLabel', ddlFloorLabel);
+            fileData.append('ddlBuilding', ddlBuilding);
+            fileData.append('txtdescs', txtdescs);
+            fileData.append('txtdrawing', txtdrawing);
+            fileData.append('hdndrawing', hdndrawing);
+            fileData.append('ddlFileSelect', ddlFileSelect);
+            fileData.append('FloorLevelLandingName', FloorLevelLandingName);
+            fileData.append('FileUploads', FileUploads);
+
+            $.ajax({
+                url: '/FloorLevelGallery/btnnSave_Click',
+                type: "POST",
+                mimeType: "multipart/form-data",
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: fileData,
+                success: function (response) {
+                        var Response = JSON.parse(response);
+                        CustomAlert(Response);
+                        $('#divCreatePops').hide();
+                        showthumnail();
+                        $("#LoadingPanel1").css("display", "none");
+                  
+                }
+            })
+
+        }
+    }
+
+    function stopsave() {
+        var filename = document.getElementById('fileList');
+        // var FloorLevel = $('#<%=ddlFloorLabel.ClientID %> option:selected').val();
+        // var Descripotion = $("#ContentPlaceHolder1_txtdescs").val();
+        var FloorLevel = $('#ddlFloorLabel').val();
+        var Descripotion = $("#txtdescs").val();
+        var flag = true;
+        if ($('#btnchoose').prop('checked') == true) {
+            if (filename.innerText == '') {
+                //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                //$('#ContentPlaceHolder1_art1').css("display", "block");
+                //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please click on choose file to select the image for Floor Level .');
+                //hideAlert();
+                var Response = { Result: "Failed", Message: "Please click on choose file to select the image for Floor Level ." };
+                CustomAlert(Response);
+
+                flag = false;
+                return flag;
+            }
+        }
+        if ($('#btnselect').prop('checked') == true) {
+            var SelectFile = $('#ddlFileSelect').val();
+            if (SelectFile == '' || SelectFile == undefined) {
+                //$('#art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+                //$('#ContentPlaceHolder1_art1').css("display", "block");
+                //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please select the Select File to select the image for Floor Level .');
+                //hideAlert();
+                var Response = { Result: "Failed", Message: "Please select the Select File to select the image for Floor Level ." };
+                CustomAlert(Response);
+                flag = false;
+                return flag;
+            }
+        }
+        if (FloorLevel == '' || FloorLevel == undefined) {
+            //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+            //$('#ContentPlaceHolder1_art1').css("display", "block");
+            //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please Select Floor Level .');
+            var Response = { Result: "Failed", Message: "Please Select Floor Level ." };
+            CustomAlert(Response);
+
+            // hideAlert();
+            flag = false;
+            return flag;
+        } if (Descripotion == '') {
+            //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+            //$('#ContentPlaceHolder1_art1').css("display", "block");
+            //$('#ContentPlaceHolder1_alertlabel').html('<strong>Alert ! </strong>Please Fill The Description .');
+            var Response = { Result: "Failed", Message: "Please Fill The Description ." };
+            CustomAlert(Response);
+
+            // hideAlert();
+            flag = false;
+            return flag;
+        }
+
+    }
+    function CheckIsRepeat() {
+
+    }
+    //function hideAlert() {
+    //    //alert();
+    //    setTimeout(function () {
+    //        $(".fadeOut").fadeOut(3000);
+    //    }, 4000);
+    //}
+
+    function btnclose() {
+        var output = document.getElementById('fileList');
+        output.innerHTML = '';
+        $('#divCreatePops').css('display', 'none');
+
+    }
+
+    function deletenos() {
+        $('#divdeleted').css('display', 'none');
+    }
+
+    function btnbacktoJob_Click() {
+        // Response.Redirect("Register.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&RID=" + Request.QueryString["RID"], false);
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var id = getParameterByName('id');
+        var RID = getParameterByName('RID');
+        window.location.href = '/Register/Register?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&RID=' + RID;
+    }
+
+    function btnbacktoSite_Click() {
+        //  Response.Redirect("EditClient.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"]);
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var id = getParameterByName('id');
+
+        window.location.href = '/EditClient/EditClient?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id;
+    }
+    function btnbacktositefloorlevelplan_Click() {
+        //  Response.Redirect("SiteFloorLevelPlan.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"]);
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var id = getParameterByName('id');
+
+        window.location.href = '/SiteFloorLevelPlan/SiteFloorLevelPlan?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id;
+    }
+
+</script>
+<script>
+
+    $(document).ready(function () {
+
+        $('#btndelete').on('click', function () {
+            var parentids = $(this).parent();
+            var siblingids = parentids.siblings();
+            var imglink = siblingids[0].currentSrc;
+            var splitting = imglink.split('/images/SiteFloorlevelimg/');
+            var imgname = splitting[1];
+            $('#hdnimgnames').val(imgname);
+            $('#divdeleted').css('display', 'block');
+        });
+
+
+
+    //     $('img').on('click', function () {
+    //    var imageid = this.id;
+    //    var SiteImageID = imageid.split('ppdl')[1];
+    //    if (imageid != 'ppdl') {
+    //        $('#ppdl').attr("src", this.src);
+    //        $('#popups').css('display', 'block');
+    //        $('#hdnImageId').val(SiteImageID);
+    //    }
+    //    else {
+
+    //    }
+    //});
+
+
+    });
+
+
+    function InpFileUpload()
+    {
+        var hdnDrawingName = readURL(this);
+            $('#hdndrawing').val(hdnDrawingName);
+            $('#txtdrawing').val(hdnDrawingName);
+
+    }
+
+
+
+    function readURL(input) {
+        var radUpdogImg = $('#FileUploads').val();
+        var fileUpload = $('#FileUploads').get(0);
+        var file = fileUpload.files;
+        var FileName = '';
+        if (file.length != 0) {
+
+            FileName = file[0].name;
+            var extension = FileName.substring(FileName.lastIndexOf('.') + 1);
+
+            if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "ico" || extension == "gif" || extension == "bmp" || extension == "JPG" || extension == "JPEG" || extension == "PNG" || extension == "ICO" || extension == "GIF" || extension == "BMP") {
+
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        $('#imga').attr('src', e.target.result);
+                    }
+
+                    reader.readAsDataURL(input.files[0]); // convert to base64 string
+                    $('#divdeleteimag').css('display', 'block');
+                }
+            }
+            else {
+                var response = { Result: "Failed", Message: "<strong>Failed to upload Image! </strong>Valid File Extensions Are jpg, jpeg, png, gif, bmp" };
+                CustomAlert(response)
+                $("#imga").attr("src", "/images/noimg.jpg");
+            }
+
+        }
+        return FileName;
+    }
+
+    
+    function btnAddFloorLevel_Click()
+    {
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var id = getParameterByName('id');
+        var from = getParameterByName('from');
+        var RID = getParameterByName('RID');
+
+        window.location.href = '/FloorLevel/FloorLevel?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&from=' + from + '&RID=' + RID;
+     //   Response.Redirect("FloorLevel.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&from=" + Request.QueryString["from"] + "&RID=" + Request.QueryString["RID"]);
+    }
+</script>
+<style>
+    .imagesize {
+        height: 23px;
+        font-size: 13px;
+        padding-top: 3px;
+    }
+</style>
+
+<input type="hidden" id="hdnaddnewimage" Value="" />
+<input type="hidden" id="hdnimgnames" Value="" />
+<input type="hidden" id="hdnsytflrid" Value="" />
+<input type="hidden" id="hdnImageId" value="" />
+<input type="hidden" id="hdndrawing" value="" />
+
+@*<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-image"></i>&nbsp;<span id="lblclient" Text="Floor Level Gallery" style="Font-Size:16px" Font-Bold="true">Floor Level Gallery</span></b></h4>
+    </div>
+</div>*@
+
+<div class="row">
+    @*<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"></div>*@
+    <div class="title_left col-lg-5 col-md-5 col-sm-5">
+        <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-image"></i>&nbsp;<span id="lblclient" Text="Floor Level Gallery" style="Font-Size:16px" Font-Bold="true">Floor Level Gallery</span></b></h4>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        @*<asp:LinkButton runat="server" ID="btnbacktoJob" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktoJob_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</asp:LinkButton>*@
+        <button id="btnbacktoJob" style="Width:100%;display:none" Class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktoJob_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Job</button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        @*<asp:LinkButton runat="server" ID="btnbacktoSite" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktoSite_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Site</asp:LinkButton>*@
+        <button id="btnbacktoSite" style="Width:100%;display:none" Class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktoSite_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Site</button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        @*<asp:LinkButton runat="server" ID="btnbacktositefloorlevelplan" Width="100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktositefloorlevelplan_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Floor Map</asp:LinkButton>*@
+        <button id="btnbacktositefloorlevelplan" style="Width:100%;display:none" Class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbacktositefloorlevelplan_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Floor Map</button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-4" id="firstdiv">
+        <label id="lblSite" style="font-weight: 700; font-size: 15px; color: black; float: right">Site:</label>
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-9 col-xs-8">
+        @*<asp:DropDownList ID="ddlSites" CssClass="form-control" EmptyMessage="Select---" OnSelectedIndexChanged="ddlSites_SelectedIndexChanged" Style="border: 1px solid; border-color: #cac5c5;" runat="server" AutoPostBack="true"></asp:DropDownList>*@
+        <select id="ddlSites" class="form-control" style="border: 1px solid; border-color: #cac5c5;" onchange="ddlSites_SelectedIndexChanged()"></select>
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-4">
+        <label id="ddlLocations" style="font-weight: 700; font-size: 15px; color: black; float: right">Location:</label>
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-9 col-xs-8">
+        @*<asp:DropDownList ID="ddlLocaSite" CssClass="form-control" EmptyMessage="Select---" OnSelectedIndexChanged="ddlLocaSite_SelectedIndexChanged" Style="border: 1px solid; border-color: #cac5c5;" runat="server" AutoPostBack="true"></asp:DropDownList>*@
+        <select id="ddlLocaSite" onchange="ddlLocaSite_SelectedIndexChanged()" class="form-control" style="border: 1px solid; border-color: #cac5c5;"></select>
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-4">
+        <label id="ddlBuild" style="font-weight: 700; font-size: 15px; color: black; float: right">Building:</label>
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-9 col-xs-8">
+        @*<asp:DropDownList ID="ddlBuilding" CssClass="form-control" OnSelectedIndexChanged="ddlBuilding_SelectedIndexChanged" Style="border: 1px solid; border-color: #cac5c5;" runat="server" AutoPostBack="true"></asp:DropDownList>*@
+        <select id="ddlBuilding" onchange="ddlBuilding_SelectedIndexChanged()" class="form-control" style="border: 1px solid; border-color: #cac5c5;"></select>
+    </div>
+
+    <div class="col-lg-2 col-md-3 col-sm-9 col-xs-8">
+        <button id="btnNewImages" type="button" class="w3-btn w3-teal" style="float: right; margin-right: 7px" onclick="addnewimages();"><i class="fa fa-plus"></i>&nbsp;Add Floor Image</button>
+
+    </div>
+
+</div>
+
+<input type="hidden" id="tempimg" name="tempimg" />
+
+<pages smartnavigation="true" maintainscrollpositiononpostback="true"></pages>
+
+<div class="panel panel-default upcommingevent">
+
+    <div class="panel-heading upcommingevt">Floor Level Images</div>
+    <div class="panel-body" style="height: 94vh; overflow-y: auto;">
+        <div id="table">
+            <div>
+                @*<asp:PlaceHolder ID="placeholderforimage" runat="server"></asp:PlaceHolder>*@
+                <div id="placeholderforimage"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="popups" class="w3-modal" runat="server">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: fit-content;">
+        <span class="crossbtn" style="cursor: pointer; color: Black; font-weight: bold; margin-right: 5px; float: right; background: white" onclick="document.getElementById('popups').style.display='none'"><a id="btndelete"><i class="glyphicon glyphicon-trash"></i></a>&nbsp;&nbsp;X</span>
+        @*<img id="ppdl" class="img-responsive" src="" align="middle" style="min-height: 350px; min-width: 350px !important; height: auto; width: auto; max-width: 1000px; max-height: 450px; margin-top: -10px;" />*@
+        <img id="ppdl" class="img-responsive" src="" align="middle" style="height: auto; width: auto; max-width: 1000px; max-height: 450px; margin-top: -10px;" />
+    </div>
+</div>
+
+
+
+
+  <div id="divCreatePops" class="w3-modal" style="display: none">
+         <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 530px; width: 450px; margin-top: 10px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Add Image<a id="close" class="close" style="float: right; color: white" onclick="btnclose();">X</a></h4>
+            </header>
+            <div class="row"></div>
+            <div class="row">
+
+                <div class="col-xs-4 col-lg-4 col-md-3 col-sm-3" style="margin-top: 7px;">
+                    <label id="lblfloorlvl" style="font-size: 13px">Floor Level:<span style="color: red">&nbsp*</span></label>
+                </div>
+
+                <div class="col-xs-7 col-lg-7 col-md-8 col-sm-8">
+                     <a ToolTip="Add Floor Level" OnClick="btnAddFloorLevel_Click()" id="btnAddFloorLevel" Style="float: right; color: #800000; font-size: smaller;margin-top: -10px;"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add Floor</a>
+                    <select id="ddlFloorLabel" class="form-control">
+
+                    </select>
+                </div>
+
+                <div class="row" id="divdrawing" >
+                <div class="col-xs-4 col-lg-4 col-md-3 col-sm-3" style="margin-top: 7px;" >
+                    <label id="lbldrawing" style="font-size: 13px">Drawing Name:</label>
+                </div>
+
+                <div class="col-xs-7 col-lg-7 col-md-8 col-sm-8" style="padding-top: 9px;">
+                    <input type="text" id="txtdrawing" disabled Class="form-control"/>
+                </div>
+               </div>
+
+             <div class="row" id="divddlFileSelect" style="display:none;">
+                <div class="col-xs-4 col-lg-4 col-md-3 col-sm-3" style="margin-top: 7px;" >
+                    <label id="lblFileSelect" style="font-size: 13px">Select File:<span style="color: red">&nbsp*</span></label>
+                </div>
+                <div class="col-xs-7 col-lg-7 col-md-8 col-sm-8" style="padding-top: 9px;">
+                    <select id="ddlFileSelect" class="form-control" onchange="ddlFileSelect_SelectedIndexChanged()"></select>
+                   @*<asp:DropDownList ID="ddlFileSelect" CssClass="form-control" runat="server" OnSelectedIndexChanged="ddlFileSelect_SelectedIndexChanged" AutoPostBack="true" ></asp:DropDownList>
+                    <asp:RequiredFieldValidator ID="RequiredFieldValidatorFileSelect" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="ddlFileSelect" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+                </div>
+
+                <div class="col-xs-4 col-lg-3 col-md-3 col-sm-3" style="padding-top: 14px; margin-left: 10px; display:none;" >
+                    <label id="lbldescription" style="font-size: 14px">Description<span style="color: red">&nbsp*</span></label>
+                </div>
+             </div>
+
+                <div class="col-xs-7 col-lg-8 col-md-8 col-sm-8" style="padding-top: 9px; display:none;">
+                    <input type="text" id="txtdescs" Class="form-control" />
+                    @*<asp:RequiredFieldValidator ID="rfv" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtdescs" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+                </div>
+                <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1" style="opacity: 0">
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="nonsafari">
+                    <div class="desktopApp">
+
+              <div class="row w3-padding-top">
+                   <div id="divChooseSelectFile" runat="server" class="col-lg-10 col-md-3 col-xs-12 col-sm-3 " style="margin-top: 1px; display: inline-flex;display:block; padding-left: 10px;">
+
+                   <input type="Radio" id="btnchoose" name="FileUploading" Checked onchange="HideSelect()" />
+                   <label id="lblChooseFile" style="margin-right:30px!important; margin-left:5px!important">Choose File</label>
+                    <input type="Radio" id="btnselect" name="FileUploading" onchange="HideChoose()" />
+                   <label id="lblSelectFile" style="margin-left:5px!important;">Select File</label>
+                   </div>
+                 </div>
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4 " id="divChooseHide">
+                            <input type="file" id="FileUploads" onchange="InpFileUpload();" />
+                            @*<asp:FileUpload runat="server" ID="FileUploads" AllowMultiple="false" />
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidatorFileUploads" runat="server" CssClass="rdf-initial rdf-text" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="FileUploads" ValidationGroup="Save"></asp:RequiredFieldValidator>*@
+                        </div>
+
+                        <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4" id="divSelectHide" style="display:none;">
+                            @*<asp:Button runat="server" ID="FileUploadsSelect" Width="70%"  CssClass="w3-btn w3-small w3-green btnheight imagesize"  OnClientClick="return showSelectFile();" CausesValidation="false"  Text="Select File" >
+                            </asp:Button>*@   
+                            <button id="FileUploadsSelect" style="width:70%" Class="w3-btn w3-small w3-green btnheight imagesize" onclick="showSelectFile()">Select File</button>
+      
+                                                   
+                        </div>
+
+
+                    </div>
+
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                        @*<asp:Button runat="server" ID="btnnSave" ValidationGroup="Save" Width="70%" CssClass="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnnSave_Click" OnClientClick=" return stopsave();" Text="Save" />*@
+                        <button id="btnnSave" style="width:70%" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnnSave_Click()">Save</button>
+                    </div>
+
+                </div>
+            </div>
+            <div id="fileList" style="color: black; margin-left: 14px">
+            </div>
+           
+            <div class="panel-body" style="height: 94vh; overflow-y: auto;">
+            <div id="table1"  style="display:block">
+                <div>
+                    @*<asp:PlaceHolder ID="placeholderfordrawingimage" runat="server"></asp:PlaceHolder>*@
+                    <div id="placeholderfordrawingimage"></div>
+                </div>
+            </div>
+            </div>
+
+        </div>
+    </div>
+
+<div id="divdeleted" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Floor level Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="c1">Are you sure you want to Delete the Image?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btndeletedyes" OnClick="btndeletedyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeletedyes" runat="server" OnClick="btndeletedyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btndeletedno" onclick="deletenos()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndeletedno" runat="server" OnClientClick="deletenos"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+            </div>
+        </div>
+    </div>
+</div>

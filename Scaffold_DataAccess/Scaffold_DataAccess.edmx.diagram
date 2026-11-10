@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="aef9f7ba5a8944908ea072c86a22993f" Name="Diagram1" >
+        <EntityTypeShape EntityType="ScaffoldModel.sysdiagram" Width="1.5" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblAccessChoice" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblArea" Width="1.5" PointX="8.25" PointY="67.25" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblAsset" Width="1.5" PointX="15.75" PointY="75.875" />
+        <EntityTypeShape EntityType="ScaffoldModel.TblAuditLogin" Width="1.5" PointX="4.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblBuilding" Width="1.5" PointX="10.5" PointY="73.375" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblchecklist" Width="1.5" PointX="3" PointY="84.875" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblChecklistContent" Width="1.5" PointX="5.25" PointY="80.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblClient" Width="1.5" PointX="0.75" PointY="72.125" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblClientRepresentation" Width="1.5" PointX="3" PointY="51.125" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDayDocket" Width="1.5" PointX="5.25" PointY="56.25" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDeliveryDocket" Width="1.5" PointX="3" PointY="108.5" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDeliveryDocketDocument" Width="1.5" PointX="4.75" PointY="5.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDesign" Width="1.5" PointX="3" PointY="47.5" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDocument" Width="1.5" PointX="15" PointY="64.5" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDocumentType" Width="1.5" PointX="3" PointY="44" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDomare" Width="1.5" PointX="6.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDutyRating" Width="1.5" PointX="3" PointY="40.5" />
+        <EntityTypeShape EntityType="ScaffoldModel.TblFloorLevel" Width="1.5" PointX="5.25" PointY="67.25" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblHandOver" Width="1.5" PointX="18" PointY="61.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblHideShow" Width="1.5" PointX="0.75" PointY="6.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblInspection" Width="1.5" PointX="15" PointY="80.875" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblInspectionList" Width="1.5" PointX="20.25" PointY="78" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblInventory" Width="1.5" PointX="3" PointY="102.5" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblInventoryChange" Width="1.5" PointX="8.25" PointY="89.375" />
+        <EntityTypeShape EntityType="ScaffoldModel.TblMainClientToClient" Width="1.5" PointX="6.75" PointY="3.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblManHr" Width="1.5" PointX="18" PointY="73.5" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblMaterialType" Width="1.5" PointX="3" PointY="120.625" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblOptimizedInventory" Width="1.5" PointX="18" PointY="86.125" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblRegister" Width="1.5" PointX="12.75" PointY="67.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblRegisterGallery" Width="1.5" PointX="15" PointY="98.875" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblRegisterTemp" Width="1.5" PointX="6.75" PointY="6.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblRequestInventoryTemp" Width="1.5" PointX="8.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblReturnInventory" Width="1.5" PointX="3" PointY="115.5" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblReturnInventoryDetail" Width="1.5" PointX="5.25" PointY="109.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblSiteImage" Width="1.5" PointX="8.75" PointY="5.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblSiteLocation" Width="1.5" PointX="3" PointY="54.875" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblSiteManHr" Width="1.5" PointX="5.25" PointY="76.625" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblSiteMaterial" Width="1.5" PointX="15" PointY="90.25" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblSitePerDayDetail" Width="1.5" PointX="2.75" PointY="9.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblState" Width="1.5" PointX="8.75" PointY="9.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblSubCategory" Width="1.5" PointX="10.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTempInspectionList" Width="1.5" PointX="10.75" PointY="4.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTransaction" Width="1.5" PointX="3" PointY="75.375" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTransactionHistDelivery" Width="1.5" PointX="7.5" PointY="96.375" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTransactionHistRequest" Width="1.5" PointX="5.25" PointY="89.25" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblUser" Width="1.5" PointX="3" PointY="92.625" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblUserCategory" Width="1.5" PointX="3" PointY="63" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblUserRole" Width="1.5" PointX="10.75" PointY="11.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.Area" Width="1.5" PointX="12.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblBana" Width="1.5" PointX="12.75" PointY="4.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblChecklistContentDoNotDelete" Width="1.5" PointX="4.75" PointY="12.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblchecklistDoNotDelete" Width="1.5" PointX="12.75" PointY="6.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblClientDoNotDelete" Width="1.5" PointX="12.75" PointY="10.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDamagedInventory" Width="1.5" PointX="0.75" PointY="13.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDamagedInventoryDetail" Width="1.5" PointX="6.75" PointY="13.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblDaylightShift" Width="1.5" PointX="14.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblEmailContent" Width="1.5" PointX="3" PointY="89" />
+        <EntityTypeShape EntityType="ScaffoldModel.TblFloorLevelDoNotDelete" Width="1.5" PointX="14.75" PointY="4.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblHideShowbak" Width="1.5" PointX="14.75" PointY="8.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblReport" Width="1.5" PointX="14.75" PointY="13.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblReturnInventoryTemp" Width="1.5" PointX="8.75" PointY="15.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblStatusColourMaping" Width="1.5" PointX="10.75" PointY="15.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTempCheckListDataUpload" Width="1.5" PointX="16.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTempInventoryDataUpload" Width="1.5" PointX="16.75" PointY="3.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTermNCondition" Width="1.5" PointX="3" PointY="80.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.tblTermNConditionDoNotDelete" Width="1.5" PointX="16.75" PointY="8.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.VW_DepotInventory" Width="1.5" PointX="16.75" PointY="12.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.Vw_SiteInventory" Width="1.5" PointX="2.75" PointY="17.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.Vw_TblInspection" Width="1.5" PointX="18.75" PointY="0.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.VW_TblRegister" Width="1.5" PointX="5.75" PointY="18.75" />
+        <AssociationConnector Association="ScaffoldModel.fk_AreaID_ref1" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblArea_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblArea_SitelocId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblBuilding_AreaId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegister_LocationId" />
+        <AssociationConnector Association="ScaffoldModel.fk_AssetID_ref1" />
+        <AssociationConnector Association="ScaffoldModel.FK_TblAsset_BuildingId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblAsset_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegister_AssetId" />
+        <AssociationConnector Association="ScaffoldModel.fk_buildingid_ref1" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblBuilding_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegister_BuildingId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblCheckList_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblCheckListContent_ChecklistId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInspectionList_CheckListId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegister_CheckListId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblCheckListContent_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInspectionList_ContentId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblClientRepresentation_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDeliveryDocket_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDesign_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDocuments_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDocumentType_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDutyRating_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblEmailContent_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblFloorLevel_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInspectionList_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInventory_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInventoryChange_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblMaterialType_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblOptimizedInventory_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegister_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblReturnInventory_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblSiteLocation_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblTermNCondition_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblTransaction_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblUser_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblUserCategory_ClientId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblHandOver_CRId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDayDocket_SiteLocId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblManHrs_DayDocketId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDocuments_documentTypeId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblDocuments_RegisterId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblFloorLevel_SiteLocId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblHandOver_RegisterId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInspection_InspectedById" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInspection_RegisterId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInspectionList_InspectionId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInspectionList_registerId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblInventoryChange_InventoryId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblOptimizedInventory_InventoryId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblReturnInventoryDetails_InventoryId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblSiteMaterial_InventoryId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tbltransactionHistDelivery_InventoryId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tbltransactionHistRequest_InventoryId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblManHrs_RegisterId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblManHrs_SiteLocId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblManHrs_UserId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblOptimizedInventory_RegisterId" />
+        <AssociationConnector Association="ScaffoldModel.fk_SiteLocId_ref1" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegister_SiteLocID" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegister_SupervisorId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblRegisterGallery_RegisterId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblSiteMaterial_RegisterId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblReturnInventoryDetails_ReturnInvId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblSiteManHrs_SiteLocId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblSiteManHrs_UserId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblTransactionHistREquest_TransId" />
+        <AssociationConnector Association="ScaffoldModel.FK_tblTransactionHistDelivery_RequestId" />
+        <EntityTypeShape EntityType="ScaffoldModel.TblAuditUser" Width="1.5" PointX="13.375" PointY="17.75" />
+        <EntityTypeShape EntityType="ScaffoldModel.Vw_OptimizedJobInventoryWithSubCategoryRate" Width="1.5" PointX="15.375" PointY="18.75" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

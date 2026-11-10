@@ -1,0 +1,537 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCAFPAC</title>
+    @*<link rel="icon" href="~/images/TopLogofavicon.png?v=2" />*@
+    @*<link rel="icon" type="image/x-icon" href="/images/TopLogofavicon.png?v=@DateTime.Now.Ticks" />*@
+    <link rel="icon" href="~/images/TopLogofavicon.png" />
+    @*@Styles.Render("~/Content/ScaffoldCss")
+        @Scripts.Render("~/Content/ScaffoldJs")*@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+
+    <link href="~/content/css/w3.css" rel="stylesheet" />
+    <link href="~/content/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/content/js/jquery.min.js"></script>
+    <script src="~/content/js/bootstrap.min.js"></script>
+    @*<script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>*@
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link href="~/content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    @*<script >
+            $(document).ready(function () {
+               // getIP();
+            });
+            function getIP(json) {
+              document.write("My public IP address is: ", json.ip);
+            }
+        </script>*@
+
+    @*<script>
+
+            /* Add "https://api.ipify.org?format=json" statement
+               this will communicate with the ipify servers in
+               order to retrieve the IP address $.getJSON will
+               load JSON-encoded data from the server using a
+               GET HTTP request */
+
+            $.getJSON("https://api.ipify.org?format=json",
+                                              function(data) {
+
+                // Setting text of element P with id gfg
+                                                  // $("#gfg").html(data.ip);
+                                                  alert(data.ip);
+            })
+        </script>*@
+
+    @*<script type="text/javascript">
+        window.onload = function () {
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = "http://jsonip.appspot.com/?callback=DisplayIP";
+            document.getElementsByTagName("head")[0].appendChild(script);
+        };
+        function DisplayIP(response) {
+            document.getElementById("ipaddress").innerHTML = "Your IP Address is " + response.ip;
+            alert(response.ip);
+        }
+        </script>*@
+
+
+    <style>
+        .navbar-default .navbar-nav > li > a {
+            color: white;
+        }
+
+        body {
+            background-color: #fbfafa;
+        }
+    </style>
+
+    <style type="text/css">
+        body {
+            font-family: Arial;
+            font-size: 10pt;
+        }
+
+        .rdf-text {
+            padding: 3px;
+            float: right;
+            color: rgba(194, 41, 44, 1);
+            font-size: 10px;
+            position: relative;
+            -webkit-animation: myfirst 1s linear 1s infinite alternate; /* Chrome, Safari, Opera */
+            animation: myfirst 1s linear 1s infinite alternate;
+        }
+
+        .visibleDiv, #topLeft, #topRight, #bottomLeft, #bottomRight {
+            position: fixed;
+            width: 150px;
+            border: solid 1px #e1e1e1;
+            vertical-align: middle;
+            background: #ffdab9;
+            text-align: center;
+            z-index: initial;
+        }
+
+        #topLeft {
+            top: 10px;
+            left: 10px;
+        }
+
+        #topRight {
+            top: 10px;
+            right: 10px;
+        }
+
+        #bottomLeft {
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+        }
+
+        #bottomRight {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .login-bg {
+            color: #73879C;
+            /*background: #2A3F54;
+            background-color: #2E5882;*/
+        }
+
+        .web-power, .web-title {
+            color: #ffffff;
+            font-size: 10px;
+        }
+
+        .web-title {
+            font-size: 20px;
+            font-weight: 600;
+            font-stretch: extra-condensed;
+        }
+
+        .mtop {
+            margin-top: -10px;
+        }
+
+        footer {
+            position: relative;
+            color: #fff !important;
+            font-weight: 500;
+        }
+
+        .continue {
+            font-weight: 500;
+        }
+
+        .lblreg {
+            color: #808080;
+        }
+
+        .forget-password, .sign-up, .eyes {
+            color: #228BFC;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .sign-up a {
+                text-decoration: none;
+                list-style: none;
+                color: #228BFC;
+            }
+
+        .eyes {
+            color: black;
+        }
+
+        .lblforget {
+            margin-top: 1px;
+            position: absolute;
+            color: #808080;
+        }
+
+        hr {
+            margin-bottom: 5px;
+        }
+
+        .r-show {
+            display: block !important;
+        }
+
+        .r-hide {
+            display: none !important;
+        }
+
+        .center-block {
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        #forgetPasswordForm {
+            margin-top: 30px;
+        }
+
+        #btngrp {
+            margin-top: 30px;
+        }
+
+        .input-sm {
+            height: 32px;
+        }
+
+        .input-lg {
+            height: 48px;
+        }
+
+        #lb {
+            margin-top: 30px;
+        }
+
+        .nln-Color {
+            color: rgb(214, 59, 62) !important;
+        }
+
+        .nln-bg {
+            font-weight: 700;
+            background-color: rgb(214, 59, 62) !important;
+        }
+
+        .forget-password:hover {
+            color: rgb(214, 59, 62) !important;
+        }
+
+        .icon-eye:before {
+            content: "\f06e";
+        }
+
+        .icon-eye-slash:before {
+            content: "\f070";
+        }
+    </style>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            document.getElementById("LoginLogo").src += "?v=" + new Date().getTime();
+            var Result = '@ViewBag.Result';
+            var Message = '@ViewBag.Message';
+            var EmailClientMsg = '@ViewBag.EmailClientMsg';
+            if (EmailClientMsg != "") {
+                $('#art1').removeClass('alert w3-green w3-card-4').addClass('alert w3-red w3-card-4');
+                $('#art1').css("display", "block");
+                $('#alertlabel1').html('<strong>Alert ! </strong>' + EmailClientMsg);
+            }
+            if (Result != "") {
+                if (Result == "Success") {
+                    $('#art1').removeClass('alert w3-red w3-card-4').addClass('alert w3-green w3-card-4');
+                    $('#art1').css("display", "block");
+                    $('#alertlabel').html('<strong>Success ! </strong>' + Message);
+                } else {
+                    $('#art1').removeClass('alert w3-green w3-card-4').addClass('alert w3-red w3-card-4');
+                    $('#art1').css("display", "block");
+                    $('#alertlabel').html('<strong>Alert ! </strong>' + Message);
+                }
+            }
+            $('#hdnTimeOffSet').val(new Date().getTimezoneOffset());
+        });
+        function checkvalue(txt) {
+            if (txt.value != "") {
+                $('#' + txt.id).removeClass('w3-border w3-pale-red w3-border-red').addClass('w3-pale-green ');
+            }
+            else {
+                $('#' + txt.id).addClass('w3-border w3-pale-red w3-border-red').removeClass('w3-pale-green');
+                $('#rdf' + txt.id).addClass('rdf-text');
+            }
+        }
+        //function close_window() {
+        //    if (confirm("Close Window?")) {
+        //        window.close();
+        //    }
+        //}
+        function ShowHidePassword(ID) {
+            if (document.getElementById($("#" + ID).prev().attr('id')).type == "password") {
+                $("#" + ID).attr("data-hint", "Hide");
+                $("#" + ID).find("i").removeClass("icon-eye").addClass("icon-eye-slash");
+                document.getElementById($("#" + ID).prev().attr('id')).type = "text";
+            }
+
+            else {
+                $("#" + ID).attr("data-hint", "Show");
+                $("#" + ID).find("i").removeClass("icon-eye-slash").addClass("icon-eye");
+                document.getElementById($("#" + ID).prev().attr('id')).type = "password";
+            }
+        }
+        $(function () {
+
+            var win1920 = function () {
+                var wisize = $(window).width();
+                if (wisize >= "1920") {
+                    $('.form-control').removeClass('input-sm').addClass('input-lg');
+                    $('.input-group-addon').removeClass('input-sm').addClass('input-lg');
+                    $('.continue').css('font-size', '13px');
+
+                }
+                else {
+                    $('.form-control').removeClass('input-lg').addClass('input-sm');
+                    $('.input-group-addon').removeClass('input-lg').addClass('input-sm');
+                    $('.continue').removeAttr('style');
+
+                }
+            }
+            $(window).resize(win1920);
+            win1920();
+            $eyes = $('.eyes');
+            $sign_up = $('.sign-up')
+            $forgetPassword = $('.forget-password');
+            //$txtpass = $('#<%=txtPassword.ClientID%>');
+            //$btnLogin = $('#<%=btnLogin.ClientID%>');
+            //$txtUserName = $('#<%=txtUserName.ClientID%>');
+            //$textforgetEmail = $('#<%=textforgetEmail.ClientID%>');
+
+            $txtpass = $('#txtPassword');
+            $btnLogin = $('#btnLogin');
+            $txtUserName = $('#txtUserName');
+            $textforgetEmail = $('#textforgetEmail');
+            $txtpass.keypress(function (e) {
+                var key = e.which;
+                if (key == 13) {
+                    $btnLogin.trigger('click');
+                    //return true;
+                }
+            });
+            $eyes.unbind('click').bind('click', function () {
+                if ($txtpass.hasClass('r-pass')) {
+                    $txtpass.removeClass('r-pass').removeProp('type').prop('type', 'text');
+                    $eyes.addClass('nln-bg').addClass('w3-text-white');
+                }
+                else {
+                    $txtpass.addClass('r-pass').removeProp('type').prop('type', 'password');
+                    $eyes.removeClass('nln-bg').removeClass('w3-text-white');
+                }
+            });
+            //$txtpass.unbind('focus').bind('focus', function () {
+            //    $(this).addClass('r-pass').removeProp('type').prop('type', 'password');
+            //});
+            $forgetPassword.unbind('click').bind('click', function () {
+                // $(this).attr('data-toggle', 'modal').attr('data-target', '#forgetPasswordModal');
+
+                if ($("#loginForm").hasClass('r-show')) {
+                    $("#loginForm").removeClass('r-show').addClass('r-hide').fadeOut();
+                    $('#forgetPasswordForm').removeClass('r-hide').addClass('r-show').fadeIn();
+                    $('.center-block').animate({
+                        left: '0px',
+                        opacity: '1',
+                        height: '190px',
+                    });
+                    $textforgetEmail.val($txtUserName.val());
+                }
+            });
+        })
+        function goBack() {
+            location.reload();
+        }
+
+        function btnSubmit_Click() {
+            var textforgetEmail = $('#textforgetEmail').val();
+            $.ajax({
+                type: "POST",
+                url: "/Login/btnSubmit_Click",
+                data: JSON.stringify({ textforgetEmail: textforgetEmail }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (response) {
+                    var GetData = response;
+                    if (response.Result == "Success") {
+                        $('#art1').removeClass('alert w3-red w3-card-4').addClass('alert w3-green w3-card-4');
+                        $('#art1').css("display", "block");
+                        $('#alertlabel').html('<strong>Success ! </strong>' + response.Message);
+                    } else {
+                        $('#art1').removeClass('alert w3-green w3-card-4').addClass('alert w3-red w3-card-4');
+                        $('#art1').css("display", "block");
+                        $('#alertlabel').html('<strong>Warning ! </strong>' + response.Message);
+                    }
+                }
+
+            });
+        }
+    </script>
+
+
+</head>
+<body id="login-body">
+
+   <div class="row">
+        <div id="header-wrapper" class="col-lg-12">
+            <div class="w3-dark-grey r-top-bar"></div>
+            <div class="container-fluid breadcrumb  r-bread-pad" style="height: 45px; background-color: #676565!important; border-radius: 0px;">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                        <span><span class="web-power">Powered by</span> <span class="web-title"><i class="fa fa-windows"></i>Microsoft Azure</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+
+    <div class="container-fluid" style="height: auto;">
+        <div class="row">
+            <div class="col-lg-4 col-md-3"></div>
+            <div id="lb" class="col-lg-4 col-md-6">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12">
+                        <div class="w3-card-8 w3-margin w3-round">
+                            <header class="w3-container login-bg" style="padding-bottom: 5px">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div style="width: 100%;">
+                                            @*<img src="/images/Logo.png" style="margin-left: 5%; height: 150px;width:90%; margin-top:10px;" class="img-responsive" />*@
+                                            @*background-color: #192f4a;"*@
+                                            @*<img src="/images/Logo.png" style="margin-left: 5%; height: 150px; width: 90%; margin-top: 10px;" class="img-responsive" onload="this.src=this.src" />*@
+                                            <img id="LoginLogo" src="/images/Logo.png" style="margin-top:20px " class="img-responsive" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="container-fluid">
+                              
+                                <div  style="display: none; width: 100%;" id="art1">
+                                    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+                                    @*<asp:Label ID="alertlabel" runat="server"></asp:Label>*@
+                                    <span ID="alertlabel"></span>
+                                    <span ID="alertlabel1"></span>
+                                </div>
+                                <div id="Consolidate_Login" class="form col-md-12 center-block">
+                                    <div id="loginForm" class="r-show">
+                                        <form class="form-signin" action="/Login/Login" method="post">
+                                            <div class="form-group">
+                                                <br />
+                                                <input type="hidden" id="hdnTimeOffSet" name="hdnTimeOffSetVal" value="0"/>
+                                                <div class="row">
+                                                    @*<div class="col-sm-9 validationSummary" style="background-color: #ffdddd!important;">*@
+                                                    @*<div class="col-sm-9 validationSummary">
+                                                         @Html.ValidationSummary()
+                                                    </div>*@
+                                                    <div class="col-sm-3"></div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-12" style="margin-bottom: -5px;">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon input-sm"><span class="glyphicon glyphicon-user"></span></span>
+                                                            @*<asp:TextBox ID="txtUserName" runat="server" AutoCompleteType="Disabled" placeholder="Your email address" CssClass="form-control input-sm" onchange='checkvalue(this)'></asp:TextBox>*@
+                                                            <input type="text" id="txtUserName" name="UserEmail" class="form-control inputEmail" placeholder="Your User Name" required>
+                                                        </div>
+                                                        @*<asp:RequiredFieldValidator runat="server" ID="rdftxtUserName" ControlToValidate="txtUserName" ErrorMessage="Please Enter Your UserName"></asp:RequiredFieldValidator>*@
+                                                    </div>
+
+                                                </div>
+                                            </div>&nbsp
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon  input-sm"><span class="glyphicon  glyphicon-lock"></span></span>
+                                                            @*<asp:TextBox ID="txtPassword" TextMode="Password" AutoCompleteType="Disabled" runat="server" Style="border-right: initial;" onchange='checkvalue(this)' placeholder="Password" CssClass="form-control r-pass input-sm">
+
+                            </asp:TextBox>*@
+                                                            <input type="password" id="txtPassword" name="Password" autocomplete="off" class="form-control inputPassword" placeholder="Password" required>
+                                                            <span id="passowordgetname" class="input-group-addon eyes  input-sm" style="background: #fff; border-left: initial;" onclick="ShowHidePassword(this.id);"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                                        </div>
+                                                        @*<asp:RequiredFieldValidator runat="server" ID="rdftxtPassword" ControlToValidate="txtPassword" ErrorMessage="Please Enter Your Password"></asp:RequiredFieldValidator>*@
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    &nbsp
+                                                    <div class="col-xs-6" style="margin-top:19px;">
+                                                        @*<asp:CheckBox runat="server" ID="chkRem" />*@
+                                                        <input type="checkbox" id="chkRem" name="chkRem" />
+                                                        <label class="w3-text-grey">Remember me</label>
+                                                    </div>
+                                                    <div class="col-xs-6">
+                                                        @*<asp:Button ID="btnLogin" Style="float: right;" CssClass="w3-btn bg-primary w3-round" UseSubmitBehavior="true" OnClick="btnLogin_Click" runat="server" Text="Sign In" OnClientClick="return validate()" />*@
+                                                        @*<button id="btnLogin" Style="float: right;" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>*@
+                                                        <button id="btnLogin" style="float:right" class="btn btn-primary" type="submit">Sign in</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            </form>
+                                            <hr style="border-color: #0084c4;" />
+                                            <div class="row">
+                                                <div class="col-xs-12">
+                                                    <p style="font-size: 18px;" class="w3-text-grey">Forget your password?</p>
+                                                    <p>no worries, click <a style="cursor: pointer;" class="forget-password">Here</a> to reset your password.</p>
+                                                </div>
+                                            </div>
+
+</div>
+                                    <div id="forgetPasswordForm" class="r-hide" style="position: static; left: -100px; overflow: visible;">
+                                        <label class="lblreg">Enter your User Name </label>
+                                        <div id="fe" class="input-group">
+                                            <span class="input-group-addon input-sm"><span class="glyphicon glyphicon-user"></span></span>
+                                            @*<asp:TextBox TextMode="MultiLine" ID="txtemailbody" Style="display: none" runat="server"></asp:TextBox>*@
+                                            <textarea  ID="txtemailbody" Style="display: none"></textarea>
+                                            @*<asp:TextBox ID="textforgetEmail" runat="server" placeholder="Enter your registered email address" CssClass="form-control input-sm"></asp:TextBox>*@
+                                            <input type="text" id="textforgetEmail"  autocomplete="off" class="form-control input-sm" placeholder="Enter Your User Name" required>
+                                        </div>
+                                        <div id="btngrp" class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-4 col-sm-4"></div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    <a class="w3-btn bg-primary w3-round" style="color:white" onclick="goBack()">Back</a>
+                                                </div>
+                                                <div class="col-md-4  col-sm-4">
+                                                    @*<asp:Button ID="btnSubmit" CausesValidation="false" CssClass="w3-btn bg-primary w3-round" runat="server" Text="Submit" OnClick="btnSubmit_Click" />*@
+                                                    <button id="btnLogin" style="float:right" class="btn btn-primary" type="button" onclick="btnSubmit_Click()">Submit</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4">
+            </div>
+        </div>
+    </div>
+
+    <div id="bottomLeft">
+        <footer class="w3-container login-bg" style="height: 45px; background-color: #5a5a5a!important; border-radius: 0px; padding-top: 10px">
+            &copy<a style="color: white;" id="lblYear"></a>&nbsp;Scaffold Project Controls Pty Ltd
+        </footer>
+    </div>
+
+  
+</body>
+</html>
+
+

@@ -1,0 +1,416 @@
+﻿
+@{
+    ViewBag.Title = "TermsNCondition";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+
+    <link href="~/Content/css/w3.css" rel="stylesheet" />
+    <link href="~/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <script src="~/Content/js/jquery.min.js"></script>
+    <script src="~/Content/js/bootstrap.min.js"></script>
+    <title></title>
+
+    <script>
+
+        $(document).ready(function () {
+            var From = getParameterByName('From');
+            if (From == "null") {
+                $('#RowBack').css('display','none');
+            } else {
+                $('#RowHide').css('display', 'none');
+            }
+            //if (Request.QueryString["From"] != "") {
+            //    RowHide.Style.Add("display", "none");
+
+            //}
+            //if (Request.QueryString["From"] == "") {
+            //    RowBack.Style.Add("display", "none");
+            //}
+
+            bindtermsandcondition();
+            bindPolicyandcondition();
+        });
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function bindtermsandcondition() {
+            var UID = getParameterByName('UID');
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({ UID: UID}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                global: false,
+                url: '/TermsNCondition/bindtermsandcondition',
+                success: function (response) {
+                    var res = response;
+                    var str="";
+                    $.each(response, function (index, obj) {
+                        if (obj != null) {
+                            var MainPoint = obj.MainPoint == null ? "" : obj.MainPoint;
+                            var SubPoint = obj.SubPoint == null ? "" : obj.SubPoint;
+                            var Text = obj.Text == null ? "" : obj.Text;
+                            //$('#lblMainPoint').text(MainPoint);
+                            //$('#lblSubPoint').text(SubPoint);
+
+                            str+='<div class="col-lg-2 col-sm-2 col-md-2" id="TermMainPoint">'
+                            str += '<label id="lblMainPoint" Style="font-weight: bold; font-size: 16px">' + MainPoint + '</label>'
+                            str+='</div>'
+                            str+='<div class="col-lg-9 col-sm-9 col-md-9" id="TermSubPoint">'
+                            str += '<span id="lblSubPoint" Style="font-size: 16px">' + SubPoint + '</label>'
+                            str += '</div>'
+                            str += '<div class="col-lg-12 col-sm-12 col-md-12" style="padding-top: 10px;"></div>'
+                            }
+                    });
+                    $('#DivTermCondition').empty().append(str);
+                   }
+                });
+        }
+
+        function bindPolicyandcondition() {
+            var UID = getParameterByName('UID');
+            $.ajax({
+                type: 'POST',
+                data: JSON.stringify({ UID: UID}),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                global: false,
+                url: '/TermsNCondition/bindPolicyandcondition',
+                success: function (response) {
+                    var res = response;
+                    var str="";
+                    $.each(response, function (index, obj) {
+                        if (obj != null) {
+                            var MainPoint = obj.MainPoint == null ? "" : obj.MainPoint;
+                            var SubPoint = obj.SubPoint == null ? "" : obj.SubPoint;
+                            var Text = obj.Text == null ? "" : obj.Text;
+                           
+                            str+='<div class="col-lg-12 col-sm-12 col-md-12" id="Mainpointmargin">'
+                            str += '<label id="lblMainPoint" Style="font-weight: bold; font-size: 16px;">'+MainPoint+'</label>'
+                            str+='</div>'
+                            str+='<div class="row">'
+                            str+='<div class="col-lg-12 col-sm-12 col-md-12" id="TextMargin">'
+                            str += '<label id="lbltext" Style="font-weight: bold; font-size: 16px; color: #89c1e8;">' + Text + '</label>'
+                            str+='</div>'
+                            str+='<div class="col-lg-11 col-sm-11 col-md-11" id="Subpointmargin">'
+                            str += '<span id="lblSubPoint" Style="font-size: 16px">' + SubPoint + '</label>'
+                            str += '</div>'
+                            str += '</div>'
+                            str += '<div class="col-lg-12 col-sm-12 col-md-12" style="padding-top: 10px;"></div>'
+                        }
+                    });
+                    $('#DivPolicyService').empty().append(str);
+                }
+            });
+        }
+
+        function Accept_Click() {
+            var ChkAgree = $("#ChkAgree").prop('checked');
+            if (ChkAgree == true) {
+                //var Response = { Result: "Failed", Message: "Please Select Client." };
+                //CustomAlert(Response);
+               
+            
+                var UID = getParameterByName('UID');
+                var UserRole = getParameterByName('UserRole');
+                var id = getParameterByName('id');
+               
+                window.location.href = '/TermsNCondition/Accept_Click?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&ChkAgree=' + ChkAgree;
+
+            } else {
+               // alert('Please checked Accept');
+                $('#divAccept').css('display', 'block');
+            }
+        }
+        function Decline_Click() {
+            window.location.href = '/Login/Login';
+        }
+       
+
+        function btnok_Click()
+        {
+            $('#divAccept').css('display', 'none');
+            location.reload();
+        //    if (Convert.ToInt32(databaseCon.Decrypt(Request.QueryString["UserRole"])) == 1)
+        //{
+        //    Response.Redirect("/TermsNcondition.aspx?UID=" + Request.QueryString["UID"] + "&UserRole="+ databaseCon.Encrypt("1"));
+        //}
+        //else
+        //{
+        //    Response.Redirect("~/TermsNcondition.aspx?UID=" + Request.QueryString["UID"] + "&UserRole="+ databaseCon.Encrypt("0")+"&id=" + Request.QueryString["id"]);
+           
+        //}
+        }
+        function btnBack_Click()
+        {
+            var id = getParameterByName('id');
+            var UserRole = getParameterByName('UserRole');
+            var UID = getParameterByName('UID');
+            window.location.href = '/RegisterList/RegisterList?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id;
+       // Response.Redirect("/EditClient.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"]+"&id=" + Request.QueryString["id"]);
+        }
+     </script>
+    <style>
+        #ChkAgree {
+            margin-top: 10px;
+        }
+
+        #btnBack {
+            border-radius: 4px !important;
+        }
+
+        #headerPolicy {
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+
+        #termheader {
+            margin-top: -20px;
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+
+        #TermMainPoint {
+            margin-left: 11px;
+        }
+
+        #Mainpointmargin {
+            margin-left: 11px;
+        }
+
+        #Subpointmargin {
+            margin-left: 25px;
+        }
+
+        #TextMargin {
+            margin-left: 25px;
+        }
+
+        #RowBack {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        a {
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+    @*<form id="form1">*@
+        @*<asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+
+
+            <Telerik:RadAjaxManager runat="server" ID="load" DefaultLoadingPanelID="LoadingPanel1">
+                <AjaxSettings>
+                    <Telerik:AjaxSetting AjaxControlID="btnLogin">
+                        <UpdatedControls>
+                            <Telerik:AjaxUpdatedControl ControlID="alt" />
+                            <Telerik:AjaxUpdatedControl ControlID="btnLogin" />
+                        </UpdatedControls>
+                    </Telerik:AjaxSetting>
+                    <Telerik:AjaxSetting AjaxControlID="btnAccept">
+                        <UpdatedControls>
+                            <Telerik:AjaxUpdatedControl ControlID="divAccept" />
+                        </UpdatedControls>
+                    </Telerik:AjaxSetting>
+                    <%-- <Telerik:AjaxSetting AjaxControlID="">
+                        <UpdatedControls>
+                            <Telerik:AjaxUpdatedControl ControlID="" />
+                        </UpdatedControls>
+                    </Telerik:AjaxSetting>--%>
+                </AjaxSettings>
+            </Telerik:RadAjaxManager>*@
+
+        <div class="row" id="RowBack">
+            <div class="col-lg-4 col-md-4 col-xs-4 col-sm-4"></div>
+            <div class="col-lg-4 col-md-4 col-xs-4 col-sm-4"></div>
+            <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2"></div>
+            <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+                @*<asp:LinkButton runat="server" ID="btnBack" Style="height: 32px; padding-top: 3px; background-color: #ce0d31; font-size: 18px !important; width: 100%" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnBack_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back</asp:LinkButton>*@
+                <button id="btnBack" Style="height: 32px; padding-top: 3px; background-color: #ce0d31; font-size: 18px !important; width: 100%" Class="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnBack_Click()"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back</button>
+            </div>
+        </div>
+
+        <div class="row">
+            @*<%-- <div class="col-lg-4 col-md-4 col-sm-4 "></div>--%>*@
+            <!--------login box begin-------->
+            <div id="lb" class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12">
+                        <div class="">
+                            @*<%--<header class="w3-container login-bg w3-round" style="background-color: #333333; padding-bottom: 5px">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div style="margin-left: 2%; margin-top: 1%;">
+                                                <h5 style="color: white; font-weight: bolder; padding-top: 5px; font-size: 20px">Terms And Condition </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </header>--%>*@
+                            <div class="container-fluid" style="height: 580px">
+                                <div style="display: none; width: 100%; margin-top: 5px; margin-bottom: -20px; padding-top: 4px" id="art1">
+                                    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+                                    @*<asp:Label ID="alertlabel"></asp:Label>*@
+                                    <label id="alertlabel"></label>
+                                </div>
+                                <div id="Consolidate_Login" class="form col-md-12 center-block">
+                                    <div id="loginForm" class="r-show">
+                                        <div class="form-group">
+                                            <br />
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    @*<asp:Repeater id="termsandcondition">
+                                                        <HeaderTemplate>*@
+                                                    <div class="row">
+                                                        <header class="w3-container login-bg w3-round" style="background-color: #333333; padding-bottom: 5px" id="termheader">
+                                                            <div class="row">
+                                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                                    <div style="margin-left: 2%; margin-top: 1%;">
+                                                                        @*<h5 style="color: white; font-weight: bolder; padding-top: 5px; font-size: 20px;">Terms and Conditions</h5>*@
+                                                                        <h5 style="color: white; font-weight: bolder; padding-top: 5px; font-size: 20px">Terms of Service </h5>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </header>
+                                                        @*</HeaderTemplate>
+                                                            <ItemTemplate>*@
+                                                        @*<%--<div class="col-lg-1 col-sm-1 col-md-1">
+
+                                                            </div>--%>*@
+                                                        @*<div class="col-lg-2 col-sm-2 col-md-2" id="TermMainPoint">
+
+                                                                <label id="lblMainPoint" Style="font-weight: bold; font-size: 16px"></label>
+                                                            </div>
+                                                                <div class="col-lg-9 col-sm-9 col-md-9" id="TermSubPoint">
+
+                                                                 <label id="lblSubPoint" Style="font-size: 16px"></label>
+                                                            </div>*@
+
+                                                        <div class="row" id="DivTermCondition">
+
+                                                        </div>
+
+                                                        @*</ItemTemplate>
+                                                            <FooterTemplate>*@
+                                                    </div>
+                                                    @*</FooterTemplate>
+                                                        </asp:Repeater>*@
+
+
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    @*<asp:Repeater runat="server" ID="PolicyService">
+                                                        <HeaderTemplate>*@
+                                                    <div class="row">
+                                                        <header class="w3-container login-bg w3-round" style="background-color: #333333; padding-bottom: 5px" id="headerPolicy">
+                                                            <div class="row">
+                                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                                    <div style="margin-left: 2%; margin-top: 1%;">
+                                                                        <h5 style="color: white; font-weight: bolder; padding-top: 5px; font-size: 20px;">Privacy Policy</h5>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </header>
+                                                        @*<%-- <asp:Label ID="lbldate" runat="server"></asp:Label>--%>*@
+                                                        @*</HeaderTemplate>
+                                                            <ItemTemplate>
+                                                                <%--<div class="col-lg-1 col-sm-1 col-md-1">
+
+                                                                </div>--%>*@
+                                                        <div class="row" id="DivPolicyService">
+
+                                                        </div>
+                                                        @*<div class="col-lg-12 col-sm-12 col-md-12" id="Mainpointmargin">
+                                                            <label id="lblMainPoint" Style="font-weight: bold; font-size: 16px;"></label>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-lg-12 col-sm-12 col-md-12" id="TextMargin">
+                                                               <label id="lbltext" Style="font-weight: bold; font-size: 16px; color: #89c1e8;"></label>
+                                                            </div>
+
+                                                            <div class="col-lg-11 col-sm-11 col-md-11" id="Subpointmargin">
+                                                            <label id="lblSubPoint" Style="font-size: 16px"></label>
+                                                            </div>
+                                                        </div>*@
+
+
+                                                        @*</ItemTemplate>
+                                                            <FooterTemplate>*@
+                                                    </div>
+                                                    @*</FooterTemplate>
+                                                        </asp:Repeater>*@
+
+
+                                                </div>
+                                            </div>
+                                            <div class="row"></div>
+
+                                            <div class="row w3-margin-top" id="RowHide" runat="server">
+                                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                                    @*<asp:CheckBox ID="ChkAgree" runat="server" Checked="false" Text='<%# Eval("Accept") %>' />*@
+                                                    <input type="checkbox" id="ChkAgree" />
+                                                    <label id="lblAgree">I Agree</label>
+                                                </div>
+                                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                                    @*<asp:Button ID="btnAccept" OnClick="Accept_Click" ValidationGroup="Submit" CssClass="btn btn-success" runat="server" Text="Accept" />*@
+                                                    <button id="btnAccept" OnClick="Accept_Click()" Class="btn btn-success">Accept</button>
+                                                </div>
+                                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+                                                    @*<asp:Button ID="btnDecline" OnClick="Decline_Click" CssClass="btn btn-danger" runat="server" Text="Cancel" />*@
+                                                    <button id="btnDecline" OnClick="Decline_Click()" Class="btn btn-danger">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div id="divAccept" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 365px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="c1">Please click on I Agree and then press Accept to Proceed?</label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                        @*<asp:LinkButton CssClass=" w3-btn w3-green w3-hover-dark-grey" OnClick="btnok_Click" ID="btnok" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> OK</asp:LinkButton>*@
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btnok_Click()" id="btnok"><i class="glyphicon glyphicon-ok-circle "></i> OK</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    @*</form>*@
+</body>
+</html>

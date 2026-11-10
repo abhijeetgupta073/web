@@ -1,0 +1,1304 @@
+﻿
+@{
+    ViewBag.Title = "SiteFloorLevelPlan";
+}
+
+    <style>
+        /*//22-Oct-2019*/
+        @@media only screen and (min-device-width: 320px) and (max-device-width: 736px) {
+            #Canvas {
+                margin-left: -10px !important;
+                width: 440px !important;
+            }
+            #divFloor{
+             padding:0px !important;
+              }
+        }
+
+        @@media screen and (min-width: 768px)and (max-width: 1028px) {
+            #Canvas {
+                width: 550px !important;
+            }
+            #divregisterlist {
+                margin-left: 60px !important;
+                width: 100%;
+            }
+            /*\\30-oct-2019*/
+        }
+         @@media only screen and (max-width: 600px) {
+       #divFloor{
+             padding:0px !important;
+              }
+ 
+        }
+        body .container.body .right_col {
+            background: white !important;
+        }
+    </style>
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+            var id = getParameterByName('id');
+            var DecriptData = Decrypt([id]);
+            $("#hdnClientID").val(DecriptData[0]);
+
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            //defaultlandingImage(ClientID, Siteid);
+
+        //    $.ajax({
+        //        type: "POST",
+        //        // url: "../WebApi/Dashboard.asmx/GetClientDefaultFloorLabelImage",
+        //        url: "/SiteFloorLevelPlan/GetClientDefaultFloorLabelImage",
+        //        data: JSON.stringify({ id: ClientID}),
+        //        contentType: "application/json; charset=utf-8",
+        //        async: true,
+        //        dataType: "json",
+        //        success: function (response) {
+        //            //var ClientDefaultFloorLabelImage = response.d;
+        //            var ClientDefaultFloorLabelImage = response;
+        //               $("#hdnClientDefaultImage").val(ClientDefaultFloorLabelImage);
+        //        }
+        //    });
+
+        });
+
+        $(document).ready(function () {
+            SiteDropDownBind();
+            //GetSiteFloorLevelPlanData("", "", "", "", "", "");
+
+            //Added the if condition to prevent GetSiteFloorLevelPlanData multiple times comming back from register (09-02-2023)
+            var CallFrom = getParameterByName('FromReg');
+            var decryCallFrom = Decrypt(CallFrom);
+            if (decryCallFrom != 'FromReg') {
+                GetSiteFloorLevelPlanData("", "", "", "", "", "");
+            }
+           // Changesite();
+        });
+        $(document).ready(function () {
+            var CallFrom = getParameterByName('FromReg');
+            var decryCallFrom = Decrypt(CallFrom);
+
+            if (decryCallFrom == 'FromReg') {
+                var ClientID = getParameterByName('id');
+                var SiteID = getParameterByName('SiteID');
+                var LocationID = getParameterByName('LocationID');
+                var BuildingID = getParameterByName('BuildingID');
+                var FloorLevel = getParameterByName('FloorLevel');
+                var DecryptData = [SiteID, LocationID, BuildingID, FloorLevel, ClientID];
+                var decryData = Decrypt(DecryptData);
+                SiteID = decryData[0];
+                LocationID = decryData[1];
+                BuildingID = decryData[2];
+                FloorLevel = decryData[3];
+                ClientID = decryData[4];
+                //SiteDropDownBind();
+                ddllocationDropdownbind(ClientID, SiteID);
+                ddlbuildingDropdownbind(ClientID, SiteID, LocationID);
+                ddlFloorLevelDropdownbind(ClientID, SiteID, LocationID, BuildingID)
+                $('#ddlsite').val(SiteID);
+                $('#ddllocation').val(LocationID);
+                $('#ddlbuilding').val(BuildingID);
+                $('#ddlFloorLevel').val(FloorLevel);
+                GetSiteFloorLevelPlanData(ClientID, SiteID, FloorLevel, LocationID, BuildingID, "")
+            }
+        });
+        ////$(document)
+
+        //      .ajaxStart(function () {
+
+        //          $('#LoadingPanel1').css('display', 'block');
+        //      })
+        //    .ajaxStop(function () {
+        //        $('#LoadingPanel1').css('display', 'none');
+        //    });
+        function clickcanvas(event) {
+
+            
+                event.stopImmediatePropagation();
+                var currentAttr = $(this).attr('id');
+                console.log(currentAttr)
+                var IDF = currentAttr.split('_')
+
+                btnredirecttoJob_Click(IDF[1]);
+            
+        }
+        function defaultlandingImage(ClientID,Siteid){
+            $('#LoadingPanel1').css('display', 'block');
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/GetClientDefaultFloorLabelImage",
+                url: "/SiteFloorLevelPlan/GetClientDefaultFloorLabelImage",
+                data: JSON.stringify({ id: ClientID, SiteID:Siteid}),
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                dataType: "json",
+                success: function (response) {
+                    //var ClientDefaultFloorLabelImage = response.d;
+                    var ClientDefaultFloorLabelImage = response;
+                    $("#hdnClientDefaultImage").val(ClientDefaultFloorLabelImage);
+                }
+            });
+
+        }
+
+        //function Changesite() {
+        //    //  $('#LoadingPanel1').css('display', 'block');
+        //    var ClientID = $("#hdnClientID").val();
+        //    var Siteid = $("#ddlsite").val();
+        //    ddlFloorLevelDropdownbind(ClientID, Siteid);
+        //    GetSiteFloorLevelPlanData(ClientID, Siteid, '');
+        //}
+
+
+        function Changesite() {
+            //added to display the loading panel at the time of Site change.(09-02-2023)
+            $('#LoadingPanel1').css('display', 'block');
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            defaultlandingImage(ClientID, Siteid); // Add on 24-June-2020
+            ddllocationDropdownbind(ClientID, Siteid);  // Add on 28-May-2020
+            ddlbuildingDropdownbind(ClientID, Siteid, ''); // Add on 9-June-2020
+            //ddlFloorLevelDropdownbind(ClientID, Siteid);
+            ddlFloorLevelDropdownbind(ClientID, Siteid, '', '');
+            var Drawing = $('#chkboxDrawing').is(':checked');
+            GetSiteFloorLevelPlanData(ClientID, Siteid, '', '', '', Drawing);
+        }
+
+        // Add on 28-May-2020
+        function Changelocation() {
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var locationid = $("#ddllocation").val();
+            ddlbuildingDropdownbind(ClientID, Siteid, locationid);
+            ddlFloorLevelDropdownbind(ClientID, Siteid, locationid, '');
+            var Drawing = $('#chkboxDrawing').is(':checked');
+            GetSiteFloorLevelPlanData(ClientID, Siteid, '', locationid, '', Drawing);
+        }
+        // Add on 9-June-2020
+        function Changebuilding() {
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var locationid = $("#ddllocation").val();
+            var buildingid = $("#ddlbuilding").val();
+            ddlFloorLevelDropdownbind(ClientID, Siteid, locationid, buildingid);
+            var Drawing = $('#chkboxDrawing').is(':checked');
+            GetSiteFloorLevelPlanData(ClientID, Siteid, '', locationid, buildingid, Drawing);
+        }
+
+        function selectFloorLevel() {
+            $('#LoadingPanel1').css('display', 'block');
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var ddlselectFloorLevel = $("#ddlFloorLevel").val();
+            $("#hdnFloorLevelId").val(ddlselectFloorLevel); // Add on 22-June-2020
+            var locationid = $("#ddllocation").val();
+            var buildingid = $("#ddlbuilding").val();
+            //GetSiteFloorLevelPlanData(ClientID, Siteid, ddlselectFloorLevel);
+            var Drawing = $('#chkboxDrawing').is(':checked');
+            GetSiteFloorLevelPlanData(ClientID, Siteid, ddlselectFloorLevel, locationid, buildingid, Drawing);
+            $('#LoadingPanel1').css('display', 'block');
+        }
+
+        function showdrawing() {
+            var ClientID = $("#hdnClientID").val();
+            var Siteid = $("#ddlsite").val();
+            var ddlselectFloorLevel = $("#ddlFloorLevel").val();
+            $("#hdnFloorLevelId").val(ddlselectFloorLevel); // Add on 22-June-2020
+            var locationid = $("#ddllocation").val();
+            var buildingid = $("#ddlbuilding").val();
+            var Drawing = $('#chkboxDrawing').is(':checked');
+
+            if ((Siteid != "" && Siteid != null) && (ddlselectFloorLevel != "" && ddlselectFloorLevel != null) && (locationid != "" && locationid != null) && (buildingid != "" && buildingid != null)) {
+
+                GetSiteFloorLevelPlanData(ClientID, Siteid, ddlselectFloorLevel, locationid, buildingid, Drawing);
+                $('#LoadingPanel1').css('display', 'block');
+
+            } else {
+
+            }
+
+        }
+
+        function SiteDropDownBind() {
+            var id = $("#hdnClientID").val();
+            $.ajax({
+                type: "POST",
+                url: "/SiteFloorLevelPlan/SiteDropDownBind",
+                data: JSON.stringify({ id: id }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (response) {
+                    var getData = response;
+                    var Siteid = "";
+                    $("#ddlsite").html("");
+                   // $("#ddlsite").append('<option value=""></option>');
+                    for (var i = 0; i < getData.length; i++) {
+                        Siteid = getData[0].SiteLocID;
+                        $("#ddlsite").append('<option value="' + getData[i].SiteLocID + '">' + getData[i].SiteLocation + '</option>');
+
+                    }
+                    //Added the if condition to prevent GetSiteFloorLevelPlanData multiple times comming back from register (06-02-2023)
+                    var CallFrom = getParameterByName('FromReg');
+                    var decryCallFrom = Decrypt(CallFrom);
+
+                    if (decryCallFrom != 'FromReg') {
+                        Changesite();
+                    }
+                }
+            });
+
+        }
+
+        // Add on 28-May-2020
+        function ddllocationDropdownbind(id, SiteId) {
+
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/ddllocationDropdown",
+                url: "/SiteFloorLevelPlan/ddllocationDropdown",
+                data: JSON.stringify({ id: id, SiteId: SiteId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (response) {
+                    var ddllocationbind = response;
+
+                    $("#ddllocation").html("");
+                    //$("#ContentPlaceHolder1_ddllocation").append('<option value="">All</option>');
+                    $("#ddllocation").append('<option value="">Select Location</option>');
+                    for (var i = 0; i < ddllocationbind.length; i++) {
+                        // $("#ddllocation").append('<option value="' + ddllocationbind[i].LocationId + '">' + ddllocationbind[i].Location + '</option>');
+                        $("#ddllocation").append('<option value="' + ddllocationbind[i].areaid + '">' + ddllocationbind[i].area + '</option>');
+                    }
+                }
+            });
+
+        }
+
+        // Add on 9-June-2020
+        function ddlbuildingDropdownbind(id, SiteId, LocationId) {
+
+            $.ajax({
+                type: "POST",
+               // url: "../WebApi/Dashboard.asmx/ddlbuildingDropdown",
+                url: "/SiteFloorLevelPlan/ddlbuildingDropdown",
+                data: JSON.stringify({ id: id, SiteId: SiteId, LocationId: LocationId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (response) {
+                    var ddlbuildingbind = response;
+                    $("#ddlbuilding").html("");
+                    //$("#ddlbuilding").append('<option value="">All</option>');
+                    $("#ddlbuilding").append('<option value="">Select Building</option>');
+                    for (var i = 0; i < ddlbuildingbind.length; i++) {
+                        $("#ddlbuilding").append('<option value="' + ddlbuildingbind[i].buildingid + '">' + ddlbuildingbind[i].buildingno + '</option>');
+                    }
+                }
+            });
+
+        }
+
+        //function ddlFloorLevelDropdownbind(id, SiteId) {
+        function ddlFloorLevelDropdownbind(id, SiteId, LocationId, BuildingId) {
+
+            $.ajax({
+                type: "POST",
+               // url: "../WebApi/Dashboard.asmx/ddlFloorLevelDropdown",
+                url: "/SiteFloorLevelPlan/ddlFloorLevelDropdown",
+               data: JSON.stringify({ id: id, SiteId: SiteId, LocationId: LocationId, BuildingId: BuildingId }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                async: false,
+                success: function (response) {
+                    var ddlddlFloorLevelbind = response;
+
+                    $("#ddlFloorLevel").html("");
+                    $("#ddlFloorLevel").append('<option value=""></option>');
+                    for (var i = 0; i < ddlddlFloorLevelbind.length; i++) {
+                        //$("#ContentPlaceHolder1_ddlFloorLevel").append('<option value="' + ddlddlFloorLevelbind[i].FloorLevel + '">' + ddlddlFloorLevelbind[i].FloorLevel + '</option>');
+                        $("#ddlFloorLevel").append('<option value="' + ddlddlFloorLevelbind[i].FloorLevelId + '">' + ddlddlFloorLevelbind[i].FloorLevel + '</option>');
+                    }
+                }
+            });
+
+        }
+
+        //function GetSiteFloorLevelPlanData(ClientID, Siteid, ddlselectFloorLevel) {
+        //    var canvas = document.getElementById('Canvas');
+        //    var context = canvas.getContext("2d");
+        //    var Markers = new Array();
+
+        //    $.ajax({
+        //        type: "POST",
+        //        // url: "../WebApi/Dashboard.asmx/GetSiteFloorLevelPlanData",
+        //        url: "/SiteFloorLevelPlan/GetSiteFloorLevelPlanData",
+        //        data: JSON.stringify({ id: ClientID, siteID: Siteid, FloorLevel: ddlselectFloorLevel }),
+        //        contentType: "application/json; charset=utf-8",
+        //        async: true,
+        //        dataType: "json",
+        //        success: function (response) {
+        //           // var GetData = response.d;
+        //            var GetData = response;
+        //            var mapSprite = new Image();
+        //            // mapSprite.src = "http://www.retrogameguide.com/images/screenshots/snes-legend-of-zelda-link-to-the-past-8.jpg";
+
+        //            //var  file = "https://scaffolddocuments.blob.core.windows.net/siteimage/101_0_637068187906591455.jpg";
+        //            // mapSprite.src = file;
+        //            var SiteFloorImage = "";
+        //            var Marker = function () {
+        //                this.Sprite = new Image();
+        //                // this.Sprite.src = "http://www.clker.com/cliparts/w/O/e/P/x/i/map-marker-hi.png"
+        //                // this.Sprite.src = "/images/SiteFloorlevelimg/RedMarkerPointer.png";
+        //                // this.Sprite.click = "alertImage()";
+
+        //                // this.Width = 50;
+        //                this.Width = 50;
+        //                this.Height = 50;
+        //                this.XPos = 0;
+        //                this.YPos = 0;
+        //                this.RID = 0;
+        //                this.ScaffRef;
+        //                this.DesignType;
+        //                this.MaterialType
+        //                this.ManHrsDismantle;
+        //                this.PlannedStandingDuration;
+        //                this.DateTagged;
+        //                this.ActualStandingData;
+        //                this.Tonnage;
+        //                this.BuildingNo;
+        //                this.FloorLevel;
+        //            }
+        //            // var Markers = new Array();
+        //            if (GetData.length > 0) {
+
+
+        //                SiteFloorImage = GetData[0].SiteFloorLevelImage == null ? "" : GetData[0].SiteFloorLevelImage;
+        //                var file = "";
+
+        //                if (SiteFloorImage != "" && SiteFloorImage != "NULL" && SiteFloorImage != null) {
+        //                    var siteimagelink = "/images/SiteFloorlevelimg/";
+        //                    file = siteimagelink + SiteFloorImage;
+        //                    //  file = "/images/SiteFloorlevelimg/129_331_637069366459922589.jpg";
+        //                } else {
+        //                    file = "/images/noimg.jpg";
+
+        //                }
+        //                mapSprite.src = file;
+
+        //                //$('#forcheckImagesize').attr("src", file);
+        //                document.getElementById("forcheckImagesize").src = file;
+        //                var myImg = document.querySelector("#forcheckImagesize");
+        //                //var realImageWidth = myImg.naturalWidth;
+        //                //var realImageHeight = myImg.naturalHeight;
+
+        //                setTimeout(function () {
+        //                    var realImageWidth = $('#forcheckImagesize').width();
+        //                    var realImageHeight = $('#forcheckImagesize').height();
+
+        //                    for (var i = 0; i < GetData.length; i++) {
+        //                        var XPosition = GetData[i].XPosition == null ? "" : GetData[i].XPosition;
+        //                        var YPosition = GetData[i].YPosition == null ? "" : GetData[i].YPosition;
+        //                        SiteFloorImage = GetData[i].SiteFloorImage == null ? "" : GetData[i].SiteFloorImage;
+        //                        var RegisterID = GetData[i].RegisterID == null ? "" : GetData[i].RegisterID;
+        //                        var ScaffRef = GetData[i].ScaffRef == null ? "" : GetData[i].ScaffRef;
+        //                        var DesignType = GetData[i].DesignType == null ? "" : GetData[i].DesignType;
+        //                        var MaterialType = GetData[i].MaterialType == null ? "" : GetData[i].MaterialType;
+        //                        var ManHrsDismantle = GetData[i].ManHrsDismantle == null ? "" : GetData[i].ManHrsDismantle;
+        //                        var PlannedStandingDuration = GetData[i].PlannedStandingDuration == null ? "" : GetData[i].PlannedStandingDuration;
+        //                        var DateTagged = GetData[i].DateTagged == null ? "" : GetData[i].DateTagged;
+        //                        var DateOfDismantle = GetData[i].DateOfDismantle == null ? "" : GetData[i].DateOfDismantle;
+        //                        var Tonnage = GetData[i].Tonnage == null ? "" : GetData[i].Tonnage;
+        //                        var BuildingNo = GetData[i].BuildingNo == null ? "" : GetData[i].BuildingNo;
+        //                        var FloorLevel = GetData[i].FloorLevel == null ? "" : GetData[i].FloorLevel;
+
+
+        //                        var ErectDate = "";                                                  //Date Tagged
+        //                        if (DateTagged != "" && DateTagged != null && DateTagged != '1900-01-01') {
+        //                            var date1 = new Date(DateTagged);
+        //                            var erect = "" + date1 + "";
+        //                            var date1dd = erect.substring(8, 11);
+        //                            var date1mm = erect.substring(4, 7);
+        //                            var date1yyyy = erect.substring(11, 16);
+        //                            ErectDate = date1dd + '-' + date1mm + '-' + date1yyyy
+        //                        }
+        //                        else {
+        //                            ErectDate = "";
+        //                            var date1 = "";
+        //                        }
+
+
+        //                        //var duration = '';
+        //                        //if (PlannedStandingDuration != '' && PlannedStandingDuration != null) {
+        //                        //    duration = markers[i][8];
+        //                        //}
+
+        //                        if (DateOfDismantle != null && DateOfDismantle != '1900-01-01' && DateOfDismantle != "") {               // Date of Dismentle
+        //                            var date2 = new Date(DateOfDismantle);
+        //                        }
+        //                        else {
+        //                            var date2 = new Date();
+        //                        }
+        //                        if (date1 != "") {                                                  // Diffrence between date tagged and date Dismentle
+        //                            var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+        //                        }
+
+        //                       // var Status = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        //                        var Status = PlannedStandingDuration;
+
+
+
+        //                        var marker = new Marker();
+
+        //                        //marker.XPos = (XPosition * 3) - (marker.Width / 2);
+        //                        //marker.YPos = (YPosition * 3) - marker.Height;
+        //                        marker.XPos = XPosition;
+        //                        marker.YPos = YPosition;
+        //                        marker.RID = RegisterID;
+        //                        marker.ScaffRef = ScaffRef;
+        //                        marker.DesignType = DesignType;
+        //                        marker.MaterialType = MaterialType;
+        //                        marker.ManHrsDismantle = ManHrsDismantle;
+        //                        marker.PlannedStandingDuration = PlannedStandingDuration;
+        //                        marker.DateTagged = ErectDate;
+        //                        marker.ActualStandingData = Status;
+        //                        marker.Tonnage = Tonnage;
+        //                        marker.BuildingNo = BuildingNo;
+        //                        marker.FloorLevel = FloorLevel;
+
+        //                        if (Status > parseInt(PlannedStandingDuration)) {                        //Color pin based on Days
+
+        //                            // Red Pointer Add Here
+        //                            marker.Sprite.src = "/images/SiteFloorlevelimg/RedMarkerPointer.png";
+        //                            marker.Width = 25;
+        //                        }
+        //                        else {
+
+        //                            // Green Pointer Add Here
+        //                            // marker.Sprite.src = "/images/SiteFloorlevelimg/greenMarker.png";
+        //                            marker.Sprite.src = "/images/NewGreen.png";
+        //                            marker.Width = 35;
+        //                        }
+
+        //                        Markers.push(marker);
+        //                    }
+
+
+        //                    setTimeout(function () {
+        //                        $('#LoadingPanel1').css('display', 'block');
+        //                    }, 10)
+
+        //                    setTimeout(function () {
+
+        //                        //
+
+        //                        canvas.style.width = '100%';
+        //                        canvas.style.height = '100%';
+        //                        // ...then set the internal size to match
+        //                        canvas.width = canvas.offsetWidth;
+        //                        canvas.height = canvas.offsetHeight;
+
+        //                        var realCanvasWidth = canvas.width;
+        //                        var realCanvasHeight = canvas.height
+
+
+        //                        var ImageRatio;
+        //                        var ImageRationWidthForMarker;
+        //                        var ImageRationHeightForMarker;
+
+        //                        //if (realImageWidth > realImageHeight) {
+        //                        //    ImageRatio = 1 + (((realCanvasWidth - realImageWidth) / realImageWidth));
+        //                        // //   ImageRationForMarker = 1 + (((realCanvasWidth - 300) / 300));
+        //                        //}
+        //                        //else {
+        //                        //    ImageRatio = 1 + (((realCanvasHeight - realImageHeight) / realImageHeight));
+        //                        // //   ImageRationForMarker = 1 + (((realCanvasHeight - 300) / 300));
+        //                        //}
+
+
+
+        //                        //var imageWidth = realImageWidth * ImageRatio;
+        //                        //var imageHeight = realImageHeight * ImageRatio;
+
+        //                        var imageWidth = realCanvasWidth;
+        //                        var imageHeight = (realCanvasWidth * realImageHeight) / realImageWidth
+
+        //                        // if (imageWidth > realImageHeight) {
+        //                        //  ImageRatio = 1 + (((realCanvasWidth - realImageWidth) / realImageWidth));
+        //                        // ImageRationWidthForMarker = 1 + (((imageWidth - 300) / 300));
+
+
+
+
+        //                        // }
+        //                        // else {
+        //                        // ImageRatio = 1 + (((realCanvasHeight - realImageHeight) / realImageHeight));
+        //                        //ImageRationHeightForMarker = 1 + (((imageHeight - 300) / 300));
+
+        //                        var RegisterFloorImageWidth = 300;
+        //                        var RegisterFloorImageHeight = (300 * realImageHeight) / realImageWidth;
+
+        //                        //   ImageRationWidthForMarker = imageWidth / realImageWidth;
+        //                        ImageRationWidthForMarker = imageWidth / RegisterFloorImageWidth;
+
+
+        //                        //ImageRationHeightForMarker = imageHeight / realImageHeight;
+        //                        ImageRationHeightForMarker = imageHeight / RegisterFloorImageHeight;
+        //                        // }
+
+
+        //                        canvas.width = imageWidth;
+        //                        canvas.height = imageHeight;
+
+        //                        context.fillStyle = "#000";
+        //                        context.fillRect(0, 0, imageWidth, imageHeight);
+        //                        context.drawImage(mapSprite, 0, 0, imageWidth, imageHeight);
+
+        //                        //context.fillStyle = "#000";
+        //                        //context.fillRect(0, 0, canvas.width, canvas.height);
+        //                        //context.drawImage(mapSprite, 0, 0, 900, 900);
+
+        //                       // Add on 19-MAy-2020
+        //                        canvas.addEventListener('mousedown', function(e) {
+        //                         getCursorPosition(canvas, e)
+        //                            }, false);
+
+        //                        let strMarkerText = "";
+        //                        for (var i = 0; i < Markers.length; i++) {
+        //                            var tempMarker = Markers[i];
+        //                            // Draw marker
+
+        //                            var xPos = (tempMarker.XPos * ImageRationWidthForMarker) -(marker.Width / 2);
+        //                            var yPos = (tempMarker.YPos * ImageRationHeightForMarker) - marker.Height;
+        //                            context.drawImage(tempMarker.Sprite, xPos, yPos, tempMarker.Width, tempMarker.Height);
+
+        //                            // Calculate postion text
+        //                            // var markerText = "<a hrefo='google.com'>Postion (X:" + tempMarker.XPos + ", Y:" + tempMarker.YPos + "</a>";
+
+
+        //                         //   var title = '-~-~-~-~-DETAILS-~-~-~-~-\n Scaf Ref                         : ' + tempMarker.ScaffRef + '\n Erection Date                : ' + tempMarker.DateTagged + '\n Actual Standing Days    : ' + tempMarker.PlannedStandingDuration + '\n Man Hrs Dismantle        : ' + tempMarker.ManHrsDismantle + '\n Material Type                : ' + tempMarker.MaterialType + '\n Design Type                  : ' + tempMarker.DesignType
+
+        //                            //var title = '-~-~-~-~-DETAILS-~-~-~-~-\n Scaf Ref                         : ' + tempMarker.ScaffRef + '\n Erection Date                : ' + tempMarker.DateTagged + '\n Actual Standing Days    : ' + tempMarker.ActualStandingData + '\n Man Hrs Dismantle        : ' + tempMarker.ManHrsDismantle + '\n Material Type                : ' + tempMarker.MaterialType + '\n Design Type                  : ' + tempMarker.DesignType
+
+        //                            var title = '-~-~-~-~-DETAILS-~-~-~-~-\n Scaf Ref                         : ' + tempMarker.ScaffRef + '\n Erection Date                : ' + tempMarker.DateTagged + '\n Actual Standing Days    : ' + tempMarker.ActualStandingData + '\n Man Hrs Dismantle        : ' + tempMarker.ManHrsDismantle + '\n Material Type                : ' + tempMarker.MaterialType + '\n Design Type                  : ' + tempMarker.DesignType+ '\n Tonnage                        : ' + tempMarker.Tonnage+ '\n Building                        : ' + tempMarker.BuildingNo+ '\n Floor Level                    : ' + tempMarker.FloorLevel
+
+        //                            //  var PointScaffRef = "ScaffRef :" + tempMarker.ScaffRef + ""; //remove Scaffref 30-oct-2019
+        //                            var PointScaffRef = "" + tempMarker.ScaffRef + "";
+
+        //                            // strMarkerText += "<a href='#' onmouseover='alert(" + tempMarker.RID + ")'>ScaffRef : " + tempMarker.ScaffRef + "</a><br/>";
+
+        //                            // strMarkerText += "<a href='#' onclick='OnClickRedirect(" + tempMarker.RID + ")'>ScaffRef : " + tempMarker.ScaffRef + "</a><br/>"; ////remove Scaffref 30-oct-2019
+        //                            strMarkerText += "<a href='#' style='color:blue; data-toggle='tooltip' title='" + title + "' text-decoration-line: underline;  ' onclick='OnClickRedirect(" + tempMarker.RID + ")'>" + tempMarker.ScaffRef + "</a><br/>";
+
+        //                            //  strMarkerText += "<a href='#' style='color:blue;  text-decoration-line: underline; onmouseover='ShowRegisterDetails("+ tempMarker.RID + ")'  onclick='OnClickRedirect(" + tempMarker.RID + ")'>" + tempMarker.ScaffRef + "</a><br/>";
+
+        //                            // Draw position above
+        //                            //context.fillStyle = "gray"; //comment 05-nov-2019
+        //                            //context.fillRect(tempMarker.XPos, tempMarker.YPos + 52, 49, 28);
+
+        //                            //  context.fillText(markerText, tempMarker.XPos, tempMarker.YPos);
+        //                            // context.fillText(PointScaffRef, tempMarker.XPos, tempMarker.YPos + 60); //comment for change text color -30-oct-2019
+        //                            //context.strokeText(PointScaffRef, tempMarker.XPos, tempMarker.YPos + 63);
+
+        //                            context.fillStyle = "gray";
+        //                            context.fillRect(xPos - 7, yPos + 50, 49, 20);
+        //                            context.strokeStyle = "white";
+        //                            context.strokeText(PointScaffRef, xPos, yPos + 63);
+
+
+        //                        }
+        //                        $("#tbllist").empty().append(strMarkerText);
+        //                        $('#LoadingPanel1').css('display', 'none');
+        //                    }, 1000);
+        //                }, 3000)
+
+        //            }
+        //            else {
+        //                $("#tbllist").empty();
+        //                var image = new Image();
+
+        //                var ClientDefaultLandingPageImage = "";
+        //                if ($("#hdnClientDefaultImage").val() != "")
+        //                {
+        //                    clientImage = $("#hdnClientDefaultImage").val();
+        //                    var siteimagelink = "/images/SiteFloorlevelimg/";
+
+        //                    ClientDefaultLandingPageImage = siteimagelink + clientImage;
+        //                }
+        //                else
+        //                {
+        //                    ClientDefaultLandingPageImage = "/images/noimg.jpg";
+        //                }
+
+
+        //                image.src = ClientDefaultLandingPageImage;
+        //                $('#forcheckImagesize').attr("src", ClientDefaultLandingPageImage);
+        //                //  image.src = "/images/SiteFloorlevelimg/LandingPageImage.jpg"
+        //                //  $('#forcheckImagesize').attr("src", "/images/SiteFloorlevelimg/LandingPageImage.jpg");
+        //                var myImg = document.querySelector("#forcheckImagesize");
+
+        //                setTimeout(function () {
+        //                    var realImageWidth = $('#forcheckImagesize').width();
+        //                    var realImageHeight = $('#forcheckImagesize').height();
+
+        //                    //var realImageWidth = myImg.naturalWidth;
+        //                    //var realImageHeight = myImg.naturalHeight;
+
+
+        //                    // context.fillStyle = "#000";
+        //                    // context.clearRect(0, 0, 900, 900);
+        //                    //  context.drawImage(image, 900, 900);
+        //                    setTimeout(function () {
+
+        //                        canvas.style.width = '100%';
+        //                        canvas.style.height = '100%';
+        //                        // ...then set the internal size to match
+        //                        //  canvas.width = canvas.offsetWidth;
+        //                        //  canvas.height = canvas.offsetHeight;
+
+        //                        var realCanvasWidth = canvas.offsetWidth;
+        //                        var realCanvasHeight = canvas.offsetHeight;
+
+        //                        var ImageRatio;
+
+        //                        //if (realImageWidth > realImageHeight) {
+        //                        //    ImageRatio = 1 + (((realCanvasWidth - realImageWidth) / realImageWidth))
+        //                        //}
+        //                        //else {
+        //                        //    ImageRatio = 1 + (((realCanvasHeight - realImageHeight) / realImageHeight))
+        //                        //}
+
+        //                        //var imageWidth = realImageWidth * ImageRatio;
+        //                        //var imageHeight = realImageHeight * ImageRatio
+
+        //                        var imageWidth = realCanvasWidth;
+        //                        var imageHeight = (realCanvasWidth * realImageHeight) / realImageWidth
+
+        //                        canvas.width = imageWidth;
+        //                        canvas.height = imageHeight;
+        //                        //  canvas.height = canvas.offsetHeight;
+
+
+        //                        context.fillStyle = "#000";
+        //                        context.fillRect(0, 0, imageWidth, imageHeight);
+        //                        context.drawImage(image, 0, 0, imageWidth, imageHeight);
+        //                    }, 1000);
+        //                }, 3000);
+        //                //04Nov2019 add condition
+        //                //if ($("#ContentPlaceHolder1_ddlFloorLevel").val() == "") {
+        //                //    $("#tbllist").empty();
+        //                //}
+        //            }
+
+        //        }
+        //    });
+
+        //}
+
+        function GetSiteFloorLevelPlanData(ClientID, Siteid, ddlselectFloorLevel, locationid, buildingid, Drawing) {
+            var canvas = document.getElementById('Canvas');
+            var context = canvas.getContext("2d");
+            var Markers = new Array();
+
+            $.ajax({
+                type: "POST",
+                //url: "../WebApi/Dashboard.asmx/GetSiteFloorLevelPlanData",
+                url: "/SiteFloorLevelPlan/GetSiteFloorLevelPlanData",
+                data: JSON.stringify({ id: ClientID, siteID: Siteid, FloorLevelId: ddlselectFloorLevel, Locationid: locationid, Buildingid: buildingid, checkDrawing: Drawing }),
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                dataType: "json",
+                success: function (response) {
+                    var GetData = response;
+
+                    var mapSprite = new Image();
+                    // mapSprite.src = "http://www.retrogameguide.com/images/screenshots/snes-legend-of-zelda-link-to-the-past-8.jpg";
+
+                    //var  file = "https://scaffolddocuments.blob.core.windows.net/siteimage/101_0_637068187906591455.jpg";
+                    // mapSprite.src = file;
+                    var SiteFloorImage = "";
+                    var Marker = function () {
+                        this.Sprite = new Image();
+                        // this.Sprite.src = "http://www.clker.com/cliparts/w/O/e/P/x/i/map-marker-hi.png"
+                        // this.Sprite.src = "/images/SiteFloorlevelimg/RedMarkerPointer.png";
+                        // this.Sprite.click = "alertImage()";
+
+                        // this.Width = 50;
+                        this.Width = 50;
+                        this.Height = 50;
+                        this.XPos = 0;
+                        this.YPos = 0;
+                        this.RID = 0;
+                        this.ScaffRef;
+                        this.DesignType;
+                        this.MaterialType
+                        this.ManHrsDismantle;
+                        this.PlannedStandingDuration;
+                        this.DateTagged;
+                        this.ActualStandingData;
+                        this.Tonnage;
+                        this.BuildingNo;
+                        this.FloorLevel;
+                        this.AssetNo;
+                    }
+                    // var Markers = new Array();
+                    if (GetData.length > 0) {
+
+
+                        SiteFloorImage = GetData[0].SiteFloorLevelImage == null ? "" : GetData[0].SiteFloorLevelImage;
+                        var file = "";
+
+                        if (SiteFloorImage != "" && SiteFloorImage != "NULL" && SiteFloorImage != null) {
+                            var siteimagelink = "/images/SiteFloorlevelimg/";
+                            file = siteimagelink + SiteFloorImage;
+                            //  file = "/images/SiteFloorlevelimg/129_331_637069366459922589.jpg";
+                        } else {
+                            file = "/images/noimg.jpg";
+
+                        }
+                        mapSprite.src = file;
+
+                        //$('#forcheckImagesize').attr("src", file);
+                        document.getElementById("forcheckImagesize").src = file;
+                        var myImg = document.querySelector("#forcheckImagesize");
+                        //var realImageWidth = myImg.naturalWidth;
+                        //var realImageHeight = myImg.naturalHeight;
+
+                        setTimeout(function () {
+                            var realImageWidth = $('#forcheckImagesize').width();
+                            var realImageHeight = $('#forcheckImagesize').height();
+
+                            for (var i = 0; i < GetData.length; i++) {
+                                var XPosition = GetData[i].XPosition == null ? "" : GetData[i].XPosition;
+                                var YPosition = GetData[i].YPosition == null ? "" : GetData[i].YPosition;
+                                SiteFloorImage = GetData[i].SiteFloorImage == null ? "" : GetData[i].SiteFloorImage;
+                                var RegisterID = GetData[i].RegisterID == null ? "" : GetData[i].RegisterID;
+                                var ScaffRef = GetData[i].ScaffRef == null ? "" : GetData[i].ScaffRef;
+                                var DesignType = GetData[i].DesignType == null ? "" : GetData[i].DesignType;
+                                var MaterialType = GetData[i].MaterialType == null ? "" : GetData[i].MaterialType;
+                                var ManHrsDismantle = GetData[i].ManHrsDismantle == null ? "" : GetData[i].ManHrsDismantle;
+                                var PlannedStandingDuration = GetData[i].PlannedStandingDuration == null ? "" : GetData[i].PlannedStandingDuration;
+                                var DateTagged = GetData[i].DateTagged == null ? "" : GetData[i].DateTagged;
+                                var DateOfDismantle = GetData[i].DateOfDismantle == null ? "" : GetData[i].DateOfDismantle;
+                                var Tonnage = GetData[i].Tonnage == null ? "" : GetData[i].Tonnage;
+                                var BuildingNo = GetData[i].BuildingNo == null ? "" : GetData[i].BuildingNo;
+                                var FloorLevel = GetData[i].FloorLevel == null ? "" : GetData[i].FloorLevel;
+                                var AssetNo = GetData[i].AssetNo == null ? "" : GetData[i].AssetNo;
+                                var DrawingName = GetData[i].DrawingName == null ? "" : GetData[i].DrawingName;
+
+                                //$("#ContentPlaceHolder1_txtdrawing").val(DrawingName);
+                                $("#txtdrawing").val(DrawingName);
+                                var ErectDate = "";                                                  //Date Tagged
+                                if (DateTagged != "" && DateTagged != null && DateTagged != '1900-01-01') {
+                                    var date1 = new Date(DateTagged);
+                                    var erect = "" + date1 + "";
+                                    var date1dd = erect.substring(8, 11);
+                                    var date1mm = erect.substring(4, 7);
+                                    var date1yyyy = erect.substring(11, 16);
+                                    ErectDate = date1dd + '-' + date1mm + '-' + date1yyyy
+                                }
+                                else {
+                                    ErectDate = "";
+                                    var date1 = "";
+                                }
+
+
+                                //var duration = '';
+                                //if (PlannedStandingDuration != '' && PlannedStandingDuration != null) {
+                                //    duration = markers[i][8];
+                                //}
+
+                                if (DateOfDismantle != null && DateOfDismantle != '1900-01-01' && DateOfDismantle != "") {               // Date of Dismentle
+                                    var date2 = new Date(DateOfDismantle);
+                                }
+                                else {
+                                    var date2 = new Date();
+                                }
+                                if (date1 != "") {                                                  // Diffrence between date tagged and date Dismentle
+                                    var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+                                }
+
+                                // var Status = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                                var Status = PlannedStandingDuration;
+
+
+
+                                var marker = new Marker();
+
+                                //marker.XPos = (XPosition * 3) - (marker.Width / 2);
+                                //marker.YPos = (YPosition * 3) - marker.Height;
+                                marker.XPos = XPosition;
+                                marker.YPos = YPosition;
+                                marker.RID = RegisterID;
+                                marker.ScaffRef = ScaffRef;
+                                marker.DesignType = DesignType;
+                                marker.MaterialType = MaterialType;
+                                marker.ManHrsDismantle = ManHrsDismantle;
+                                marker.PlannedStandingDuration = PlannedStandingDuration;
+                                marker.DateTagged = ErectDate;
+                                marker.ActualStandingData = Status;
+                                marker.Tonnage = Tonnage;
+                                marker.BuildingNo = BuildingNo;
+                                marker.FloorLevel = FloorLevel;
+                                marker.AssetNo = AssetNo;
+
+                                if (Status > parseInt(PlannedStandingDuration)) {                        //Color pin based on Days
+
+                                    // Red Pointer Add Here
+                                    marker.Sprite.src = "/images/SiteFloorlevelimg/RedMarkerPointer.png";
+                                    //marker.Width = 25;
+                                    marker.Width = 35;
+                                }
+                                else {
+
+                                    // Green Pointer Add Here
+                                    // marker.Sprite.src = "/images/SiteFloorlevelimg/greenMarker.png";
+                                    marker.Sprite.src = "/images/NewGreen.png";
+                                    marker.Width = 35;
+                                }
+
+                                Markers.push(marker);
+                            }
+
+
+                            setTimeout(function () {
+                                $('#LoadingPanel1').css('display', 'block');
+                            }, 10)
+
+                            setTimeout(function () {
+
+                                //
+
+                                canvas.style.width = '100%';
+                                canvas.style.height = '100%';
+                                // ...then set the internal size to match
+                                canvas.width = canvas.offsetWidth;
+                                canvas.height = canvas.offsetHeight;
+
+                                var realCanvasWidth = canvas.width;
+                                var realCanvasHeight = canvas.height
+
+
+                                var ImageRatio;
+                                var ImageRationWidthForMarker;
+                                var ImageRationHeightForMarker;
+
+                                //if (realImageWidth > realImageHeight) {
+                                //    ImageRatio = 1 + (((realCanvasWidth - realImageWidth) / realImageWidth));
+                                // //   ImageRationForMarker = 1 + (((realCanvasWidth - 300) / 300));
+                                //}
+                                //else {
+                                //    ImageRatio = 1 + (((realCanvasHeight - realImageHeight) / realImageHeight));
+                                // //   ImageRationForMarker = 1 + (((realCanvasHeight - 300) / 300));
+                                //}
+
+
+
+                                //var imageWidth = realImageWidth * ImageRatio;
+                                //var imageHeight = realImageHeight * ImageRatio;
+
+                                var imageWidth = realCanvasWidth;
+                                var imageHeight = (realCanvasWidth * realImageHeight) / realImageWidth
+
+                                // if (imageWidth > realImageHeight) {
+                                //  ImageRatio = 1 + (((realCanvasWidth - realImageWidth) / realImageWidth));
+                                // ImageRationWidthForMarker = 1 + (((imageWidth - 300) / 300));
+
+
+
+
+                                // }
+                                // else {
+                                // ImageRatio = 1 + (((realCanvasHeight - realImageHeight) / realImageHeight));
+                                //ImageRationHeightForMarker = 1 + (((imageHeight - 300) / 300));
+
+                                var RegisterFloorImageWidth = 300;
+                                var RegisterFloorImageHeight = (300 * realImageHeight) / realImageWidth;
+
+                                //   ImageRationWidthForMarker = imageWidth / realImageWidth;
+                                ImageRationWidthForMarker = imageWidth / RegisterFloorImageWidth;
+
+
+                                //ImageRationHeightForMarker = imageHeight / realImageHeight;
+                                ImageRationHeightForMarker = imageHeight / RegisterFloorImageHeight;
+                                // }
+
+
+                                canvas.width = imageWidth;
+                                canvas.height = imageHeight;
+
+                                context.fillStyle = "#000";
+                                context.fillRect(0, 0, imageWidth, imageHeight);
+                                context.drawImage(mapSprite, 0, 0, imageWidth, imageHeight);
+
+                                //context.fillStyle = "#000";
+                                //context.fillRect(0, 0, canvas.width, canvas.height);
+                                //context.drawImage(mapSprite, 0, 0, 900, 900);
+
+                                // Add on 19-MAy-2020
+                                canvas.addEventListener('mousedown', function (e) {
+                                    getCursorPosition(canvas, e);
+                                }, false);
+
+                                let strMarkerText = "";
+                                //var Canvasprint = "";
+                                for (var i = 0; i < Markers.length; i++) {
+                                    var tempMarker = Markers[i];
+                                    // Draw marker
+
+                                    var xPos = (tempMarker.XPos * ImageRationWidthForMarker) - (marker.Width / 2);
+                                    var yPos = (tempMarker.YPos * ImageRationHeightForMarker) - marker.Height;
+                                    context.drawImage(tempMarker.Sprite, xPos, yPos, tempMarker.Width, tempMarker.Height);
+
+                                    // Calculate postion text
+                                    // var markerText = "<a hrefo='google.com'>Postion (X:" + tempMarker.XPos + ", Y:" + tempMarker.YPos + "</a>";
+
+
+                                    //   var title = '-~-~-~-~-DETAILS-~-~-~-~-\n Scaf Ref                         : ' + tempMarker.ScaffRef + '\n Erection Date                : ' + tempMarker.DateTagged + '\n Actual Standing Days    : ' + tempMarker.PlannedStandingDuration + '\n Man Hrs Dismantle        : ' + tempMarker.ManHrsDismantle + '\n Material Type                : ' + tempMarker.MaterialType + '\n Design Type                  : ' + tempMarker.DesignType
+
+                                    //var title = '-~-~-~-~-DETAILS-~-~-~-~-\n Scaf Ref                         : ' + tempMarker.ScaffRef + '\n Erection Date                : ' + tempMarker.DateTagged + '\n Actual Standing Days    : ' + tempMarker.ActualStandingData + '\n Man Hrs Dismantle        : ' + tempMarker.ManHrsDismantle + '\n Material Type                : ' + tempMarker.MaterialType + '\n Design Type                  : ' + tempMarker.DesignType
+
+                                    var title = '-~-~-~-~-DETAILS-~-~-~-~-\n Scaf Ref                         : ' + tempMarker.ScaffRef + '\n Erection Date                : ' + tempMarker.DateTagged + '\n Actual Standing Days    : ' + tempMarker.ActualStandingData + '\n Man Hrs Dismantle        : ' + tempMarker.ManHrsDismantle + '\n Material Type                : ' + tempMarker.MaterialType + '\n Design Type                  : ' + tempMarker.DesignType + '\n Tonnage                        : ' + tempMarker.Tonnage + '\n Building                        : ' + tempMarker.BuildingNo + '\n Floor Level                    : ' + tempMarker.FloorLevel + '\n Asset #                          : ' + tempMarker.AssetNo
+
+                                    //  var PointScaffRef = "ScaffRef :" + tempMarker.ScaffRef + ""; //remove Scaffref 30-oct-2019
+                                    var PointScaffRef = "" + tempMarker.ScaffRef + "";
+
+                                    // strMarkerText += "<a href='#' onmouseover='alert(" + tempMarker.RID + ")'>ScaffRef : " + tempMarker.ScaffRef + "</a><br/>";
+
+                                    // strMarkerText += "<a href='#' onclick='OnClickRedirect(" + tempMarker.RID + ")'>ScaffRef : " + tempMarker.ScaffRef + "</a><br/>"; ////remove Scaffref 30-oct-2019
+                                    strMarkerText += "<a href='#' style='color:blue; data-toggle='tooltip' title='" + title + "' text-decoration-line: underline;  ' onclick='OnClickRedirect(" + tempMarker.RID + ")'>" + tempMarker.ScaffRef + "</a><br/>";
+
+                                    //Added For However Functionality (13-12-2022)
+                                    var Canvasprint = document.createElement("Canvas")
+                                    Canvasprint.className = 'Cancas1';
+                                    Canvasprint.setAttribute('data-toggle','tooltip');
+                                    Canvasprint.setAttribute('title', title);
+                                    Canvasprint.setAttribute('width', '15');
+                                    Canvasprint.setAttribute('height', '44');
+
+                                    Canvasprint.setAttribute('style', 'position: absolute;left:' + (xPos + 51) + 'px;top:' + yPos + 98 + 'px');
+                                    //End Here
+
+                                    //Canvasprint.setAttribute('style', 'position: absolute;left:' + (xPos + (27 * (1200 / 1920))) + 'px;top:' + (yPos + (93 * (1920 / 1080))) + 'px');
+
+                                    Canvasprint.setAttribute('id', 'CanvasObj_' + tempMarker. RID);
+
+
+                                    //Added On (13-12-2022) To Remove Scaff Reff Boxes
+                                    /*context.fillStyle = "gray";
+                                    context.fillRect(xPos - 7, yPos + 50, 49, 20);
+                                    context.strokeStyle = "white";
+                                    context.strokeText(PointScaffRef, xPos, yPos + 63);*/
+                                    // End Here on (13-12-2022)
+
+                                    document.getElementById("MultipleCanvas").append(Canvasprint);                                    
+
+                                }
+                                $("#tbllist").empty().append(strMarkerText);
+                               
+                                
+                                var canvas1 = document.querySelectorAll('Canvas1');
+
+                                $('.Cancas1').on('click', function (e) {
+                                    event.stopImmediatePropagation();
+                                    var currentAttr = $(this).attr('id');
+                                    console.log(currentAttr)
+                                    var IDF = currentAttr.split('_')
+
+                                    btnredirecttoJob_Click(IDF[1]);
+                                });
+                                $('#LoadingPanel1').css('display', 'none');
+                            }, 1000);
+                        }, 3000)
+
+                    }
+                        else {      
+                            $("#tbllist").empty();
+                        var image = new Image();
+
+                        $("#txtdrawing").val('');
+                        var ClientDefaultLandingPageImage = "";
+                        if ($("#hdnClientDefaultImage").val() != "") {
+                            clientImage = $("#hdnClientDefaultImage").val();
+                            var siteimagelink = "/images/SiteFloorlevelimg/";
+
+                            ClientDefaultLandingPageImage = siteimagelink + clientImage;
+                        }
+                        else {
+                            ClientDefaultLandingPageImage = "/images/noimg.jpg";
+                        }
+
+
+                        image.src = ClientDefaultLandingPageImage;
+                        $('#forcheckImagesize').attr("src", ClientDefaultLandingPageImage);
+                        //  image.src = "/images/SiteFloorlevelimg/LandingPageImage.jpg"
+                        //  $('#forcheckImagesize').attr("src", "/images/SiteFloorlevelimg/LandingPageImage.jpg");
+                        var myImg = document.querySelector("#forcheckImagesize");
+
+                        setTimeout(function () {
+                            var realImageWidth = $('#forcheckImagesize').width();
+                            var realImageHeight = $('#forcheckImagesize').height();
+
+                            //var realImageWidth = myImg.naturalWidth;
+                            //var realImageHeight = myImg.naturalHeight;
+
+
+                            // context.fillStyle = "#000";
+                            // context.clearRect(0, 0, 900, 900);
+                            //  context.drawImage(image, 900, 900);
+                            setTimeout(function () {
+
+                                canvas.style.width = '100%';
+                                canvas.style.height = '100%';
+                                // ...then set the internal size to match
+                                //  canvas.width = canvas.offsetWidth;
+                                //  canvas.height = canvas.offsetHeight;
+
+                                var realCanvasWidth = canvas.offsetWidth;
+                                var realCanvasHeight = canvas.offsetHeight;
+
+                                var ImageRatio;
+
+                                //if (realImageWidth > realImageHeight) {
+                                //    ImageRatio = 1 + (((realCanvasWidth - realImageWidth) / realImageWidth))
+                                //}
+                                //else {
+                                //    ImageRatio = 1 + (((realCanvasHeight - realImageHeight) / realImageHeight))
+                                //}
+
+                                //var imageWidth = realImageWidth * ImageRatio;
+                                //var imageHeight = realImageHeight * ImageRatio
+
+                                var imageWidth = realCanvasWidth;
+                                var imageHeight = (realCanvasWidth * realImageHeight) / realImageWidth
+
+                                canvas.width = imageWidth;
+                                canvas.height = imageHeight;
+                                //  canvas.height = canvas.offsetHeight;
+
+
+                                context.fillStyle = "#000";
+                                context.fillRect(0, 0, imageWidth, imageHeight);
+                                context.drawImage(image, 0, 0, imageWidth, imageHeight);
+
+                                $('#LoadingPanel1').css('display', 'none');
+                            }, 1000);
+                        }, 3000);
+                        //04Nov2019 add condition
+                        //if ($("#ContentPlaceHolder1_ddlFloorLevel").val() == "") {
+                        //    $("#tbllist").empty();
+                        //}
+                    }
+
+                }
+            });
+
+        }
+
+        function OnClickRedirect(RID) {
+            if (RID != "") {
+                $("#hdnRegisterID").val(RID);
+                  $("#btnredirecttoJob").click();
+               
+            }
+
+        }
+        function btnredirecttoJob_Click(RID) {
+            var UID = getParameterByName('UID');
+            var UserRole = getParameterByName('UserRole');
+            var Clientid = getParameterByName('id');
+            var RegisterId = $("#hdnRegisterID").val();
+            if (RegisterId == '' || RegisterId == null)
+            {
+                RegisterId = RID;
+            }
+            var CallFrom = 'FloorMap';
+
+            var EncryptData = Encrypt([RegisterId, CallFrom]);
+            RegisterId = EncryptData[0];
+            CallFrom = EncryptData[1];
+            var hdnTimeOffSet = $('#hdnTimeOffSetForAllPage').val();
+
+            window.location.href = '/Register/Register?UID=' + UID + '&UserRole=' + UserRole + '&id=' + Clientid + '&RID=' + RegisterId + '&hdnTimeOffSet=' + hdnTimeOffSet + '&CallFrom=' + CallFrom;
+
+        }
+        function btnGotoFloorlevelImage_Click() {
+            // Response.Redirect("FloorLevelGallery.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&RID=" + databaseCon.Encrypt(hdnRegisterID.Value) + "&from=" + "Sitefloorlevelplan");
+
+            var UID = getParameterByName('UID');
+            var UserRole = getParameterByName('UserRole');
+            var id = getParameterByName('id');
+
+            window.location.href = '/FloorLevelGallery/FloorLevelGallery?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&from=' + "Sitefloorlevelplan";
+        }
+        function getCursorPosition(canvas, event) {
+
+        const rect = canvas.getBoundingClientRect()
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+        //alert("Mouse x: " + x + " Mouse y: " + y + " rect.left: " + rect.left + " rect.top: " + rect.top + " Canvas Width: " + canvas.width + " Canvas Height: " + canvas.height);
+
+            var ClientID = $("#hdnClientID").val();
+            var FloorLevelId = $("#ddlFloorLevel").val();
+            var chckDrawing = $('#chkboxDrawing').is(':checked');
+            var DrawingName = $("#txtdrawing").val();
+            var Xpos = x/3;
+            var Ypos = y/3;
+
+            $.ajax({
+                type: "POST",
+                // url: "../WebApi/Dashboard.asmx/GetRedirectToJob",
+                url: "/SiteFloorLevelPlan/GetRedirectToJob",
+                // data: JSON.stringify({ id: ClientID, Xpos: Xpos, Ypos: Ypos, FloorLevel, FloorLevel }),
+                data: JSON.stringify({ id: ClientID, Xpos: Xpos, Ypos: Ypos, FloorLevelId: FloorLevelId, chckDrawing: chckDrawing, DrawingName: DrawingName }),
+                contentType: "application/json; charset=utf-8",
+                async: true,
+                dataType: "json",
+                success: function (response) {
+                //var RegisterID = response.d;
+                var RegisterID = response;
+                if (RegisterID != "") {
+
+                $("#hdnRegisterID").val(RegisterID);
+                $("#btnredirecttoJob").click();
+
+                    }
+                }
+            });
+
+        }
+        function handlemousemove(e, canvas, context, xPos, yPos, title)
+        {
+            console.log(title);
+            var canvas1 = document.getElementById('Canvas1');
+            var context = canvas1.getContext("2d");
+            const rect = canvas1.getBoundingClientRect();
+            $('#Canvas1').attr("title", title);
+            //const x = parseInt(e.clientX - rect.left);
+            //const y = parseInt(e.clientY - rect.top);
+
+            //console.log("Mouse x: " + x + " Mouse y: " + y + " rect.left: " + rect.left + " rect.top: " + rect.top + " Canvas Width: " + canvas.width + " Canvas Height: " + canvas.height)
+            //    canvas1.style.display = '';
+            //    canvas1.style.left = xPos + "px";
+            //    canvas1.style.top = yPos + 70 + "px";
+            //    context.clearRect(0, 0, canvas1.width, canvas1.height)
+            //    context.strokeStyle = "white";
+            //    context.fillStyle = "red";
+            //context.fillText(title, 5, 15)
+        }
+    </script>
+
+
+    @*<asp:HiddenField ID="hdnClientDefaultImage" runat="server" />
+    <asp:HiddenField ID="hdnClientID" runat="server" />
+    <asp:HiddenField ID="hdnRegisterID" runat="server" />
+    <asp:HiddenField ID="hdnFloorLevelId" runat="server" />
+    <asp:Button ID="btnredirecttoJob" runat="server" OnClick="btnredirecttoJob_Click" Style="display: none" />*@
+
+        <input type="hidden" id="hdnClientDefaultImage"/>
+        <input type="hidden" id="hdnClientID" />
+        <input type="hidden" id="hdnRegisterID" runat="server" />
+        <input type="hidden" id="hdnFloorLevelId" runat="server" />
+        <input type="button" id="btnredirecttoJob" onclick="btnredirecttoJob_Click()" Style="display: none" />
+
+    <div class="row" style="height: auto" id="divmain">
+        <div class="col-lg-10 col-md-8 col-sm-12 col-xs-12">
+
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4" style="margin-top: 6px">
+                <label id="lblSite" style="font-weight: 700; font-size: 16px; color: black; float: right">Site:</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-8" style="margin-top: 6px;">
+                <select id="ddlsite" Class="form-control" onchange="Changesite()" Style="border: 1px solid; Width:100%"></select>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-2 col-xs-4" style="margin-top: 6px">
+                <label id="lblLocation" style="font-weight: 700; font-size: 16px; color: black; float: right">Location:</label>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-4 col-xs-8" style="margin-top: 6px">
+                @*<asp:DropDownList ID="ddllocation" CssClass="form-control" onchange="Changelocation()" Style="border: 1px solid;" runat="server" Width="100%" AppendDataBoundItems="true"></asp:DropDownList>*@
+                <select id="ddllocation" Class="form-control" onchange="Changelocation()" Style="border: 1px solid;Width:100%"></select>
+            </div>
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 6px">
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4" style="margin-top: 6px">
+                <label id="lblBuilding" style="font-weight: 700; font-size: 16px; color: black; float: right">Building:</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-8" style="margin-top: 6px">
+                @*<asp:DropDownList ID="ddlbuilding" CssClass="form-control" onchange="Changebuilding()" Style="border: 1px solid;" runat="server" Width="100%" AppendDataBoundItems="true"></asp:DropDownList>*@
+                <select id="ddlbuilding" Class="form-control" onchange="Changebuilding()" Style="border: 1px solid;Width:100%"></select>
+            </div>
+
+            <div class="col-lg-2 col-md-3 col-sm-2 col-xs-4" id="divFloor" style="margin-top: 6px">
+                <label id="lblFloorLevel" style="font-weight: 700; font-size: 16px; color: black; float: right; margin-left:7px;">Floor Level:</label>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-4 col-xs-8" style="margin-top: 6px">
+                @*<asp:DropDownList ID="ddlFloorLevel" CssClass="form-control" runat="server" Style="border: 1px solid" Width="100%" AppendDataBoundItems="true" onchange="selectFloorLevel();"></asp:DropDownList>*@
+                <select id="ddlFloorLevel" Class="form-control" Style="border: 1px solid; Width:100%"  onchange="selectFloorLevel();"></select>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 6px">
+            </div>
+
+            <div class="col-lg-1 col-md-2 col-sm-1 col-xs-1">
+                <input type="checkbox" id="chkboxDrawing" style="float: right;" onchange="showdrawing()" />
+            </div>
+            <div class="col-lg-4 col-md-7 col-sm-5 col-xs-11" style="padding-Left: 0px;">
+                <label style="font-size: 14px; font-weight: 700;">Include ALL jobs pinned to this drawing</label>
+            </div>
+
+            <div class="col-xs-6 col-lg-2 col-md-4 col-sm-3" style="margin-left: 0px; ">
+                <label id="lbldrawing" style="font-size: 16px; font-weight: 700;float: right;">Drawing Name:</label>
+            </div>
+            <div class="col-xs-6 col-lg-3 col-md-4 col-sm-3">
+                @*<asp:TextBox ID="txtdrawing" runat="server" Enabled="false" CssClass="form-control"></asp:TextBox>*@
+                <input type="text" id="txtdrawing" disabled Class="form-control" />
+            </div>
+
+            <div class="col-lg-2 col-md-2 col-sm-10 col-xs-2" style="">
+                @*<asp:LinkButton runat="server" ID="btnGotoFloorlevelImage" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnGotoFloorlevelImage_Click"> <i class="fa fa-forward"> </i>&nbsp;&nbsp;Show All Floors</asp:LinkButton>*@
+                <button id="btnGotoFloorlevelImage" Class="w3-btn w3-small  nln-bg w3-text-white" onclick="btnGotoFloorlevelImage_Click()"> <i class="fa fa-forward"> </i>&nbsp;&nbsp;Show All Floors</button>
+            </div>
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 6px">
+            </div>
+
+            <div id="MultipleCanvas" class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 6px; position:relative;">
+                @*<canvas id="Canvas" height="900" width="900" style="margin-left: 30px;"></canvas>*@
+                <canvas id="Canvas" style="margin-left: 30px;"></canvas>
+                @* added on 09-12-2022 *@
+                <canvas id="Canvas1" style="margin-left: 30px; position:absolute;" width=100 height=25 data-toggle="tooltip" ></canvas>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-4 col-sm-12 col-xs-12">
+            <div class="col-lg-12 col-md-10 col-sm-12 col-xs-12">
+                <div class="x_title w3-light-grey w3-small" style="overflow-y: auto; margin-left: 6px;" id="divregisterlist">
+                    <h4 style="margin-top: 6px; font-size: 14px; width: 105%;" id="hdlistofregister"><i class="fa fa-list"></i>&nbsp;Floor Level Job List <span style="margin-left: 5px;" id="Spanregisterlist"></span></h4>
+                    <label id="tbllist"></label>
+                </div>
+                <div id="divRegisterDetails" class="w3-modal  fadeOut" style="display: none">
+                    <p runat="server" id="registerDetails" style="height: 135px; width: 200px; margin-top: 86px; margin-left: 807px; background-color: black">
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <label Text="*" Style="color: red"></label>
+        <img src="/images/NewRed.png" id="imgLogo" title="red pin" style="object-fit: contain; height: 25px; background-color: white;" />
+        <label id="label" style="color: black; font-size: 11px; width: auto">Exceeded Expected Standing Days</label>
+        <br />
+
+        <label Text="*" Style="color: red"></label>
+        <img src="/images/NewGreen.png" id="imgLogo1" title="Green pin" style="height: 25px; background-color: white;" />
+        <label id="Label1" style="color: black; width: auto; font-size: 11px;">Met Expected Standing Days</label>
+        <div class="row">
+        </div>
+        <img id="forcheckImagesize" style="width: auto; height: auto; visibility: hidden" />
+    </div>
+
+

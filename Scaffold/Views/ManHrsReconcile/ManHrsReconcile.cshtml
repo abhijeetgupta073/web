@@ -1,0 +1,358 @@
+﻿
+@{
+    ViewBag.Title = "ManHrsReconcile";
+}
+
+    @*<link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" />*@
+    @*<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="/Assets/js/jquery.dataTables.min.js"></script>*@
+
+    <script>
+
+        $(document).ready(function () {
+
+            var today = new Date();
+
+            $("#EntryDate").val(today.DateMonthFormat());
+
+            $("#EntryDate").datepicker({
+            dateFormat: 'dd-M-yy',
+            maxDate: new Date(),
+            closeText: 'Close',
+
+                 });
+
+           
+
+            var EntryDate = getParameterByName('EntryDate');
+            if (EntryDate != "" && EntryDate != undefined){
+                $('#EntryDate').val(EntryDate);
+                showData(EntryDate);
+                $("#btnExport").css("display", "block");
+            }
+            else{
+               $("#btnExport").css("display", "none");
+            }
+     
+    });
+
+        function exportToExcel() {
+            var htmls = "";
+            var uri = 'data:application/vnd.ms-excel;base64,';
+            var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>';
+            var base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            };
+
+            var format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+
+            //htmls = "" + $('#<%= lbltabledata.ClientID%>').text() + ""
+            htmls = "" + $("#lbltabledata").val()+ ""
+
+
+            var ctx = {
+                worksheet: 'Worksheet',
+                table: htmls
+            }
+
+            var today = new Date();
+            var formattedtoday = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+
+            var link = document.createElement("a");
+            link.download = "Reconcile_" + formattedtoday + ".xls";
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+        }
+    </script>
+    <style>
+        #EntryDate{
+            border-color: #e5e5e5 !important;
+            border-radius: 4px !important;
+        }
+        td.tblmainhdr {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #484040;
+            font-family: serif;
+        }
+
+        .InvalidCol {
+            background-color: #ff2a2a;
+        }
+
+        .totalcolor {
+            background-color: #a2fa99;
+            /*border-right-color: #a2fa99;
+            border-left-color: #a2fa99;*/
+        }
+
+        label {
+            color: #000 !important;
+        }
+
+        .tblcols {
+            text-align: center !important;
+        }
+
+        /*.linecolor {
+            border-right-color: #a2fa99;
+            border-left-color: #a2fa99;
+        }*/
+
+        .tblheaders {
+            text-align: center !important;
+        }
+
+        table.dataTable thead th, table.dataTable thead td {
+            border: 1px solid #ddd;
+        }
+
+        .No.records {
+            color: #000;
+            font-size: 20px;
+            font-weight: 700;
+            margin: 10% 0 0 22%;
+            width: 100%;
+            font-family: -webkit-pictograph;
+        }
+
+        @@media (max-width:767px) {
+            .btnreconcile {
+                margin-top: 15px;
+            }
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+
+            //Screen Size Code Arrangement Starts
+            var screensize = $(window).width();
+            if (screensize < 1150 && screensize > 650) {
+                ($BODY.hasClass('nav-md'))
+                $('#CreateNewDropDown').css("margin-top", "2px");
+                $BODY.removeClass('nav-md').addClass('nav-sm');
+                $LEFT_COL.removeClass('scroll-view');
+                //$('#BlackSection').css('display', 'block');
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "38px");
+                $('#leftbarsection').css('margin-top', '0px');
+
+            }
+            else {
+                if (screensize < (650)) {
+                    $BODY.removeClass('nav-sm')
+                    $('#imgLogo').parent().css('display', 'none');
+                    $('#imgLogo1').css('display', 'block').css("height", "52px");
+                }
+                else {
+                    $('#CreateNewDropDown').css("margin-top", "6px");
+                    $BODY.removeClass('nav-sm').addClass('nav-md');
+                    //$('#BlackSection').css('display', 'none');
+                    $('#imgLogo').parent().css('display', 'block');
+                    $('#imgLogo1').css('display', 'none');
+                    $('#leftbarsection').css('margin-top', '40px');
+                }
+
+            }
+
+            //Screen Size Code Arrangement Ends
+
+            var table = $('#example').DataTable({
+                "scrollX": "auto",
+                "scrollY": "auto",
+                "searching": false,
+                "scrollCollapse": true,
+                "paging": false,
+                columnDefs: [
+                    { targets: 'no-sort', orderable: false }
+                ]
+            });
+
+           // $('.editUser').on('click', function () {
+
+             $(document).on("click",".editUser",function() { 
+
+                var EntryDate = $('#EntryDate').val();
+                var UID = getParameterByName('UID');
+                var UserRole = getParameterByName('UserRole');
+                var ClientId = getParameterByName('id');
+
+                var ResourceId = $(this).parent().find('input').val();
+
+                var ActualHrsTotal = $(this).parent().parent().find('.getActualTotal').text();
+               //if (hdnTotal.Value =="0.00")
+               if (ActualHrsTotal =="0.00")
+               {
+                 //Response.Redirect("ManHrs.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"], false);
+                 window.location.href = '/ManHrs/ManHrs?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientId ;
+               }
+               else
+               {
+               // Response.Redirect("ManHrs.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"]+ "&ResourceId="+databaseCon.Encrypt(resourceidhdn.Value) + "&EntryDate=" + databaseCon.Encrypt(hdnDate.Value), false);
+
+                window.location.href = '/ManHrs/ManHrs?UID=' + UID + '&UserRole=' + UserRole + '&id=' + ClientId + '&ResourceId='+ ResourceId + '&EntryDate=' + EntryDate ;
+               }
+                
+               // $('#<%= resourceidhdn.ClientID%>').val(ResourceId);
+               // $('#<%= hdnDate.ClientID%>').val(EntryDate);
+               // $('#<%= hdnTotal.ClientID%>').val(ActualHrsTotal)
+                //__doPostBack('ctl00$ContentPlaceHolder1$btnclickresorce', '');
+
+
+            });
+           
+
+        });
+
+function BtnReconcile_Click(){
+   var EntryDate = $('#EntryDate').val();
+  
+   if (EntryDate != null && EntryDate != "")
+   {
+     showData(EntryDate);
+   }
+   else{
+             var response = { Result: "Failed", Message: "Please Select Date ." }
+             CustomAlert(response);
+             $("#LoadingPanel1").css("display", "none");
+    }
+   
+   //$('#LoadingPanel1').hide();
+}
+
+function showData(EntryDate){
+    
+    $('#LoadingPanel1').show();
+
+    var RecocileEntryDate = EntryDate;
+    var id = getParameterByName('id');
+    var UID = getParameterByName('UID');
+    var getRowCount="";
+    $.ajax({
+            url: '/ManHrsReconcile/showData',
+            type: 'POST',
+            data: JSON.stringify({ id: id, UID: UID, EntryDate: RecocileEntryDate }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                getRowCount= response.getRowCount;
+                if(getRowCount !=""){
+                  $('#btnExport').css('display', 'block');
+                }
+                else{
+                  $('#btnExport').css('display', 'none');
+                }
+                $('#lbltabledata').val(response.lbltabledata);
+                $('#PlaceHolder1').empty().append(response.html);  
+             
+
+                    }
+                });
+            
+          $('#LoadingPanel1').hide();
+            var RowCount = 0;
+            var SiteTotal;
+
+            //RowCount = $('#<%= getRowCount.ClientID%>').val();
+
+            RowCount = getRowCount;
+                          
+            if (RowCount > 0) {
+                for (var i = 0; i < RowCount; i++) {
+                    SiteTotal = 0;
+                    //$("#manhrRow" + i).find(".siteTotal" + i).each(function () {
+                    //    //alert($(this).text());
+                    //    SiteTotal = (parseFloat(SiteTotal) + parseFloat($(this).text())).toFixed(2);
+                    //});
+
+                    SiteTotal = $(".ActualHrsTotal" + i).text();
+
+                    if (SiteTotal != null && SiteTotal != 0) {
+                        $(".ActualHrsTotal" + i).text(SiteTotal);
+
+                        if (parseInt($(".ExpectedHrsTotal" + i).text()) != null && parseInt($(".ExpectedHrsTotal" + i).text()) != 0) {
+
+                            //Commented on 24-05-2023 Total Hours Was showing twice data 
+                            //if (SiteTotal < parseInt($(".ExpectedHrsTotal" + i).text()) || SiteTotal > parseInt($(".ExpectedHrsTotal" + i).text())) {
+                            //    $(".ExpectedHrsTotal" + i).parent().addClass("InvalidCol");
+                            //}
+                            //else {
+                            //    $(".ExpectedHrsTotal" + i).parent().removeClass("InvalidCol");
+                            //}
+
+                            if (SiteTotal < parseInt($(".ExpectedHrsTotal" + i).text())) {
+                                $(".ExpectedHrsTotal" + i).parent().addClass("InvalidCol");
+                            }
+                            else {
+                                $(".ExpectedHrsTotal" + i).parent().addClass("totalcolor");
+                            }
+                        }
+                    } else {
+                        $(".ActualHrsTotal" + i).text("0.00");
+                        if (parseInt($(".ExpectedHrsTotal" + i).text()) != null && parseInt($(".ExpectedHrsTotal" + i).text()) != 0) {
+
+                            //Commented on 24-05-2023
+                            //if (SiteTotal < parseInt($(".ExpectedHrsTotal" + i).text()) || SiteTotal > parseInt($(".ExpectedHrsTotal" + i).text())) {
+                            //    $(".ExpectedHrsTotal" + i).parent().addClass("InvalidCol");
+                            //}
+                            //else {
+                            //    $(".ExpectedHrsTotal" + i).parent().removeClass("InvalidCol");
+                            //}
+
+                            if (SiteTotal < parseInt($(".ExpectedHrsTotal" + i).text())) {
+                                $(".ExpectedHrsTotal" + i).parent().addClass("InvalidCol");
+                            }
+                            else {
+                                $(".ExpectedHrsTotal" + i).parent().addClass("totalcolor");
+                            }
+                        }
+                    }
+                }
+            }
+
+    }
+
+    </script>
+@*<input type="hidden" id="getRowCount" />*@
+<label hidden="hidden" id="lbltabledata"></label>
+@*<input type="hidden" ID="getTableData" />*@
+@*<input type="placeholder" ID="PlaceHolder1" />*@
+
+ <div class="row">
+        <div class="title_left col-lg-6 col-md-6 col-sm-6 col-xs-12">
+            <h4 class="heading" style="color: #0070ba"><b><i class="fa fa-list"></i>&nbsp;<span ID="lblRigister" Font-Size="16px" Font-Bold="true">Daily Man Hours Reconciliation</span></b></h4>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-3 col-xs-12">
+            @*<Telerik:RadDatePicker ID="EntryDate" DateInput-DateFormat="dd-MMM-yyyy" runat="server" Width="100%"></Telerik:RadDatePicker>
+            <asp:RequiredFieldValidator ID="rdFileddate" runat="server" CssClass="rdf-initial rdf-text"
+                ControlToValidate="EntryDate" ValidationGroup="Save" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+            <input type="text" id="EntryDate" style="width:100%;color:black;" />
+        </div>
+
+        <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12 btnreconcile">
+            @*<asp:LinkButton CssClass="w3-btn w3-teal" ValidationGroup="Save" runat="server" OnClick="BtnReconcile_Click" CausesValidation="true" ID="BtnReconcile">Reconcile</asp:LinkButton>*@
+              <button Class="w3-btn w3-teal" onclick="BtnReconcile_Click()" ID="BtnReconcile">Reconcile</button>
+        </div>
+  </div>
+
+    <div class="row">
+        <button type="button" id="btnExport" style="display: none;" onclick="exportToExcel();" Class="btn btn-primary">Export To Excel</button>
+    </div>
+
+    <div id="PlaceHolder1"></div>
+    @*<asp:PlaceHolder ID="PlaceHolder1" runat="server" />
+    <asp:HiddenField runat="server" ID="getRowCount" />
+    <asp:HiddenField runat="server" ID="getTableData" />
+    <label runat="server" hidden="hidden" id="lbltabledata"></label>
+
+    <asp:HiddenField runat="server" ID="resourceidhdn" />
+    <asp:HiddenField runat="server" ID="hdnDate" />
+    <asp:HiddenField runat="server" ID="hdnTotal" />
+    <asp:LinkButton runat="server" id="btnclickresorce" style="display: none;" OnClick="btnclickresorce_Click" ></asp:LinkButton>*@

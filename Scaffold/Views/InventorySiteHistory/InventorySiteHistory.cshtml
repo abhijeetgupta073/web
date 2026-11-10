@@ -1,0 +1,1060 @@
+﻿
+@{
+    ViewBag.Title = "InventorySiteHistory";
+}
+
+@*<link href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.jquery.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.8.0/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.8.0/js/anychart-cartesian.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.8.0/js/anychart-data-adapter.min.js"></script>*@
+@*<script src="https://code.highcharts.com/highcharts.js"></script>*@
+@*<script src="https://code.highcharts.com/highcharts-more.js"></script>*@
+@*<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>*@
+@*<script src="/Content/js/technical-indicators.src.js"></script>*@
+@*<script src="/Content/js/highcharts-regression.js"></script>*@
+@*<script src="/Content/js/canvasjs.min.js"></script>*@
+@*<script type="text/javascript" src="/Content/js/jspdf.min.js"></script>*@
+<script src="/Content/js/html2canvas.js"></script>
+<script src="/Content/js/highcharts.js"></script>
+<script src="/Content/js/highcharts-3d.js"></script>
+<script src="/Content/js/exporting.js"></script>
+<script src="/Content/js/export-data.js"></script>
+<script src="/Content/js/no-data-to-display.js"></script>
+<script src="/Content/js/highcharts-more.js"></script>
+<script src="~/Content/js/Layout.js?v1=1"></script>
+
+<script>
+    var isFinished = false;
+    $(document)
+        .ajaxStart(function () {
+            $('#LoadingPanel1').css('display', 'block');
+        })
+        .ajaxStop(function () {
+            $('#LoadingPanel1').css('display', 'none');
+        });
+    $(document).ready(function () {
+        //formatDateToDDMMYYYY(date);
+        $("#WeekStart").datepicker({
+            //format: 'dd-M-yyyy',
+            format: 'dd-M-yy',
+            maxDate: new Date(),
+            changeYear: true, // Enable year option
+            changeMonth: true, // Enable month option
+            beforeShowDay: function (date) {
+                var show = true;
+                if (date.getDay() != 5) show = false
+                return [show];
+            },
+            onClose: function (dateText, inst) { // Update the date format when the datepicker is closed
+                var dateFormat = $.datepicker.formatDate('dd-M-yy', new Date(dateText));
+                $(this).val(dateFormat);
+            }
+        });
+        $("#WeekEnding").datepicker({
+            //format: 'dd-M-yyyy',
+            format: 'dd-M-yy',
+            maxDate: new Date(),
+            changeYear: true, // Enable year option
+            changeMonth: true, // Enable month option
+            beforeShowDay: function (date) {
+                var show = true;
+                if (date.getDay() != 5) show = false
+                return [show];
+            },
+            onClose: function (dateText, inst) { // Update the date format when the datepicker is closed
+                var dateFormat = $.datepicker.formatDate('dd-M-yy', new Date(dateText));
+                $(this).val(dateFormat);
+            }
+        });
+        $('#LoadingPanel1').css('display', 'block');
+        getLastFriday();
+        GetThreeMonthsOldLastFriday();
+        SiteDropdown();
+        MaterialTypeDropdownBind();
+        ItemCodeDropdownBind();
+        BindSubCategory();
+        //GetSweatReportData();
+        //GetSweatReportStatus();
+        $("#ddlSite").on("change", function () {
+            MaterialTypeDropdownBind();
+            ItemCodeDropdownBind();
+            //Added on 20-06-2023
+            GetSweatReportData();
+            BindSubCategory();
+            GetSweatReportStatus();
+        });
+        $("#ddlMattype").on("change", function () {
+            ItemCodeDropdownBind();
+            //Added on 20-06-2023
+            GetSweatReportData();
+            BindSubCategory();
+            GetSweatReportStatus();
+        });
+        $("#ddlSubCategory").on("change", function () {
+            //Added on 20-06-2023
+            GetSweatReportData();
+            ItemCodeDropdownBind();
+            GetSweatReportStatus();
+        });
+        $("#ddlitemcode").on("change", function () {
+            $('#LoadingPanel1').css('display', 'block');
+            //console.log(new Date());
+            setTimeout(function () {
+                GetSweatReportData();
+                //console.log(new Date());
+            }, 500)
+            //console.log(new Date());
+            //while (!isFinished) {
+            //    $('#LoadingPanel1').css('display', 'none');
+            //}
+
+            //setTimeout(function () {
+            //    //ItemCodeDescriptionDropdownBind();
+            //    //Added on 22-07-2023 to block display pannel.
+            //    GetSweatReportData();
+            //    //Commented on 01-08-2023 As we are now using print button to print chart
+            //    //GetSweatReportStatus();
+            //    $('#LoadingPanel1').css('display', 'none');
+            //}, 300000)
+
+            //Commented on 22-07-2023 to block display pannel.
+            //ItemCodeDescriptionDropdownBind();
+            ////Added on 20-06-2023
+            //GetSweatReportData();
+            //GetSweatReportStatus();
+            //$('#LoadingPanel1').css('display', 'none');
+        });
+        $('#ddlitemcode').chosen({ search_contains: true });
+        $("#WeekEnding").on("change", function () {
+            //Added on 01-07-2023
+            GetSweatReportData();
+            GetSweatReportStatus();
+        });
+        $("#WeekStart").on("change", function () {
+            //Added on 01-07-2023
+            GetSweatReportData();
+            GetSweatReportStatus();
+        });
+    });
+
+    function getLastFriday() {
+        var today = new Date();
+        var day = today.getDay(); // Get the current day (0 = Sunday, 1 = Monday, ...)
+
+        // Calculate the number of days to subtract to reach the last Friday
+        var daysToSubtract = (day + 2) % 7;
+
+        // Subtract the calculated number of days from the current date
+        var lastFriday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysToSubtract);
+
+        // Return the formatted last Friday date
+        var dateObj = new Date(lastFriday);
+        var day = dateObj.getDate();
+        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        var month = monthNames[dateObj.getMonth() + 1]; // Adding 1 since month is zero-indexed
+        var month = monthNames[dateObj.getMonth()]; // now we match indes from array
+        var year = dateObj.getFullYear();
+        //var formattedDate = (month < 10 ? '0' + month : month) + '/' + day + '/' + year;
+        var formattedDate = day + '-' + month + '-' + year;
+
+        $("#WeekEnding").val(formattedDate);
+    }
+
+    function GetThreeMonthsOldLastFriday() {
+        var today = new Date();
+        //var today = new Date("2023-07-21");
+        // Calculate the month and year of 3 months ago
+        //var month = today.getUTCMonth() - 12;
+        var month = today.getUTCMonth();
+        var year = today.getUTCFullYear() - 1;
+
+        // Adjust the year if necessary
+        if (month < 0) {
+            month += 12;
+            year--;
+        }
+
+        // Set the date to the last day of the calculated month
+        //var lastDayOfMonth = new Date(Date.UTC(year, month + 1,today.getDate()));
+        //var lastDayOfMonth = new Date(Date.UTC(year, month,0));
+        var lastDayOfMonth = new Date(Date.UTC(year, month, today.getDate()));
+
+        // Calculate the day of the last Friday
+        //var lastFriday = lastDayOfMonth.getUTCDate() - ((lastDayOfMonth.getUTCDay() + 1) % 7);
+        var lastFriday = lastDayOfMonth.getUTCDate() - ((lastDayOfMonth.getUTCDay()) % 7);
+
+        // Create the date object for the last Friday of 3 months ago
+        var lastFridayDate = new Date(Date.UTC(year, month, lastFriday));
+        // Loop until the date falls on a Friday
+        while (lastFridayDate.getDay() !== 5) {
+            lastFridayDate.setDate(lastFridayDate.getDate() - 1);
+        }
+        var day = lastFridayDate.getUTCDate();
+        var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        var month = monthNames[lastFridayDate.getUTCMonth() + 1]; // Adding 1 since month is zero-indexed
+        var month = monthNames[lastFridayDate.getUTCMonth()]; // now we match indes from array
+        var year = lastFridayDate.getUTCFullYear();
+        //var formattedDate = (month < 10 ? '0' + month : month) + '/' + day + '/' + year;
+        var formattedDate = day + '-' + month + '-' + year;
+        ;
+        $("#WeekStart").val(formattedDate);
+    }
+
+    function SiteDropdown() {
+        var ClientID = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        $.ajax({
+            type: "POST",
+            url: "/InventorySiteHistory/SiteDropdown",
+            data: JSON.stringify({ ClientID: ClientID, UID: UID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: false,
+            success: function (response) {
+                var SiteData = response;
+                var SiteLocId = "";
+                $("#ddlSite").html("");
+                for (var i = 0; i < SiteData.length; i++) {
+                    SiteLocId = SiteData[i].SiteLocID;
+                    if (SiteLocId == 0) {
+                        SiteLocId = "All";
+                    }
+                    $("#ddlSite").append("<option value='" + SiteLocId + "'>" + SiteData[i].SiteLocation + "</option>");
+                }
+            }
+        });
+    }
+
+    function MaterialTypeDropdownBind() {
+        //ajaxload();
+        var SiteID = $('#ddlSite').val();
+        var ClientID = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: '/InventorySiteHistory/MaterialDropDown',
+            async: false,
+            data: JSON.stringify({ SiteID: SiteID, ClientID: ClientID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                data = response;
+                var ddlMattype = "<option value=''>All</option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlMattype += '<option value="' + obj.MaterialType + '">' + obj.MaterialType + '</option>';
+                    }
+                });
+
+                $('#ddlMattype').empty().append(ddlMattype);
+            }
+
+        });
+    }
+
+    function ItemCodeDropdownBind() {
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        var ddlSubCategory = $('#ddlSubCategory').val();
+        var inventoryid;
+        $.ajax({
+            type: "POST",
+            url: '/InventorySiteHistory/ddlMattype_SelectedIndexChanged',
+            async: false,
+            data: JSON.stringify({ SiteID: SiteID, ddlMattype: ddlMattype, ddlSubCategory: ddlSubCategory }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+
+                data = response;
+
+                var ddlitemcode = "";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        //Commented on 28-06-2023
+                        //ddlitemcode += '<option value="' + obj.ItemCode + '">' + obj.ItemCodeItemDesc + '</option>';
+                        ddlitemcode += '<option value="' + obj.InventoryID + '">' + obj.ItemCodeItemDesc + '</option>';
+                    }
+                });
+                $('#ddlitemcode').empty().append(ddlitemcode).trigger('chosen:updated');
+            }
+        });
+
+
+    }
+
+    function ItemCodeDescriptionDropdownBind() {
+
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        var ddlitemcode = $('#ddlitemcode').val();
+        var itemCodeDescVal = $('#ddlitemcode option:selected').text();
+        var itemDesc = "";
+        if (itemCodeDescVal != "All") {
+            var arr = itemCodeDescVal.substring(itemCodeDescVal.indexOf('-') + 1)
+            itemDesc = arr;
+        }
+        $.ajax({
+            type: "POST",
+            url: '/InventorySiteHistory/ddlitemcode_SelectedIndexChanged',
+            async: false,
+            data: JSON.stringify({ SiteID: SiteID, ddlMattype: ddlMattype, ddlitemcode: ddlitemcode }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+
+                data = response;
+
+                var ddlitemdesc = "<option value=''></option>";
+                $.each(response, function (idx, obj) {
+                    if (obj != null) {
+                        ddlitemdesc += '<option value="' + obj.ItemDesc + '" title="' + obj.ItemDesc + '">' + obj.ItemDesc + '</option>';
+                    }
+                });
+
+                $('#ddlitemdesc').empty().append(ddlitemdesc);
+
+
+            }
+        });
+    }
+
+    function GetSweatReportData() {
+        $('#LoadingPanel1').css('display', 'block');
+        var ClientID = getParameterByName('id');
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        var FromDate = formatDated($('#WeekStart').val());
+        var EndDate = formatDated($('#WeekEnding').val());
+        var ddlitemcode = $('#ddlitemcode').val();
+        var ddlSubCategory = $('#ddlSubCategory').val();
+        var ddlitemdesc = $('#ddlitemdesc').text();
+
+        if (ddlitemcode != "" && ddlitemcode != null && ddlitemcode != undefined && ddlitemcode != 0) {
+
+            $.ajax({
+                url: "/InventorySiteHistory/GetSweatReportData",
+                type: 'Post',
+                async: false,
+                data: { ClientID: ClientID, SiteID: SiteID, ddlMattype: ddlMattype, FromDate: FromDate, EndDate: EndDate, ddlitemcode: ddlitemcode, ddlitemdesc, ReportType: "S", ddlSubCategory: ddlSubCategory },
+                success: function (response) {
+
+                    var getData = response;
+                    $('#tblSweatReport').DataTable().clear();
+                    $('#tblSweatReport').DataTable().destroy();
+
+                    if (getData.length != 0) {
+                        var str = '';
+                        $.each(getData, function (index, obj) {
+                            //var percentUtilation = "";
+                            //var InventoryDataPlus = "";
+                            //var weekdays = obj.weekdays == null ? "" : getFormattedDate(obj.weekdays);
+                            //var OnsiteQty = obj.OnSiteQuantity == null ? "" : obj.OnSiteQuantity;
+                            //var Standing = obj.UsedQty == null ? "" : obj.UsedQty;
+                            //var Utilation = obj.Utilation == null ? "" : obj.Utilation;
+
+                            //if ((Utilation != "") || (Utilation = "0")) {
+                            //    var percant = "%";
+                            //    var DataUtilation = Utilation;
+                            //    percentUtilation = DataUtilation + percant;
+                            //}
+                            //var InventoryItem = obj.ItemCode == null ? "" : obj.ItemCode;
+                            //var InventoryDesc = obj.ItemDesc == null ? "" : obj.ItemDesc;
+
+                            //if ((InventoryItem != "") || (InventoryDesc != "")) {
+
+                            //    var Data1 = InventoryItem;
+                            //    var Data2 = " - ";
+                            //    var Data3 = InventoryDesc;
+
+                            //    var InventoryDataPlus = Data1 + Data2 + Data3;
+                            //}
+
+                            //var weekdays = obj.weekdays == null ? "" : getFormattedDate(obj.weekdays);
+
+                            //Commented on 17-08-2023 renamed as Today
+                            /*var LastFriday = obj.LastFriday == null ? "" : getFormattedDate(obj.LastFriday);*/
+                            var Today = obj.Today == null ? "" : getFormattedDate(obj.Today);
+                            var Code = obj.Code == null ? "" : obj.Code;
+                            var Description = obj.Description == null ? "" : obj.Description;
+                            var QuantityWithJob = obj.QuantityWithJob == null ? "" : obj.QuantityWithJob;
+                            var OnSite = obj.OnSite == null ? "" : obj.OnSite;
+                            var CurrentUtilisation = obj.CurrentUtilisation == null ? "" : obj.CurrentUtilisation;
+
+                            //Commented on 17-08-2023 renamed as Today
+                            //var ToDateUtilisation = obj.ToDateUtilisation == null ? "" : obj.ToDateUtilisation;
+                            var CurrentUtilisation = obj.CurrentUtilisation == null ? "" : obj.CurrentUtilisation;
+                            var Available = obj.Available == null ? "" : obj.Available;
+                            var subcategory = obj.subcategory == null ? "" : obj.subcategory;
+                            var EncryptData = [Description];
+                            var encryData = Encrypt(EncryptData);
+                            var EnDescription = encryData[0];
+                            str += "<tr id='tblSweatReport_" + index + "' class='backcolour'>";
+                            str += "<td style='display:none;' id='viewchart_" + index + "' class='Classbtnview setWidth1' onclick=GetSweatReportStatus('" + Code + "','" + EnDescription + "','" + index + "');><a id='rowgraph' class='expand fa fa-area-chart'></a></td>";
+
+                            //else {
+                            //    str += "<td style='display:none' id='viewchart_" + index + "' class='Classbtnview setWidth1' onclick=GetSweatReportStatus('" + Code + "','" + EnDescription + "');><a id='rowgraph' class='expand fa fa-area-chart'></a></td>";
+                            //}
+                            str += "<td id='weekdays_" + index + "' class='setWidth1'>" + Today + "</td>";
+                            str += "<td id='InventoryItem_" + index + "' class='setWidth2'>" + Code + "</td>";
+                            str += "<td id='OnsiteQty_" + index + "' class='setWidth5' >" + Description + "</td>";
+                            str += "<td id='OnSite_" + index + "' class='setWidth3' >" + OnSite + "</td>";
+                            str += "<td id='QuantityWithJob_" + index + "' class='setWidth4' >" + QuantityWithJob + "</td>";
+                            str += "<td id='Available_" + index + "' class='setWidth4' >" + Available + "</td>";
+                            str += "<td id='InventoryDesc_" + index + "' class='setWidth1'>" + CurrentUtilisation + '%' + "</td>";
+                            str += "<td id='subcategory_" + index + "' class='setWidth5'>" + subcategory + "</td>";
+                            str += "</tr>";
+                        });
+                    }
+                    $('#tbodytblSweatReport').html(str);
+                    isFinished = true;
+                    //Added on 18-08-2023 for excel
+                    $('#hdnTableData').html(str);
+                    table = $('#tblSweatReport').dataTable({
+                        "bSort": true,
+                        "processing": true,
+                        scrollY: '10vh',
+                        searching: false,
+                        paging: false,
+                        info: false,
+
+                        dom: 'Bfrtip',
+                        buttons: [
+                            {
+                                extend: 'csvHtml5',
+                                title: 'SweatReport Report',
+                                exportOptions: {
+                                    columns: [0, 1, 2, 4, 5, 6]
+                                }
+                            }
+                        ],
+                    });
+                    $('#LoadingPanel1').css('display', 'none');
+                }
+            });
+        }
+        else {
+            $('#LoadingPanel1').css('display', 'none');
+        }
+        /*   $('#LoadingPanel1').css('display', 'none');*/
+    }
+
+    function ExportToCsvFile() {
+        var ClientID = getParameterByName('id');
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        var FromDate = formatDated($('#WeekStart').val());
+        var EndDate = formatDated($('#WeekEnding').val());
+        var ddlitemcode = $('#ddlitemcode').val();
+        var ddlitemdesc = $('#ddlitemdesc').val();
+        var ddlSubCategory = $('#ddlSubCategory').val();
+        ddlMattype = Encrypt(ddlMattype);
+        window.location.href = '/InventorySiteHistory/ExportToCsvFile?ClientID=' + ClientID + '&SiteID=' + SiteID + '&ddlMattype=' + ddlMattype + '&FromDate=' + FromDate + '&EndDate=' + EndDate + '&ddlitemcode=' + ddlitemcode + '&ddlitemdesc=' + ddlitemdesc + '&ReportType=S' + '&ddlSubCategory=' + ddlSubCategory;
+
+
+    }
+
+    function getFormattedDate(givendate) {
+        if (givendate != "" && givendate != null) {
+            givendate = givendate.toString();
+            var date = new Date(parseInt(givendate.substr(6)));
+            return ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + date.getFullYear()
+        }
+        else {
+            return "";
+        }
+    }
+
+    //Added on 26-06-2023
+    function BindSubCategory() {
+        var ClientID = getParameterByName('id');
+        var ddlMattype = $('#ddlMattype').val();
+        $.ajax({
+            type: "POST",
+            url: "/InventorySiteHistory/SubCategoryDropDown",
+            data: JSON.stringify({ id: ClientID, ddlMattype: ddlMattype }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var SubCategory1 = response;
+                var ddlSubCategory = "<option value='All'>All</option>";
+                if (SubCategory1.length > 0) {
+                    for (var m = 0; m < SubCategory1.length; m++) {
+                        var sub = SubCategory1[m].SubCategory;
+                        //var rowmat1 = "";
+                        //if (d == 0) {
+                        //    rowmat1 = "0";
+                        //}
+                        //else {
+                        //    rowmat1 = d[15];
+                        //}
+                        /*if (sub != rowmat1) {*/
+                        ddlSubCategory += '<option value="' + SubCategory1[m].SubCategoryID + '">' + SubCategory1[m].SubCategory + ' - (' + SubCategory1[m].Category + ') </option>';
+                        /* }*/
+                    }
+                    $('#ddlSubCategory').empty().append(ddlSubCategory);
+                }
+            }
+        })
+    }
+    //Added on 26-06-2023
+    function GetSweatReportStatus(Code, EnDescription, index) {
+        $('.backcolour').css('background', '');
+        $('#tblSweatReport_' + index).css('background', '#808080');
+        $('#LoadingPanel1').css('display', 'block');
+        $('.forRemoveData').remove();
+        var ClientID = getParameterByName('id');
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        //var FromDate = $('#WeekStart').val();
+        //var EndDate = $('#WeekEnding').val();
+        var FromDate = formatDated($('#WeekStart').val());
+        var EndDate = formatDated($('#WeekEnding').val());
+        var ddlitemcode = $('#ddlitemcode').val();
+        var ddlitemdesc = $('#ddlitemdesc').text();
+        var ddlSubCategory = $('#ddlSubCategory').val();
+        var ItemCode = "";
+        setTimeout(function () {
+            if (ddlitemcode != "" && ddlitemcode != null && ddlitemcode != undefined && ddlitemcode != 0) {
+                //if (EnDescription != null && EnDescription != "" && EnDescription != undefined) {
+                //    var DecryptData = Decrypt([EnDescription]);
+                //    var DecryptDescription = DecryptData[0];
+                //}
+                if (Code == "" || Code == null || Code == undefined) {
+                    ItemCode = ddlitemcode;
+                }
+                else {
+                    ItemCode = Code;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/InventorySiteHistory/GetSweatReportData",
+                    data: JSON.stringify({ ClientID: ClientID, SiteID: SiteID, ddlMattype: ddlMattype, FromDate: FromDate, EndDate: EndDate, ddlitemcode: ItemCode, ddlitemdesc: ddlitemdesc, ReportType: "D", ddlSubCategory: ddlSubCategory }),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        Cyclone = response;
+                        var DecryptDescription = Cyclone?.[0]?.ItemDesc ?? "";
+                        var Cton = [];
+                        var CycloneData = [];
+                        var CycloneData1 = [];
+                        if (Cyclone.length > 0) {
+                            for (var i = 0; i < Cyclone.length; i++) {
+                                var TobePush = true;
+                                if (TobePush) {
+                                    /*var Weekdays = Cyclone.weekdays == null ? "" : getFormattedDate(Cyclone.weekdays);*/
+                                    /*var Weekdays = Cyclone.weekdays == null ? "" : getFormattedDate(new Date(Cyclone.weekdays));*/
+                                    var Weekdays = Cyclone[i].weekdays;
+                                    Weekdays = getFormattedDate(Weekdays);
+                                    CycloneData.push({ name: Cyclone.weekdays, y: Cyclone[i].OnSiteQuantity, sliced: true });
+                                    CycloneData1.push({ name: Cyclone.weekdays, y: Cyclone[i].QuantityWithJob, sliced: true });
+                                    Cton.push(Weekdays);
+                                }
+
+
+                            }
+
+                        }
+
+                        var theExportOptions = Highcharts.getOptions().exporting.buttons.contextButton.menuItems;
+                        theExportOptions.splice(0, 1);
+
+
+                        Highcharts.setOptions({ colors: ['#0000FF', '#FFA500'] });//Change line By 19 Nov 2018
+                        Highcharts.chart('container', {
+                            chart: {
+                                type: 'area',
+                                animation: false, // Disable animations
+                                backgroundColor: '#f2f2f2'
+                            },
+                            title: {
+                                align: 'center',
+                                text: DecryptDescription,
+                                style: {
+                                    fontSize: '16px',
+                                    fontWeight: 'bold',
+                                }
+                            },
+                            subtitle: {
+                                text: ''
+                            },
+                            xAxis: {
+                                categories: Cton,
+                                //labels: []
+                                title: {
+                                    text: null
+                                }
+                            },
+                            yAxis: {
+                                min: 0,
+                                title: {
+                                    text: '',
+                                    align: 'high'
+                                },
+                                labels: {
+                                    overflow: 'justify'
+                                }
+                            },
+                            tooltip: {
+                                formatter: function () {
+                                    return this.x + ', ' + this.y + ' Qty';
+                                }
+                            },
+                            //plotOptions: {
+                            //    series: {
+                            //        cursor: 'pointer',
+                            //        point: {
+                            //            events: {
+                            //                click: function (eve) {
+
+                            //                    GetSweatReportData(this.ClientID, SiteID, ddlMattype, FromDate, EndDate, ddlitemcode, ddlitemdesc);
+                            //                }
+                            //            }
+                            //        }
+                            //    },
+                            //    bar: {
+                            //        dataLabels: {
+                            //            enabled: true,
+                            //            color: 'black'
+                            //        }
+                            //    }
+                            //},
+                            navigation: {
+                                buttonOptions: {
+                                    verticalAlign: 'top',
+                                    y: -12,
+                                }
+                            },
+                            exporting: {
+                                buttons: {
+
+                                    contextButton: {
+                                        enabled: true,
+                                        x: 9,
+                                    },
+
+                                    exportButton: {
+                                        onclick: function () {
+                                            ShowAllTable(Code);
+                                            $('#btnOpenModel1').click();
+                                        },
+                                        text: 'Show All'
+                                    }
+                                }
+
+
+                            },
+                            credits: {
+                                enabled: false
+                            },
+                            series: [{
+                                name: 'On Site Qty',
+                                //showInLegend: false,
+                                //colorByPoint: false,
+                                data: CycloneData
+                            },
+                            {
+                                name: 'Qty With Job',
+                                /*showInLegend: false,*/
+                                /* colorByPoint: false,*/
+                                data: CycloneData1
+                            }]
+                        });
+                        //function redrawchart1() {
+                        //    var chart = $('#container').highcharts();
+
+                        //    var w = $('#container').closest(".wrapper").width()
+                        //    chart.setSize(
+                        //        w, w * (2.2 / 4), false
+                        //    );
+                        //}
+                        //$('#menu_toggle').on('click', function () {
+                        //    $(window).resize(redrawchart1);
+                        //    redrawchart1();
+                        //});
+                        //$(window).resize(redrawchart1);
+                        //redrawchart1();
+                        //var row = '';
+                        // $.each(response.d, function (index, obj) {
+                        //$.each(response, function (index, obj) {
+                        //    var num;
+                        //    num = (obj.PctAllSite1 * 100);
+                        //    row += "<tr class='forRemoveData'><td style='text-align: center;'>" + obj.weekdays + "</td><td style='text-align: center;'>" + obj.Code + "</td><td style='text-align: center;'>" + obj.Description + "</td><td style='text-align: center;'>" + obj.Standing + "</td><td style='text-align: center;'>" + obj.OnSite + "</td><td style='text-align: center;'>" + obj.CurrentUtilisation + "</td><td style='text-align: center;'>" + obj.ToDateUtilisation + "</td></tr>";
+                        //});
+                        //$("#tbDetails1 tbody").append(row);
+
+                        $('#LoadingPanel1').css('display', 'none');
+                    }
+                });
+
+                /*setTimeout(function () { tbodytblSweatReportm_dt.columns.adjust().draw(); }, 1000);*/
+            }
+            else {
+                $("#container").html("");
+                $('#LoadingPanel1').css('display', 'none');
+            }
+            /*$('#LoadingPanel1').css('display', 'none');*/
+        }, 5000);
+    }
+    function formatDated(dateString) {
+        if (!dateString) return '';
+        let date = new Date(dateString);
+        let months = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+        let day = String(date.getDate()).padStart(2, '0');
+        let month = months[date.getMonth()];
+        let year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+    function ShowAllTable(Code) {
+        $('#LoadingPanel1').css('display', 'block');
+        $('.forRemoveData').remove();
+        var ClientID = getParameterByName('id');
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        var FromDate = formatDated($('#WeekStart').val());
+        var EndDate = formatDated($('#WeekEnding').val());
+        var ddlitemcode = $('#ddlitemcode').val();
+        var ddlitemdesc = $('#ddlitemdesc').text();
+        var ddlSubCategory = $('#ddlSubCategory').val();
+        var ItemCode = "";
+        if (Code == "" || Code == null || Code == undefined) {
+            ItemCode = ddlitemcode;
+        }
+        else {
+            ItemCode = Code;
+        }
+        if (ddlitemcode == "All") {
+            ddlitemcode == 0;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/InventorySiteHistory/GetSweatReportData",
+            data: JSON.stringify({ ClientID: ClientID, SiteID: SiteID, ddlMattype: ddlMattype, FromDate: FromDate, EndDate: EndDate, ddlitemcode: ItemCode, ddlitemdesc: ddlitemdesc, ReportType: "D", ddlSubCategory: ddlSubCategory }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var getData = response;
+                $('#tblSweatReportimg').DataTable().clear();
+                $('#tblSweatReportimg').DataTable().destroy();
+
+                if (getData.length != 0) {
+                    var str = '';
+                    $('#LoadingPanel1').css('display', 'none');
+                    $.each(getData, function (index, obj) {
+                        var ItemCode = obj.ItemCode == null ? "" : obj.ItemCode;
+                        var ItemDesc = obj.ItemDesc == null ? "" : obj.ItemDesc;
+                        var OnSiteQuantity = obj.OnSiteQuantity == null ? "" : obj.OnSiteQuantity;
+                        var QuantityWithJob = obj.QuantityWithJob == null ? "" : obj.QuantityWithJob;
+                        var Available = obj.Available == null ? "" : obj.Available;
+                        var Utilation = obj.Utilation == null ? "" : obj.Utilation;
+                        var subcategory = obj.subcategory == null ? "" : obj.subcategory;
+
+                        str += "<tr>";
+                        str += "<td id='ItemCode_" + index + "' class='setWidth14'>" + ItemCode + "</td>";
+                        str += "<td id='ItemDesc_" + index + "' class='setWidth15'>" + ItemDesc + "</td>";
+                        str += "<td id='OnSiteQuantity_" + index + "' class='setWidth13' >" + OnSiteQuantity + "</td>";
+                        str += "<td id='QuantityWithJob_" + index + "' class='setWidth11'>" + QuantityWithJob + "</td>";
+                        str += "<td id='Utilation_" + index + "' class='setWidth11'>" + Utilation + "%" + "</td>";
+                        str += "<td id='Available_" + index + "' class='setWidth14'>" + Available + "</td>";
+                        str += "<td id='subcategory_" + index + "' class='setWidth5'>" + subcategory + "</td>";
+                        str += "</tr>";
+                    });
+
+                    $('#tblbodySweatReportm').html(str);
+
+                    //added 18-08-2023 For excle
+                    $('#hdnTableData1').html(str);
+                    table = $('#tblSweatReportm').dataTable({
+                        "bSort": true,
+                        "processing": true,
+                        scrollY: '62vh',
+                        searching: true,
+                        paging: true,
+                        info: false
+                    });
+                }
+                else {
+                    var getData = response;
+                    $('#tblSweatReportm').DataTable().clear();
+                    $('#tblSweatReportm').DataTable().destroy();
+
+                    if (getData.length != 0) {
+                        var str = '';
+                        $('#LoadingPanel1').css('display', 'none');
+                        $.each(getData, function (index, obj) {
+                            var weekdays = obj.weekdays == null ? "" : getFormattedDate(obj.weekdays);
+                            var inventoryid = obj.inventoryid == null ? "" : obj.inventoryid;
+                            var OnSiteQuantity = obj.OnSiteQuantity == null ? "" : obj.OnSiteQuantity;
+                            var ItemCode = obj.ItemCode == null ? "" : obj.ItemCode;
+                            var ItemDesc = obj.ItemDesc == null ? "" : obj.ItemDesc;
+                            var UsedQty = obj.UsedQty == null ? "" : obj.UsedQty;
+                            var Utilation = obj.Utilation == null ? "" : obj.Utilation;
+
+                            str += "<tr>";
+                            str += "<td id='weekdays_" + index + "' class='setWidth11'>" + weekdays + "</td>";
+                            str += "<td id='inventoryid_" + index + "' style='display:none' class='setWidth12'>" + inventoryid + "</td>";
+                            str += "<td id='ItemDesc_" + index + "' class='setWidth15'>" + ItemDesc + "</td>";
+                            str += "<td id='OnSiteQuantity_" + index + "' class='setWidth13' >" + OnSiteQuantity + "</td>";
+                            str += "<td id='ItemCode_" + index + "' class='setWidth14'>" + ItemCode + "</td>";
+                            str += "<td id='UsedQty_" + index + "' class='setWidth11'>" + UsedQty + "</td>";
+                            str += "<td id='Utilation_" + index + "' class='setWidth11'>" + Utilation + "%" + "</td>";
+                            str += "</tr>";
+                        });
+
+                        $('#tblbodySweatReportm').html(str);
+                        table = $('#tblSweatReportm').dataTable({
+                            "bSort": true,
+                            "processing": true,
+                            scrollY: '62vh',
+                            searching: true,
+                            paging: true,
+                            info: false
+                        });
+                    }
+                }
+            }
+        });
+    }
+    function GetSweatReportSearch() {
+        GetSweatReportData();
+        GetSweatReportStatus();
+
+    }
+
+    function btnPrintImage_Click() {
+        var container = document.getElementById("containerwithgraph");
+        html2canvas(container, { allowTaint: false, backgroundColor: '#ffffcc', removeContainer: true /*width:useWidth,height:useHeight*/ }).then(function (canvas) {
+
+            var link = document.createElement("a");
+            document.body.appendChild(link);
+            link.href = canvas.toDataURL();
+            link.download = "Inventory_Site_History_Report.png";
+            link.target = '_blank';
+            link.click();
+        });
+    }
+
+    //Commented on 18-08-2023 
+    function ExportToCsvFileDetail() {
+        var ClientID = getParameterByName('id');
+        var SiteID = $('#ddlSite').val();
+        var ddlMattype = $('#ddlMattype').val();
+        var FromDate = formatDated($('#WeekStart').val());
+        var EndDate = formatDated($('#WeekEnding').val());
+        var ddlitemcode = $('#ddlitemcode').val();
+        var ddlitemdesc = $('#ddlitemdesc').val();
+        var ddlSubCategory = $('#ddlSubCategory').val();
+        ddlMattype = Encrypt(ddlMattype);
+        window.location.href = '/InventorySiteHistory/ExportToCsvFileDetail?ClientID=' + ClientID + '&SiteID=' + SiteID + '&ddlMattype=' + ddlMattype + '&FromDate=' + FromDate + '&EndDate=' + EndDate + '&ddlitemcode=' + ddlitemcode + '&ddlitemdesc=' + ddlitemdesc + '&ReportType=D' + '&ddlSubCategory=' + ddlSubCategory;
+    }
+
+</script>
+
+<style>
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+
+    .chosen-search input {
+        color: black;
+    }
+
+    .setWidth5 {
+        max-width: 50px !important
+    }
+
+    .setWidth1, .setWidth2, .setWidth3, .setWidth4 {
+        max-width: 10px !important
+    }
+
+    .setWidth1 {
+        max-width: 5px !important
+    }
+
+    .setWidth11, .setWidth12, .setWidth13, .setWidth14 {
+        max-width: 10px !important
+    }
+
+    .setWidth15 {
+        max-width: 50px !important
+    }
+</style>
+
+<div class="container DshbrdBack">
+    <input type="hidden" id="hdnSite" />
+    <input type="hidden" id="hdnTableData" />
+    <input type="hidden" id="hdnTableData1" />
+    <div class="row">
+
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" style="margin-top: 24px">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    <label id="lblSite" Text="Site:" Style="color: black">Site : </label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    <select id="ddlSite" Class="form-control"></select>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    <label id="lblMaterial" Text="Material Type:" Style="color: black">Material Type :</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    <select id="ddlMattype" Class="form-control"></select>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    <label id="lblddlSubCategory" Style="color: black">Sub Category :</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    <select id="ddlSubCategory" Class="form-control"></select>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 10px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    <label id="lblMaterial" Text="Material Type:" Style="color: black">Inventory Item :</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    <select id="ddlitemcode" Class="form-control"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" style="margin-top: 24px">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12" style="display:none">
+                    <label id="lblitemdesc" Text="Item Desc:" Style="color: black">Item Desc:</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12" style="display:none">
+                    <select id="ddlitemdesc" onchange="" Class="form-control" disabled></select>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    <label id="lblSite" Text="Site:" Style="color: black ">Week Start &nbsp;&nbsp;<i style="margin-left:14px;" class="fa fa-calendar"></i>&nbsp;: </label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    <input type="text" style="text-align: center;" placeholder="Select Date" Class="form-control" id="WeekStart" />
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 5px"></div>
+                <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12">
+                    <label id="lblMaterial" Text="Week Type:" Style="color: black">Week Ending &nbsp;&nbsp;<i class="fa fa-calendar"></i>&nbsp;:</label>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12">
+                    <input type="text" style="text-align: center;" placeholder="Select Date" Class="form-control" id="WeekEnding" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="w3-container">
+
+    <div class="row"></div>
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-6">
+            <b style="color: blue; font-size: 36px;">Inventory Site History Report</b>
+        </div>
+        <!--<div class="col-sm-2 clsPad_top">
+        <button title="Export to Excel" class="btn w3-btn w3-teal" style="width: 34%;background-color:green;" onclick="ExportToCsvFile();"><i class="fa fa-file-excel-o"></i>&nbsp;Excel For Summary</button>
+        <button title="Export to Excel" class="btn w3-btn w3-blue" style="width: 34%;" onclick="ExportToCsvFileDetail();"><i class="fa fa-file-excel-o"></i>&nbsp;Excel For Detail</button>
+        <button title="Export to PDF" class="btn w3-btn w3-blue" style="width: 34%;margin-left:349px;margin-top:-52px;" onclick="btnPrintImage_Click()"><i class="fa fa-file-pdf-o"></i>&nbsp;Print Image</button>-->
+        @*<button class="btn w3-btn w3-teal" type="button" onclick="GetSweatReportSearch();" id="GetSweatReportData1" style="width: 34%;"><i class="fa fa-filter"></i> Search </button>*@
+        <!--</div>-->
+
+    </div>
+    <div class="row" style="float:right;">
+        <div class="col-lg-4 col-md-3 col-sm-6 col-xs-12" style="margin-right: -23px;">
+            <button title="Export to Excel" class="btn w3-btn w3-teal" background-color:green;" onclick="ExportToCsvFile();"><i class="fa fa-file-excel-o"></i>&nbsp;Excel For Summary</button>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <button title="Export to Excel" class="btn w3-btn w3-blue" @*style="width: 34%;"*@ onclick="ExportToCsvFileDetail();"><i class="fa fa-file-excel-o"></i>&nbsp;Excel For Detail</button>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="margin-right: -21px;">
+            <button title="Export to PDF" class="btn w3-btn w3-blue" @*style="width: 34%;margin-left:349px;margin-top:-52px;*@ onclick="btnPrintImage_Click()"><i class="fa fa-file-pdf-o"></i>&nbsp;Print Image</button>
+        </div>
+        <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12">
+            <button title="View Chart" class="btn w3-btn w3-blue" onclick="GetSweatReportStatus()"><i class="fa fa-area-chart"></i>&nbsp;Generate Chart</button>
+        </div>
+    </div>
+</div>
+    <div class="row"></div>
+    <div class="row"></div>
+    <div class="row"></div>
+    <div id="containerwithgraph">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="DivSwearReport" style="width: 100%">
+                <div id="SwearReport21" style="color: black;">
+                    <table id="tblSweatReport" class="table" style="width:100% !important;">
+                        <thead style="background-color: #efefef; color: #716262;">
+                            <tr>
+                                @*<th class="setWidth1"></th>
+        <th class="setWidth1">Week</th>
+        <th class="setWidth5">InventoryItem</th>
+        <th class="setWidth2">OnSite</th>
+        <th class="setWidth3">Standing</th>
+        <th class="setWidth4">Current Utilisation</th>
+        <th class="setWidth4">To Date Utilisation</th>
+        <th class="setWidth5" style="display:none;">InventoryDesc</th>*@
+                                <th style="display:none" class="setWidth1 Classbtnview"></th>
+                                @* Commented on (17-08-2023) Renamed to Today *@
+                                @*<th class="setWidth1">Week</th>*@
+                                <th class="setWidth1">Today</th>
+                                <th class="setWidth2">Code</th>
+                                <th class="setWidth5">Description</th>
+                                <th class="setWidth3">On Site</th>
+                                <th class="setWidth4">Quantity With Job</th>
+                                <th class="setWidth4">Available</th>
+                                @* Commented On (16-08-2023) renamed as Current Utilisation *@
+                                @*<th class="setWidth1"> To Date Utilisation</th>*@
+                                <th class="setWidth1"> Current Utilisation</th>
+                                <th class="setWidth5"> Sub Category</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodytblSweatReport"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="w3-container">
+            <div class="col-lg-10 col-md-12 col-sm-12 col-xs-12 wrapper">
+                <div id="container" style="width: 100%; margin-top: 0px; border: 1px solid lightgrey; overflow: hidden"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <button style="display: none;" id="btnOpenModel1" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Open Modal</button>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div style="width: 80%;" class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Inventory Site History Report</h4>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table table-bordered" id="tblSweatReportm" style="width: 100% !important; color: black">
+                        <thead style="background-color: #efefef; color: #716262;">
+                            <tr>
+                                <th class="setWidth14">Item Code</th>
+                                <th class="setWidth15">Item Desc</th>
+                                <th class="setWidth13">On Site Quantity</th>
+                                <th class="setWidth11">Quantity With Job</th>
+                                <th class="setWidth11">Utilisation</th>
+                                <th class="setWidth14">Available</th>
+                                <th class="setWidth15">Sub Category</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblbodySweatReportm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

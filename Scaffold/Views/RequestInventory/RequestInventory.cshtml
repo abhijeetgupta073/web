@@ -1,0 +1,446 @@
+﻿
+@{
+    ViewBag.Title = "RequestInventory";
+}
+<script src="~/Content/js/RequestInventory.js?V1=29"></script>
+<script>
+    $(document).ready(function () {
+        var RID = getParameterByName('RID');
+        var ArrayData = [RID];
+        var DecryptData = Decrypt(ArrayData);
+        var fromtocheck = getParameterByName('fromtocheck');
+        var ThirdParty = getParameterByName('ThirdParty');
+
+        RID = DecryptData[0];
+        if (RID != "" && RID != null) {
+            $('#rdositetojob').prop('checked', true);
+            //$('#btnnewrequest').css('display', 'none');
+            //$('#btnedit').css('display', 'none');
+            //$('#Delivery').css('display', 'none');
+            $('#showback').css('display', 'block');
+            $('#DtoS').css('display', 'none');
+            $('#showreqdel').css('display', 'none');
+            //$('#RequiredDt').css('display', 'none');
+
+            $('#StoJ').css('display', 'block');
+            $('#txtsite').val('@ViewBag.SiteName');
+            $('#txtjob').val('@ViewBag.ScaffRref');
+
+            $('#ShowThirdPartytoDepot').css('display', 'none');
+            $('#Showdepottosite').css('display', 'none');
+
+        } else {
+            if (Decrypt(fromtocheck) == "3" || Decrypt(ThirdParty) == "true") {
+                $('#rdoThirdPartytoDepot').prop('checked', true);
+                $('#lblfrom').css('display', 'none');
+                $('#ddlSite').css('display', 'none');
+            }
+            else {
+                $('#rdodepottosite').prop('checked', true);
+                //$('#rdoThirdPartytoDepot').prop('checked', true);
+                //$('#lblfrom').css('display', 'none');
+                //$('#ddlSite').css('display', 'none');
+            }
+           //commented on 15-02-2023 $('#RequiredDt').css('display', 'block');
+
+        }
+
+       SiteDropDownBind();
+        GetRequestInventoryData();
+
+    });
+
+    function rdoThirdPartytoDepot_CheckedChanged() {
+        $('#lblfrom').css('display', 'none');
+        $('#ddlSite').css('display', 'none');
+        //$('#displaygrid').css('display', 'block');
+        GetRequestInventoryData();
+        
+    }
+
+    function rdodepottosite_CheckedChanged() {
+        $('#lblfrom').css('display', 'block');
+        $('#ddlSite').css('display', 'block');
+        //$('#displaygrid').css('display', 'block');
+        GetRequestInventoryData();
+      
+    }
+
+
+</script>
+<style>
+     /*.setWidth1,.setWidth2,.setWidth3 {
+        max-width: 10px !important;
+    }
+   .setWidth4,.setWidth5,.setWidth14,.setWidth18,.setWidth19 {
+        max-width: 60px !important;
+    }
+   .setWidth6,.setWidth7,.setWidth8,.setWidth15 {
+        max-width: 70px !important;
+    }
+
+    .setWidth9,.setWidth13 {
+        max-width: 200px !important;
+    }
+    .setWidth10 {
+        max-width: 1px !important;
+    }
+
+    .setWidth11 {
+        max-width: 180px !important;
+    }
+
+    .setWidth12 {
+        max-width: 100px !important;
+    }
+
+    .setWidth16,.setWidth17,.setWidth20 {
+        max-width: 120px !important;
+    }*/
+
+    .setWidth1,.setWidth2,.setWidth3 {
+        min-width: 10px !important;
+    }
+   .setWidth4,.setWidth19 {
+        min-width: 60px !important;
+    }
+   .setWidth7,.setWidth15{
+        min-width: 70px !important;
+    }
+    .setWidth18, .setWidth5, .setWidth6, .setWidth21, .setWidth23 {
+        min-width: 80px !important;
+    }
+    .setWidth9, .setWidth13, .setWidth22 {
+        min-width: 200px !important;
+    }
+    .setWidth10 {
+        min-width: 1px !important;
+    }
+
+    .setWidth11,.setWidth12,.setWidth16,.setWidth17{
+        min-width: 180px !important;
+    }
+    .setWidth8,.setWidth14,.setWidth20,.setWidth21  {
+        min-width: 120px !important;
+    }
+    .dataTables_scrollHead table thead th {
+        background: #e9e9e9 !important;
+        color: #333 !important;
+    }
+</style>
+<div class="clearfix"></div>
+<input type="hidden" id="hdnTransID" />
+<input type="hidden" id="hdnEmailTransID" />
+<div id="FormSection" class="row">
+    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+        <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+            <li id="liThirdParty" runat="server">
+                <a id="AnchorYardInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                </a>
+            </li>
+            <li id="liDepotInventory" runat="server">
+                <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                </a>
+            </li>
+            <li id="liSiteInventory" runat="server">
+                <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                </a>
+            </li>
+            <li id="liJob" class="active" style="width: 227px">
+                <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                </a>
+            </li>
+            <li id="liSite" runat="server">
+                <a id="AnchorReturnInventory" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                </a>
+            </li>
+            <li id="LiDamaged" runat="server">
+                <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                </a>
+            </li>
+            <li id="PipeLineInventory">
+                <a id="AnchorPipeLineInventory" style="cursor: pointer;" data-toggle="tab">
+                    <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;PipeLine Inventory</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+            <div class="row">
+                <input type="hidden" id="hdnfield" />
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12" style="margin-left: 8px; display: block" id="ShowThirdPartytoDepot">                  
+                    <input type="radio" id="rdoThirdPartytoDepot" name="abc" onchange="rdoThirdPartytoDepot_CheckedChanged()" />
+                    <label>Depot Inventory Request</label>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12" style="display:block" id="Showdepottosite">
+                    @*<%--<asp:CheckBox id="rdodepottosite" AutoPostBack="true" OnCheckedChanged="rdodepottosite_CheckedChanged" runat="server" Text="Site to Depot" />--%>*@
+                    @*<asp:RadioButton ID="rdodepottosite" AutoPostBack="true" OnCheckedChanged="rdodepottosite_CheckedChanged" GroupName="abc" runat="server" Text="Site Inventory Request" />*@
+                    <input type="radio" id="rdodepottosite" name="abc" onchange="rdodepottosite_CheckedChanged()" />
+                    <label>Site Inventory Request</label>
+                </div>
+                <div id="ShowSitetoJob" runat="server" style="margin-top: 5px; display: none">
+                    @*<%--<asp:CheckBox id="rdositetojob" AutoPos tBack="true" OnCheckedChanged="rdositetojob_CheckedChanged" runat="server" Text="Job to Site" />--%>*@
+                    @*<div class="col-lg-6 col-md-6 col-sm-4 col-xs-7">*@
+                        @*<asp:RadioButton ID="rdositetojob" AutoPostBack="true" OnCheckedChanged="rdositetojob_CheckedChanged" GroupName="abc" runat="server" Text="Job Inventory Request" />*@
+                        <input type="radio" id="rdositetojob" name="abc" style="display:none" />
+                    @*</div>*@
+
+                </div>
+
+
+            </div>
+            <div class="row">
+                <div id="DtoS" class="col-lg-5 col-md-6 col-sm-4 col-xs-6" runat="server" style="display: block; margin-top: 4px !important">
+                    <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3" style="margin-top: 6px">
+                        @*<asp:Label ID="lblfrom" Text="Site" runat="server">
+                        </asp:Label>*@
+                        <label id="lblfrom">Site</label>
+                    </div>
+                    <div class="col-lg-7 col-md-8 col-sm-9 col-xs-9">
+                        @*<asp:DropDownList ID="ddlfrom" CssClass="form-control" runat="server" AutoPostBack="true" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important"
+                                          OnSelectedIndexChanged="ddlfrom_SelectedIndexChanged" AppendDataBoundItems="true">
+                        </asp:DropDownList>*@
+                        <select id="ddlSite" class="form-control" Style="margin-top: 4px;height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="GetRequestInventoryData()">
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-2 col-sm-3 col-xs-3">
+                        <button type="button" Class="w3-btn w3-teal w3-small" id="ExportToCsv" Style="color:white; height: 26px !important; width: 152%; margin-top: 4px !important;" onclick="ExportToReqCsvButton_Click()"><i class="fa fa-file-excel-o"></i>&nbsp;Export To CSV</button>
+                    </div>
+
+                </div>
+                <div id="showreqdel" runat="server" style="display: block; margin-top: 4px !important">
+                    <div class="col-lg-2  col-md-2 col-sm-3 col-xs-6">
+                        @*<asp:Button ID="btnnewrequest" Text="Add Request" Style="height: 26px !important; width: 105%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" CssClass="btn btn-primary" OnClick="btnnewrequest_Click1" runat="server"></asp:Button>*@
+                        <button type="button" Class="btn btn-primary" id="btnnewrequest" Style="height: 26px !important; width: 100%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="btnnewrequest_Click1()"><i class="fa fa-plus"></i>&nbsp;Add Request</button>
+                    </div>
+                    <div class="col-lg-2  col-md-2 col-sm-3 col-xs-6">
+                        @*<asp:Button ID="btnedit" Text="Edit Request" Style="height: 26px !important; width: 105%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" CssClass="btn btn-primary" OnClick="btnrequest_Click" runat="server"></asp:Button>*@
+                        <button type="button" Class="btn btn-primary" id="btnedit" Style="height: 26px !important; width: 100%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="btnrequest_Click()"><i class='expand fa fa-pencil-square-o '></i>&nbsp;Edit Request</button>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" >
+                        @*<asp:Button CssClass="btn  btn-primary" Style="height: 26px !important; padding-top: 3px; color: black; width: 105%; margin-top: 4px !important; background: #eee;" ID="Delivery" Visible="true" OnClick="Delivery_Click" runat="server" Text="Deliveries"></asp:Button>*@
+                        <button type="button" Class="btn btn-primary" id="Delivery" Style="height: 26px !important; width: 100%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="Delivery_Click()">
+                            <i class="fa fa-truck" aria-hidden="true"></i>&nbsp;Deliveries</button>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1" >                        
+                        <button type="button" Class="btn btn-primary" id="btnEmail" Style="height: 26px !important; width: 95%; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;" onclick="CheckboxEmailSend_Click()"><i class='fa fa-envelope'>Email</i></button>
+                    </div>
+                </div>
+
+                <div id="StoJ" runat="server" style="display: none; margin-top: 4px">
+
+                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-7">
+                        @*<asp:Label ID="txtFrom" Text="Site" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtsite" Enabled="false" CssClass="form-control" runat="server"></asp:TextBox>*@
+                        <label id="txtFrom">Site</label>
+                        <input type="text" id="txtsite" class="form-control" disabled="disabled" />
+                        @*<Telerik:RadComboBox Visible="false" ID="ddl1to" EmptyMessage="All" OnSelectedIndexChanged="ddl1to_SelectedIndexChanged1" AutoPostBack="true" Style="width: 148px" runat="server">
+                        </Telerik:RadComboBox>*@
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-7">
+                        @*<asp:Label ID="txtTo" Text="Job" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtjob" Enabled="false" CssClass="form-control" runat="server"></asp:TextBox>*@
+                        <label id="txtTo">Job</label>
+                        <input type="text" id="txtjob" class="form-control" disabled="disabled" />
+                        @*<Telerik:RadComboBox Visible="false" ID="ddl1from" EmptyMessage="All" OnSelectedIndexChanged="ddl1from_SelectedIndexChanged" runat="server" AutoPostBack="true" Style="width: 148px">
+
+                            <HeaderTemplate>
+                                <ul>
+                                    <li class="col-xs-4">Scaf Ref</li>
+                                    <li class="col-xs-8">Description</li>
+
+                                </ul>
+                            </HeaderTemplate>
+                            <ItemTemplate>
+                                <ul>
+                                    <li class="col-xs-4">
+                                        <%# DataBinder.Eval(Container.DataItem, "ScaffRef") %>
+                                    </li>
+                                    <li class="col-xs-8">
+                                        <%# DataBinder.Eval(Container.DataItem, "Description") %>
+                                    </li>
+
+                                </ul>
+                            </ItemTemplate>
+                        </Telerik:RadComboBox>*@
+                    </div>
+                </div>
+                <div id="showback" runat="server" style="display: none; margin-top: 21px" class="col-lg-5 col-md-5 col-sm-4 col-xs-5">
+
+                    @*<asp:Button CssClass="btn  btn-primary" Style="height: 28px !important; padding-top: 4px; color: black; background: #eee; float: right" ID="backtojob" Visible="true" OnClick="backtojob_Click" runat="server" Text="Back to Job"></asp:Button>*@
+                    <button type="button" Class="btn btn-primary" id="backtojob" Style="height: 28px !important; margin-top: 4px !important; padding-top: 3px; color: black; background: #eee;float: right" onclick="backtojob_Click()">Back to Job</button>
+                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="clearfix"></div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <!--<div id="RequestInventoryGrid" style="color: black; width: 100% !important; margin-top: 5px;">
+        <table id="tblRequestInventory" class="table table-striped" style="width: 100% !important;">
+            <thead style="background-color: #efefef; color: #716262;">
+                <tr>
+                    <th class="setWidth0" style="display:none;"></th>
+                    <th class="setWidth1 ClassbtnRequestEdit" id="UniqueEdit"></th>
+                    <th class="setWidth1" id="UniqueDelete"></th>
+                    <th class="setWidth2" id="UniqueImage"></th>
+                    <th class="setWidth3">#</th>
+                    <th class="setWidth4">Trans Id</th>
+                    <th class="setWidth5">Delivered Date</th>
+                    <th class="setWidth6">Delivery Docket</th>
+                    <th class="setWidth7">Material List</th>
+                    <th class="setWidth21">Request Docket</th>
+                    <th class="setWidth8">Supplier</th>
+                    <th class="setWidth9">Description</th>
+                    <th class="setWidth10" style="display:none">From ID</th>
+                    <th class="setWidth11">From</th>
+                    <th class="setWidth12">To</th>
+                    <th class="setWidth13" style="display:none">To ID</th>
+                    <th class="setWidth14">Request Status</th>
+                    <th class="setWidth15">Delivery Status</th>
+                    <th class="setWidth16">Requestor</th>
+                    <th class="setWidth17">Deliverer</th>
+                    <th class="setWidth18">Requested Date</th>-->
+                            @*<th class="setWidth18" id="RequiredDt" style="display:none">Required Date</th>*@
+                            <!--<th class="setWidth23">Required Date</th>
+    <th class="setWidth19">(Requested) No. of Items</th>
+    <th class="setWidth20">Total Weight (Tonnes)</th>
+    <th class="setWidth21">Last Email Sent On</th>-->
+                            @*Added on 06-06-2023 Client wanted this Columns in editing field so we added this into the list            also.*@
+                            <!--<th class="setWidth22">Comment</th>
+                    <th style="display:none;" class="setWidth22"></th>
+                </tr>
+            </thead>
+            <tbody id="tbodyTblRequestInventory" style="width:100% !important"></tbody>
+        </table>
+
+    </div>-->
+
+
+                            <div id="RequestInventoryGrid" style="color: black; width: 100%; margin-top: 5px;">
+                                <table id="tblRequestInventory" class="display nowrap" style="width:100%">
+                                    <tbody id="tbodyTblRequestInventory"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divdelete"  class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px;">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click" ID="btndeleteyes" CausesValidation="false" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" OnClick="btndeleteyes_Click()" ID="btndeleteyes" CausesValidation="false" ><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click" ID="btndeleteno" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" OnClick="btndeleteno_Click()" ID="btndeleteno"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divEmailConfirm" class="w3-modal">
+    <div class="w3-modal-content w3-round-medium w3-animate-zoom" style="margin-top: -86px; width: 750px; color: black;">
+        <header class="w3-container nln-gray-bg">
+            <h5 class="w3-text-white">Email Form</h5>
+        </header>
+        <div class="w3-container">
+            <fieldset>
+                <legend>
+                    <label><b>Email Client</b></label>
+                </legend>
+
+
+                <div class="row">
+                    <span ID="alertlabel2"></span>
+                   
+                </div>
+
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                            <label>To </label>
+                        </div>
+                        <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+
+                            <input type="text" id="txtClientEmail" Class="form-control" />
+                            <input type="text" id="txtcc" Style="display: none" Class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                            <label>Subject </label>
+                        </div>
+                        <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+
+                            <input type="text" id="txtsubject" Class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                            <label>Optional Email Text</label>
+                        </div>
+                        <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+                            <textarea rows="3" id="txtEmailAdditionalText" style="width:100%" class="w3-padding-small"></textarea>
+                        </div>
+                    </div>
+                    <div class="row" style="display:none;">
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                            <label>File </label>
+                        </div>
+                        <div class="col-lg-11 col-md-11 col-sm-11 col-xs-9">
+
+                            <input type="text" id="txttempfile" Class="form-control" disabled>
+                            <input type="text" id="txtFile" Style="display: none;" Class="form-control" disabled />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                            <textarea rows="18" id="txtEmailMSg" style="width:100%" class="w3-padding-small"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-4">
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+
+                            <button id="btnSend" Class="w3-btn w3-green w3-small w3-padding-small" style="Width:100%" OnClientClick="validate()" OnClick="btnSend_Click()"> <i class="fa fa-share"></i> Send</button>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2">
+
+                            <button id="btnCancel" Class="w3-btn w3-red w3-small w3-padding-small" Style="width: 100%" OnClick="btnCancel_Click()"><i class="fa fa-recycle"></i>&nbsp;Cancel</button>
+                        </div>
+                    </div>
+            </fieldset>
+            <br />
+        </div>
+    </div>
+</div>

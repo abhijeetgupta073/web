@@ -1,0 +1,371 @@
+<head>
+    <link href="/Content/Css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="/Content/Css/custom.css" rel="stylesheet" />
+    <!--<link rel="stylesheet" href="/Content/Css/base_jquery-ui.css">-->
+    <link href="/Content/fonts/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/Content/Css/w3.css" rel="stylesheet" />
+    <link href="/Content/Css/SecStyle.css" rel="stylesheet" />
+    <link href="/Content/Css/CustomAlert.css" rel="stylesheet" />
+    <link href="/Content/Css/jquery-ui.css" rel="stylesheet" />
+
+    <script src="/Content/js/jquery.min.js"></script>
+    <script src="/Content/js/jquery-ui.min.js"></script>
+    <script src="/Content/js/bootstrap.min.js"></script>
+    <script src="/Content/js/bootbox.min.js"></script>
+    <script src="Content/js/CustomAlert.js"></script>
+    <script src="/Content/js/jquery.dataTables.min.js"></script>
+    <script src="Content/js/OfflineEncryptDecript.js"></script>
+    <script src="Content/js/crypto-js.min.js"></script>
+    <script src="/Content/js/OfflineSiteRequest.js"></script>
+    <link href="/Content/Css/CustomAlert.css" rel="stylesheet" />
+
+
+</head>
+<title>SCAFPAC</title>
+<!--<script>
+    $(document).ready(function () {
+        debugger;
+        var ReqDate = $("#txtrequesteddate").val();
+        if (ReqDate == null || ReqDate == "") {
+            $('#txtrequesteddate').val(new Date().DateMonthFormat());
+            $("#txtrequesteddate").datepicker({
+                dateFormat: 'dd-M-yy',
+                // maxDate: 0,
+                closeText: 'Close',
+
+            });
+        }
+
+        dropdownSupplier();
+
+        var UserRole = getParameterByName('UserRole');
+        var DecUserRole = parseInt(Decrypt(UserRole));
+        if (DecUserRole == 75) {
+            $('#AnchorYardInventory').css('display', 'none');
+            $('#AnchorDepotInventory').css('display', 'none');
+            $('#AnchorSiteInventory').css('display', 'none');
+        }
+
+        var from = getParameterByName('from');
+        var To = getParameterByName('To');
+
+        var DecriptData = [from, To];
+        var DecrData = Decrypt(DecriptData);
+        var from = DecrData[0];
+        var To = DecrData[1];
+
+        $('#hdnfrom').val(from);
+        $('#hdnTo').val(To);
+
+
+    });
+
+    function ReqDateOnclick() {
+        $("#txtrequesteddate").datepicker({
+            dateFormat: 'dd-M-yy',
+            // maxDate: 0,
+            closeText: 'Close',
+        });
+    }
+
+    function dropdownSupplier() {
+        var id = getParameterByName('id');
+        $.ajax({
+            type: "POST",
+            url: "/OfflineSiteRequest/dropdownSupplier",
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            async: true,
+            success: function (response) {
+                var GetData = response;
+                if (GetData.length > 0) {
+                    $("#ddlSupplier").append('<option value=""></option>');
+                    for (var i = 0; i < GetData.length; i++) {
+                        $("#ddlSupplier").append("<option value='" + GetData[i].Supplier + "'>" + GetData[i].Supplier + "</option>");
+
+                    }
+
+                }
+                var Supplier = '@Model.Supplier';
+                Supplier = Supplier.replace('&#39;', "'")
+                if (Supplier != "") {
+                    // $('#ddlSupplier').val('@Model.Supplier');
+                    $("#ddlSupplier option:contains(" + Supplier + ")").attr('selected', 'selected');
+                }
+            }
+        })
+    }
+</script>-->
+<style>
+    .dataTables_length {
+        display: none;
+    }
+
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+</style>
+
+
+<div id="customLoader" style="display:none;position: fixed; z-index: 999; height: 100%; width: 100%; top: 0; left: 0; background-color: black; filter: alpha(opacity=60); opacity: 0.3; -moz-opacity: 0.8;">
+    <div style="z-index: 99999; margin: 16% 48%; padding: 10px; width: 150px; border-radius: 10px; filter: alpha(opacity=100); opacity: 1; -moz-opacity: 1;">
+        <img src="/Images/loading.gif" style="height: 128px; width: 128px;" />
+        <p class="w3-margin-left"><b>Please Wait.......</b></p>
+    </div>
+</div>
+<div style="display:none;top: 0px;" id="CustomAlert">
+    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+    <span ID="alertMsg"></span>
+</div>
+
+
+<div class="tab-content">
+    <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+        <div class="row w3-margin-top">
+            <div class="row">
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                    <label id="lblto" class="labeltext">Site:</label>
+                    <input id="txtto" disabled="disabled" class="form-control labeltext" style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+
+                <div class="col-lg-4 col-md-3 col-sm-8 col-xs-8">
+                    <label id="lblfrom" class="labeltext">Job:</label>
+                    <input id="txtfrom" disabled="disabled" class="form-control labeltext" style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4">
+                    <label id="lbl" class="labeltext">Requested By:</label>
+                    <input id="txtrequestedby" disabled="disabled" class="form-control labeltext" style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+
+                <div class="col-lg-1 col-md-1 col-sm-2 col-xs-3">
+                    <label id="lblrequestdate" class="labeltext">Date:</label>
+                    <input id="txtrequesteddate" onclick="ReqDateOnclick()" class="form-control labeltext" style="color: black; width: 100px; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+
+                <div class="col-lg-1 col-md-2 col-sm-1 col-xs-1"></div>
+                <div class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+                    <label id="lblTransId" class="labeltext">Transaction ID:</label>
+                    <input id="txtTransId" disabled="disabled" class="form-control labeltext" style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                </div>
+            </div>
+
+            <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4">
+                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                    <h4 style="margin-top: 6px; font-size: 15px" id="H5"><i class="fa fa-list"></i>&nbsp;Request Inventory Details</h4>
+                    <ul class="nav navbar-right panel_toolbox" style="min-width: 17px !important; margin-top: -32px;">
+                        <li>
+                            <a id="Back" style="cursor: pointer;" class="w3-btn w3-green buttonBlue btn" onclick="Back_Click();"><i class="fa fa-backward"></i>&nbsp;Save & Go Back</a>
+                        </li>
+                        <li>
+                            <a id="btnbackSite" style="cursor: pointer; background: none; color:black" class="w3-btn btn" onclick="Back_to_List();"><i class="fa fa-backward"></i>&nbsp;Back</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            <label id="lbltab" style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE ICON to save data</label>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            <label id="lblnote" style="font-size: 11px; color: #151414;"><strong style="color:red">*</strong> Yellow indicates insufficient Quantity</label>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12">
+                            <label id="lblJobMsg" style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press <strong style="font-weight:bold">Save & Go Back </strong>to Confirm Request-Delivery</label>
+                        </div>
+                    </div>
+
+                    <div id="ddlmat" class="col-lg-2 col-md-2 col-sm-3 col-xs-12">
+                        <label id="lblmaterial" class="labeltext">Filter By MaterialType</label>
+                        <select id="ddlMaterialType" class="form-control" style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="MaterialChange()"></select>
+                    </div>
+
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12" style="margin-top: 2px">
+                        <label id="lbldesc" class="labeltext" style="display:block">Description</label>
+                        <label id="lblTralblJobDescnsId" class="labeltext" style="display:none">Delivery Description</label>
+                        <input id="txtdesc" class="form-control labeltext" style="color: black; height: 25px !important; font-size: 12px!important; border: 1px solid lightgray;" />
+                    </div>
+                    <!--<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="margin-top: 2px">
+                        <label id="lblVersion" class="labeltext"></label>
+
+                    </div>-->
+
+                    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12"></div>
+
+
+                    <div class="col-lg-1 col-md-1 col-sm-4 col-xs-3" style="float:right;">
+                        <button type="button" Class="w3-btn  w3-green buttonBlue" id="btnrefresh" Style="height: 30px !important;display: block; width: 100%; font-size:14px; padding-top: 3px;margin-top:16px;padding-left:10px; color: black; background: #eee;" onclick="btnrefresh_Click()">Refresh</button>
+                    </div>
+
+
+                    <div class="col-lg-1 col-md-1 col-sm-4 col-xs-3" style="float:right;">
+                        <button type="button" Class="w3-btn  w3-green buttonBlue" id="btnClearAll" Style="height: 30px !important;display: block; width: 100%; font-size:14px; padding-top: 3px;margin-top:16px;padding-left:10px; color: black; background: #eee;" onclick="btnClearAll_Click()">Clear All</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6  col-xs-12 ajectrow"></div>
+
+                </div>
+
+
+                <input type="hidden" id="hdnfield" />
+                <input type="hidden" id="jobvalue" />
+                <input type="hidden" id="getgridcount" />
+                <input type="hidden" id="hdnScaffref" />
+
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                    <div class="clearfix"></div>
+
+                    <div id="loaddata"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="myModal" class="w3-modal" style="display: none !important">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 90%; width: 60%;">
+        <div class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; text-align: right;">
+
+            <button Class="btn btn-primary" Style="border: 1px solid #82CAFA; margin-right: 4px;" Width="100px" id="btnSelectJob" OnClick="btnSelectJob_Click()">Select</button>
+            <button ID="btnclose" Class="fa fa-close" Style="color: black" OnClick="btnclose_Click()"></button>
+
+        </div>
+        <div class="w3-container">
+
+            <input type="hidden" id="hdfieldId" />
+            <input type="hidden" id="hdnlblOptimizeStatus" />
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div id="SiteJobGrid" style="color: black; width: 100%;margin-top:5px;">
+                        <table id="tblSiteJobGrid" class="table table-striped " style="display:none">
+                            <thead style="background-color: #efefef; color: #716262;">
+                                <tr>
+                                    <td style="display:none"></td>
+                                    <td>Select</td>
+                                    <td>Location</td>
+                                    <td>Building No</td>
+                                    <td>Asset No</td>
+                                    <td>Asset Description</td>
+                                    <td>Scaf Ref</td>
+                                    <td>Mat. Finalised</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodySiteJobGrid"></tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divConfirmReq" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 146px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey" id="P1">
+                <label>Are You Sure You Want Convert Pipeline to Inventory </label>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-2 col-md-2 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnConfirmReqYes" OnClick="btnConfirmAndBack_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-4">
+                <button Class="btn btn-dark" id="btncancel" OnClick="btncancel_Click()"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="divClearAllData" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 146px; width: 400px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4">Alert!</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey" id="P1">
+                <label>All data will be delete on the pipeline in this job, 'Are you sure you want to delete the Records ?'.</label>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-2 col-md-2 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnClearAllData" OnClick="btnClearAllPipeLineData_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-4">
+                <button Class="btn btn-dark" id="btncancel" OnClick="btnClearcancel_Click()"><i class="glyphicon glyphicon-remove-circle"></i> Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divCreateSupplier" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 160px; width: 300px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h9"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Supplier<a id="closesupplier" class="close" style="float: right; color: white" onclick="btnSupplierClose();">X</a></h4>
+        </header>
+        <div class="row">
+            <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                <label id="LabelAdd1" runat="server" style="font-size: 15px">Add New Supplier<span style="color: red">&nbsp*</span></label>
+                <input type="text" id="txtSupplier" Class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnSupplierSave" style="Width:100%" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSupplierSave_Click()">Save</button>
+            </div>
+            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                <button id="btnSupplierClose" onclick="btnSupplierClose();" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade text-left w-100" id="ItemCodeModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document" style="width: 763px" ;>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">List of items to be requested by Site to Depot</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered" id="tbDetails" style="width: 110%;">
+                    <thead style="color: black; text-transform: uppercase; font-size: smaller;">
+                        <tr>
+                            <th style="text-align: center;">Material Type</th>
+                            <th style="text-align: center;">Item Code</th>
+                            <th style="text-align: center;">Item Desc</th>
+                            <th style="text-align: center;">Available Quantity</th>
+                            <th style="text-align: center;">Required Quantity </th>
+                            <th style="text-align: center;">Request Quantity </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_tbDetails" style="font-size: 14px; font-weight: normal !important; color: #0a0a0a;">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">
+                    <span class="d-none d-sm-block">Close</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,2087 @@
+﻿
+@{
+    ViewBag.Title = "UserInfo";
+}
+
+@*<script src="/Assets/js/html2canvas.js"></script>
+    <script src="/Assets/js/jquery.min.js"></script>
+    <script src="/Assets/js/bootstrap.min.js"></script>
+    <link href="/Assets/fonts/css/font-awesome.min.css" rel="stylesheet" />*@
+
+@*<script src="https://rawgit.com/RobinHerbots/jquery.inputmask/3.x/dist/jquery.inputmask.bundle.js"></script>*@
+<script src="/Content/js/jquery.inputmask.bundle.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        //if (Request.QueryString["RID"] == null) {
+        //    divbtnbackRegister.Visible = false;
+        //    divbtnbackInspection.Visible = false;
+        //}
+       // var t = getParemeterByName('RID');
+        var d = getParameterByName('RID');
+
+        if (getParameterByName('RID') != null) {
+            if (getParameterByName('from') == "Job") // check Come From Job From
+            {
+               // divbtnbackInspection.Visible = false;
+                $('#divbtnbackRegister').css('display', 'block')
+                $('#btnbackRegister').css('display', 'block')
+            }
+            else {
+                $('#divbtnbackInspection').css('display', 'block')
+               // divbtnbackRegister.Visible = false;
+               // btnbackRegister.Visible = false;
+            }
+           // btnCAncel.Visible = false;
+            $('#btnCAncel').css('display','none');
+        }
+
+        //$('#txtPassworduser').val('scaffold123');
+        $("#radUpdogImg").change(function () {
+            var urlImage = readURL(this);
+            $('#hdnUploadImage').val(urlImage);
+        });
+
+        $("#btnpassword").text("Change Password");
+        $("#btncancel1").text("Back to Old Password");
+
+        ddlUserRoleData();
+        ddlCountry();
+        /*ddlState();*/
+        var Country = '@ViewBag.Country';
+          $('#ddlCountry').val(Country);
+           ddlState(Country);
+        ddlCategory();
+        ddlOwner();
+        ddlSubOwner();
+        ddlSite();
+        ddlLocation();
+      
+        $("#ddlCountry option:contains(" +Country + ")").attr('selected', 'selected');
+        if (Country == "Australia") {
+            //txtContact.Visible = true;
+            //txtUK.Visible = false;
+            //txtZip.Visible = true;
+            //txtpostcodeuk.Text = "";
+            //txtpostcodeuk.Visible = false;
+            //lblstate.Visible = true;
+
+            $('#txtContact').css('display', 'block');
+            $('#txtUK').css('display', 'none');
+            $('#txtZip').css('display', 'block');
+            $('#txtpostcodeuk').val('');
+            $('#txtpostcodeuk').css('display', 'none');
+            $('#lblstate').css('display', 'block');
+
+        }
+        else if (Country == "United Kingdom") {
+            //txtUK.Visible = true;
+            //txtZip.Visible = false;
+            //txtContact.Visible = false;
+            //txtpostcodeuk.Visible = true;
+            //txtZip.Text = "";
+            //lblcounty.Visible = true;
+
+            $('#txtContact').css('display', 'none');
+            $('#txtUK').css('display', 'block');
+            $('#txtZip').css('display', 'none');
+            $('#txtZip').val('');
+            $('#txtpostcodeuk').css('display', 'block');
+            $('#lblcounty').css('display', 'block');
+        }
+
+    });
+
+    function readURL(input) {
+        var radUpdogImg = $('#radUpdogImg').val();
+        var fileUpload = $('#radUpdogImg').get(0);
+        var file = fileUpload.files;
+        var FileName = '';
+        if (file.length != 0) {
+
+            FileName = file[0].name;
+            var extension = FileName.substring(FileName.lastIndexOf('.') + 1);
+
+            if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "ico" || extension == "gif" || extension == "bmp" || extension == "JPG" || extension == "JPEG" || extension == "PNG" || extension == "ICO" || extension == "GIF" || extension == "BMP") {
+
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        $('#imga').attr('src', e.target.result);
+                    }
+
+                    reader.readAsDataURL(input.files[0]); // convert to base64 string
+                    $('#divdeleteimag').css('display', 'block');
+                }
+            }
+            else {
+                var response = { Result: "Failed", Message: "<strong>Failed to upload Image! </strong>Valid File Extensions Are jpg, jpeg, png, gif, bmp" };
+                CustomAlert(response)
+                $("#imga").attr("src", "/images/noimg.jpg");
+            }
+
+        }
+        return FileName;
+    }
+    function btnOkPopClose() {
+        $("#divUserPopup").css("display", "none");
+    }
+    function savepassword() {
+        var getpassword = $('#txtPassworduser').val();
+        $('#hdnpassword').val(getpassword);
+    }
+    function changepassword() {
+        $("#txtPassworduser").attr("readonly", false);
+        var getpassword = $('#txtPassworduser').val();
+        $('#hdnpassword').val(getpassword);
+        $("#txtPassworduser").val('');
+
+        $("#btnpassword").css("display", "none");
+        $("#btncancel1").css("display", "block").css("display", "inline-table");
+    }
+    function cancelpassword() {
+        $("#txtPassworduser").attr("readonly", true);
+        $("#btncancel1").css("display", "none")
+        $("#btnpassword").css("display", "block");
+        var hdnpassword = $('#hdnpassword').val();
+        $('#txtPassworduser').val(hdnpassword);
+    }
+
+    function hideAlert() {
+        //alert();
+        setTimeout(function () {
+            $(".fadeOut").fadeOut(2000);
+        }, 3000);
+    }
+    function btndeleteImage() {
+        var green = $('.ruUploadSuccess').text();
+        if (green == "") {
+            var a = $('.ruUploadProgress').text();
+            if (a != "") {
+                $('.ruCancel').click();
+                $('.ruButton').click();
+            }
+            else {
+                var captimg = $('#tempimg').val();
+                if (captimg != "") {
+                    $("#btncaptureRemove").click();
+                }
+                else {
+                    $('#divdelete').css('display', 'block');
+                }
+            }
+        }
+        else {
+            $('.ruButton').click();
+        }
+    }
+    //function OnClientFileSelected(sender, args) {
+    //    var a = $('.ruUploadProgress').text();
+    //    if (a != "") {
+    //        $('#divdeleteimag').css('display', 'block');
+    //    }
+    //    document.getElementById('<%=imga.ClientID%>').src = '';
+    //    if ($telerik.isIE9 || $telerik.isIE8 || $telerik.isIE7) {
+    //        var input = args.get_fileInputField();
+    //        if (sender.isExtensionValid(input.value)) {
+    //            var img = document.getElementById("imga");
+    //            if (img) {
+    //                img.style.visibility = "";
+    //                img.filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = input.value;
+    //            }
+    //        }
+    //    }
+    //    else {
+    //        var file = args.get_fileInputField().files.item(args.get_rowIndex()),
+    //            index = 0;
+    //        var filename = file.name;
+    //        var dotscount = filename.split('.').length - 1;
+    //        $("#hdfield").val(dotscount);
+    //        if (dotscount <= 1) {
+    //            var fileexe = filename.split('.');
+    //            var extension = fileexe[1];
+    //            if (extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "ico" || extension == "gif" || extension == "bmp" || extension == "JPG" || extension == "JPEG" || extension == "PNG" || extension == "ICO" || extension == "GIF" || extension == "BMP") {
+    //                showThumbnail(file);
+    //                // alert("Image verified");
+    //            }
+    //            else {
+
+    //                //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+    //                //$('#ContentPlaceHolder1_art1').css("display", "block");
+    //                //$('#ContentPlaceHolder1_alertlabel').html('<strong>Failed to upload Image! </strong>Valid File Extensions Are jpg, jpeg, png, gif, bmp');
+    //                var response = { Result: 'Failed', Message: 'Failed to upload Image! Valid File Extensions Are jpg, jpeg, png, gif, bmp' };
+    //                CustomAlert(response);
+    //                //$("#imga").attr("src", imageSrc);
+    //                $("#imga").attr("src", "images/noimg.jpg");
+    //                hideAlert();
+    //            }
+    //            var file = args.get_fileInputField().files.item(args.get_rowIndex()),
+    //                index = 0;
+    //            while (!file) {
+    //                file = args.get_fileInputField().files.item(index);
+    //                index++;
+    //            }
+    //            showThumbnail(file);
+    //        } else {
+    //            //$('#ContentPlaceHolder1_art1').removeClass('w3-section w3-card-12 j-alertBox-Success').addClass('w3-section fadeOut w3-card-12 j-alertBox-Failed');
+    //            //$('#ContentPlaceHolder1_art1').css("display", "block");
+    //            //$('#ContentPlaceHolder1_alertlabel').html('<strong>Failed to upload Image! </strong>File name should not have a dot (.)');
+    //            var response = { Result: 'Failed', Message: 'Failed to upload Image! File name should not have a dot (.)' };
+    //            CustomAlert(response);
+    //            //$("#imga").attr("src", imageSrc);
+    //            $("#imga").attr("src", "images/noimg.jpg");
+    //            hideAlert();
+    //        }
+
+    //    }
+    //}
+
+    //let fileInput = document.getElementById('fileinput');
+    //fileInput.addEventListener('change', function (ev) {
+    //});
+
+
+
+
+    $(document).ready(function () {
+
+
+        var phones = [{ "mask": "(###) ###-####" }, { "mask": "(###) ###-####" }];
+        $("#txtContact").inputmask({
+            mask: phones,
+            greedy: false,
+            definitions: { '#': { validator: "[0-9]", cardinality: 1 } }
+        });
+        $('#Birthdate').datepicker({
+            dateFormat: 'dd-M-yy',
+            closeText: 'Close',
+        });
+
+        var UserID = getParameterByName('UserID');
+        var decryptData = Decrypt([UserID]);
+        UserID = decryptData[0];
+       // if (Convert.ToInt32(databaseCon.Decrypt(Request.QueryString["UserID"])) > 0)
+        if (UserID > 0) {
+            ShowClientDetails();
+        }
+        else {
+            $('#lblClientuser').text('New User');
+        //lblClientuser.Text = "New User";
+            $('#txtPassworduser').val('scaffold123');
+            $('#userDetailsMainDiv').css('display', 'block');
+        }
+
+        $("#ddluserrole").change(function () {
+            var userRole = $("option:selected", this).text();
+            if (userRole == 'Inspection Audit View' || userRole == 'Client View Single Site') {
+                $('#ddlOwnerName').prop("disabled", false);
+                $('#ddlSubOwner').prop("disabled", false);
+            } else {
+                $('#ddlOwnerName').prop("disabled", true);
+                $('#ddlSubOwner').prop("disabled", true);
+            }
+            const Site = document.getElementById("ddlSite")
+            const Location = document.getElementById("ddlLocation")
+            if (userRole == 'Client View Single Site Single Location') {
+                $('#divSelectSiteAndLocation').css("display", "block");
+                ddlSite();
+                ddlLocation();
+                Site.setAttribute('required', 'required')
+                Location.setAttribute('required', 'required')
+
+
+            } else {
+                $('#divSelectSiteAndLocation').css("display", "none");
+                Site.removeAttribute('required', 'required')
+                Location.removeAttribute('required', 'required')
+            }
+
+        });
+
+
+        var GetisSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 && navigator.userAgent && !navigator.userAgent.match('CriOS');
+        if (GetisSafari == false) {
+            $(".nonsafari").css("display", "block");
+            $(".safari").css("display", "none");
+            var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                $(".mobileApp").css("display", "block");
+                $(".desktopApp").css("display", "none");
+            } else {
+                $(".mobileApp").css("display", "none");
+                $(".desktopApp").css("display", "block");
+            }
+        } else {
+            $(".nonsafari").css("display", "none");
+            $(".safari").css("display", "block");
+        }
+
+        $(document).on("change", ".mob_file_image", function (evt) {
+            var base64mobImagedata;
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64mobImagedata = reader.result;
+                $("#Image1").attr('src', base64mobImagedata);
+                //$("#<%=imgload.ClientID%>").val(base64mobImagedata);
+            }
+        });
+
+        $(document).on("change", "#mobApp_file", function (evt) {
+            var base64mobdata;
+            var reader = new FileReader();
+            reader.readAsDataURL(this.files[0]);
+            reader.onloadend = function () {
+                base64mobdata = reader.result;
+                console.log(base64mobdata);
+                $("#imga").attr('src', base64mobdata);
+
+                //$("#<%=imgload.ClientID%>").val(base64mobdata);
+            }
+        });
+
+        $(".dropdown.user").click(function () {
+            $(this).toggleClass("open");
+        });
+        $("#btncaptureRemove").on("click", function () {
+            $('#radUpdogImg').css('display', 'block');
+            $('#getCamera').css('display', 'block');
+            $('#divdeleteimag').css('display', 'none');
+            $('#canvas').css('display', 'none');
+            $('#imga').css('display', 'block');
+            $('#btnchngeimg').css('display', 'block');
+            $('#btnchngg').css('display', 'block');
+
+        });
+
+        $("#getCamera").on("click", function () {
+            // alert();
+
+            $("#cancelsnap").on("click", function () {
+                $("#btnOpenModel").css("display", "none");
+                cameraStream.stop();
+            });
+            $("#btnOpenModel").css("display", "block");
+            $(".hdnCamerabefore").css("display", "none");
+
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var video = document.querySelector('video#video');
+            var cameraStream = null;
+            var mediaConfig = { video: true };
+            var errBack = function (e) {
+                console.log('An error has occurred!', e)
+            };
+            // Put video listeners into place
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(mediaConfig).then(function (stream) {
+                    video.srcObject = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                });
+            }
+            /* Legacy code below! */
+            else if (navigator.getUserMedia) { // Standard
+                navigator.getUserMedia(mediaConfig, function (stream) {
+                    video.src = stream;
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                }, errBack);
+            }
+            else if (navigator.mozGetUserMedia) {// Mozilla-prefixed
+                navigator.mozGetUserMedia(mediaConfig, function (stream) {
+                    video.src = window.URL.createObjectURL(stream);
+                    video.play();
+                    cameraStream = stream.getTracks()[0];
+                }, errBack);
+            }
+            // Trigger photo take
+            document.getElementById('snap').addEventListener('click', function () {
+                $("#btnOpenModel").css("display", "none");
+                $(".hdnCamerabefore").css("display", "block");
+                $("#imga").css("display", "none");
+                context.drawImage(video, 0, 0, 640, 480);
+                var image = document.getElementById("canvas").toDataURL("image/png");
+                $("#tempimg").val(image);
+                $('#canvas').css('display', 'block');
+                $('#radUpdogImg').css('display', 'none');
+                $('#getCamera').css('display', 'none');
+                $('#divdeleteimag').css('display', 'block');
+                $('#btnchngeimg').css('display', 'none');
+                $('#btnchngg').css('display', 'none');
+                cameraStream.stop();
+            });
+
+        });
+    });
+
+</script>
+<script>
+    $(document).ready(function () {
+        $("#ulalwaysactive").css("display", "none");
+        var screensize = $(window).width();
+        if (screensize < 1150 && screensize > 650) {
+            ($BODY.hasClass('nav-md'))
+            $('#CreateNewDropDown').css("margin-top", "2px");
+            //$BODY.removeClass('nav-md').addClass('nav-sm');
+            $LEFT_COL.removeClass('scroll-view');
+            //$('#BlackSection').css('display', 'block');
+            $('#imgLogo').parent().css('display', 'none');
+            $('#imgLogo1').css('display', 'block').css("height", "38px");
+            $('#leftbarsection').css('margin-top', '0px');
+
+        }
+        else {
+            if (screensize < (650)) {
+                $BODY.removeClass('nav-sm')
+                $('#imgLogo').parent().css('display', 'none');
+                $('#imgLogo1').css('display', 'block').css("height", "38px");
+            }
+            else {
+                $('#CreateNewDropDown').css("margin-top", "6px");
+                //$BODY.removeClass('nav-sm').addClass('nav-md');
+                //$('#BlackSection').css('display', 'none');
+                $('#imgLogo').parent().css('display', 'block');
+                $('#imgLogo1').css('display', 'none');
+                $('#leftbarsection').css('margin-top', '40px');
+            }
+
+        }
+    });
+
+    var auto_hide = setInterval(
+        function () {
+            //$(' #<%=art1.ClientID%>').fadeOut(1500);
+        }, 6000);
+</script>
+
+<script>
+    function ImageRotate(angle) {
+        if (angle == 90 || angle == -90 || angle == 270 || angle == -270) {
+            $('#imga').addClass("rotatedimg");
+        }
+        var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+        if (isFirefox == true) {
+            $(".changeimg").css('image-orientation', +angle + 'deg');
+        } else {
+            $(".changeimg").css({ 'transform': 'rotate(' + angle + 'deg)' });
+        }
+    }
+    function newclickforward() {
+        var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+        var imgsrc = $('#imga').attr('src');
+
+        var angle = 90;
+        var newangle = $("#imgangle").val();
+
+        if (newangle == 0) {
+            newangle = 90;
+        } else {
+            newangle = parseInt(newangle) + angle;
+        }
+        if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+            $('#imga').addClass("rotatedimg");
+        } else {
+            $('#imga').removeClass("rotatedimg");
+        }
+
+        if (isFirefox == true) {
+            $(".changeimg").css('image-orientation', +newangle + 'deg');
+        } else {
+            $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+        }
+
+        if (newangle > -360 && newangle < 360) {
+            $("#imgangle").val(newangle);
+        } else {
+            newangle = 0;
+            $("#imgangle").val(newangle);
+        }
+    }
+    function newclickbackward() {
+        var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+        var angle = -90;
+        var newangle = $("#imgangle").val();
+
+        if (newangle == 0) {
+            newangle = -90;
+        } else {
+            newangle = parseInt(newangle) + angle;
+        }
+
+        if (newangle == 90 || newangle == -90 || newangle == 270 || newangle == -270) {
+            //alert("hello");
+            // $(".rotatedimgdiv").css("margin", "50px 0 0 0");
+            //$(".rotatedimg").css("margin", "0 0 0 25px").css("max-width", "260px").css("width", "100%");
+            $('#imga').addClass("rotatedimg");
+            // $("#removemargin").css("margin-top", "0");
+        } else {
+            // $(".rotatedimgdiv").css("margin", "0 0 0 0");
+            $('#imga').removeClass("rotatedimg");
+            //$(".rotatedimg").css("margin", "0 0 0 0").css("max-width", "auto").css("width", "100%");
+            // $("#removemargin").css("margin-top", "-32px");
+        }
+
+        if (isFirefox == true) {
+            $(".changeimg").css('image-orientation', +newangle + 'deg');
+        } else {
+            $(".changeimg").css({ 'transform': 'rotate(' + newangle + 'deg)' });
+        }
+
+        if (newangle > -360 && newangle < 360) {
+            $("#imgangle").val(newangle);
+        } else {
+            newangle = 0;
+            $("#imgangle").val(newangle);
+
+        }
+    }
+
+
+
+    function AlertMsg(Errormsg) {
+        document.getElementById('art1').style.display = 'block';
+        document.getElementById('art1').classList.add("j-close");
+        document.getElementById('art1').classList.add("w3-section");
+        document.getElementById('art1').classList.add("w3-card-12");
+        document.getElementById('art1').classList.add("j-close");
+        document.getElementById('art1').classList.add("fade");
+        document.getElementById('art1').classList.add("in");
+        document.getElementById('art1').classList.add("j-alertBox-Failed");
+        document.getElementById('alertlabel').innerText = Errormsg;
+        setTimeout(function () {
+            document.getElementById('art1').style.display = 'none';
+        }, 2000);
+    }
+
+</script>
+<script>
+    function character(e) {
+        isIE = document.all ? 1 : 0
+        keyEntry = !isIE ? e.which : event.keyCode;
+        if (((keyEntry >= '65') && (keyEntry <= '90')) || ((keyEntry >= '97') && (keyEntry <= '122')) || (keyEntry == '46') || (keyEntry == '32') || keyEntry == '45')
+            return true;
+        else {
+            return false;
+        }
+    }
+</script>
+<script>
+    //function Emailvalidate(s) {
+    //    var value = validate(s);
+    //    var emailidBlanck = $('#<%=txtEmail.ClientID%>').val();
+    //    if (value == true) {
+    //        var emailid = $('#<%=txtEmail.ClientID%>').selector;
+    //        if (emailid == "#txtEmail") {
+    //            $('#<%=txtEmail.ClientID%>').removeClass('w3-pale-red w3-border-red  rdf-inupt-glow');
+    //        }
+    //    }
+    //    if (emailidBlanck == "") {
+    //        $('#<%=txtEmail.ClientID%>').removeClass('w3-pale-red w3-border-red  rdf-inupt-glow');
+    //    }
+    //    var EmailAddress = $('#<%=txtEmail.ClientID%>').val();
+
+
+    //    return value
+    //}
+    (function () {
+        window.validationFailed = function (radAsyncUpload, args) {
+            var $row = $(args.get_row());
+            var erorMessage = getErrorMessage(radAsyncUpload, args);
+            var span = createError(erorMessage);
+            $row.addClass("ruError");
+            $row.append(span);
+        }
+
+        function getErrorMessage(sender, args) {
+            var fileExtention = args.get_fileName().substring(args.get_fileName().lastIndexOf('.') + 1, args.get_fileName().length);
+            if (args.get_fileName().lastIndexOf('.') != -1) {//this checks if the extension is correct
+                if (sender.get_allowedFileExtensions().indexOf(fileExtention) == -1) {
+                    return ("This file type is not supported.");
+                }
+                else {
+                    return ("This file exceeds the maximum allowed size of 1 MB.");
+                }
+            }
+            else {
+                return ("not correct extension.");
+            }
+        }
+        function createError(erorMessage) {
+            var input = ' <br><span class="ruErrorMessage">' + erorMessage + ' </span>';
+            return input;
+        }
+    })();
+    function OnClientFileRemoved(sender, args) {
+        var a = $('.ruUploadProgress').text();
+        if (a == "") {
+            var img = document.getElementById("imga");
+            var source = $('#getimage').val();
+            if (source != "") {
+                img.src = "images/UserLicencePic/" + source + "";
+                //$('#ContentPlaceHolder1_getimage').val("");
+                $('#divdeleteimag').css('display', 'block');
+            }
+            else {
+                img.src = "images/noimg.jpg";
+                $('#divdeleteimag').css('display', 'none');
+            }
+        }
+
+        $('#getCamera').css('display', 'block');
+    }
+    function showThumbnail(file) {
+        $('#getCamera').css('display', 'none');
+
+        var image = document.getElementById("imga"),
+            thumbnail = document.getElementById("imga");
+
+        image.file = file;
+        //thumbnail.appendChild(image);
+
+        var reader = new FileReader()
+        reader.onload = (function (aImg) {
+            return function (e) {
+                aImg.src = e.target.result;
+            };
+        }(image))
+        var ret = reader.readAsDataURL(file),
+            canvas = document.createElement("canvas");
+
+        ctx = canvas.getContext("2d");
+        image.onload = function () {
+            ctx.drawImage(image, 100, 100);
+        }
+        var MAX_WIDTH = 200,
+            MAX_HEIGHT = 100,
+            width = image.width,
+            height = image.height;
+        if (width > height) {
+            if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+            }
+        } else {
+            if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+            }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(image, 0, 0, width, height);
+        var dataurl = canvas.toDataURL("image/png");
+
+    }
+
+    //var ddl = document.getElementById('ContentPlaceHolder1_ddlCountry').value();
+    //if (ddl == "Australia") {
+
+    //}
+    function ShowHidePassword(ID) {
+        if (document.getElementById($("#" + ID).prev().attr('id')).type == "password") {
+            $("#" + ID).attr("data-hint", "Hide");
+            $("#" + ID).find("i").removeClass("icon-eye").addClass("icon-eye-slash");
+            document.getElementById($("#" + ID).prev().attr('id')).type = "text";
+        }
+
+        else {
+            $("#" + ID).attr("data-hint", "Show");
+            $("#" + ID).find("i").removeClass("icon-eye-slash").addClass("icon-eye");
+            document.getElementById($("#" + ID).prev().attr('id')).type = "password";
+        }
+    }
+    $(function () {
+
+        var win1920 = function () {
+            var wisize = $(window).width();
+            if (wisize >= "1920") {
+                $('.form-control').removeClass('input-sm').addClass('input-lg');
+                $('.input-group-addon').removeClass('input-sm').addClass('input-lg');
+                $('.continue').css('font-size', '13px');
+
+            }
+            else {
+                $('.form-control').removeClass('input-lg').addClass('input-sm');
+                $('.input-group-addon').removeClass('input-lg').addClass('input-sm');
+                $('.continue').removeAttr('style');
+
+            }
+        }
+        $(window).resize(win1920);
+        win1920();
+        $eyes = $('.eyes');
+        $sign_up = $('.sign-up')
+        $forgetPassword = $('.forget-password');
+        //$txtpass = $('#<%=txtPassworduser.ClientID%>');
+        $txtpass = $('123');
+        //    <% --$btnLogin = $('#<%=btnLogin.ClientID%>');
+        //$txtUserName = $('#<%=txtUserName.ClientID%>');
+        //$textforgetEmail = $('#<%=textforgetEmail.ClientID%>'); --%>
+        $txtpass.keypress(function (e) {
+            var key = e.which;
+            if (key == 13) {
+                $btnLogin.trigger('click');
+                //return true;
+            }
+        });
+        $eyes.unbind('click').bind('click', function () {
+            if ($txtpass.hasClass('r-pass')) {
+                $txtpass.removeClass('r-pass').removeProp('type').prop('type', 'text');
+                $eyes.addClass('nln-bg').addClass('w3-text-white');
+            }
+            else {
+                $txtpass.addClass('r-pass').removeProp('type').prop('type', 'password');
+                $eyes.removeClass('nln-bg').removeClass('w3-text-white');
+            }
+        });
+        //$txtpass.unbind('focus').bind('focus', function () {
+        //    $(this).addClass('r-pass').removeProp('type').prop('type', 'password');
+        //});
+        $forgetPassword.unbind('click').bind('click', function () {
+            // $(this).attr('data-toggle', 'modal').attr('data-target', '#forgetPasswordModal');
+
+            if ($("#loginForm").hasClass('r-show')) {
+                $("#loginForm").removeClass('r-show').addClass('r-hide').fadeOut();
+                $('#forgetPasswordForm').removeClass('r-hide').addClass('r-show').fadeIn();
+                $('.center-block').animate({
+                    left: '0px',
+                    opacity: '1',
+                    height: '190px',
+                });
+                $textforgetEmail.val($txtUserName.val());
+            }
+        });
+    })
+</script>
+
+<style>
+
+    @@media only screen and (min-width: 768px) {
+        .Inspclass {
+            padding: 0px !important;
+        }
+    }
+
+    #radUpdogImgfakeInput {
+        width: 142px !important;
+    }
+
+    .ruCancel {
+        display: none;
+    }
+
+    .ruRemove {
+        display: none;
+    }
+
+    .rdf-initial {
+        right: 3px;
+        position: absolute;
+        top: 19px;
+    }
+
+    .riTextBox, #radUpdogImgfakeInput0 {
+        border-color: #e5e5e5 !important;
+        border-radius: 4px !important;
+    }
+
+    .rotatedimg {
+        margin: 34px 0 50px 20px;
+        max-width: 260px;
+        width: 100% !important;
+        height: auto !important;
+        max-height: 300px;
+    }
+
+    #btncaptureRemove:hover {
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    #passowordgetname {
+        height: 0px;
+    }
+
+    .forget-password, .sign-up, .eyes {
+        color: #228BFC;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+        .sign-up a {
+            text-decoration: none;
+            list-style: none;
+            color: #228BFC;
+        }
+
+    .eyes {
+        color: black;
+    }
+
+    .requiredColumn {
+        border-color: red;
+    }
+</style>
+
+
+<script>
+
+
+    function ddlUserRoleData() {
+        $.ajax({
+            url: '/UserInfo/ddlUserRole',
+            type: 'post',
+            async: false,
+            data: {},
+            success: function (response) {
+                data = response;
+                var optionAppend = "";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.RoleName + ">" + obj.RoleName + "</option>";
+                });
+                $('#ddluserrole').empty().append(optionAppend);
+                $('#ddluserrole option:last-child').attr('selected', 'selected');
+            }
+        });
+    }
+
+    function ddlCountry() {
+        $.ajax({
+            url: '/UserInfo/countryDropDown',
+            type: 'post',
+            async: false,
+            data: {},
+            success: function (response) {
+                data = response;
+                var optionAppend = "";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.Country + ">" + obj.Country + "</option>";
+                });
+                $('#ddlCountry').empty().append(optionAppend);
+            }
+        });
+    }
+
+    //function ddlState() {
+    //    $.ajax({
+    //        url: '/UserInfo/ddlState',
+    //        type: 'post',
+    //        async: false,
+    //        data: {},
+    //        success: function (response) {
+    //            data = response;
+    //            var optionAppend = "";
+    //            $.each(data, function (index, obj) {
+    //                optionAppend += "<option value=" + obj.state + ">" + obj.state + "</option>";
+    //            });
+    //            $('#ddlstate').empty();
+    //            $('#ddlstate').append("<option value=''></option>");
+    //            $('#ddlstate').append(optionAppend);
+    //        }
+    //    });
+    //}
+
+    function ddlState(country) {
+
+        $.ajax({
+            url: '/UserInfo/ddlState',
+            type: 'post',
+            async: false,
+            data: {
+                country: country
+            },
+            success: function (response) {
+                var optionAppend = "";
+                $.each(response, function (index, obj) {
+                    optionAppend += "<option value='" + obj.state + "'>" + obj.state + "</option>";
+                });
+                $('#ddlstate').empty();
+                $('#ddlstate').append("<option value=''></option>");
+                $('#ddlstate').append(optionAppend);
+            }
+        });
+    }
+
+
+    function ddlCategory() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/UserInfo/ddlCategory',
+            type: 'post',
+            async: false,
+            data: { id: id },
+            success: function (response) {
+                data = response;
+                var optionAppend = "";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.CategoryId + ">" + obj.Category + "</option>";
+                });
+                $('#ddlCategory').empty();
+                $('#ddlCategory').append("<option value=''></option>");
+                $('#ddlCategory').append(optionAppend);
+            }
+        });
+    }
+
+    function ddlOwner() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/UserInfo/dropdownOwner',
+            type: 'post',
+            async: false,
+            data: { id: id },
+            success: function (response) {
+
+                let optionAppend = "<option value=''></option>";
+
+                $.each(response, function (index, obj) {
+
+                    let val = obj.OwnerName.replace(/'/g, "&#39;");
+                    optionAppend += "<option value='" + val + "'>" + obj.OwnerName + "</option>";
+                });
+                $('#ddlOwnerName').empty().append(optionAppend);
+            }
+        });
+    }
+    function ddlSite() {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/UserInfo/dropdownSite',
+            type: 'post',
+            async: false,
+            data: { id: id },
+            success: function (response) {
+                data = response;
+                var optionAppend = "<option value=''></option>";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.SiteLocID + ">" + obj.SiteLocation + "</option>";
+                });
+                $('#ddlSite').empty().append(optionAppend);
+            }
+        });
+    }
+
+    function ddlSubOwner() {
+        var id = getParameterByName('id');
+        let ddlOwnerName = $('#ddlOwnerName').val();
+        $.ajax({
+            url: '/UserInfo/ddlSubOwnerDropdown',
+            type: 'post',
+            async: false,
+            data: { id: id, ddlOwnerName: ddlOwnerName },
+            success: function (response) {
+                data = response;
+                var optionAppend = "<option value='' selected='selected'></option>";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.ScaffoldOwner + ">" + obj.ScaffoldOwner + "</option>";
+                });
+                $('#ddlSubOwner').empty();
+                // $('#ddlSubOwner').append("<option value=''></option>");
+                $('#ddlSubOwner').empty().append(optionAppend);
+            }
+        });
+    }
+
+    function ddlLocation() {
+        var id = getParameterByName('id');
+        let ddlSite = $('#ddlSite').val();
+        $.ajax({
+            url: '/UserInfo/ddlLocation',
+            type: 'post',
+            async: false,
+            data: { id: id, ddlSite: ddlSite },
+            success: function (response) {
+                data = response;
+                var optionAppend = "<option value='' selected='selected'></option>";
+                $.each(data, function (index, obj) {
+                    optionAppend += "<option value=" + obj.AreaID + ">" + obj.Area + "</option>";
+                });
+                $('#ddlLocation').empty();
+                $('#ddlLocation').empty().append(optionAppend);
+            }
+        });
+    }
+
+    function ddlOwnerName_SelectedIndexChanged() {
+        //ddlSubOwnerDropdown();
+        ddlSubOwner();
+    }
+
+    function ChkIpAddress_CheckedChanged() {
+        if ($('#ChkIpAddress').is(':checked') == true) {
+            $('#txtIPAddress').prop('disabled', false);
+        } else {
+            $('#txtIPAddress').prop('disabled', true);
+        }
+    }
+
+    function CheckIPAddress(txtIPAddress) {
+        var IsIpValid = false;
+        if (txtIPAddress != "") {
+            var CheckIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+            var arrVal = txtIPAddress.split(',');
+            for (var i = 0; i < arrVal.length; i++) {
+                if (CheckIP.test(arrVal[i])) {
+                    // alert("Your IP Address Is Valid.");
+                    IsIpValid = true;
+                } else {
+                    return false;
+                }
+
+            }
+            return IsIpValid;
+        } else {
+            return true;
+        }
+
+    }
+
+    //function btnSave_Click() {
+
+    //    savepassword();
+    //    var fileData = new FormData();
+    //    var files;
+
+    //    // Checking whether FormData is available in browser
+    //    if (window.FormData !== undefined) {
+    //        if (files == null || files == "") {
+    //            var fileUpload = $('#radUpdogImg').get(0);
+    //            files = fileUpload.files;
+    //        }
+    //        var fileUpload = $('#radUpdogImg').get(0);
+    //        // Create FormData object
+    //        //  var fileData = new FormData();
+    //        if (files.length != 0) {
+
+    //            var FileName = files[0].name;
+    //            var FileSize = files[0].size;
+    //            var extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+    //            fileData.append(files[0].name, files[0]);
+
+    //        }
+    //    }
+
+
+    //    var UserID = getParameterByName('UserID');
+    //    var decryptData = Decrypt([UserID]);
+    //    UserID = decryptData[0];
+
+    //    // var UserID = $('#hdnUserID').val();
+    //    UserID = UserID == '' ? 0 : UserID;
+    //    var UID = getParameterByName('UID');
+    //    var id = getParameterByName('id');
+    //    let firstName = $('#txtFirstname').val();
+    //    let lastName = $('#txtLastname').val();
+    //    //let userRole = $('#ddluserrole').val();
+    //    let userRole = $('#ddluserrole option:selected').text();
+    //    let status = $('#ddlstatus').val();
+    //    let mobileNo = $('#txtContact').val();
+    //    let emailAddress = $('#txtEmail').val();
+    //    let chkInspector = $('#chkInspector').is(':checked');
+    //    let licenceNo = $('#txtlicenceNo').val();
+    //    let birthDate = $('#Birthdate').val();
+    //    let category = $('#ddlCategory').val();
+    //    let password = $('#txtPassworduser').val();
+    //    let address = $('#txtAddress').val();
+    //    let city = $('#txtcity').val();
+    //    let state = $('#ddlstate option:selected').text();
+    //    let ddlCountry = $('#ddlCountry option:selected').text();
+    //    let postCode = $('#txtpostcodeuk').val();
+    //    if (postCode == "") {
+    //        postCode = $('#txtZip').val();
+    //    }
+    //    let ownerName = $('#ddlOwnerName option:selected').text();
+    //    let subOwner = $('#ddlSubOwner option:selected').text();
+    //    let Site = $('#ddlSite option:selected').val();
+    //    if (Site == 'undefined' && Site == null) {
+    //        Site = ''
+    //    }
+    //    let Location = $('#ddlLocation option:selected').val();
+    //    if (Location == 'undefined' && Location == null) {
+    //        Location = ''
+    //    }
+    //    let notes = $('#txtnotes').val();
+    //    let txtUK = $('#txtUK').val();
+    //    let image = $('#tempimg').val();
+    //    let imgangle = $('#imgangle').val();
+    //    let radUpdogImg = $('#radUpdogImg').val();
+    //    let hdnpassword = $('#hdnpassword').val();
+    //    var txtIPAddress = $('#txtIPAddress').val();
+    //    var ChkIpAddress = $('#ChkIpAddress').is(':checked');
+    //    var ChkEmailAuthantication = $('#ChkEmailAuthantication').is(':checked'); // Line Add on 31-Oct-2020
+
+    //    fileData.append('UserID', UserID);
+    //    fileData.append('UID', UID);
+    //    fileData.append('id', id);
+    //    fileData.append('firstName', firstName);
+    //    fileData.append('lastName', lastName);
+    //    fileData.append('userRole', userRole);
+    //    fileData.append('status', status);
+    //    fileData.append('mobileNo', mobileNo);
+    //    fileData.append('emailAddress', emailAddress);
+    //    fileData.append('chkInspector', chkInspector);
+    //    fileData.append('licenceNo', licenceNo);
+    //    fileData.append('birthDate', birthDate);
+    //    fileData.append('category', category);
+    //    fileData.append('password', password);
+    //    fileData.append('address', address);
+    //    fileData.append('city', city);
+    //    fileData.append('state', state);
+    //    fileData.append('ddlCountry', ddlCountry);
+    //    fileData.append('postCode', postCode);
+    //    fileData.append('ownerName', ownerName);
+    //    fileData.append('subOwner', subOwner);
+    //    fileData.append('Site', Site);
+    //    fileData.append('Location', Location);
+    //    fileData.append('notes', notes);
+    //    fileData.append('imgangle', imgangle);
+    //    fileData.append('image', image);
+    //    fileData.append('txtUK', txtUK);
+    //    fileData.append('radUpdogImg', radUpdogImg);
+    //    fileData.append('hdnpassword', hdnpassword);
+    //    fileData.append('txtIPAddress', txtIPAddress);
+    //    fileData.append('ChkIpAddress', ChkIpAddress);
+    //    fileData.append('ChkEmailAuthantication', ChkEmailAuthantication);
+
+    //    function chkInspectorCheck() {
+    //        var flag = false;
+    //        if (chkInspector == true) {
+    //            if (licenceNo == "") {
+    //                flag = true;
+    //            }
+    //        }
+
+    //        return flag;
+    //    }
+
+
+    //    if (CheckRequiredfields() == false) {
+    //        if (validateEmail(emailAddress) == true) {
+    //            $("#txtEmail").css("border-color", "");
+    //            if (chkInspectorCheck() == false) {
+    //                if ((ChkIpAddress == true && txtIPAddress != "") || ChkIpAddress == false) {
+    //                    var ChekcIpAddress = CheckIPAddress(txtIPAddress);
+    //                    if (ChekcIpAddress == true) {
+    //                        $.ajax({
+    //                            url: '/UserInfo/btnSave_Click',
+    //                            type: 'POST',
+    //                            contentType: false, // Not to set any content header
+    //                            processData: false, // Not to process data
+    //                            data: fileData,
+
+    //                            success: function (response) {
+    //                                if (response != null) {
+    //                                    if (response.Result == "Success") {
+    //                                        CustomAlert(response);
+    //                                        var UID = getParameterByName('UID');
+    //                                        var UserRole = getParameterByName('UserRole');
+    //                                        var Clientid = getParameterByName('id');
+    //                                        var UserID = response.returnUserID;
+    //                                        window.location.href = '/UserInfo/UserInfo?UID=' + UID + '&UserRole=' + UserRole + '&id=' + Clientid + '&UserID=' + UserID;
+    //                                    } else {
+    //                                        CustomAlert(response);
+    //                                    }
+    //                                }
+    //                            }
+    //                        });
+    //                    } else {
+    //                        var Response = { Result: "Failed", Message: "Please enter valid IP Address ." };
+    //                        CustomAlert(Response);
+    //                    }
+    //                } else {
+    //                    var Response = { Result: "Failed", Message: "Please enter IP Address ." };
+    //                    CustomAlert(Response);
+    //                    $("#txtIPAddress").css("border-color", "red");
+    //                }
+    //            } else {
+    //                var Response = { Result: "Failed", Message: "Licence No. must be entered for Inspectors." };
+    //                CustomAlert(Response);
+    //            }
+    //        } else {
+    //            var Response = { Result: "Failed", Message: "Please validate email" };
+    //            CustomAlert(Response);
+    //            $("#txtEmail").css("border-color", "red");
+    //        }
+    //    } else {
+    //        Res = { Result: 'Failed', Message: 'Please fill out mandatory fields' };
+    //        CustomAlert(Res);
+    //    }
+    //}
+
+    function btnSave_Click() {
+
+        savepassword();
+        var fileData = new FormData();
+        var files;
+
+        // Checking whether FormData is available in browser
+        if (window.FormData !== undefined) {
+            if (files == null || files == "") {
+                var fileUpload = $('#radUpdogImg').get(0);
+                files = fileUpload.files;
+            }
+            var fileUpload = $('#radUpdogImg').get(0);
+            if (files.length != 0) {
+                var FileName = files[0].name;
+                var FileSize = files[0].size;
+                var extension = FileName.substring(FileName.lastIndexOf('.') + 1).toLowerCase();
+                fileData.append(files[0].name, files[0]);
+            }
+        }
+
+        var UserID = getParameterByName('UserID');
+        var decryptData = Decrypt([UserID]);
+        UserID = decryptData[0];
+        UserID = UserID == '' ? 0 : UserID;
+
+        var UID = getParameterByName('UID');
+        var id = getParameterByName('id');
+
+        let firstName = $('#txtFirstname').val();
+        let lastName = $('#txtLastname').val();
+        let userRole = $('#ddluserrole option:selected').text();
+        let status = $('#ddlstatus').val();
+        let mobileNo = $('#txtContact').val();
+        let emailAddress = $('#txtEmail').val();
+        let chkInspector = $('#chkInspector').is(':checked');
+        let licenceNo = $('#txtlicenceNo').val();
+        let birthDate = $('#Birthdate').val();
+        let category = $('#ddlCategory').val();
+        let password = $('#txtPassworduser').val();
+        let address = $('#txtAddress').val();
+        let city = $('#txtcity').val();
+        let state = $('#ddlstate option:selected').text();
+        let ddlCountry = $('#ddlCountry option:selected').text();
+        let postCode = $('#txtpostcodeuk').val();
+        if (postCode == "") {
+            postCode = $('#txtZip').val();
+        }
+        let ownerName = $('#ddlOwnerName option:selected').text();
+        let subOwner = $('#ddlSubOwner option:selected').text();
+
+
+        let Site, Location;
+        if (userRole === "Client View Single Site Single Location") {
+            Site = $('#ddlSite option:selected').val();
+            if (Site === 'undefined' || Site == null) Site = '';
+
+            Location = $('#ddlLocation option:selected').val();
+            if (Location === 'undefined' || Location == null) Location = '';
+        } else {
+            Site = "";
+            Location = "";
+        }
+
+        let notes = $('#txtnotes').val();
+        let txtUK = $('#txtUK').val();
+        let image = $('#tempimg').val();
+        let imgangle = $('#imgangle').val();
+        let radUpdogImg = $('#radUpdogImg').val();
+        let hdnpassword = $('#hdnpassword').val();
+        var txtIPAddress = $('#txtIPAddress').val();
+        var ChkIpAddress = $('#ChkIpAddress').is(':checked');
+        var ChkEmailAuthantication = $('#ChkEmailAuthantication').is(':checked');
+
+        // Append all fields to FormData
+        fileData.append('UserID', UserID);
+        fileData.append('UID', UID);
+        fileData.append('id', id);
+        fileData.append('firstName', firstName);
+        fileData.append('lastName', lastName);
+        fileData.append('userRole', userRole);
+        fileData.append('status', status);
+        fileData.append('mobileNo', mobileNo);
+        fileData.append('emailAddress', emailAddress);
+        fileData.append('chkInspector', chkInspector);
+        fileData.append('licenceNo', licenceNo);
+        fileData.append('birthDate', birthDate);
+        fileData.append('category', category);
+        fileData.append('password', password);
+        fileData.append('address', address);
+        fileData.append('city', city);
+        fileData.append('state', state);
+        fileData.append('ddlCountry', ddlCountry);
+        fileData.append('postCode', postCode);
+        fileData.append('ownerName', ownerName);
+        fileData.append('subOwner', subOwner);
+        fileData.append('Site', Site);
+        fileData.append('Location', Location);
+        fileData.append('notes', notes);
+        fileData.append('imgangle', imgangle);
+        fileData.append('image', image);
+        fileData.append('txtUK', txtUK);
+        fileData.append('radUpdogImg', radUpdogImg);
+        fileData.append('hdnpassword', hdnpassword);
+        fileData.append('txtIPAddress', txtIPAddress);
+        fileData.append('ChkIpAddress', ChkIpAddress);
+        fileData.append('ChkEmailAuthantication', ChkEmailAuthantication);
+
+        function chkInspectorCheck() {
+            var flag = false;
+            if (chkInspector == true && licenceNo == "") {
+                flag = true;
+            }
+            return flag;
+        }
+
+        if (CheckRequiredfields() == false) {
+            if (validateEmail(emailAddress) == true) {
+                $("#txtEmail").css("border-color", "");
+                if (chkInspectorCheck() == false) {
+                    if ((ChkIpAddress == true && txtIPAddress != "") || ChkIpAddress == false) {
+                        var ChekcIpAddress = CheckIPAddress(txtIPAddress);
+                        if (ChekcIpAddress == true) {
+                            $.ajax({
+                                url: '/UserInfo/btnSave_Click',
+                                type: 'POST',
+                                contentType: false,
+                                processData: false,
+                                data: fileData,
+                                success: function (response) {
+                                    if (response != null) {
+                                        if (response.Result == "Success") {
+                                            CustomAlert(response);
+                                            var UID = getParameterByName('UID');
+                                            var UserRole = getParameterByName('UserRole');
+                                            var Clientid = getParameterByName('id');
+                                            var UserID = response.returnUserID;
+                                            window.location.href = '/UserInfo/UserInfo?UID=' + UID + '&UserRole=' + UserRole + '&id=' + Clientid + '&UserID=' + UserID;
+                                        } else {
+                                            CustomAlert(response);
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            var Response = { Result: "Failed", Message: "Please enter valid IP Address." };
+                            CustomAlert(Response);
+                        }
+                    } else {
+                        var Response = { Result: "Failed", Message: "Please enter IP Address." };
+                        CustomAlert(Response);
+                        $("#txtIPAddress").css("border-color", "red");
+                    }
+                } else {
+                    var Response = { Result: "Failed", Message: "Licence No. must be entered for Inspectors." };
+                    CustomAlert(Response);
+                }
+            } else {
+                var Response = { Result: "Failed", Message: "Please validate email" };
+                CustomAlert(Response);
+                $("#txtEmail").css("border-color", "red");
+            }
+        } else {
+            Res = { Result: 'Failed', Message: 'Please fill out mandatory fields' };
+            CustomAlert(Res);
+        }
+    }
+
+
+    function CheckRequiredfields() {
+        var requiredInput = false;
+        $('#ModalUserInfo').find('input, select').each(function () {
+            if ($(this).prop('required') == true && ($(this).val() == "" || $(this).val() == null)) {
+                if (requiredInput == false) {
+                    requiredInput = true;
+                }
+                $(this).addClass('requiredColumn');
+            } else {
+                $(this).removeClass('requiredColumn');
+            }
+        });
+        return requiredInput;
+    }
+
+    function validateEmail(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@@"]+(\.[^<>()\[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        //return re.test(String(email).toLowerCase());
+        if (re.test(String(email).toLowerCase())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function btnCAncel_Click() {
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var Clientid = getParameterByName('id');
+        window.location.href = '/ClientUsers/ClientUsers?UID=' + UID + '&UserRole=' + UserRole + '&id=' + Clientid;
+    }
+
+    function ShowClientDetails() {
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserID = getParameterByName('UserID');
+        $.ajax({
+            url: '/UserInfo/ShowClientDetails',
+            type: 'POST',
+            data: { id: id, UserID: UserID },
+            async: false,
+            success: function (response) {
+                if (response != null) {
+                    $('#lblClientuser').text(response.firstname + ' ' + response.lastname);
+                    $('#txtFirstname').val(response.firstname);
+                    $('#txtLastname').val(response.lastname);
+                    //$('#ddluserrole').val(response.Role);
+                    // $("#ddluserrole option:contains(" + response.Role + ")").attr('selected', 'selected');
+                    if (response.Role != "") {
+                        $('[id=ddluserrole] option').filter(function () {
+                            return ($(this).text() == response.Role);
+                        }).prop('selected', true);
+                    }
+                    $('#ddlstatus').val(response.Status);
+                    $('#txtContact').val(response.CellPhone);
+                    $('#txtUK').val(response.CellPhone);
+                    $('#txtEmail').val(response.EmailID);
+                    $('#txtlicenceNo').val(response.LicenceNo);
+                    var IsInspector = response.IsInspector;
+                    if (IsInspector == true) {
+                        $('#chkInspector').prop('checked', true);
+                    } else {
+                        $('#chkInspector').prop('checked', false);
+                    }
+                    $('#Birthdate').val(DateFormat(response.BirthDate));
+                    // $("#ddlCategory").val(response.Category);
+                    $("#ddlCategory option:contains(" + response.Category + ")").attr('selected', 'selected');
+                    $("#ddlCountry option:contains(" + response.Country + ")").attr('selected', 'selected');
+                    $('#txtPassworduser').val(response.Password);
+                    $('#txtAddress').val(response.Address);
+                    $('#txtcity').val(response.City);
+                    //$('#ddlstate').val(response.State);
+                    if (response.Role == 'Inspection Audit View' || response.Role == 'Client View Single Site') {
+                        $('#ddlOwnerName').prop("disabled", false);
+                        $('#ddlSubOwner').prop("disabled", false);
+                    } else {
+                        $('#ddlOwnerName').prop("disabled", true);
+                        $('#ddlSubOwner').prop("disabled", true);
+                    }
+                    const Site = document.getElementById("ddlSite")
+                    const Location = document.getElementById("ddlLocation")
+                    if (response.Role == 'Client View Single Site Single Location') {
+                        $('#divSelectSiteAndLocation').css("display", "block");
+                        ddlSite();
+                        Site.setAttribute('required', 'required')
+                        Location.setAttribute('required', 'required')
+
+
+                    } else {
+                        $('#divSelectSiteAndLocation').css("display", "none");
+                        Site.removeAttribute('required', 'required')
+                        Location.removeAttribute('required', 'required')
+                    }
+
+                    $("#ddlstate option:contains(" + response.State + ")").attr('selected', 'selected');
+                    $('#txtpostcodeuk').val(response.Zip);
+                    $('#txtZip').val(response.Zip);
+                    //$('#ddlSubOwner').val(response.SiteOwnerName);
+
+                    var SiteOwnerName = response.ScaffoldOwner;
+                    if (SiteOwnerName != "") {
+                        // $('#ddlSubOwner option:selected').text(SiteOwnerName);
+                        $("#ddlSubOwner option:contains(" + response.ScaffoldOwner + ")").attr('selected', 'selected');
+
+                    }
+                    var ddlOwnerName = response.SiteOwnerName;
+                    if (ddlOwnerName != "") {
+                        $("#ddlOwnerName option:contains(" + response.SiteOwnerName + ")").attr('selected', 'selected');
+                    }
+
+                    let SiteData = response.Site;
+                    if (SiteData) {
+                        $("#ddlSite").val(SiteData)
+                    }
+                    let LocationData = response.Location;
+                    if (LocationData) {
+                        ddlLocation();
+
+                        $("#ddlLocation").val(LocationData)
+
+                    }
+                    var IPAddress = response.IPAddress == null ? "" : response.IPAddress;
+                    var IPAuthentication = response.IPAuthentication;
+                    if (IPAuthentication == true) {
+                        $('#ChkIpAddress').prop('checked', true);
+                    } else {
+                        $('#ChkIpAddress').prop('checked', false);
+                    }
+                    $('#txtIPAddress').val(IPAddress);
+                    var EmailAuthentication = response.EmailAuthentication;
+                    if (EmailAuthentication == true) {
+                        $('#ChkEmailAuthantication').prop('checked', true);
+                    } else {
+                        $('#ChkEmailAuthantication').prop('checked', false);
+                    }
+
+                    $('#txtnotes').val(response.notes);
+                    if (response.LicencePicUpload != null && response.LicencePicUpload != '') {
+                        $('#imga').attr('src', '/Images/UserLicencePic/' + response.LicencePicUpload);
+                        $('#divdeleteimag').css('display', 'block');
+                        $('#deleteimageupload').val(response.LicencePicUpload);
+                    } else {
+                        $("#imga").attr("src", "/images/noimg.jpg");
+                        $('#divdeleteimag').css('display', 'none');
+                    }
+                }
+                $('#userDetailsMainDiv').css('display', 'block');
+            }
+        });
+    }
+
+
+
+    function btnAddUser_Click() {
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var Clientid = getParameterByName('id');
+        var UserID = '0';
+        var encryData = Encrypt([UserID]);
+        UserID = encryData[0];
+        window.location.href = '/UserInfo/UserInfo?UID=' + UID + '&UserRole=' + UserRole + '&id=' + Clientid + '&UserID=' + UserID;
+    }
+
+    function btndeleteyes_Click() {
+        var UserID = getParameterByName('UserID');
+        var deleteimageupload = $('#deleteimageupload').val();
+        $.ajax({
+            url: '/UserInfo/btndeleteyes_Click',
+            type: 'post',
+            async: false,
+            data: { UserID: UserID, deleteimageupload: deleteimageupload },
+            success: function (response) {
+                if (response.Result == 'Success') {
+                    CustomAlert(response);
+                    $('#divdelete').css('display', 'none');
+                    ShowClientDetails();
+                } else {
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+
+    function btnbackRegister_Click() {
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var RID = getParameterByName('RID');
+        window.location.href = '/Register/Register?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&RID=' + RID;
+        // Response.Redirect("Register.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&RID=" + Request.QueryString["RID"], false);
+    }
+
+    function btnbackInspection_Click() {
+        var id = getParameterByName('id');
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var RID = getParameterByName('RID');
+
+        window.location.href = '/InspectionList/InspectionList?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&RID=' + RID + '&from=' + "Job";
+        //  Response.Redirect("InspectionList.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&RID=" + Request.QueryString["RID"], false);
+    }
+
+</script>
+
+
+<!--Start page code-->
+
+<input type="hidden" id="deleteimageupload" value="" />
+<input type="hidden" runat="server" id="tempimg" name="tempimg" />
+<input type="hidden" id="hdnUserID" value="" />
+<input type="hidden" id="hdnUploadImage" value="" />
+<div runat="server" style="display: none" id="art1">
+    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+    @*<asp:Label ID="alertlabel" runat="server"></asp:Label>*@
+    <label id="alertlabel"></label>
+</div>
+<div class="row">
+    <div class="col-lg-7 col-md-4 col-sm-3 col-xs-12">
+        <h4 class="heading">
+            <b style="color: #0070ba">
+                <i class="fa fa-users"></i>
+                @*<asp:Label ID="lblClientuser" runat="server" Text="User" Font-Size="16px" Font-Bold="true"></asp:Label>*@
+                <label id="lblClientuser" style="font-size:16px; font-weight:bold;"></label>
+            </b>
+        </h4>
+        @*<h4 class="heading" style="color: #0070ba"><b style="font-size:16px;"><i class="fa fa-user"></i>&nbsp;User</b></h4>*@
+    </div>
+    @*<asp:HiddenField ID="getimage" Value="" runat="server" />*@
+    <input type="hidden" id="getimage" Value="" />
+    <div class="col-lg-1 col-md-3 col-sm-4  col-xs-7" id="divbtnbackRegister" style="display:none;">
+        @*<asp:LinkButton runat="server" ID="btnbackRegister" Style="padding-left: 10px;" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbackRegister_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to Register</asp:LinkButton>*@
+        <button id="btnbackRegister" style="padding-left: 10px;" class="w3-btn w3-small  nln-bg w3-text-white" onclick="btnbackRegister_Click();"><i class="fa fa-backward"></i>&nbsp;&nbsp;Back to Register</button>
+    </div>
+    <div class="col-lg-1 col-md-3 col-sm-4  col-xs-7" id="divbtnbackInspection" style="display:none;">
+        @*<asp:LinkButton runat="server" ID="btnbackInspection" Style="padding-left: 10px;" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnbackInspection_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back to InspectionList</asp:LinkButton>*@
+        <button id="btnbackInspection" style="padding-left: 10px;" Class="w3-btn w3-small w3-dark-grey" onclick="btnbackInspection_Click();"><i class="fa fa-backward"></i>&nbsp;&nbsp;Back to Inspection List</button>
+    </div>
+
+    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3">
+        @*<asp:LinkButton runat="server" ID="btnSave" CssClass="w3-btn w3-small w3-green w3-hover-dark-grey " OnClientClick="validate('saveuser');savepassword();" OnClick="btnSave_Click"> <i class="fa fa-save"> </i>  Save</asp:LinkButton>*@
+        <button id="btnSave" class="w3-btn w3-small w3-green w3-hover-dark-grey " style="width:100%" onclick="btnSave_Click();"><i class="fa fa-save"></i> Save</button>
+    </div>
+    <div class="col-lg-1 col-md-2 col-sm-2 col-xs-3">
+        @*<asp:LinkButton runat="server" ID="btnCAncel" CssClass="w3-btn w3-small  nln-bg w3-text-white" OnClick="btnCAncel_Click"> <i class="fa fa-backward"> </i>&nbsp;&nbsp;Back</asp:LinkButton>*@
+        <button id="btnCAncel" class="w3-btn w3-small  nln-bg w3-text-white" style="width:100%" onclick="btnCAncel_Click();"><i class="fa fa-backward"></i>&nbsp;&nbsp;Back</button>
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6">
+        @*<asp:LinkButton CssClass="w3-btn w3-teal" CausesValidation="true" ID="btnAddUser" Width="60%" OnClick="btnAddUser_Click" runat="server"><i class="fa fa-plus "></i>&nbsp;Add User</asp:LinkButton>*@
+        <button class="w3-btn w3-teal" id="btnAddUser" style="width:60%" onclick="btnAddUser_Click();"><i class="fa fa-plus "></i>&nbsp;Add User</button>
+    </div>
+    @*<%--<asp:LinkButton ID="btnSecurity" runat="server" OnClick="btnSecurity_Click">&nbsp</asp:LinkButton>--%>*@
+</div>
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <ul style="margin-bottom: 0px !important;" class="nav nav-tabs">
+            @*<%--
+                <li class="active" id="liClient"><a data-toggle="tab"><i class="fa fa-user" aria-hidden="true"></i>&nbsp; User Information</a></li>--%>*@
+            <li id="lisecu" style="display:none;">
+                @*<a href="#" id="liSecurity" runat="server" onclick="javascript:__doPostBack('ctl00$ContentPlaceHolder1$btnSecurity','')">
+                        <i class="fa fa-clipboard" aria-hidden="true"></i>&nbsp;Security Access
+                        <span id="spnsecurity" runat="server" class="label label-success"></span>
+                    </a>*@
+                <a href="#" id="liSecurity" onclick="javascript:__doPostBack('ctl00$ContentPlaceHolder1$btnSecurity','')">
+                    <i class="fa fa-clipboard" aria-hidden="true"></i>&nbsp;Security Access
+                    <span id="spnsecurity" runat="server" class="label label-success"></span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="userDetailsMainDiv" style="display:none;">
+                <div id="userDetails" class="tab-pane fade active in table-bordered w3-padding w3-white" style="border-top: initial;">
+                    <div class="row w3-margin-top ">
+                        <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12" id="ModalUserInfo">
+                            <fieldset>
+                                <legend>
+                                    @*<%--<asp:HiddenField runat="server" ID="txtcreateuser" Value='<%#Eval("Create_User")%>' />--%>*@
+                                    <label>General <i class="fa fa-arrow-down"></i></label>
+                                </legend>
+                                <div class="col-lg-3 col-md-6 col-sm-3 col-xs-12">
+                                    <label>First Name <i class=" w3-text-red">*</i></label>
+                                    @*<asp:TextBox runat="server" ID="txtFirstname" onchange="checkvalue(this)" CssClass="form-control"></asp:TextBox>
+                                        <asp:RequiredFieldValidator runat="server" ID="rdftxtFirstname" ControlToValidate="txtFirstname" ErrorMessage="* Required" ForeColor="Red" CssClass="rdf-initial" ValidationGroup="saveuser"></asp:RequiredFieldValidator>*@
+
+                                    <input type="text" id="txtFirstname" class="form-control" required />
+                                    @*<asp:RequiredFieldValidator runat="server" ID="rdftxtFirstname" ControlToValidate="txtFirstname" ErrorMessage="* Required" ForeColor="Red" CssClass="rdf-initial" ValidationGroup="saveuser"></asp:RequiredFieldValidator>*@
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-3 col-xs-12">
+                                    <label>Last Name <i class=" w3-text-red">*</i></label>
+                                    @*<asp:TextBox runat="server" onchange="checkvalue(this)" ID="txtLastname" CssClass="form-control"></asp:TextBox>*@
+                                    <input type="text" id="txtLastname" class="form-control" required />
+                                    @*<asp:RequiredFieldValidator runat="server" ID="rdftxtlastname" ControlToValidate="txtLastname" ErrorMessage="* Required" CssClass="rdf-initial" ValidationGroup="saveuser"></asp:RequiredFieldValidator>*@
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-3 col-xs-12">
+                                    <label runat="server">User Role</label>
+                                    @*<asp:DropDownList EmptyMessage="Select Role Type" Width="100%" Skin="Metro" EnableLoadOnDemand="true" MarkFirstMatch="true" ID="ddluserrole" CssClass="form-control" runat="server" AppendDataBoundItems="true" AutoPostBack="true" OnSelectedIndexChanged="ddluserrole_SelectedIndexChanged">
+                                        </asp:DropDownList>*@
+                                    <select EmptyMessage="Select Role Type" style="Width:100%" Skin="Metro" id="ddluserrole" class="form-control">
+                                    </select>
+                                    @*<%-- <asp:ListItem Text="User" Value="user" />
+                                        <asp:ListItem Text="Manager" Value="Manager" />
+                                        <asp:ListItem Text="Inspector" Value="Inspector" />
+                                        <asp:ListItem Text="Resource" Value="Resource" />--%>*@
+
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-3 col-xs-12 ">
+                                    <label id="lblstatus">Status</label>
+                                    @*<asp:DropDownList EmptyMessage="Select Role Type" Width="100%" Skin="Metro" EnableLoadOnDemand="true" MarkFirstMatch="true" ID="ddlstatus" runat="server" CssClass="form-control">
+                                        <asp:ListItem Text="Active" Value="Active" />
+                                        <asp:ListItem Text="InActive" Value="InActive" />
+                                        </asp:DropDownList>*@
+                                    <select style="Width:100%" id="ddlstatus" class="form-control">
+                                        <option value="Active" selected>Active</option>
+                                        <option value="InActive">InActive</option>
+                                    </select>
+
+                                    @*<%--<asp:RequiredFieldValidator runat="server" ID="rfvddlstatus" ControlToValidate="ddlstatus" ErrorMessage="* Required" CssClass="rdf-initial" ValidationGroup="saveuser"></asp:RequiredFieldValidator>--%>*@
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>
+                                    <label>Contact Information <i class="fa fa-arrow-down"></i></label>
+                                </legend>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 col-sm-3 col-xs-12">
+                                        <label>Mobile No</label>
+                                        @*<Telerik:RadMaskedTextBox ID="txtContact" Visible="false" Width="100%" Height="50" Mask="(####) ### ###" runat="server" CssClass="form-control input-sm"></Telerik:RadMaskedTextBox>*@
+                                        <input type="text" id="txtContact" step="Width:100%;" Mask="(####) ### ###" class="form-control" />
+                                        @*<Telerik:RadMaskedTextBox ID="txtUK" Visible="false" Width="100%" Height="50" Mask="(#####) ### ###" runat="server" CssClass="form-control input-sm"></Telerik:RadMaskedTextBox>*@
+                                        <input type="text" id="txtUK" style="Width:100%;display:none" Mask="(#####) ### ###" class="form-control input-sm" />
+                                        @*<%--<asp:TextBox ID="txtcontactno" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>--%>*@
+                                    </div>
+
+
+                                    @*<%--<div class="col-lg-4 col-md-4">
+                                            <label runat="server">User Role</label>
+                                            <asp:DropDownList EmptyMessage="Select Role Type" Width="100%" Skin="Metro" EnableLoadOnDemand="true" MarkFirstMatch="true" ID="ddluserrole" CssClass="form-control" runat="server">
+
+                                                <asp:ListItem text="User" Value="user" />
+                                                <asp:ListItem Text="manager" Value="manager" />
+                                                <asp:ListItem Text="Insptor" Value="Insptor" />
+
+                                            </asp:DropDownList>
+                                        </div>--%>*@
+                                    <div class="col-lg-4 col-md-8 col-sm-4 col-xs-12">
+                                        <label>Email Address<i class="w3-text-red">*</i></label>
+
+                                        @*<asp:TextBox ID="txtEmail" runat="server" CssClass="form-control" AutoCompleteType="Disabled" onchange="return Emailvalidate('saveuser')"></asp:TextBox>*@
+                                        @*<input type="text" id="txtEmail" class="form-control" required />*@
+                                        @*Added by Abhijeet on 30-08-2024*@
+                                        <form autocomplete="off">
+                                            <input type="text" id="txtEmail" class="form-control" required />
+                                        </form>
+                                        @*<asp:RequiredFieldValidator runat="server" ID="rfvtxtEmail" ControlToValidate="txtEmail" ErrorMessage="* Required" CssClass="rdf-initial" ValidationGroup="saveuser"></asp:RequiredFieldValidator>
+                                            <asp:RegularExpressionValidator ID="validateEmail1"
+                                                                            runat="server" ErrorMessage="Invalid email address." CssClass="rdf-initial"
+                                                                            ControlToValidate="txtEmail" ValidationGroup="saveuser"
+                                                                            ValidationExpression="^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$" />*@
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-sm-2 col-xs-12 Inspclass">
+                                        <label>Can Inspect?</label>
+                                        <div>
+                                            @*<asp:CheckBox ID="chkInspector" runat="server" AutoPostBack="true" OnCheckedChanged="chkInspector_CheckedChanged" />*@
+                                            <input type="checkbox" id="chkInspector" OnCheckedChanged="chkInspector_CheckedChanged();" />
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-3 col-md-8 col-sm-3 col-xs-12">
+                                        <label>Licence No</label>
+                                        @*<asp:TextBox ID="txtlicenceNo" Width="100%" Enabled="true" Height="50" runat="server" CssClass="form-control input-sm"></asp:TextBox>*@
+                                        <input type="text" id="txtlicenceNo" style="Width:100%; Height:50px" class="form-control input-sm" />
+                                        @*<%--<asp:TextBox ID="txtcontactno" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>--%>*@
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    @*<%--  <div class="col-lg-6 col-md-4 col-sm-12 col-xs-12">
+                                            <label> BirthDate </label>
+                                            <asp:TextBox ID="txtbirthdate" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>
+                                        </div>--%>*@
+
+
+
+                                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                                        <label>Birthdate</label>
+                                        @*<Telerik:RadDatePicker ID="Birthdate" DateInput-DateFormat="dd-MMM-yyyy" Height="28px" AutoPostBack="true" Width="100%" runat="server" PickerType="DatePicker" MinDate="01/01/1901"></Telerik:RadDatePicker>*@
+                                        <input type="text" id="Birthdate" style="height:28px; width:100%" MinDate="01/01/1901" class="form-control" />
+                                    </div>
+                                    <div class="col-lg-4 col-md-8 col-sm-6 col-xs-12 ">
+                                        <label id="lblCategoryID">Category</label>
+                                        @*<asp:DropDownList ID="ddlCategory" runat="server" AppendDataBoundItems="true" AutoPostBack="true"         CssClass="form-control" OnSelectedIndexChanged="ddlCategory_SelectedIndexChanged">
+                                            <asp:ListItem Text=" " Value=""></asp:ListItem>
+                                            <%-- <asp:ListItem Selected="True" Text="Select"></asp:ListItem--%>
+                                            </asp:DropDownList>*@
+                                        <select id="ddlCategory" class="form-control" OnSelectedIndexChanged="ddlCategory_SelectedIndexChanged();">
+                                            <option value="">--Select--</option>
+                                            @*<%-- <asp:ListItem Selected="True" Text="Select"></asp:ListItem--%>*@
+                                        </select>
+                                    </div>
+
+
+                                    <div class="col-lg-3 col-md-8 col-sm-6 col-xs-12 " style="display: none">
+                                        <label id="lblDirectIndirect">Direct/In-Direct</label>
+                                        @*<asp:DropDownList EmptyMessage="Select Role Type" Width="100%" Skin="Metro" EnableLoadOnDemand="true"      MarkFirstMatch="true" ID="ddlDirectIndirect" runat="server" CssClass="form-control">
+                                                <asp:ListItem Text=" "></asp:ListItem>
+                                                <asp:ListItem Text="Direct" Value="Direct" />
+                                                <asp:ListItem Text="Indirect" Value="Indirect" />
+                                            </asp:DropDownList>*@
+
+                                        <select EmptyMessage="Select Role Type" style="width:100%" id="ddlDirectIndirect" class="form-control">
+                                            <option value=""></option>
+                                            <option value="Direct">Direct</option>
+                                            <option value="Indirect">Indirect</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-5 col-md-8 col-sm-6 col-xs-12">
+                                        @*<asp:HiddenField ID="hdnpassword" runat="server" />*@
+                                        <input type="hidden" id="hdnpassword" />
+                                        <label>Password &nbsp;</label>
+                                        <label id="btnpassword" onclick="changepassword();" style="font-size: smaller; float: right; cursor: pointer; height: 25px; padding-top: 4px; margin-top: -5px" class="w3-btn w3-orange w3-tiny w3-text-white"></label>
+                                        <label id="btncancel1" onclick="cancelpassword();" style="font-size: smaller; float: right; cursor: pointer; height: 25px; padding-top: 4px; margin-top: -5px; display: none" class="w3-btn w3-orange w3-tiny w3-text-white"></label>
+                                        <div class="input-group">
+                                            @*<asp:TextBox ID="txtPassworduser" TextMode="Password" ReadOnly="true" AutoCompleteType="Disabled" runat="server" Style="border-right: initial;" onchange='checkvalue(this)' CssClass="form-control r-pass input-sm">
+                                                </asp:TextBox>*@
+                                            <input id="txtPassworduser" type="password" style="border-right: initial;" class="form-control r-pass input-sm" readonly />
+
+                                            @*<%--<label>8 to 15 Character</label>--%>*@
+                                            <span id="passowordgetname" class="input-group-addon eyes  input-sm" style="background: #fff; border-left: initial;" onclick="ShowHidePassword(this.id);"><i class="fa fa-eye" aria-hidden="true"></i></span>
+                                        </div>
+                                    </div>
+
+                                    @*<%--   <div class="col-lg-5 col-md-7 col-sm-3 col-xs-6 ">
+                                            <label id="lblCategoryID">Category</label>
+                                            <asp:DropDownList EmptyMessage="Select Role Type" Width="100%" Skin="Metro" EnableLoadOnDemand="true" MarkFirstMatch="true" ID="CategoryIDDropDown" runat="server" CssClass="form-control">
+                                                <asp:ListItem text="Direct" Value="Direct" />
+                                                <asp:ListItem Text="InDirect" Value="InDirect" />
+                                            </asp:DropDownList>
+                                        </div>--%>*@
+                                </div>
+
+
+
+                                @*<%--                      <label>Category</label>
+                                    <Telerik:RadComboBox ID="ddlCategory" runat="server" Width="100%" DataSourceID="dsddlstate" DataTextField="state" DataValueField="State" MarkFirstMatch="true" AppendDataBoundItems="true" SelectedValue='<%#Eval("Category")%>' EmptyMessage="All">
+                                        <Items>
+
+                                        </Items>
+                                    </Telerik:RadComboBox>--%>*@
+
+
+                                <div class="row">
+                                    @*<%--<div class="col-lg-4 col-md-4">
+                                            <label> Contact No</label>
+                                            <asp:TextBox ID="txtcontactno" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>
+                                        </div>--%>*@
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>Address</label>
+
+                                        @*<asp:TextBox ID="txtAddress" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" ID="txtAddress" style="Width:100%" class="form-control" />
+                                        @*<%-- <asp:RequiredFieldValidator runat="server" ID="RequiredFieldValidator1" ControlToValidate="txtEmail" ErrorMessage="* Required" CssClass="rdf-initial" ValidationGroup="saveuser"></asp:RequiredFieldValidator>--%>*@
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                        <label>City</label>
+                                        @*<asp:TextBox ID="txtcity" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" id="txtcity" style="Width:100%" class="form-control" />
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                        @*<asp:Label ID="lblcounty" runat="server" Visible="false" Style="color: #908080">County</asp:Label>
+                                            <asp:Label ID="lblstate" runat="server" Visible="false" Style="color: #908080">State</asp:Label>*@
+                                        <label id="lblcounty" style="color: #908080;display:none;">County</label>
+                                        <label id="lblstate" style="color: #908080;display:none;">State</label>
+                                        @*<asp:DropDownList ID="ddlstate" runat="server" AutoPostBack="true" CssClass="form-control" Width="100%"    AppendDataBoundItems="true">
+                                            </asp:DropDownList>*@
+                                        <select id="ddlstate" class="form-control" style="Width:100%;">
+                                        </select>
+                                    </div>
+
+                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                        <label>Country</label>
+                                        @*<asp:DropDownList ID="ddlCountry" runat="server" Enabled="false" AutoPostBack="true" CssClass="form-   control" Width="100%" AppendDataBoundItems="true"      OnSelectedIndexChanged="ddlCountry_SelectedIndexChanged">
+                                            </asp:DropDownList>*@
+                                        <select id="ddlCountry" class="form-control" style="Width:100%" OnSelectedIndexChanged="ddlCountry_SelectedIndexChanged()" disabled>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2 col-md-4 col-sm-4 col-xs-12">
+                                        <label>Postcode</label>
+                                        @*<Telerik:RadMaskedTextBox RenderMode="Lightweight" Visible="false" ID="txtZip" Width="100%" runat="server" Mask="####"></Telerik:RadMaskedTextBox>
+                                            <asp:TextBox ID="txtpostcodeuk" Visible="false" Width="100%" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" id="txtZip" style="Width:100%;display:none;" Mask="####" class="form-control" />
+                                        <input type="text" id="txtpostcodeuk" style="Width:100%;display:none;" class="form-control" />
+                                    </div>
+                                </div>
+                                @*<%-- Line Add on 20 Sep 2019 For Owner And Sub Owner--%>*@
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label id="lblOwnerName">Owner Name</label>
+                                        @*<asp:DropDownList EmptyMessage="Select Owner Name" Width="100%" Skin="Metro" EnableLoadOnDemand="true" MarkFirstMatch="true" ID="ddlOwnerName" OnSelectedIndexChanged="ddlOwnerName_SelectedIndexChanged" runat="server" CssClass="form-control" AutoPostBack="true" Enabled="false">
+                                            </asp:DropDownList>*@
+                                        <select style="Width:100%" id="ddlOwnerName" onchange="ddlOwnerName_SelectedIndexChanged()" class="form-control" disabled>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 ">
+                                        <label id="lblSubOwner">Sub Owner</label>
+                                        @*<asp:DropDownList EmptyMessage="Select Sub Owner" Width="100%" Skin="Metro" EnableLoadOnDemand="true" MarkFirstMatch="true" ID="ddlSubOwner" runat="server" CssClass="form-control" AutoPostBack="true" Enabled="false">
+                                            </asp:DropDownList>*@
+                                        <select style="Width:100%" id="ddlSubOwner" class="form-control" disabled>
+                                        </select>
+                                    </div>
+                                </div>
+                                @*Added on 09-04-2025  for the new user role Client View – Single Site – Single Location by  ss *@
+                                <div class="row" id="divSelectSiteAndLocation" style="display:none">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label id="lblOwnerName">Site<i class="w3-text-red">*</i></label>
+
+                                        <select style="Width:100%" id="ddlSite" onchange="ddlLocation()" class="form-control">
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 ">
+                                        <label id="lblSubOwner">Location<i class="w3-text-red">*</i></label>
+
+                                        <select style="Width:100%" id="ddlLocation" class="form-control">
+                                        </select>
+                                    </div>
+
+                                </div>
+                            </fieldset>
+                            <fieldset class="userSecurity">
+                                <legend>
+                                    <label>Security&nbsp;<i class="fa fa-arrow-down"></i></label>
+                                </legend>
+                                <div class="col-lg-12 col-md-6 col-sm-6 col-xs-12">
+                                    <input type="checkbox" id="ChkIpAddress" onchange="ChkIpAddress_CheckedChanged()" />
+                                    <label>&nbsp;IP Address</label>
+                                    <input type="text" id="txtIPAddress" style="margin-bottom: 10px;" disabled Class="form-control" title="Enter multiple IP address separated by comma like this 1.126.109.1,1.126.109.5" placeholder="Enter multiple IP address separated by comma like this 1.126.109.1,1.126.109.5" />
+                                    <input type="checkbox" id="ChkEmailAuthantication" />
+                                    <label>&nbsp;Email Authentication</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>
+                                    <label>Notes <i class="fa fa-arrow-down"></i></label>
+                                </legend>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    @*<asp:TextBox ID="txtnotes" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="10" Style="max-width: 576px; min-width: 100%; height: 100px !important"></asp:TextBox>*@
+                                    <textarea id="txtnotes" TextMode="MultiLine" Rows="10" style="max-width: 576px; min-width: 100%; height: 100px !important"></textarea>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        @*<asp:HiddenField ID="imgload" Value="" runat="server" />*@
+                        <input type="hidden" id="imgload" Value="" />
+                        <div class="col-lg-5 col-md-5 col-sm-7 col-xs-12" style="margin-left: -7px">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <fieldset>
+                                    <legend>
+
+                                        <label>Licence <i class="fa fa-arrow-down"></i></label>
+                                    </legend>
+
+                                    <div class="safari" style="display: none;">
+                                        @*<asp:Image runat="server" ID="Image1" Height="176px" Width="338px" CssClass="img-thumbnail img-responsive" src="../images/noimg.jpg" ClientIDMode="Static" />*@
+                                        <img id="Image1" style="Height:176px; Width:338px" class="img-thumbnail img-responsive" src="~/images/noimg.jpg" ClientIDMode="Static" />
+                                        <div class="row"></div>
+                                    </div>
+                                    <div class="row safari" style="display: none;">
+
+                                        <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+                                            <input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn" accept="image/*;capture=camera" />
+                                        </div>
+                                    </div>
+                                    <!-- need to check in terms of display :none-->
+                                    <div class="nonsafari" style="display: block;">
+                                        @*<asp:Image runat="server" ID="imga" Style="max-height: 300px; height: auto" CssClass="img-thumbnail img-responsive changeimg" src="../images/noimg.jpg" ClientIDMode="Static" />*@
+                                        <img id="imga" style="max-height: 300px; height: auto" class="img-thumbnail img-responsive changeimg" src="~/images/noimg.jpg" />
+                                        <div id="Photoblock" class="hdnCamerabefore" style="display: none; width: 200px;">
+                                            <canvas id="canvas" width="640" height="480" style="width: 336px; height: 180px"></canvas>
+                                        </div>
+                                        <div class="row"></div>
+                                        <div class="row">
+                                            <div class="desktopApp" style="display: block;">
+                                                <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
+                                                    @*<Telerik:RadAsyncUpload Width="100%" Size="15px" runat="server" ID="radUpdogImg"
+                                                                                MultipleFileSelection="Disabled" AllowedFileExtensions="JPG,gif,png,jpg,tif,tiff,jpeg,JPEG,ico,bmp" OnClientFileSelected="OnClientFileSelected" MaxFileInputsCount="1" OnClientFileUploadRemoved="OnClientFileRemoved" Skin="Metro" EnableInlineProgress="false" DisableChunkUpload="true" ChunkSize="2" EnableViewState="true">
+                                                        </Telerik:RadAsyncUpload>
+                                                        <asp:HiddenField ID="hdfield" Value="" runat="server" />*@
+                                                    @*<input type="file" class="fileinput" style="Width:100%; font-Size:15px" id="radUpdogImg"
+                                                        AllowedFileExtensions="JPG,gif,png,jpg,tif,tiff,jpeg,JPEG,ico,bmp" OnClientFileSelected="OnClientFileSelected" MaxFileInputsCount="1" OnClientFileUploadRemoved="OnClientFileRemoved" Skin="Metro" EnableInlineProgress="false" DisableChunkUpload="true" ChunkSize="2" EnableViewState="true" />*@
+
+                                                    <input type="file" class="fileinput" style="Width:100%; font-Size:15px" id="radUpdogImg"
+                                                           AllowedFileExtensions="JPG,gif,png,jpg,tif,tiff,jpeg,JPEG,ico,bmp" />
+
+                                                    <input type="hidden" id="hdfield" Value="" />
+                                                </div>
+                                            </div>
+                                            <div class="mobileApp" style="display: none;">
+                                                <input type="file" name="file" id="mobApp_file" class="custombtn" accept="image/*;capture=camera" />
+                                            </div>
+                                            <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3  w3-padding-top" style="margin-top: -6px">
+                                                <img src="~/images/forspinicon.png" style="height: 20px; cursor: pointer;" id="btnchngeimg" onclick="newclickforward();" />
+                                            </div>
+                                            <div class="col-lg-1 col-md-1 col-sm-3 col-xs-3  w3-padding-top" style="margin-top: -6px">
+                                                <img src="~/images/backspinicon.png" style="height: 20px; cursor: pointer;" id="btnchngg" onclick="newclickbackward();" />
+                                            </div>
+                                            <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1" id="divdeleteimag" runat="server" style="display: none">
+                                                <a id="btndeleteImage" onclick="btndeleteImage();"><i class="glyphicon glyphicon-trash"></i></a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    @*<asp:HiddenField ID="imgangle" Value="0" runat="server" />*@
+                                    <input type="hidden" id="imgangle" Value="0" />
+                                    <div class="row">
+                                        <div class="col-lg-3 col-md-3 col-xs-4 col-sm-4" id="removediv" runat="server" style="display: none">
+                                            <a id="btncaptureRemove" style="font-size: 10px;">X Remove</a>
+                                        </div>
+
+                                        <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 desktopApp nonsafari" style="display: block;">
+                                            <button type="button" id="getCamera" class="btn w3-btn w3-ripple w3-blue-grey"><i class="fa fa-camera"></i>&nbsp;Capture Photo</button>
+
+                                        </div>
+                                    </div>
+
+
+
+                                </fieldset>
+                                @*<asp:TextBox runat="server" ID="txtuserid" Visible="false" Text='<%#Eval("UserID") %>'>></asp:TextBox>*@
+                                <input type="text" id="txtuserid" style="display:none;" Text='<%#Eval("UserID") %>' />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<%-- Photo Capture Start Model --%>*@
+<div id="btnOpenModel" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 365px; margin-top: 50px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h4" runat="server">Capture Your Licence</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <video id="video" style="width:100%; height:auto" autoplay></video>
+                <div class="row">
+                    <div class="col-lg-4 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="snap" class="btn btn-primary">Snap Photo</button>
+                    </div>
+                    <div class="col-lg-5 col-md-6 col-sm-3 col-xs-3"></div>
+                    <div class="col-lg-3 col-md-2 col-sm-4 col-xs-4">
+                        <button type="button" id="cancelsnap" class="btn btn-danger">Cancel</button>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+<div id="divdelete" runat="server" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h6" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="c1">Are you sure you want to Delete the Image?</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeleteyes" runat="server" OnClick="btndeleteyes_Click"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                <button class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteyes" onclick="btndeleteyes_Click();"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btndeleteno" runat="server" OnClick="btndeleteno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" onclick="$('#divdelete').css('display', 'none');"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divUserPopup" runat="server" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 150px; width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey">
+            <h4 class="w3-text-white" id="h1" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label runat="server" id="Label1">Please Clear Owner Name And Sub Owner Then Change User Role.</label>
+            </p>
+        </div>
+        <div class="row" style="padding-bottom: 20px">
+            <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnOk" runat="server" OnClientClick="btnOkPopClose();return false;"><i class="glyphicon glyphicon-remove-circle"></i> OK</asp:LinkButton>*@
+                <button class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" onclick="btndeleteno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>

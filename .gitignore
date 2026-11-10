@@ -1,0 +1,14 @@
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+packages/*
+!packages/repositories.config
+TestResults/
+*.log
+*.mdf
+*.ldf
+publish/

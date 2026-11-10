@@ -1,0 +1,388 @@
+﻿
+@{
+    ViewBag.Title = "ClientUsers";
+}
+<style>
+    .dt-button.buttons-csv.buttons-html5 {
+        display: none;
+    }
+</style>
+
+<script>
+
+    $(function () {
+        GetClientUser();
+
+        // On the date 05 / 13 / 2025, the 'Show Password' button and the password column from the DataTable were removed.
+        //var UserRole = getParameterByName('UserRole');
+        //UserRole = Decrypt(UserRole);
+        //if (UserRole == 10)
+        //{
+        //    //$("#divShowPasswordButton").css('display', '');
+        //    //$('.blankdiv').removeClass('col-lg-3 col-md-1 col-sm-1 col-xs-1').addClass('col-lg-1 col-md-1 col-sm-1 col-xs-1');
+
+
+        //    $('.blankdiv').removeClass('col-lg-3 col-md-1 col-sm-1 col-xs-1').addClass('col-lg-1 col-md-1 col-sm-1 col-xs-1');
+        //    var newDiv = $('<div/>', {
+        //        id: 'divShowPasswordButton',
+        //        class: 'col-lg-2 col-md-2 col-sm-2 col-xs-4',
+        //        html: '<button id="ShowPasswordButton" style="width:100%;height: 25px;padding-top: 3px;" class="btn w3-btn w3-teal" onclick="btnShowPasswordButton()"><i class="fa fa-eye"></i>&nbsp;Show Password</button>'
+        //    });
+
+        //    // Append the new div to a parent element or wherever you want it to be inserted
+        //    newDiv.appendTo('#divShowPasswordButton');
+        //}
+    });
+    var tbleClientUser;
+    var tblClientUserpass;
+
+    //Commented on (20-02-2024) we have passed a parameter of showpass to show password only when client press show passord button from front end.
+    //function GetClientUser() {
+    function GetClientUser(showpass) {
+        var id = getParameterByName('id');
+        $.ajax({
+            url: '/ClientUsers/GetClientUserData',
+            type: 'POSt',
+            data: JSON.stringify({ id: id }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                var data = response;
+
+                $('#tblClientUser').DataTable().clear();
+                $('#tblClientUser').DataTable().destroy();
+                $('#tblClientUserpass').DataTable().clear();
+                $('#tblClientUserpass').DataTable().destroy();
+                if (data.length != 0) {
+                    var str = '';
+                    var str2 = '';
+                    $.each(data, function (index, obj) {
+
+                        var UserId = obj.UserId == null ? "" : obj.UserId;
+                        var firstname = obj.firstname == null ? "" : obj.firstname;
+                        var lastname = obj.lastname == null ? "" : obj.lastname;
+                        var Category = obj.Category == null ? "" : obj.Category;
+                        var CellPhone = obj.CellPhone == null ? "" : obj.CellPhone;
+                        var Zip = obj.Zip == null ? "" : obj.Zip;
+                        var City = obj.City == null ? "" : obj.City;
+                        var Role = obj.Role == null ? "" : obj.Role;
+                        var EmailID = obj.EmailID == null ? "" : obj.EmailID;
+                        var Status = obj.Status == null ? "" : obj.Status;
+                        // On the date 05 / 13 / 2025, the 'Show Password' button and the password column from the DataTable were removed.
+                        //var Password = obj.Password == null ? "" : obj.Password;
+                        //var Password = Decrypt(obj.Password);
+                        //Password = Password == null ? "" : Password;
+
+                        if (showpass == "showpass") {
+                            str += "<tr>";
+                            str += "<td id='UserId_" + index + "' class='clsClientUserIDWidth' style='display: none;'> " + UserId + "</td>";
+                            str += "<td id='EditClientUser_" + index + "' class='clsClientUserId' style='cursor:pointer;' nowNumber='" + index + "'><i class='expand fa fa-pencil'></i></td>";
+                            str += "<td class='clsClientUserdeleteWidth' style='cursor:pointer;'><i id='deleteUserID_" + UserId + "' class='fa fa-trash'></i></td>";
+                            str += "<td class='clsFirstNameWidth' > " + firstname + "</td>";
+                            str += "<td class='clsLastNameWidth' > " + lastname + "</td>";
+                            str += "<td class='clsCategoryWidth' > " + Category + "</td>";
+                            str += "<td class='clsRoleWidth' > " + Role + "</td>";
+                            str += "<td class='clsEmailWidth' > " + EmailID + "</td>";
+                            // On the date 05 / 13 / 2025, the 'Show Password' button and the password column from the DataTable were removed.
+                            //str += "<td class='clsPasswordWidth'> " + Password + "</td>";
+                            str += "<td class='clsStatusWidth' > " + Status + "</td>";
+                            str += "<td class='clsContactNoWidth' > " + CellPhone + "</td>";
+                            str += "<td class='clsPostcodeWidth' > " + Zip + "</td>";
+                            str += "<td class='clsCityWidth' > " + City + "</td>";
+                            str += "</tr>";
+                        }
+                        else {
+                            str2 += "<tr>";
+                            str2 += "<td id='UserId_" + index + "' class='clsClientUserIDWidth' style='display: none;'> " + UserId + "</td>";
+                            str2 += "<td id='EditClientUser_" + index + "' class='clsClientUserId' style='cursor:pointer;' nowNumber='" + index + "'><i class='expand fa fa-pencil'></i></td>";
+                            str2 += "<td class='clsClientUserdeleteWidth' style='cursor:pointer;'><i id='deleteUserID_" + UserId + "' class='fa fa-trash'></i></td>";
+                            str2 += "<td class='clsFirstNameWidth' > " + firstname + "</td>";
+                            str2 += "<td class='clsLastNameWidth' > " + lastname + "</td>";
+                            str2 += "<td class='clsCategoryWidth' > " + Category + "</td>";
+                            str2 += "<td class='clsRoleWidth' > " + Role + "</td>";
+                            str2 += "<td class='clsEmailWidth' > " + EmailID + "</td>";
+                            str2 += "<td class='clsStatusWidth' > " + Status + "</td>";
+                            str2 += "<td class='clsContactNoWidth' > " + CellPhone + "</td>";
+                            str2 += "<td class='clsPostcodeWidth' > " + Zip + "</td>";
+                            str2 += "<td class='clsCityWidth' > " + City + "</td>";
+                            str2 += "</tr>";
+                        }
+                    });
+
+                }
+                if (showpass == "showpass") {
+                    $("#LoadingPanel1").css("display", "none");
+                    $('#tbodyTblClientUser2').html(str);
+                    tblClientUserpass = $('#tblClientUserpass').dataTable({
+                        "bSort": false,
+                        "processing": true,
+                        searching: true,
+                        "bLengthChange": false,
+                        "bInfo": false,
+                        autoWidth: false,
+                        scrollX: true,
+                        scrollCollapse: true,
+                        scrollY: "60vh",
+                        //paging: false,
+                        dom: 'Bfrtip',
+                        buttons: [
+
+                            {
+                                extend: 'csvHtml5',
+                                title: 'User List',
+                                exportOptions: {
+                                    columns: ':visible'
+                                }
+                            }
+                        ],
+
+                    });
+                    $(document).on('click', '.fa-trash', function () {
+                        var Userid = this.id.split('deleteUserID_')[1];
+                        $("#hdnUserID").val(Userid);
+                        $("#PopupDelete").css("display", "block");
+                    });
+
+                    //$(".fa-trash").click(function () {
+                    //    var Userid = this.id.split('deleteUserID_')[1];
+                    //    $("#hdnUserID").val(Userid);
+                    //    $("#PopupDelete").css("display", "block");
+                    //});
+                    $('#tblClientUserpass tbody').on('click', '.clsClientUserId', function () {
+
+                        var rowNumber = $(this).attr('nowNumber');
+                        var ClientUserid = $('#UserId_' + rowNumber).text();
+
+                        var UID = getParameterByName('UID');
+                        var UserRole = getParameterByName('UserRole');
+                        var id = getParameterByName('id');
+                        var encryData = Encrypt([ClientUserid]);
+                        ClientUserid = encryData[0];
+                        location.href = '/UserInfo/UserInfo?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&UserID=' + ClientUserid;
+
+                        //Response.Redirect("UserInfo.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&UserID=" + databaseCon.Encrypt(UserId), false);
+                    });
+                }
+                else {
+                    $("#LoadingPanel1").css("display", "none");
+                    $('#tbodyTblClientUser').html(str2);
+                    tbleClientUser = $('#tblClientUser').dataTable({
+                        "bSort": false,
+                        "processing": true,
+                        searching: true,
+                        "bLengthChange": false,
+                        "bInfo": false,
+                        autoWidth: false,
+                        scrollX: true,
+                        scrollCollapse: true,
+                        scrollY: "60vh",
+                        //paging: false,
+                        dom: 'Bfrtip',
+                        buttons: [
+
+                            {
+                                extend: 'csvHtml5',
+                                title: 'User List',
+                                exportOptions: {
+                                    columns: ':visible'
+                                }
+                            }
+                        ],
+
+                    });
+                    $(document).on('click', '.fa-trash', function () {
+                        var Userid = this.id.split('deleteUserID_')[1];
+                        $("#hdnUserID").val(Userid);
+                        $("#PopupDelete").css("display", "block");
+                    });
+
+                    //$(".fa-trash").click(function () {
+                    //    var Userid = this.id.split('deleteUserID_')[1];
+                    //    $("#hdnUserID").val(Userid);
+                    //    $("#PopupDelete").css("display", "block");
+                    //});
+                    $('#tblClientUser tbody').on('click', '.clsClientUserId', function () {
+
+                        var rowNumber = $(this).attr('nowNumber');
+                        var ClientUserid = $('#UserId_' + rowNumber).text();
+
+                        var UID = getParameterByName('UID');
+                        var UserRole = getParameterByName('UserRole');
+                        var id = getParameterByName('id');
+                        var encryData = Encrypt([ClientUserid]);
+                        ClientUserid = encryData[0];
+                        location.href = '/UserInfo/UserInfo?UID=' + UID + '&UserRole=' + UserRole + '&id=' + id + '&UserID=' + ClientUserid;
+
+                        //Response.Redirect("UserInfo.aspx?UID=" + Request.QueryString["UID"] + "&UserRole=" + Request.QueryString["UserRole"] + "&id=" + Request.QueryString["id"] + "&UserID=" + databaseCon.Encrypt(UserId), false);
+                    });
+                }
+            }
+        });
+
+    }
+    function btnConfirmDeleteYes_Click() {
+        var UserID = $('#hdnUserID').val();
+        $.ajax({
+            url: '/ClientUsers/btnConfirmDeleteYes_Click',
+            type: 'POSt',
+            data: JSON.stringify({ UserID: UserID }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                if (response.Result == "Success") {
+                    $("#PopupDelete").css("display", "none");
+                    //GetClientUser();
+                    location.reload();
+                    CustomAlert(response);
+
+                } else {
+                    $("#PopupDelete").css("display", "none");
+                    CustomAlert(response);
+                }
+            }
+        });
+    }
+    function btnConfirmDeleteNo_Click() {
+        $("#PopupDelete").css("display", "none");
+    }
+
+    function EncrptyClientUserID(clientUserId) {
+        let tempClientUserId;
+        $.ajax({
+            url: '/ClientUsers/EncrptyClientUserID',
+            type: 'POST',
+            async: false,
+            data: { clientUserId },
+            success: function (response) {
+                if (response != null) {
+                    tempClientUserId = response;
+                }
+            }
+        });
+        return tempClientUserId;
+    }
+
+
+    function btnExportToCSV() {
+        $('.dt-button.buttons-csv.buttons-html5').trigger('click');
+    }
+
+
+    function btnAddUser_Click() {
+        var UID = getParameterByName('UID');
+        var UserRole = getParameterByName('UserRole');
+        var Clientid = getParameterByName('id');
+        var UserID = '0';
+        var encryData = Encrypt([UserID]);
+        UserID = encryData[0];
+        window.location.href = '/UserInfo/UserInfo?UID=' + UID + '&UserRole=' + UserRole + '&id=' + Clientid + '&UserID=' + UserID;
+    }
+
+    //Added on (20-02-2024) we have passed a parameter of showpass to show password only when client press show passord button from front end.
+    //On the date 05 / 13 / 2025, the 'Show Password' button and the password column from the DataTable were removed.
+    //function btnShowPasswordButton()
+    //{
+    //    GetClientUser('showpass');
+    //    $("#tblClientUser").css('display', 'none');
+    //    $("#tblClientUserpass").css('display', '');
+    //}
+
+</script>
+
+<div class="row">
+    <div class="title_left col-lg-5 col-md-5 col-sm-5 col-xs-7">
+        @*<h4 class="heading" style="color: #0070ba"><b><i class="fa fa-user"></i>&nbsp;<label id="LblClientUserList" Text="Users List" Font-Size="16px" Font-Bold="true">Users List</label></b></h4>*@
+        <h4 class="heading" style="color: #0070ba"><b style="font-size:16px;"><i class="fa fa-user"></i>&nbsp;Users List</b></h4>
+    </div>
+
+    <div class="col-lg-3 col-md-1 col-sm-1 col-xs-1 blankdiv"></div>
+
+    <div class="col-lg-2 col-md-2 col-sm-3 col-xs-3">
+        <button id="ExportToCsvButton" style="width:100%;height: 25px;padding-top: 3px;" class="btn w3-btn w3-teal" onclick="btnExportToCSV()"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+    </div>
+    <div class="col-lg-2 col-md-3 col-sm-2 col-xs-3">
+        @*<asp:LinkButton CssClass="w3-btn w3-teal" CausesValidation="true" Style="height: 24px; padding-top: 3px" ID="btnAddUser" Width="100%" OnClick="btnAddUser_Click" runat="server"><i class="fa fa-plus "></i>&nbsp;Add User</asp:LinkButton>*@
+        <button class="w3-btn w3-teal" style="height: 25px; padding-top: 3px; width:100%" id="btnAddUser" onclick="btnAddUser_Click();"><i class="fa fa-plus "></i>&nbsp;Add User</button>
+
+    </div>
+    @*<div id="divShowPasswordButton" class="col-lg-2 col-md-2 col-sm-2 col-xs-4" style="display:none">
+            <button id="ShowPasswordButton" style="width:100%;height: 25px;padding-top: 3px;" class="btn w3-btn w3-teal" onclick="btnShowPasswordButton()"><i class="fa fa-eye"></i>&nbsp;Show Password</button>
+        </div>*@
+    @*On the date 05/13/2025, the 'Show Password' button and the password column from the DataTable were removed.*@
+    @*<div id="divShowPasswordButton"></div>*@
+</div>
+
+<div id="FormSection" class="row">
+    <div class="clearfix"></div>
+    <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+        <div id="ClientUsersDiv" style="color: black; width: 100%;margin-top:5px;">
+            <table id="tblClientUser" class="table table-striped">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th class="clsClientUserIDWidth" style="display:none;">CleintUser ID</th>
+                        <th class="clsClientUserEditWidth"></th>
+                        <th class="clsClientUserdeleteWidth"></th>
+                        <th class="clsFirstNameWidth">First Name</th>
+                        <th class="clsLastNameWidth">Last Name</th>
+                        <th class="clsCategoryWidth">Category</th>
+                        <th class="clsRoleWidth">Role</th>
+                        <th class="clsEmailWidth">Email</th>
+                        <th class="clsStatusWidth">Status</th>
+                        <th class="clsContactNoWidth">Contact No</th>
+                        <th class="clsPostcodeWidth">Postcode</th>
+                        <th class="clsCityWidth">City</th>
+                    </tr>
+
+                </thead>
+                <tbody id="tbodyTblClientUser"></tbody>
+            </table>
+
+            <table id="tblClientUserpass" class="table table-striped" style="display:none;" width="100%">
+                <thead style="background-color: #efefef; color: #716262;">
+                    <tr>
+                        <th class="clsClientUserIDWidth" style="display:none;">CleintUser ID</th>
+                        <th class="clsClientUserEditWidth"></th>
+                        <th class="clsClientUserdeleteWidth"></th>
+                        <th class="clsFirstNameWidth">First Name</th>
+                        <th class="clsLastNameWidth">Last Name</th>
+                        <th class="clsCategoryWidth">Category</th>
+                        <th class="clsRoleWidth">Role</th>
+                        <th class="clsEmailWidth">Email</th>
+                        @*On the date 05/13/2025, the 'Show Password' button and the password column from the DataTable were removed.*@
+                        @*<th class="clsPasswordWidth">Password</th>*@
+                        <th class="clsStatusWidth">Status</th>
+                        <th class="clsContactNoWidth">Contact No</th>
+                        <th class="clsPostcodeWidth">Postcode</th>
+                        <th class="clsCityWidth">City</th>
+                    </tr>
+
+                </thead>
+                <tbody id="tbodyTblClientUser2"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnUserID" />
+<div id="PopupDelete" class="w3-modal" style="display: none">
+    <div class="w3-modal-content w3-animate-zoom w3-card-8" style="width: 365px; margin-top: 86px;">
+        <header class="w3-container w3-dark-grey ">
+            <h4 class="w3-text-white" id="H1"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Record</h4>
+        </header>
+        <div class="w3-container">
+            <p class="w3-padding-top w3-text-grey">
+                <label id="ConfirmMassageText">Are you sure you want to Delete the Record?</label>
+            </p>
+        </div>
+        <div class="row topmargn" style="padding-top: 20px">
+            <div class="col-xs-5 col-lg-5 col-md-5 col-sm-5"></div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2 w3-margin-bottom" style="margin-right: 30px">
+                @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnConfirmDeleteYes" OnClick="btnConfirmDeleteYes_Click" runat="server"><i class="glyphicon glyphicon-ok-circle "></i> Yes</asp:LinkButton>*@
+                <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnConfirmDeleteYes" OnClick="btnConfirmDeleteYes_Click()"><i class="glyphicon glyphicon-ok-circle "></i> Yes</button>
+            </div>
+            <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2 w3-margin-bottom" style="margin-right: 30px">
+                @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnConfirmDeleteNo" OnClick="btnConfirmDeleteNo_Click" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnConfirmDeleteNo" OnClick="btnConfirmDeleteNo_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+            </div>
+        </div>
+    </div>
+</div>

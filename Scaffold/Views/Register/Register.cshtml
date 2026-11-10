@@ -1,0 +1,2383 @@
+﻿@{
+    ViewBag.Title = "Register";
+}
+
+<script src="~/Content/js/Register.js?v1=84"></script>
+
+@*<script src="~/Content/js/select2.min.js"></script>*@
+@*<script src="http://code.jquery.com/jquery-1.12.1.min.js"></script>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />*@
+@*<link href="~/Content/Css/select2.min.css" rel="stylesheet" />*@
+
+<script src="https://maps.googleapis.com/maps/api/js?key=@(Session["googlemapapi"])&libraries=places" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+@*<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css" />smartresize*@
+@*<link href="~/Content/Css/ImagePointer.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="~/Content/js/jquery.imagePointer.js"></script>*@
+<script src="~/Content/js/JobInfo.js?v1=8.2"></script>
+<script>
+    $(function () {
+        $('#ddlInspectionTimeFrame').val('@ViewBag.ddlInspectionTimeFrame');
+        $('#ddlChecklistInsp').val('@ViewBag.ddlChecklistInsp');
+        $('#hdnNoOfScafRefGenerate').val('@ViewBag.NoOfScafRefGenerate');
+        var RegId =  $('#hdnRID').val();
+        var HdnGenerate = $('#hdnNoOfScafRefGenerate').val();
+        if (HdnGenerate == "True" && RegId == "0") {
+            $('#divGenerate').css('display', 'block');
+        }
+        else {
+            $('#divGenerate').css('display', 'none');
+        }
+
+        $('#hdnOfflineEnabled').val('@ViewBag.OfflineEnabled');
+        if ($('#hdnOfflineEnabled').val() == 'True') {
+            $('#DivbtnOfflineLink').css('display', 'block');
+        }
+//         added the service worker to the offlineRegisterlist
+//and window.addEventListener('load', function ())
+// removed this function
+       // if ('serviceworker' in navigator) {
+       //     window.addeventlistener('load', function () {
+       //         navigator.serviceworker.register('../sw_cached_pages.js?v=50.0')
+       //             .then(function (registration) {
+       //                 console.log('service worker registered with scope:', registration.scope);
+       //             })
+       //             .catch(function (err) {
+       //                 console.log('service worker registration failed:', err);
+       //             });
+       //     });
+       // }
+
+
+    });
+</script>
+
+<style>
+    .calendar-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: black;
+    }
+
+    #PipelineStartDate {
+        width: 100%;
+        padding-right: 30px; /* Adjust as needed to prevent text overlap */
+        box-sizing: border-box;
+    }
+
+    #BuildDate {
+        width: 100%;
+        padding-right: 30px; /* Adjust as needed to prevent text overlap */
+        box-sizing: border-box;
+    }
+
+    .calendar-icon {
+        cursor: pointer;
+    }
+    /* 100% Image Width on Smaller Screens */
+    @@media only screen and (max-width: 700px) {
+        .modal-content {
+            width: 100%;
+        }
+    }
+
+    .out {
+        animation-name: zoom-out;
+        animation-duration: 0.6s;
+    }
+
+    .modal-content {
+        -webkit-animation-name: zoom;
+        -webkit-animation-duration: 0.6s;
+        animation-name: zoom;
+        animation-duration: 0.6s;
+    }
+
+    @@-webkit-keyframes zoom {
+        from {
+            -webkit-transform: scale(1)
+        }
+
+        to {
+            -webkit-transform: scale(2)
+        }
+    }
+
+    @@keyframes zoom {
+        from {
+            transform: scale(0.4)
+        }
+
+        to {
+            transform: scale(1)
+        }
+    }
+
+    @@-webkit-keyframes zoom-out {
+        from {
+            transform: scale(1)
+        }
+
+        to {
+            transform: scale(0)
+        }
+    }
+
+    @@keyframes zoom-out {
+        from {
+            transform: scale(1)
+        }
+
+        to {
+            transform: scale(0)
+        }
+    }
+
+    #caption {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 700px;
+        text-align: center;
+        color: #ccc;
+        padding: 10px 0;
+        height: 150px;
+    }
+    /* Modal Content (image) */
+    .modal-content {
+        margin: auto;
+        display: block;
+        width: 75%;
+        //max-width: 75%;
+    }
+    /* The Modal (background) */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 99; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: hidden; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        object-fit: contain;
+        background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+    }
+
+    #imga:hover {
+        opacity: 0.7;
+    }
+
+    #imga {
+        border-radius: 5px;
+        cursor: pointer;
+        /*        transition: 0.3s;
+    */ display: block;
+        /* margin-left: auto;
+            margin-right: auto*/
+    }
+    /*#CanvasFloorImage {
+            width: 100%;
+        }*/
+
+    .spancolorandsize {
+        font-size: 12px !important;
+    }
+
+    .RadComboBox_Simple {
+        border-radius: 4px;
+    }
+
+    .RadComboBoxDropDown_Simple .rcbHovered {
+        background-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbInner {
+        border-color: #e5e5e5 !important;
+    }
+
+    .RadComboBox_Simple .rcbActionButton {
+        border-color: #ffffff !important;
+        background-color: #ffffff !important;
+        height: 24px !important;
+    }
+
+    html .RadComboBox .rcbInner, html .RadComboBox .rcbActionButton {
+        border-radius: 4px;
+        height: 27px;
+    }
+
+    .ruRemove {
+        display: none;
+    }
+
+    span.text {
+        font-size: 13px;
+    }
+
+    @@media (min-width: 768px) and (max-width: 1500px) {
+        #txtlckedsignbynone {
+            margin-top: -13px;
+        }
+    }
+
+    @@media (min-width:768px) and (max-width:991px) {
+        span.text {
+            font-size: 11px;
+        }
+    }
+
+    @@media (max-width:767px) {
+        span.text {
+            display: none;
+        }
+    }
+
+    @@media (min-width: 211px) and (max-width: 767px) {
+        .icon {
+            width: 100%;
+            height: auto;
+        }
+    }
+
+    #custDetails {
+        height: auto !important;
+    }
+
+    .xsimageframe {
+        margin: 25px 0 0 0;
+    }
+
+    .rotatedimg {
+        /*margin: 0 0 50px 25px;*/
+        margin: 0 0 50px 0;
+        max-width: 260px;
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+    }
+
+
+    /*#btnSave {
+            font-size: 10px !important;
+            width: auto !important;*/
+    /*padding-left: 4px;*/
+    /*}*/
+
+    /* #btnaddnew {
+            font-size: 10px !important;
+            width: auto !important;
+            padding-left: 0px;
+        }*/
+
+    /*#btnWorkPack {
+            font-size: 10px !important;
+            width: auto !important;
+            padding-left: 4px;
+        }*/
+
+    /* #btnCAncel {
+            font-size: 10px !important;
+            width: auto !important;
+            padding-left: 4px;
+        }*/
+
+    #BackTofloorMap {
+        font-size: 10px !important;
+        width: auto !important;
+        padding-left: 4px;
+        /*//height: 33px;*/
+        padding-right: 7px;
+    }
+
+    #imga {
+        cursor: zoom-in;
+    }
+
+    .Colred {
+        border-color: red !important;
+    }
+
+    /* img {
+        border: 1px solid #e5e5e5;
+    }*/
+</style>
+
+<style>
+    @@media(min-width:1200px) {
+        .zoomin {
+            width: auto;
+            max-height: fit-content !important;
+            height: -webkit-fill-available;
+        }
+
+        #btndelete {
+            margin: 0 0 0 0;
+        }
+    }
+
+    @@media(min-width:360px) and (max-width:767px) {
+        .zoomin {
+            width: auto;
+            max-height: fit-content !important;
+            height: none !important;
+        }
+    }
+
+    @@media (min-width:200px) and (max-width:550px) {
+
+        .sn {
+            font-size: 12px;
+        }
+
+        #btndelete {
+            margin-left: 90px;
+        }
+
+
+        .xsformsection {
+            margin-left: -9px;
+        }
+
+        .xsimageframe {
+            margin-left: -29px;
+        }
+
+        #custDetails {
+            height: 2500px;
+            margin-left: 6px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .text, .respText {
+            display: none; /* Hide text in buttons */
+        }
+    }
+
+    @@media(max-width:667px) {
+        /* #btnSave {
+            font-size: 10px !important;
+            height: 29px;
+            padding-top: 3px;
+        }*/
+    }
+
+    @@media (min-width:700px) {
+
+        .xsimageframe {
+            margin-left: -12px;
+        }
+
+        #custDetails {
+            margin-left: 6px;
+        }
+
+        #UlNavTabSeciton {
+            margin-left: 6px;
+        }
+
+        .element.style {
+            width: 100px;
+        }
+    }
+
+
+    .rdf-initial {
+        margin-top: -16px;
+    }
+
+    .form-control {
+        height: 28px !important;
+    }
+
+    .x_content {
+        padding: 0 0px 6px;
+    }
+
+    .input-group {
+        margin-bottom: 0px;
+    }
+
+    #FormSection label {
+        color: gray !important;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .nav-sm span.fa, .nav-sm .menu_section h3 {
+        display: block !important;
+    }
+
+    .w3-card-4, .w3-hover-shadow:hover {
+        box-shadow: 0 0px 0px 0 rgba(0,0,0,0.2),0 0px 0px 0 rgba(0,0,0,0.19) !important;
+    }
+
+    .panel_toolbox > li > a:hover {
+        background: none;
+    }
+
+    label {
+        font-size: 12px;
+    }
+
+    #txtplnstandDur, #txtNoOfPlatform, #txtplnstandDur, #txtCrewSize, #lbllat, #lbllong, #rdpDateTagged, #rdpdatedis, #radUpdogImgfakeInput0, #txtManhrserect, #txtmanDisman, #txtlength, #txtwidth, #txtheight, #rddateDisAppro {
+        border-color: #e5e5e5;
+        border-radius: 4px !important;
+    }
+
+
+    .variationmodal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 60px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .variationmodal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        color: black;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .close-icon {
+        margin-left: auto;
+        font-size: 24px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        color: #fff; /* Ensure this is applied correctly */
+    }
+
+    @@media (max-width: 1024px) {
+        .text, .respText {
+            display: none;
+            Hide text on buttons
+        }
+    }
+
+    @@media (max-width: 1366px) {
+        .text, .respText {
+            display: none;
+            Hide text on buttons
+        }
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center; /* Center align buttons */
+        gap: 10px; /* Space between buttons */
+        flex-wrap: wrap; /* Wrap on small screens */
+    }
+
+        .button-container button {
+            flex: 1; /* Equal width for both buttons */
+            max-width: 150px; /* Limit width */
+        }
+</style>
+
+@*<div style="display: none" id="art1">
+        <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+        <label ID="alertlabel"></label>
+    </div>*@
+<input type="hidden" ID="tempimg" Value="" />
+<input type="hidden" ID="basetempimg" Value="" />
+<input type="hidden" ID="getimage" Value="" />
+<input type="hidden" ID="hdnClientID" />
+<input type="hidden" ID="hdnSigntr" />
+<input type="hidden" ID="hdnRID" />
+<input type="hidden" ID="hdnXPosition" />
+<input type="hidden" ID="hdnYPosition" />
+<input type="hidden" ID="hdnmouseXPos" />
+<input type="hidden" ID="hdnmouseYPos" />
+<input type="hidden" ID="hdnFloorImage" />
+<input type="hidden" id="hdnPrevFloorLebel" />
+<input type="hidden" id="hdnimgname" />
+<input type="hidden" id="hdnAddbtnAlert" />
+<input type="hidden" id="hdnSaveIsOffline" />
+<input type="hidden" id="hdnNoOfScafRefGenerate" />
+<input type="hidden" id="hdnOfflineEnabled" />
+
+
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+    @*<div class="title_left col-lg-1 col-md-1 col-sm-1 col-xs-1 hidden-xs">
+            <h4 class="heading" style="color: #0070ba">
+                <b>
+                    <span class="icon"><i class="fa fa-book"></i></span>
+                    <span ID="lblclient" style="Font-Size:16px;" class="text">&nbsp;Job</span>
+                </b>
+            </h4>
+        </div>*@
+    @*<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" id="divOffline">
+            <button id="btnOfflineLink" Style="height: 26px; font-size:small;background-color: #bfc3c5; color: white; Width:100%" Class="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click()"><i class="fa fa-wifi" aria-hidden="true"></i>&nbsp;Offline Job</button>
+            <button id="btnoflinee" Style="height: 26px; font-size:small;background-color: #bfc3c5; color: white; display: none; Width:100%" Class="btn btn-dark btnheight btnOffline" OnClick="btnOfflineLink_Click"><i class="fa fa-wifi" aria-hidden="true"></i>&nbsp;Offline Job</button>
+        </div>*@
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        <button id="btnOfflineLink" class="btn w3-btn" style="width: -webkit-fill-available; height: 33px; background-color: #4169E1; border: none; color: white; " onclick="btnGoOfflineClick()">
+            <span class="icon"><i class="fa fa-chain-broken"></i></span>
+            <span class="text">&nbsp; Go Offline</span>
+
+        </button>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style=" text-align: center;">
+        <button id="btnWorkPack" class="w3-btn w3-small w3-blue" style="width: -webkit-fill-available;" onclick="RunReport()">
+            <span class="icon"><i class="fa fa-print"></i></span>
+            <span class="text">&nbsp;Print Work Pack</span>
+        </button>
+    </div>
+
+
+
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-1">
+        <button type="button" id="CopyHistoricalButton" class="w3-btn w3-small w3-orange" style="width: -webkit-fill-available" onclick="CopyHistorical()">
+            <span class="icon"><i class="fa fa-copy"></i></span> <!-- Adjust the font-size property here -->
+            <span class="text">&nbsp;Copy Job</span>
+        </button>
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+
+
+        <button ID="btnSave" style="width:-webkit-fill-available;" Class="w3-btn w3-small w3-green btnheight" OnClick="btnSave_Click();">
+            <span class="icon"><i class="fa fa-save"> </i></span>
+            <span class="respText text">&nbsp;Save</span>
+        </button>
+
+    </div>
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+        <button ID="btnaddnew" style="width:-webkit-fill-available;" Class="w3-btn w3-teal" OnClick="btnaddnew_Click()">
+            <span class="icon"><i class="fa fa-plus"></i></span>
+            <span class="text">&nbsp;Job</span>
+        </button>
+
+        @*<button Class="w3-btn w3-teal buttonAdd" Style="height: 26px; width: 85%; padding-top: 3px; display: none" ID="btnaddregjob" OnClick="btnaddnew_Click()"><i style="display:none;" class="fa fa-plus "></i>&nbsp;</button>*@
+
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        <button ID="btnCAncel" Class="w3-btn w3-small w3-dark-grey" OnClick="btnCAncel_Click()" style="width:-webkit-fill-available;">
+            <span class="icon"><i class="fa fa-backward"> </i></span>
+            <span class="text">&nbsp;Back to Register </span>
+        </button>
+
+        <button id="BackToOffSystemInspection"
+                class="w3-btn w3-small w3-dark-grey"
+                onclick="BtnBackToOffSystemInspection_Click()"
+                style="width:-webkit-fill-available; display:none; padding:8px 10px; line-height:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            <i class="fa fa-backward"></i>&nbsp;Back to Off System Insp.
+        </button>
+    </div>
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+        <button ID="btnPre" class="w3-btn w3-small w3-blue btnheight" OnClick="btnPre_Click()" style="width:-webkit-fill-available;">
+            <span class="icon"><i class="fa fa-chevron-left"> </i></span>
+            <span class="respText text">&nbsp;Prev</span>
+        </button>
+    </div>
+
+    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1">
+
+
+        <button ID="btnNext" class="w3-btn w3-small w3-blue btnheight" OnClick="btnNext_Click()" style="width:-webkit-fill-available;">
+            <span class="respText text">&nbsp;Next</span>
+            <span class="icon"><i class="fa fa-chevron-right"> </i></span>
+        </button>
+
+    </div>
+</div>
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top:5px;">
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" id="DivbtnClearOfflineJobData">
+        <button id="btnClearOfflineJobData" onclick="btnClearOfflineJobData()" style="width: -webkit-fill-available; background-color: #8b2e93; border: none; color: white; height: 33px;" class="w3-btn w3-small btnheight">
+            <span class="icon"><i class="fa fa-step-backward"> </i></span>
+            <span class="respText text">&nbsp;Clear Offline Job Data</span>
+        </button>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" id="btnCloseOutJob">
+        <button type="button" class="w3-btn w3-small w3-red" style="width: -webkit-fill-available;" onclick="btnCloseOutJob_Click()">
+            <span class="icon"><i class="fa fa-check-circle"></i></span>
+            <span class="text">&nbsp;Close Out Job</span>
+        </button>
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        <button ID="BackTofloorMap" Class="w3-btn w3-small w3-dark-grey" OnClick="BtnBackToFloorMap_Click()" style=" width: -webkit-fill-available; display: none">
+            <span class="icon"><i class="fa fa-backward"> </i></span>
+            <span class="text">&nbsp;Back to FloorMap </span>
+        </button>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        <button Class="w3-btn w3-teal Back" style="width: -webkit-fill-available; display: none" ID="btnback" OnClick="btnCAncel_Click()">
+            <span class="icon"><i class="fa fa-backward"></i></span>
+            <span class="c respText">&nbsp;Back </span>
+        </button>
+    </div>
+
+
+
+
+    <!--<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+        <button ID="btnaddnew" style="width:-webkit-fill-available;" Class="w3-btn w3-teal" OnClick="btnaddnew_Click()">
+            <span class="icon"><i class="fa fa-plus"></i></span>
+            <span class="text">&nbsp;Job</span>
+        </button>-->
+    @*<button Class="w3-btn w3-teal buttonAdd" Style="height: 26px; width: 85%; padding-top: 3px; display: none" ID="btnaddregjob" OnClick="btnaddnew_Click()"><i style="display:none;" class="fa fa-plus "></i>&nbsp;</button>*@
+
+    <!--</div>
+
+    <div class="col-lg-3 col-md-2 col-sm-2 col-xs-2">
+
+
+        <button ID="BackTofloorMap" Class="w3-btn w3-small w3-dark-grey" OnClick="BtnBackToFloorMap_Click()" style=" width: -webkit-fill-available; display: none">
+            <span class="icon"><i class="fa fa-backward"> </i></span>
+            <span class="text">&nbsp;Back to FloorMap </span>
+        </button>
+        <button Class="w3-btn w3-teal Back" style="width: -webkit-fill-available; display: none" ID="btnback" OnClick="btnCAncel_Click()">
+            <span class="icon"><i class="fa fa-backward"></i></span>
+            <span class="c respText">&nbsp;Back </span>
+        </button>
+
+    </div>-->
+</div>
+
+    @*<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div id="div_btnPrvNxt" class="button-container">
+                <button ID="btnCAncel" Class="w3-btn w3-small w3-dark-grey" OnClick="btnCAncel_Click()" style="width:-webkit-fill-available;display:none">
+                    <span class="icon"><i class="fa fa-backward"> </i></span>
+                    <span class="text">&nbsp;Back to Register </span>
+                </button>
+                <button ID="btnPre" class="w3-btn w3-small w3-blue btnheight">
+                    <span class="icon"><i class="fa fa-chevron-left"> </i></span>
+                    <span class="respText text">&nbsp;Prev</span>
+                </button>
+
+                <button ID="btnNext" class="w3-btn w3-small w3-blue btnheight">
+                    <span class="respText text">&nbsp;Next</span>
+                    <span class="icon"><i class="fa fa-chevron-right"> </i></span>
+                </button>
+                <button id="btnClearOfflineJobData" onclick="btnClearOfflineJobData()" style="width: -webkit-fill-available; background-color: #8b2e93; border: none; color: white; height: 33px;" class="w3-btn w3-small btnheight">
+                    <i class="fa fa-step-backward"></i>&nbsp;Clear Offline Job Data
+                </button>
+            </div>
+        </div>*@
+
+
+
+    @*<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top:9px;" id="DivbtnClearOfflineJobData">
+            <div  class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <button id="btnClearOfflineJobData" onclick="btnClearOfflineJobData()" style="width: -webkit-fill-available; background-color: #8b2e93; border: none; color: white; height: 33px;" class="w3-btn w3-small btnheight">
+                    <i class="fa fa-step-backward"></i>&nbsp;Clear Offline Job Data
+                </button>
+            </div>
+
+        </div>*@
+
+    <div class="row" style="text-align:center ;text-shadow:1px;">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 " id="divGenerate" style="color:black;display:none;">
+            <label style="font-size:18px" id="lblselect">
+                Number of Scaf Ref # to Generate:
+            </label>
+            <select ID="NoOFScaf" class="1-20"></select>
+        </div>
+    </div>
+    @*<%-- <div class="row" style="height:40px; background-color:#c1c1c11f;">
+            <div class="col-lg-12 col-md-12 col-sm-12" style="margin-top: 9px;">
+                <i class="fa fa-home" style="color:#959595;"> </i>
+                <asp:SiteMapDataSource ID="SiteMapDataSource1" runat="server" ShowStartingNode="true" />
+                <asp:SiteMapPath ForeColor="#959595" Font-Bold="true" Font-Size="Larger" ID="SiteMapPath1" runat="server" PathSeparator=">
+                    " NodeStyle-ForeColor="#959595" RenderCurrentNodeAsLink="false">
+                </asp:SiteMapPath>
+            </div>
+        </div>--%>*@
+    <input type="hidden" id="hdnfld" />
+    <div class="tab-content" id="MainDivJob" style="display:none;">
+
+        @Html.Partial("_RegisterPartiaView")
+
+
+        <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+            <div class="row w3-margin-top">
+
+                <div class="col-lg-8 col-md-8 col-sm-12 col-sx-12">
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        @*<div style="height: 562px;" class="x_panel w3-padding-0 w3-card-4">*@
+                        <div style="height: 530px;" class="x_panel w3-padding-0 w3-card-4">
+                            <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                @*<h4 style="margin-top: 6px; font-size: 15px" id="lblVaccinations" runat="server"><i class="fa fa-list"></i>&nbsp;Basic Information <span style="margin-left: 5px;" id="VacCount" runat="server"></span></h4>*@
+                                <h4 style="margin-top: 6px; font-size: 15px" id="lblVaccinations"><i class="fa fa-list"></i>&nbsp;Basic Information <span style="margin-left: 5px;" id="VacCount"></span></h4>
+
+                                <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                    <li>
+                                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content" style="margin-bottom: 3px!important;">
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        @*<label>Site<span style="color: red">&nbsp*</span></label><asp:LinkButton ToolTip="Add Site" OnClick="btnAddnewSIte_Click" ID="btnAddnewSIte" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                                            <asp:DropDownList ID="ddlsites" CausesValidation="false" AutoPostBack="true" OnSelectedIndexChanged="ddlsites_SelectedIndexChanged" runat="server" AppendDataBoundItems="true" CssClass="form-control"></asp:DropDownList>
+                                            <asp:RequiredFieldValidator ID="rfvtxtcompanyname" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="ddlsites" ErrorMessage="* Required" ValidationGroup="Save" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                                        <label>Site<span style="color: red">&nbsp*</span></label><label ToolTip="Add Site" OnClick="btnAddnewSIte_Click()" ID="btnAddnewSIte" Style="float: right; color: #800000 !important; font-size: smaller;cursor:pointer"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                        <select id="ddlsites" onchange="ddlsites_SelectedIndexChanged()" class="form-control"></select>
+
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>Owner Name</label>
+                                        @*<asp:TextBox ID="txtOwnername" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" ID="txtOwnername" disabled Class="form-control" />
+                                    </div>
+
+                                </div>
+                                <div class="row" style="margin-top: 10px;display:none;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>Address</label>
+                                        @*<asp:TextBox ID="txtsiteAddress" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" ID="txtsiteAddress" disabled Class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;display:none;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>City</label>
+                                        @*<asp:TextBox ID="txtsiteCity" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" ID="txtsiteCity" disabled Class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;display:none;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>Postcode</label>
+                                        @*<asp:TextBox ID="txtZip" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" ID="txtZip" disabled Class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        @*<label>Location<span style="color: red">&nbsp*</span></label><asp:LinkButton ID="btnLocation" OnClick="btnLocation_Click" ToolTip="Add Location" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                                            <asp:DropDownList ID="ddlLocation" runat="server" CssClass="form-control" AutoPostBack="true" OnSelectedIndexChanged="ddlLocation_SelectedIndexChanged" AppendDataBoundItems="true"></asp:DropDownList>
+                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="ddlLocation" ErrorMessage="* Required" ValidationGroup="Save" ForeColor="Red"></asp:RequiredFieldValidator>*@
+                                        <label>Location<span style="color: red">&nbsp*</span></label><label id="btnLocation" OnClick="btnLocation_Click()" ToolTip="Add Location" Style="float: right; color: #800000 !important; font-size: smaller;cursor:pointer"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                        <select id="ddlLocation" Class="form-control" onchange="ddlLocation_SelectedIndexChanged()"></select>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Building / Module No.<span style="color: red"></span></label>
+
+                                        @*<asp:LinkButton ToolTip="BuldingNo" OnClick="BuldingNo_Click" ID="BuldingNo" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                                            <asp:DropDownList ID="ddbuilding" CausesValidation="false" AutoPostBack="true" OnSelectedIndexChanged="ddbuilding_SelectedIndexChanged" runat="server" AppendDataBoundItems="true" CssClass="form-control">
+                                            </asp:DropDownList>*@
+                                        @*<%--<asp:RequiredFieldValidator ID="RequiredFieldValidator2" CssClass="rdf-initial rdf-text" runat="server" ControlToValidate="ddlsites" ErrorMessage="* Required" ValidationGroup="Save" ForeColor="Red"></asp:RequiredFieldValidator>
+                                            --%>*@
+                                        <label ToolTip="BuldingNo" OnClick="BuldingNo_Click()" id="BuldingNo" Style="float: right; color: #800000 !important; font-size: smaller !important;cursor:pointer !important"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                        <select id="ddbuilding" onchange="ddbuilding_SelectedIndexChanged()" Class="form-control"></select>
+
+                                    </div>
+
+                                    @*<%--<div class="row" style="margin-top: 10px;">
+                                        --%>*@
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Asset # / Func. Loc</label>
+
+                                        @*<asp:LinkButton ToolTip="Add Site" OnClick="NewAssets_Click" ID="NewAssets" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                                            <asp:DropDownList ID="ddassets" CausesValidation="false" AutoPostBack="true" runat="server" OnSelectedIndexChanged="ddassets_SelectedIndexChanged" AppendDataBoundItems="true" CssClass="form-control"></asp:DropDownList>*@
+                                        <label ToolTip="Add Site" OnClick="NewAssets_Click()" ID="NewAssets" Style="float: right; color: #800000 !important; font-size: smaller !important;cursor:pointer"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller"></i>Add</label>
+                                        <select id="ddassets" onchange="ddassets_SelectedIndexChanged()" Class="form-control"></select>
+
+                                        @*<%--<asp:TextBox ID="TextBox1" Enabled="true" runat="server" CssClass="form-control"></asp:TextBox>
+                                            --%>*@
+                                    </div>
+
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    @*<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">*@
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <div>
+                                            <div class="col-lg-7 col-md-7 col-sm-6 col-xs-6" style="padding-left:0px">
+                                                <label>Floor Level<span style="color: red">&nbsp*</span></label>
+                                            </div>
+                                            <div class="col-lg-5 col-md-5 col-sm-6 col-xs-6" id="divHideFloorLevelImage" style="padding:0px;">
+                                                <label ToolTip="Add Floor Level Image" OnClick="btnAddFloorLevelImage_Click()" id="btnAddFloorLevelImage" Style="float: right; color: #800000 !important; font-size: smaller; display:none;cursor:pointer"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add Image</label>
+                                            </div>
+                                        </div>
+                                        <select ID="DropDownList1" onchange="DropDownList1_SelectedIndexChanged()" Class="form-control"></select>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Bearing</label>
+                                        @*<asp:TextBox ID="txtBearing" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" ID="txtBearing" Class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;" id="divDiscipline">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+
+                                        @*<%--Scaffold Owner Rep . change Sub Owner On 10 Sep 2019--%>
+                                            <%--  <label>Scaffold Owner Rep.</label>--%>*@
+                                        <label>Sub Owner</label>
+                                        @*<asp:LinkButton ToolTip="Sub Owner" OnClientClick="addnewScaffoldOwner();return false;" ID="btnScaffoldOwner" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>*@
+                                        <label ToolTip="Sub Owner" onclick="addnewScaffoldOwner();return false;" id="btnScaffoldOwner" Style="float: right; color: #800000 !important; font-size: smaller !important"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+
+                                        @*<%--    <button id="btnScaffoldOwner" runat="server" type="button" style="float: right; color: #800000; background-color: white; border: none; font-size: smaller" onclick="addnewScaffoldOwner();"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>&nbsp;Add</button>--%>*@
+                                        @*<asp:DropDownList ID="txtScaffoldOwner" runat="server" CssClass="form-control" AutoPostBack="true">
+                                            </asp:DropDownList>*@
+                                        <select id="txtScaffoldOwner" Class="form-control"></select>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        @*<%--Discipline change Sub Owner Rep On 10 Sep 2019--%>
+                                            <%-- <label>Discipline</label>--%>*@
+                                        <label>Sub Owner Rep</label>
+                                        @*<asp:LinkButton ToolTip="Sub Owner Rep" OnClientClick="addnewdiscipline();return false;" ID="btndiscipline" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>*@
+                                        <label ToolTip="Sub Owner Rep" onclick="addnewdiscipline();return false;" id="btndiscipline" Style="float: right; color: #800000 !important; font-size: smaller !important"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+
+                                        @*<%--    <button id="btndiscipline" runat="server" type="button" style="float: right; color: #800000; background-color: white; border: none; font-size: smaller" onclick="addnewdiscipline();"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>&nbsp;Add</button>--%>*@
+                                        @*<asp:DropDownList ID="txtdiscipline" runat="server" CssClass="form-control" AutoPostBack="true">
+                                            </asp:DropDownList>*@
+                                        <select id="txtdiscipline" Class="form-control"></select>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;" id="divWorkSubGroups">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Work Groups</label>
+                                        <label ToolTip="Work Groups" onclick="addnewWorkGroupsPopup();return false;" id="btnWorkGroups" Style="float: right; color: #800000 !important; font-size: smaller !important"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller"></i>Add</label>
+                                        <select id="ddlWorkGroups" onchange="ddlWorkGroup_SelectedIndexChanged()" Class="form-control"></select>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Sub Groups</label>
+                                        <label ToolTip="Sub Groups" onclick="addnewSubGroupsPopup();return false;" id="btnSubGroups" Style="float: right; color: #800000 !important; font-size: smaller"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                        <select id="ddlSubGroups" class="form-control"></select>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label>Requested By</label>
+                                        @*<input type="text" class="form-control" id="txtRequestedBy" />*@
+                                        <label ToolTip="Requested By" onclick="addnewRequestedByPopup();return false;" id="btnRequestedBy" Style="float: right; color: #800000 !important; font-size: smaller"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                        <select id="ddlRequestedBy" Class="form-control"></select>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    @*<input type="hidden" runat="server" id="hdnlatitude" name="hdnlatitude" value=" " />
+                        <input type="hidden" runat="server" id="hdnlongitude" name="hdnlongitude" value=" " />*@
+                    <input type="hidden" id="hdnlatitude" name="hdnlatitude" value="" />
+                    <input type="hidden" id="hdnlongitude" name="hdnlongitude" value="" />
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        @*<div style="height: 562px;" class="x_panel w3-padding-0 w3-card-4">*@
+                        <div style="height: 530px;" class="x_panel w3-padding-0 w3-card-4">
+                            <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                @*<h4 style="margin-top: 6px; font-size: 15px" id="H3" runat="server"><i class="fa fa-list"></i>&nbsp;Details <span style="margin-left: 5px;" id="Span3" runat="server"></span></h4>*@
+                                <h4 style="margin-top: 6px; font-size: 15px" id="H3"><i class="fa fa-list"></i>&nbsp;Details <span style="margin-left: 5px;" id="Span3"></span></h4>
+
+                                <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                    <li>
+                                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Date Built</label>
+                                        @*<Telerik:RadDatePicker ID="rdpDateTagged" DateInput-DateFormat="dd-MMM-yyyy" AutoPostBack="true" Width="100%" runat="server"></Telerik:RadDatePicker>*@
+                                        <input type="text" ID="rdpDateTagged" Class="form-control" autocomplete="off" />
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <label>Date Dismantled</label>
+                                        @*<Telerik:RadDatePicker ID="rdpDateTagged" DateInput-DateFormat="dd-MMM-yyyy" AutoPostBack="true" Width="100%" runat="server"></Telerik:RadDatePicker>*@
+                                        <input type="text" ID="rdpdatedis" Class="form-control" autocomplete="off" />
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        @*<label>Design Type</label><asp:LinkButton ID="btnDesign" ToolTip="Add Design" runat="server" OnClick="btnDesign_Click" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                <asp:DropDownList ID="ddlScaffoldDesign" runat="server" CssClass="form-control"></asp:DropDownList>*@
+                                        <label>Design Type</label><label ID="btnDesign" ToolTip="Add Design" OnClick="btnDesign_Click()" Style="float: right; color: #800000 !important; font-size: smaller !important ; cursor:pointer"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                        <select ID="ddlScaffoldDesign" Class="form-control"></select>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        @*<label>Duty Rating</label><asp:LinkButton ID="btndutyrating" ToolTip="Add Duty Rating" runat="server" OnClick="btndutyrating_Click" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                <asp:DropDownList ID="ddlDutyrating" runat="server" CssClass="form-control"></asp:DropDownList>*@
+                                        <label>Duty Rating</label><label ID="btndutyrating" ToolTip="Add Duty Rating" OnClick="btndutyrating_Click()" Style="float: right; color: #800000 !important; font-size: smaller !important; cursor:pointer"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important;"></i>Add</label>
+                                        <select ID="ddlDutyrating" Class="form-control"></select>
+                                    </div>
+
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        @*<label>Material Type</label><asp:LinkButton ToolTip=" Add Meterial Type" ID="btnmeterialType" OnClick="btnmeterialType_Click" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                <asp:DropDownList ID="ddlMaterialType" runat="server" CssClass="form-control"></asp:DropDownList>*@
+                                        <label>Material Type</label><label ToolTip="Add Meterial Type" ID="btnmeterialType" OnClick="btnmeterialType_Click()" Style="float: right; color: #800000 !important; font-size: smaller; cursor:pointer"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                        <select ID="ddlMaterialType" Class="form-control"></select>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                                        <label>Reason for Access. (Provide Detailed Description) </label>
+                                        @*<asp:TextBox ID="txtdesc" TextMode="MultiLine" Rows="5" Style="height: 85px !important" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                        <textarea type="text" ID="txtdesc" TextMode="MultiLine" Rows="5" Style="height: 80px !important" Class="form-control"></textarea>
+                                        @*<%--<asp:RequiredFieldValidator Style="margin-top:0px" ID="rdfdescription" runat="server" ControlToValidate="txtdesc" CssClass="rdf-initial rdf-text" ErrorMessage="* Required" ForeColor="Red" ValidationGroup="Save"></asp:RequiredFieldValidator>--%>*@
+                                    </div>
+                                </div>
+                                <div class="row" style="">
+                                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                                        <label>Inspection Time Frame</label>
+                                        @*<asp:DropDownList ID="ddlInspectionTimeFrame" runat="server" CssClass="form-control">
+                <asp:ListItem Text="07 Days" Value="07 Days"></asp:ListItem>
+                <asp:ListItem Text="14 Days" Value="14 Days"></asp:ListItem>
+                <asp:ListItem Text="21 Days" Value="21 Days"></asp:ListItem>
+                <asp:ListItem Text="28 Days" Value="28 Days"></asp:ListItem>
+                <asp:ListItem Text="30 Days" Value="30 Days"></asp:ListItem>
+            </asp:DropDownList>*@
+                                        <select ID="ddlInspectionTimeFrame" Class="form-control">
+                                            <option Value="07 Days">07 Days</option>
+                                            <option Value="14 Days">14 Days</option>
+                                            <option Value="21 Days">21 Days</option>
+                                            <option Value="28 Days">28 Days</option>
+                                            <option Value="30 Days">30 Days</option>
+                                        </select>
+                                    </div>
+                                    @*<%-- Change On 05 Sep 2019 Maintain Inventory Display None And Values Assing To Site By Default "MaintainInventoryAtJob"--%>*@
+                                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                                        <div class="maintainInventory" style="display:none;">
+
+                                            @*<asp:CheckBox ID="checkboxMaintainInventory" runat="server" />*@
+                                            <input type="checkbox" ID="checkboxMaintainInventory" />
+                                            <label style="margin-left: 10px;">Maintain Inventory</label>
+                                        </div>
+                                        <div class="clsNoInventory" id="NoInventoryReq">
+                                            <input type="checkbox" ID="chkNoInventory" />
+                                            <label style="margin-left: 3px;"> No Inventory Required</label>
+                                        </div>
+                                        <div class="clsNoInventory" id="ReqIsolation">
+                                            <input type="checkbox" ID="chkReqis" />
+                                            <label style="margin-left: 3px;"> Requires Isolation</label>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" id="checkLTStructure" />
+                                            <label style="margin-left: 3px;" for="checkLTStructure">Long Term Structure</label>
+                                        </div>
+                                        <div id="BuildDuringShutdownCheckBox">
+                                            <input type="checkbox" id="checkBuildDuringShutdown" />
+                                            <label style="margin-left: 3px;" for="checkBuildDuringShutdown">Build During Shutdown</label>
+                                        </div>
+
+                                        <div id="chkIsMasterJobCheckBox" style="">
+                                            <input type="checkbox" id="chkIsMasterJob" />
+                                            <label style="margin-left: 3px;" for="chkIsMasterJob">Master Job</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                </div>
+                        </div>
+                    </div>
+
+                    @*<%-- More Info Section Starts --%>*@
+                    <div class="row w3-margin-top">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 xsheight" id="divMoreInfo">
+                            <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4 xshight">
+                                <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                                    @*<h4 style="margin-top: 6px; font-size: 15px" id="H1" runat="server"><i class="fa fa-list"></i>&nbsp;More Information <span style="margin-left: 5px;" id="Span1" runat="server"></span></h4>*@
+                                    <h4 style="margin-top: 6px; font-size: 15px" id="H1"><i class="fa fa-list"></i>&nbsp;More Information <span style="margin-left: 5px;" id="Span1"></span></h4>
+
+                                    <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                        <li>
+                                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="x_content" style="margin-bottom: 3px!important;">
+                                    <div class="row" style="margin-top: 10px;">
+
+                                        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Owner Ref</label>
+                                            @*<asp:TextBox ID="txtclientReference" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                            <input type="text" ID="txtclientReference" Class="form-control" />
+                                        </div>
+                                        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+                                            <label>WO Number</label>
+                                            @*<asp:TextBox ID="txtWOnumb" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                            <input type="text" ID="txtWOnumb" Class="form-control" />
+                                        </div>
+                                        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+                                            <label>SAP Number</label>
+                                            @*<asp:TextBox ID="txtSapNumber" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                            <input type="text" ID="txtSapNumber" Class="form-control" />
+                                        </div>
+
+                                        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Length (m)</label>
+                                            @*<Telerik:RadNumericTextBox ID="txtlength" Enabled="true" Width="100%" MinValue="0" runat="server" CssClass="form-control">*@
+                                            <input type="text" ID="txtlength" Enabled="true" Width="100" MinValue="0" Class="form-control" />
+                                        </div>
+                                        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Width (m)</label>
+                                            @*<Telerik:RadNumericTextBox ID="txtwidth" Enabled="true" Width="100%" MinValue="0" runat="server" CssClass="form-control"></Telerik:RadNumericTextBox>*@
+                                            <input type="text" ID="txtwidth" Enabled="true" Width="100" MinValue="0" Class="form-control" />
+                                        </div>
+                                        <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Height TWP (m) </label>
+                                            @*<Telerik:RadNumericTextBox ID="txtheight" Enabled="true" Width="100%" MinValue="0" runat="server" CssClass="form-control"></Telerik:RadNumericTextBox>*@
+                                            <input type="text" ID="txtheight" Enabled="true" Width="100" MinValue="0" Class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+
+                                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Asset # Description</label>
+                                            @*<asp:TextBox ID="txtassetsdesc" Enabled="false" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                            <input type="text" ID="txtassetsdesc" disabled Class="form-control" />
+
+                                        </div>
+                                        <div class="col-lg-2 col-md-4 col-sm-4 col-xs-12">
+                                            <label>Working Decks #</label>
+                                            @*<%--<asp:TextBox ID="txtworkdacks" Enabled="true" runat="server" CssClass="form-control"></asp:TextBox>--%>*@
+                                            @*<asp:DropDownList ID="DropDownList2" runat="server" CssClass="form-control">
+                                                    <asp:ListItem Text="N/A" Value="N/A"></asp:ListItem>
+                                                    <asp:ListItem Text="1" Value="1"></asp:ListItem>
+                                                    <asp:ListItem Text="2" Value="2"></asp:ListItem>
+                                                    <asp:ListItem Text="3" Value="3"></asp:ListItem>
+                                                    <asp:ListItem Text="4" Value="4"></asp:ListItem>
+                                                    <asp:ListItem Text="5" Value="5"></asp:ListItem>
+
+                                                    <asp:ListItem Text="6" Value="6"></asp:ListItem>
+                                                    <asp:ListItem Text="7" Value="7"></asp:ListItem>
+                                                    <asp:ListItem Text="8" Value="8"></asp:ListItem>
+                                                    <asp:ListItem Text="9" Value="9"></asp:ListItem>
+                                                    <asp:ListItem Text="10" Value="10"></asp:ListItem>
+                                                    <asp:ListItem Text="11" Value="11"></asp:ListItem>
+                                                    <asp:ListItem Text="12" Value="12"></asp:ListItem>
+                                                    <asp:ListItem Text="13" Value="13"></asp:ListItem>
+                                                    <asp:ListItem Text="14" Value="14"></asp:ListItem>
+                                                    <asp:ListItem Text="15" Value="15"></asp:ListItem>
+
+                                                    <asp:ListItem Text="16" Value="16"></asp:ListItem>
+                                                    <asp:ListItem Text="17" Value="17"></asp:ListItem>
+                                                    <asp:ListItem Text="18" Value="18"></asp:ListItem>
+                                                    <asp:ListItem Text="19" Value="19"></asp:ListItem>
+                                                    <asp:ListItem Text="20" Value="20"></asp:ListItem>
+                                                    <asp:ListItem Text="21" Value="21"></asp:ListItem>
+                                                    <asp:ListItem Text="22" Value="22"></asp:ListItem>
+                                                    <asp:ListItem Text="23" Value="23"></asp:ListItem>
+                                                    <asp:ListItem Text="24" Value="24"></asp:ListItem>
+                                                    <asp:ListItem Text="25" Value="25"></asp:ListItem>
+
+                                                    <asp:ListItem Text="26" Value="26"></asp:ListItem>
+                                                    <asp:ListItem Text="27" Value="27"></asp:ListItem>
+                                                    <asp:ListItem Text="28" Value="28"></asp:ListItem>
+                                                    <asp:ListItem Text="29" Value="29"></asp:ListItem>
+                                                    <asp:ListItem Text="30" Value="30"></asp:ListItem>
+                                                </asp:DropDownList>*@
+                                            <select ID="DropDownList2" Class="form-control">
+                                                <option Value="N/A">N/A</option>
+                                                <option Value="1">1</option>
+                                                <option Value="2">2</option>
+                                                <option Value="3">3</option>
+                                                <option Value="4">4</option>
+                                                <option Value="5">5</option>
+
+                                                <option Value="6">6</option>
+                                                <option Value="7">7</option>
+                                                <option Value="8">8</option>
+                                                <option Value="9">9</option>
+                                                <option Value="10">10</option>
+                                                <option Value="11">11</option>
+                                                <option Value="12">12</option>
+                                                <option Value="13">13</option>
+                                                <option Value="14">14</option>
+                                                <option Value="15">15</option>
+
+                                                <option Value="16">16</option>
+                                                <option Value="17">17</option>
+                                                <option Value="18">18</option>
+                                                <option Value="19">19</option>
+                                                <option Value="20">20</option>
+                                                <option Value="21">21</option>
+                                                <option Value="22">22</option>
+                                                <option Value="23">23</option>
+                                                <option Value="24">24</option>
+                                                <option Value="25">25</option>
+
+                                                <option Value="26">26</option>
+                                                <option Value="27">27</option>
+                                                <option Value="28">28</option>
+                                                <option Value="29">29</option>
+                                                <option Value="30">30</option>
+                                            </select>
+                                        </div>
+                                        @*<div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">*@
+                                        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                            @*<label id="lblManHrsErect" runat="server">Man Hrs Erect</label>*@
+                                            <label id="lblManHrsErect">Man Hrs Erect</label>
+                                            @*<Telerik:RadNumericTextBox ID="txtManhrserect" runat="server" Width="100%" CssClass="form-control" NumberFormat-DecimalDigits="2" MinValue="0">*@
+                                            @*<input type="number" ID="txtManhrserect" Width="100" Class="form-control" NumberFormat-DecimalDigits="2" MinValue="0" />*@
+                                            @*<input type="number" ID="txtManhrserect" Width="100" Class="form-control" name="test" min="0" oninput="validity.valid||(value='');">*@
+                                            <input type="number" ID="txtManhrserect" Width="100" Class="form-control" name="test" min="0" oninput="this.value = Math.abs(this.value)" />
+                                        </div>
+
+                                        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12" id="rowmanHrsErect">
+
+                                            @*<label id="Label8" runat="server">Man Hrs Dismantle</label>
+                                                <Telerik:RadNumericTextBox ID="txtmanDisman" runat="server" CssClass="form-control" Width="100%" NumberFormat-DecimalDigits="2" MinValue="0"></Telerik:RadNumericTextBox>*@
+                                            <label id="Label8">Man Hrs Dismantle</label>
+                                            @*<input type="number" ID="txtmanDisman" Class="form-control" Width="100" NumberFormat-DecimalDigits="2" MinValue="0" />*@
+                                            @*<input type="number" ID="txtmanDisman" Width="100" Class="form-control" name="test" min="0" oninput="validity.valid||(value='');">*@
+                                            <input type="number" ID="txtmanDisman" Width="100" Class="form-control" name="test" min="0" oninput="this.value = Math.abs(this.value)" />
+                                        </div>
+                                        <div class="row"></div>
+                                        <div class="row">
+                                            @*<div class="col-xs-6 col-sm-8 col-md-7 col-lg-3">*@
+                                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6">
+                                                @*<label id="lblChecklist" runat="server">Scaffold Inspection List</label>*@
+                                                <label id="lblChecklist">Scaffold Inspection List</label>
+
+                                                @*<asp:DropDownList ID="ddlChecklistInsp" DataValueField="checklistID" EmptyMessage="Select---" DataTextField="checklistdescription" runat="server" AutoPostBack="true" MarkFirstMatch="true" CssClass="form-control"></asp:DropDownList>*@
+                                                @*<%--<Telerik:RadComboBox ID="ddlChecklistInsp" DataSourceID="dsddlCheckList" DataValueField="checklistID" EmptyMessage="Select" DataTextField="checklistdescription" runat="server" AutoPostBack="true" MarkFirstMatch="true" CssClass=""></Telerik:RadComboBox>--%>*@
+                                                <select ID="ddlChecklistInsp" EmptyMessage="Select---" AutoPostBack="true" MarkFirstMatch="true" Class="form-control">
+                                                    <option Value=""></option>
+                                                    <option Value="Support">Support</option>
+                                                </select>
+                                            </div>
+                                            @*<%--<div class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></div>--%>*@
+                                            @*<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" style="width:80px">*@
+                                            <div class="col-lg-2 col-sm-3 col-md-4 col-xs-6">
+                                                @*<asp:LinkButton runat="server" ID="btnview" CausesValidation="false" OnClick="btnview_Click" CssClass="w3-btn w3-teal" CommandName="View" Style="margin-top: 16px; width: 75px; padding-left: 7px"><i class="fa fa-search"></i>&nbsp;Preview</asp:LinkButton>*@
+                                                <button ID="btnview" OnClick="btnview_Click()" Class="w3-btn w3-teal" CommandName="View" Style="margin-top: 16px; width: 100px; padding-left: 7px"><i class="fa fa-search"></i>&nbsp;Preview</button>
+                                            </div>
+
+                                            @*<div class="col-lg-1 col-md-2 col-sm-2 col-xs-1" style="width:86px">*@
+                                            <div class="col-lg-2 col-md-4 col-sm-4 col-xs-6" style="margin-left: -3px;">
+                                                @*<asp:LinkButton runat="server" ID="btnsaveBottom" Style="margin-top: 16px; width: 100px; padding-left: 7px" CausesValidation="true" ValidationGroup="Save" CssClass="w3-btn w3-small w3-green btnheight" OnClick="btnSave_Click" OnClientClick="checklatlong();"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></asp:LinkButton>*@
+                                                <button ID="btnsaveBottom" style="Width:100px;margin-top: 16px;" Class="w3-btn w3-green" OnClick="btnSave_Click()"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></button>
+                                            </div>
+
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 " style="margin-left: -6px;">
+                                                @*<asp:LinkButton runat="server" ID="btnsaveBottom" Style="margin-top: 16px; width: 100px; padding-left: 7px" CausesValidation="true" ValidationGroup="Save" CssClass="w3-btn w3-small w3-green btnheight" OnClick="btnSave_Click" OnClientClick="checklatlong();"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></asp:LinkButton>*@
+                                                <button id="btnVariationHours" style="Width:100px;margin-top: 16px; padding-left:3px " Class="w3-btn w3-blue" onclick="GetVariationHours()"><span class="icon"><i class="fa fa-plus"></i></span>@*<span class="respText text">Variation Hrs</span>*@Variation Hrs</button>
+                                            </div>
+
+
+
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6" style="display: none">
+                                                @*<label id="lblManHrsAllo" runat="server">Man Hours Allowed</label>
+                                                    <asp:TextBox ID="txtManHrsAllow" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                <label id="lblManHrsAllo">Man Hours Allowed</label>
+                                                <input type="text" ID="txtManHrsAllow" Class="form-control" />
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Client Scaf Ref</label>
+                                                @*<asp:TextBox ID="txtClientScaff" runat="server" Enabled="false" CssClass="form-control"></asp:TextBox>*@
+                                                <input type="text" ID="txtClientScaff" @*disabled*@ Class="form-control" />
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                @*<%-- <label>Scaf Type</label>--%>*@
+                                                <label>Project Type</label>
+                                                @*<asp:TextBox ID="txtScaffType" runat="server" Enabled="true" CssClass="form-control"></asp:TextBox>*@
+                                                <input type="text" ID="txtScaffType" Enabled="true" Class="form-control" />
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Planned Standing Days<span style="color: red">&nbsp*</span></label>
+                                                @*<Telerik:RadNumericTextBox ID="txtplnstandDur" runat="server" Width="100%" CssClass="form-control" CausesValidation="true" MinValue="0">
+                                                        <NumberFormat AllowRounding="false" DecimalDigits="0" />
+                                                    </Telerik:RadNumericTextBox>
+                                                    <asp:RequiredFieldValidator ControlToValidate="txtplnstandDur" CssClass="rdf-initial rdf-text" ID="rdgdays" runat="server" ForeColor="Red" ValidationGroup="Save" ErrorMessage="* Required"></asp:RequiredFieldValidator>*@
+                                                <input type="text" ID="txtplnstandDur" Width="100" Class="form-control" MinValue="0" value="30" NumberFormat AllowRounding="false" DecimalDigits="0" />
+                                            </div>
+                                            @*<div class="col-lg-3 col-md-6 col-sm-6 col-xs-6" id="rowmanHrsDisman" runat="server">*@
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6" id="rowmanHrsDisman">
+
+                                                @*<label id="lblplannStatus" runat="server">Plan Status</label>
+                                                    <asp:DropDownList ID="ddlPlanningStatus" runat="server" CssClass="form-control">
+                                                        <asp:ListItem Text=""></asp:ListItem>
+                                                        <asp:ListItem Value="Break-In" Text="Break-In"></asp:ListItem>
+                                                        <asp:ListItem Value="Cancelled" Text="Cancelled"></asp:ListItem>
+                                                        <asp:ListItem Value="Planned" Text="Planned"></asp:ListItem>
+                                                        <asp:ListItem Value="Unplanned" Text="Unplanned"></asp:ListItem>
+                                                    </asp:DropDownList>*@
+                                                <label id="lblplannStatus">Plan Status</label>
+                                                <select ID="ddlPlanningStatus">
+                                                    <option value=""></option>
+                                                    <option Value="Break-In">Break-In</option>
+                                                    <option Value="Cancelled">Cancelled</option>
+                                                    <option Value="Opportunity">Opportunity</option>
+                                                    <option Value="Outage">Outage</option>
+                                                    <option Value="Planned">Planned</option>
+                                                    <option Value="Unplanned">Unplanned</option>
+                                                </select>
+
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                @*<label id="lblEngineeredDesign" runat="server">Engineered Design?</label>
+                                                    <asp:DropDownList ID="ddlEngineeredDesign" runat="server" CssClass="form-control" OnSelectedIndexChanged="ddlEngineeredDesign_SelectedIndexChanged" AutoPostBack="false">
+                                                        <asp:ListItem Value="NO" Text="NO"></asp:ListItem>
+                                                        <asp:ListItem Value="YES" Text="YES"></asp:ListItem>
+                                                        <asp:ListItem Value="N/A" Text="N/A"></asp:ListItem>
+                                                    </asp:DropDownList>*@
+                                                <label id="lblEngineeredDesign">Engineered Design?</label>
+                                                <select id="ddlEngineeredDesign" Class="form-control">
+                                                    <option Value="NO">NO</option>
+                                                    <option Value="YES">YES</option>
+                                                    <option Value="N/A">N/A</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Design Drawing No</label>
+                                                @*<asp:TextBox ID="txtDesignDrawingNo" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                <input type="text" ID="txtDesignDrawingNo" Class="form-control" />
+                                            </div>
+
+
+                                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                <label>Pipeline Start Date</label>
+                                                @*<Telerik:RadDatePicker ID="rddateDisAppro" DateInput-DateFormat="dd-MMM-yyyy" AutoPostBack="true" Width="100%" runat="server" Height="27px"></Telerik:RadDatePicker>*@
+                                                <input type="text" ID="PlannedDate" Class="form-control" autocomplete="off" />
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Supervisor</label>
+                                                @*<asp:LinkButton ToolTip="Add Supervisor" OnClick="btnAddNewSupervisor_Click" ID="btnAddNewSupervisor" runat="server" Style="float: right; color: #800000; font-size: smaller"><i class="fa fa-plus" style="color:#800000;font-size:smaller"></i>Add</asp:LinkButton>
+                                                    <asp:DropDownList ID="ddlsupervisor" runat="server" CssClass="form-control" AppendDataBoundItems="true"></asp:DropDownList>*@
+                                                <label ToolTip="Add Supervisor" OnClick="btnAddNewSupervisor_Click()" ID="btnAddNewSupervisor" Style="float: right !important; color: #800000 !important; font-size: smaller !important;cursor:pointer;"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                                <select ID="ddlsupervisor" Class="form-control">
+                                                    @*<option Value="YES">YES</option>
+                                                        <option Value="N/A">N/A</option>*@
+                                                </select>
+                                            </div>
+
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Max # of Decks at a time</label>
+                                                @*<Telerik:RadNumericTextBox ID="txtNoOfPlatform" runat="server" Width="100%" CssClass="form-control" CausesValidation="true" MinValue="0">
+                                                        <NumberFormat AllowRounding="false" DecimalDigits="0" />
+                                                    </Telerik:RadNumericTextBox>*@
+                                                @*<input type="number" ID="txtNoOfPlatform" Width="100" Class="form-control" min="0" NumberFormat DecimalDigits="0" />*@
+                                                @*<input type="number" ID="txtNoOfPlatform" Width="100" Class="form-control" name="test" min="0" oninput="validity.valid||(value='');">*@
+                                                <input type="number" ID="txtNoOfPlatform" Width="100" Class="form-control" name="test" min="0">
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Pipeline Notes</label>
+                                                <input type="text" ID="txtPipelinenotes" Class="form-control" />
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="row">
+
+                                            @*<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">*@
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Crew Description</label>
+                                                @*<asp:TextBox ID="txtCrew" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                <input type="text" ID="txtCrew" Class="form-control" />
+                                            </div>
+                                            @*<div class="col-lg-1 col-md-4 col-sm-4 col-xs-4" style="padding-left:0px">*@
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Minimum Crew Size</label>
+                                                @*<Telerik:RadNumericTextBox ID="txtCrewSize" runat="server" Width="100%" CssClass="form-control" CausesValidation="true" MinValue="0">
+                                                        <NumberFormat AllowRounding="false" DecimalDigits="0" />
+                                                    </Telerik:RadNumericTextBox>*@
+                                                @*<input type="number" ID="txtCrewSize" Width="100" Class="form-control" max="0" NumberFormat AllowRounding="false" DecimalDigits="0" />*@
+                                                <input type="number" ID="txtCrewSize" Width="100" Class="form-control" name="test" min="0" oninput="validity.valid||(value='');">
+                                                @*<input type="number" ID="txtCrewSize" Width="100" Class="form-control" name="test" min="0"/>*@
+                                            </div>
+
+
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Dismantle Approved Date</label>
+                                                @*<Telerik:RadDatePicker ID="rddateDisAppro" DateInput-DateFormat="dd-MMM-yyyy" AutoPostBack="true" Width="100%" runat="server" Height="27px"></Telerik:RadDatePicker>*@
+                                                <input type="text" ID="rddateDisAppro" Class="form-control" autocomplete="off" />
+                                            </div>
+                                        </div>
+                                        <div class="row">
+
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Shift Allocation</label>
+
+                                                @* Added on 06-12-2023 we want to navigate to Shift Allocation Master on Click of Add. *@
+                                                <label ToolTip="Shift Allocation" OnClick="ShiftAllocation_Click()" id="ShiftAllocation" Style="float: right; color: #800000 !important; font-size: smaller !important;cursor:pointer !important"><i class="fa fa-plus" style="color:#800000 !important;font-size:smaller !important"></i>Add</label>
+                                                <select ID="ddlShiftAllocation" Class="form-control">
+
+                                                    @* Commented on 06-12-2023 we are now creating Drop Down Dynamically. *@
+                                                    @*<option value=""></option>
+                                                        <option Value="Shift A">Shift A</option>
+                                                        <option Value="Shift B">Shift B</option>*@
+                                                </select>
+                                            </div>
+
+
+
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Dismantle Approved Notes</label>
+                                                @*<asp:TextBox ID="txtdiappronotes" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                <input type="text" ID="txtdiappronotes" Class="form-control" />
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label>Comments</label>
+                                                @*<asp:TextBox ID="txtcomments" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="10" Style="max-width: 576px; min-width: 100%; height: 149px !important"></asp:TextBox>*@
+                                                @*<input type="text" ID="txtcomments" Class="form-control" TextMode="MultiLine" Rows="10" Style="max-width: 576px; min-width: 100%; height: 149px !important" />*@
+                                                <textarea ID="txtcomments" Class="form-control" TextMode="MultiLine" Rows="10" Style="max-width: 576px; min-width: 100%; height: 149px !important"></textarea>
+                                            </div>
+
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " id="ddldivDismantledBy">
+                                                <label>Dismantled By</label>
+                                                @*<Telerik:RadDatePicker ID="rdpdatedis" DateInput-DateFormat="dd-MMM-yyyy" Width="100%" runat="server"></Telerik:RadDatePicker>*@
+                                                @*<input type="text" ID="txtdismantleby" Class="form-control" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" autocomplete="off" disabled onmouseover="this.title = this.value;" />*@
+                                                <input type="text" ID="txtdismantleby" Class="form-control" />
+                                            </div>
+
+                                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 " id="divBuiltBy" style="margin-top: 10px;">
+                                                <label>Built By</label>
+                                                @*<Telerik:RadDatePicker ID="rdpdatedis" DateInput-DateFormat="dd-MMM-yyyy" Width="100%" runat="server"></Telerik:RadDatePicker>*@
+                                                <input type="text" ID="txtBuiltBy" Class="form-control" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" autocomplete="off" disabled onmouseover="this.title = this.value;" />
+                                            </div>
+
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                @*<label id="lblLocaked" runat="server">Locked In?</label>
+            <asp:DropDownList ID="ddlLockedIn" runat="server" CssClass="form-control" OnSelectedIndexChanged="ddlLockedIn_SelectedIndexChanged" AutoPostBack="true">
+                <asp:ListItem Value="0" Text="NO"></asp:ListItem>
+                <asp:ListItem Value="1" Text="YES"></asp:ListItem>
+            </asp:DropDownList>*@
+                                                <label id="lblLocaked">Locked In?</label>
+                                                <select ID="ddlLockedIn" Class="form-control" onchange="ddlLockedIn_SelectedIndexChanged()">
+                                                    <option Value="0">NO</option>
+                                                    <option Value="1">YES</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                                                <label>Permit #</label>
+                                                @*<asp:TextBox ID="txtPermit" runat="server" CssClass="form-control"></asp:TextBox>*@
+                                                <input type="text" ID="txtPermit" Class="form-control" />
+                                            </div>
+                                            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6" id="divRTIONotificationNumber"> <label>RTIO Notification Number</label> <input type="text" id="txtRTIONotificationNumber" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '');" title="Only numbers are allowed" /> </div>
+                                            @*<div class="col-lg-3 col-md-3 col-sm-3 col-xs-7" id="qrcodediv" runat="server">*@
+                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-7" id="qrcodediv" style="display:none">
+                                                <label>QR Code</label>
+                                                @*<asp:PlaceHolder ID="QRCodeImage" runat="server"></asp:PlaceHolder>*@
+                                                @*<div id="QRCodeImage" ></div>*@
+                                                <img src="" style="float: right;" id="QRCodeImage" class="img-responsive" />
+                                                @*<label id="QRCodeImage"></label>*@
+
+                                            </div>
+                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-5">
+                                                @*<img src="/images/LockedIn.png" style="float: right; margin-top: 19px;" runat="server" id="imgLocked" class="img-responsive" visible="false" />*@
+                                                <img src="/images/LockedIn.png" style="float: right; margin-top: 19px; display:none;" id="imgLocked" class="img-responsive" />
+                                            </div>
+                                            @*<div class="col-lg-3 col-md-3 col-sm-3 col-xs-7" style="display: none;" id="txtlckedsignbynone" runat="server">*@
+                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-7" style="float: right; margin-top: 19px; display:none;" id="txtlckedsignbynone">
+                                                <label>Locked In Signed Off By</label>
+                                                @*<asp:TextBox ID="txtlckedsignby" runat="server" Enabled="false" CssClass="form-control"></asp:TextBox>*@
+                                                <input type="text" id="txtlckedsignby" disabled Class="form-control" />
+                                            </div>
+
+                                        </div>
+                                        @*<%-- //Start-7-Mar-2019--%>*@
+                                        <div class="row">
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-1">
+                                                @*<asp:LinkButton runat="server" ID="btnsaveBottom" CausesValidation="true" ValidationGroup="Save" Width="100%" CssClass="w3-btn w3-small w3-green btnheight" OnClick="btnSave_Click" OnClientClick="checklatlong();"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></asp:LinkButton>*@
+                                                @*<button ID="btnsaveBottom" style="Width:100px" Class="w3-btn w3-small w3-green btnheight" OnClick="btnSave_Click()"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></button>*@
+                                            </div>
+                                            <div class="col-lg-4 col-md-3 col-sm-4 col-xs-1">
+                                            </div>
+
+                                            <div class="col-lg-3 col-md-4 col-sm-3 col-xs-3" style="display:none;">
+                                                @*<asp:LinkButton ID="QrCodePrint" CssClass="w3-btn w3-small w3-blue btnheight" runat="server" OnClick="QrCodePrint_Click" OnClientClick="QRCodePrint_click()"><span class="icon"><i class="fa fa-print"> </i></span><span class="respText text">&nbsp;Print</span></asp:LinkButton>*@
+                                                <button id="QrCodePrint" Class="w3-btn w3-small w3-blue btnheight" onclick="QRCodePrint_click()"><span class="icon"><i class="fa fa-print"> </i></span><span class="respText text">&nbsp;Print</span></button>
+                                                @*<%--   <ASP:lINKbUTTON id="BTNqrcODEPRINT" RUNAT="SERVER" oNcLICK="BTNqrcODEPRINT_cLICK" cSScLASS="BTN  BTN-PRIMARY W3-BTN W3-TEAL"><I CLASS="FA FA-PRINT"></I></ASP:lINKbUTTON>--%>*@
+                                            </div>
+
+                                        </div>
+
+                                        @*<%-- //End-7-Mar-2019--%>*@
+
+
+                                        <div class="row">
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                                            </div>
+                                            @*<%--<div class="col-md-2 col-sm-4 col-lg-2 col-xs-6">
+
+                                                    <asp:LinkButton ID="btnprint" runat="server" Style="width: 100%; height: 28px;" CssClass="btn  btn-primary w3-btn w3-teal" OnClick="btnprint_Click"><i class="fa fa-print"></i> Print</asp:LinkButton>
+                                                </div>--%>*@
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-3 col-md-1 col-xs-1 col-sm-1" style="visibility: hidden">
+                                                @*<asp:Label ID="lblOnline" runat="server" Text="Does Online Inspection Apply?"></asp:Label>
+                                                    <asp:CheckBox ID="chkOnline" AutoPostBack="true" OnCheckedChanged="chkOnline_CheckedChanged" Checked="true" Enabled="false" runat="server"></asp:CheckBox>*@
+                                                <label ID="lblOnline" Text="Does Online Inspection Apply?"></label>
+                                                <input type="checkbox" ID="chkOnline" AutoPostBack="true" OnCheckedChanged="chkOnline_CheckedChanged" Checked Enabled="false" />
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<img id="forcheckFloarImageSize" style="width:auto;height:auto; visibility:hidden" />*@
+                    <img id="forcheckFloarImageSize" style="width:auto;height:auto; display:none;" />
+                    @*<%-- More Info Section Ends --%>*@
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    @*<div style="height: auto;" class="x_panel w3-padding-0 w3-card-4" id="divscafoldgps" runat="server">*@
+                    <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4" id="divscafoldgps">
+                        <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                            @*<h4 style="margin-top: 6px; font-size: 15px" id="H4" runat="server"><i class="fa fa-list"></i>&nbsp;Scaffold GPS <span style="margin-left: 5px;" id="Span4" runat="server"></span></h4>*@
+                            <h4 style="margin-top: 6px; font-size: 15px" id="H4"><i class="fa fa-list"></i>&nbsp;Scaffold GPS <span style="margin-left: 5px;" id="Span4"></span></h4>
+
+                            <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                <li>
+                                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                </li>
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row xsfield">
+                            @*<%--<fieldset style="height: 240px; width: 97%; margin-top: -13px">
+                                <legend>
+                                    <label><i class="fa fa-file-image-o "></i>&nbsp;Scaffold GPS  </label>
+                                </legend>--%>*@
+                            @*<asp:HiddenField ID="HiddenforMappAddress" runat="server" />*@
+                            <input type="hidden" ID="HiddenforMappAddress" />
+                            @*<%-- <div id="map_populate" style="width: 310px; height: 206px;margin-left:12px; border: 5px solid #5E5454;">
+                                --%>*@
+                            <div id="map_populate" style="width: 90%; height: 206px; margin-left: 12px; border: 5px solid #5E5454; display: none">
+                            </div>
+                            <div id="divCaptureLocatinHide" style="display:inline-flex">
+                                @*<%--  Capture Location Display None on 12 March 2020--%>*@
+                                @*<button type="button" id="gpsbutton" style="display:none;" runat="server" onclick="displaymap();">Capture Location</button>&nbsp;&nbsp;
+                                    <button type="button" id="gpsbutton1" style="display:none;" runat="server" onclick="displaymapCenterOfSite();">Pin To Centre Of Site</button>*@
+                                <button type="button" id="gpsbutton" style="display:none;" onclick="displaymap();"><i class="fa fa-map-marker"></i>&nbsp;Capture Location</button>&nbsp;&nbsp;
+                                <button type="button" id="gpsbutton1" style="display:none;" onclick="displaymapCenterOfSite();"><i class="fa fa-thumb-tack" aria-hidden="true"></i>&nbsp;Pin To ScafMap</button>
+                            </div>
+                            @*<asp:Label ID="lbl1" runat="server" Text="Latitude : " Style="display: none; margin: 8px 0 0 12px; width: 90%">*@
+                            <label ID="lbl1" Style="display: none; margin: 8px 0 0 12px; width: 90%">
+                                Latitude :
+                                @*<%--<asp:TextBox ID="lbllat" runat="server" style="height:19px; margin-left: 11px;"></asp:TextBox>--%>*@
+                                @*<Telerik:RadNumericTextBox ID="lbllat" runat="server" NumberFormat-DecimalDigits="11" Style="height: 19px !important; margin-left: 11px;"></Telerik:RadNumericTextBox>*@
+                                <input type="number" id="lbllat" NumberFormat-DecimalDigits="11" Style="height: 19px !important; margin-left: 11px;" />
+                                <button type="button" id="searchgps" onclick="searchlocation();" style="margin-left: -24PX; background: none; border: 0; float: right"><i class="fa fa-search"></i></button>
+                            </label>
+
+                            @*<asp:Label ID="lbl2" runat="server" Text="Longitude : " Style="display: none; margin: 0px 0 0 12px; width: 90%">*@
+                            <label ID="lbl2" Style="display: none; margin: 0px 0 0 12px; width: 90%">
+                                Longitude :
+                                @*<%--<asp:TextBox ID="lbllong" runat="server" style="height:19px;margin-top:2px"></asp:TextBox>--%>*@
+                                @*<Telerik:RadNumericTextBox ID="lbllong" runat="server" NumberFormat-DecimalDigits="11" Style="height: 19px !important; margin-top: 2px"></Telerik:RadNumericTextBox>*@
+                                <input type="number" ID="lbllong" NumberFormat-DecimalDigits="11" Style="height: 19px !important; margin-top: 2px; margin-left: 2px;" />
+                                <button type="button" id="resetmap" onclick="resetlocation();" style="background: none; border: 0; float: right; display: none"><i class="glyphicon glyphicon-trash"></i></button>
+                            </label>
+                        </div>
+                    </div>
+
+                    @*<%-- Image Section Starts Here --%>*@
+                    <div class="row w3-padding-top">
+                        <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                            @*<h4 style="margin-top: 6px; font-size: 15px" id="H5" runat="server"><i class="fa fa-list"></i>&nbsp;Scaffold Image <span style="margin-left: 5px;" id="Span5" runat="server"></span></h4>*@
+                            <h4 style="margin-top: 6px; font-size: 15px" id="H5"><i class="fa fa-list"></i>&nbsp;Scaffold Image <span style="margin-left: 5px;" id="Span5"></span></h4>
+                        </div>
+
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="row">
+
+                                @*<div class="nonsafari" style="display: none;">
+                                    <div class="desktopApp" style="display: none;">*@
+                                <div class="nonsafari" style="display: block;">
+                                    <div class="desktopApp" style="display: block;">
+
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-left: -3px">
+                                            @*<Telerik:RadAsyncUpload Width="90%" Size="10 !important" runat="server" ID="radUpdogImg"
+                                                                        MultipleFileSelection="Disabled" AllowedFileExtensions="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" OnClientFileSelected="OnClientFileSelected" MaxFileInputsCount="1" OnClientFileUploadRemoved="OnClientFileRemoved" Skin="Metro" DisableChunkUpload="true" ChunkSize="0" EnableViewState="true">
+                                                </Telerik:RadAsyncUpload>*@
+                                            @*<input type="file" Width="90" id="radUpdogImg" MultipleFileSelection="Disabled" AllowedFileExtensions="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" OnClientFileSelected="OnClientFileSelected" MaxFileInputsCount="1" OnClientFileUploadRemoved="OnClientFileRemoved" Skin="Metro" DisableChunkUpload="true" ChunkSize="0" />*@
+                                            @*<input type="file" style="width:90px" id="radUpdogImg" accept="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" onchange="OnClientFileSelected()" />*@
+                                            <input type="file" style="width:90px" accept="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" id="radUpdogImg">
+                                            @*<asp:HiddenField ID="hdfield" Value="" runat="server" />*@
+                                            <input type="hidden" id="hdfield" Value="" />
+                                        </div>
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="Downloadimgdiv" style="margin-left: 3px">
+                                            <button type="button" id="downloadButton" onclick="downloadImage()" style="display: none; padding-bottom: 0px; padding-top: 0px;">Download Image</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mobileApp" style="display: none;">
+
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-left: -3px">
+                                            <input type="file" name="file" id="mobApp_file" class="custombtn" accept="image/*;capture=camera" />
+                                        </div>
+                                    </div>
+
+                                    @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019 Start --%>*@
+                                    <div style="margin-left: 316px; opacity: 0">
+                                        @*<asp:TextBox ID="txtpsudouserid" Enabled="true" runat="server" Height="0px" Width="0px" Visible="true" CssClass="form-control"></asp:TextBox>*@
+                                        <input type="text" ID="txtpsudouserid" Enabled="true" Height="0" Width="0" Class="form-control" />
+                                    </div>
+                                    @*<%--  psudouserid coloumn written for Email Id Not Fill Automatic  8 May 2019 End --%>*@
+                                </div>
+
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 safari" style="display: none;">
+                                    <input type="file" id="mob_file_image" class="mob_file_image custombtn"
+                                           accept="JPG,gif,png,tif,tiff,jpeg,JPEG,ico,bmp" name="file">
+                                    @*<input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn" accept="image/*;capture=camera" />*@
+                                    @*<%--<button type="button" id="deleteimage1" onclick="resetimage();" style="background:none;border:0;float:right !important;margin-top:-25px"><i class="glyphicon glyphicon-trash"></i></button>--%>*@
+                                </div>
+                                @*<%--  <div class="col-lg-2 col-md-1 col-sm-2 col-xs-5">
+                                        <asp:LinkButton runat="server" ID="btnImageSave" Width="100%" CssClass="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></asp:LinkButton>
+                                    </div>
+                                    <div class="col-lg-2 col-md-1 col-sm-2 col-xs-5">
+                                        <button type="button" id="deleteimage" onclick="deletecheck();" runat="server" style="background: none; border: 0; float: left; display: none;"><i class="glyphicon glyphicon-trash"></i></button>
+                                    </div>--%>*@
+                                @*<%-- <div class="col-lg-3 col-md-2 col-sm-7 col-xs-4 classdelete">
+                                        <asp:LinkButton runat="server" ToolTip="Delete" ID="btndelete" CommandName="Delete" OnClick="btndelete_Click"><i class="glyphicon glyphicon-trash"></i></asp:LinkButton>
+                                    </div>--%>*@
+
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3   w3-padding-top" style="margin-top: -6px">
+                                    <img src="/images/forspinicon.png" style="height: 20px; cursor: pointer; border: none;" id="btnchngeimg" onclick="newclickforward();" />
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3   w3-padding-top" style="margin-top: -6px">
+                                    <img src="/images/backspinicon.png" style="height: 20px; cursor: pointer; border: none;" id="btnchngg" onclick="newclickbackward();" />
+                                </div>
+                                <div class="col-lg-4 col-md-5 col-sm-2 col-xs-3" id="divBtnImgSave">
+                                    @*<asp:LinkButton runat="server" ID="btnImageSave" OnClick="btnImageSave_Click" style="display:none;" CssClass="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></asp:LinkButton>*@
+                                    <button ID="btnImageSave" OnClick="btnSave_Click()" style="display:none;" Class="w3-btn w3-small w3-green btnheight"><span class="icon"><i class="fa fa-save"> </i></span><span class="respText text">&nbsp;Save</span></button>
+                                </div>
+                                <div id="divImgDeleteButton" class="col-lg-2 col-md-1 col-sm-2 col-xs-3">
+                                    @*<%--  <button type="button" id="deleteimage" onclick="deletecheck();" runat="server" style="background: none;margin-top: 6px; border: 0; float: left; display: none;"><i class="glyphicon glyphicon-trash"></i></button>--%>*@
+                                    @*<asp:LinkButton runat="server" ID="deleteimage" OnClientClick="deletecheck();return false;" style="background: none;margin-top: 6px; border: 0; float: left; display: none;"><i class="glyphicon glyphicon-trash"></i></asp:LinkButton>*@
+                                    <button ID="deleteimage" onclick="deletecheck();return false;" style="background: none;margin-top: 6px; border: 0; float: left; display: none;"><i class="glyphicon glyphicon-trash"></i></button>
+                                </div>
+                                @*<%-- <div class="col-lg-3 col-md-3 col-sm-9 "></div>--%>*@
+                            </div>
+                            @*<asp:HiddenField ID="imgangle" Value="0" runat="server" />*@
+                            <input type="hidden" ID="imgangle" Value="0" />
+                        </div>
+
+
+                        @*<%--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 safari" style="display:none;">
+                                <input type="file" name="file" id="mob_file_image" class="mob_file_image custombtn" accept="image/*;capture=camera" />
+                                <button type="button" id="deleteimage1" onclick="resetimage();" style="background:none;border:0;float:right !important;margin-top:-25px"><i class="glyphicon glyphicon-trash"></i></button>
+                            </div>--%>*@
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 xsimageframe">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                @*<asp:Image runat="server" ID="imga" Style="margin-top: 20px" CssClass="img-thumbnail img-responsive changeimg" src="../images/noimg.jpg" ClientIDMode="Static" />*@
+                                <img id="imga" Style="margin-top: 20px" Class="img-thumbnail img-responsive changeimg" src="../images/noimg.jpg" />
+                                @*<canvas id="canvas" width="300" height="300"></canvas>*@
+                                <div id="myModal" class="modal">
+                                    <img class="modal-content" id="img01">
+                                    @*<div id="caption"></div>*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*<%-- Image Section Ends Here --%>*@
+
+                    @*<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="FloorLevelImage" runat="server">*@
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="FloorLevelImage">
+                        <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                            @*<h4 style="margin-top: 6px; font-size: 15px" id="floorImage" runat="server"><i class="fa fa-list"></i>&nbsp;Floor Level Image <span style="margin-left: 5px;" id="Span6" runat="server"></span></h4>*@
+                            <h4 style="margin-top: 6px; font-size: 15px" id="floorImage"><i class="fa fa-list"></i>&nbsp;Floor Level Image <span style="margin-left: 5px;" id="Span6"></span></h4>
+                        </div>
+
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="divimagetext" style="display:none" runat="server">
+                        @*<%--<asp:Label runat="server" ID="lblflrrimagename">Click on Image to pin scaffold position</asp:Label>--%>*@
+                        <label id="lblflrrimagename" style="font-size: 17px!important;">Click on Image to pin scaffold position</label>
+                    </div>
+                    @*<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="divCanvasFloorImage" runat="server">
+                        <canvas id="CanvasFloorImage" runat="server" height="300"></canvas>*@
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="divCanvasFloorImage">
+                        @*<canvas id="CanvasFloorImage" style="height:300px"></canvas>*@
+                        <canvas id="CanvasFloorImage"></canvas>
+                    </div>
+                    @*<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" id="divbtnflrimg" style="display:none" runat="server">
+                        <asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnfloorimagepinRemove" runat="server" OnClientClick="floorimagepinRemove();return false;"><i class="glyphicon glyphicon-remove-circle"></i> Remove</asp:LinkButton>*@
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" id="divbtnflrimg" style="display:none">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnfloorimagepinRemove" onclick="floorimagepinRemove();return false;"><i class="glyphicon glyphicon-remove-circle"></i> Remove</button>
+                    </div>
+                    @*<%--Add code on 11 May 2020--%>
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" id="divbtnZoomfloor" style="display:none" runat="server">
+                            <asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnfloorimagepinZoom" runat="server" OnClientClick="floorimagepinZoom();return false;"> <i class="fa fa-search"></i> Zoom</asp:LinkButton>
+                        </div>*@
+
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" id="divbtnZoomfloor" style="display:none" runat="server">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnfloorimagepinZoom" onclick="floorimagepinZoom();return false;"> <i class="fa fa-search"></i> Zoom</button>
+                    </div>
+
+                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8"></div>
+                </div>
+            </div>
+            <div id="map_populate_hidden" style="width: 1200px; height: 1000px; margin-left: 5px; border: 5px solid #5E5454;">
+
+            </div>
+            @*Adden on 09-Mar-2022*@
+            <div id="FloorImage_hidden" style="width: 1200px; height: 1000px; margin-left: 5px;">
+                <canvas id="CanvasFloorImage_hidden" height="1200" width="900"></canvas>
+
+            </div>
+            @*<%-- <div class="tab-content">
+                <div id="MoreDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+                    --%>*@
+
+
+            <div class="tab-pane fade table-bordered w3-padding w3-white" id="tabnotes" style="border-top: initial">
+                <div class="row w3-margin-top">
+                    <div class="col-lg-12 col-sm-12 col-md-12">
+                        <div class="x_panel w3-padding-0 w3-card-4">
+                            <div class="x_title w3-light-grey w3-small" style="height: 34px; margin-bottom: 0px;">
+                                @*<h4 style="margin-top: 6px; font-size: 15px;" id="H2" runat="server"><i class="fa fa-list"></i>&nbsp;Notes/Comments<span style="margin-left: 5px;" id="Span2" runat="server"></span></h4>*@
+                                <h4 style="margin-top: 6px; font-size: 15px;" id="H2"><i class="fa fa-list"></i>&nbsp;Notes/Comments<span style="margin-left: 5px;" id="Span2"></span></h4>
+
+                                <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+
+                                    <li>
+                                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <div class="row" style="margin-top: 10px!important;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin-bottom: -6px !important;">
+                                        @*<asp:TextBox ID="txtnotes_comments" runat="server" Width="100%" TextMode="MultiLine" Rows="20"></asp:TextBox>*@
+                                        <input type="text" ID="txtnotes_comments" Width="100%" TextMode="MultiLine" Rows="20" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade table-bordered w3-padding w3-white" id="tabActivity" style="border-top: initial">
+                Activity
+            </div>
+            <div class="tab-pane fade table-bordered w3-padding w3-white" id="tabInvoice" style="border-top: initial;">
+                Invoice
+            </div>
+        </div>
+
+        <div id="divdelete" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h6" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Delete Image</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="c1">Are you sure you want to Delete the Image?</label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                        @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btndeleteyes" runat="server" OnClick="btndeleteyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btndeleteyes" OnClick="btndeleteyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btndeleteno" OnClick="btndeleteno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="PopLocked" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 320px; width: 365px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h7"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Confirmation!</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="Label2">This should only be set to 'Yes' if the following are optimised?</label>
+                    </p>
+                    <p>
+                        <label id="Label3">1: Material Use</label>
+                    </p>
+                    <p>
+                        <label id="Label4">2: Man Hours</label>
+                    </p>
+                    <p>
+                        <label id="Label5">3: Design Type</label>
+                    </p>
+                    <p>
+                        <label id="Label6">4: Hierarchy of Access Choice</label>
+                    </p>
+                    <p>
+                        <label id="Label7">Do you want 'Lock In' this Job?</label>
+                    </p>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                        <label style="margin-left: 5px">Signed Off By : </label>
+                    </div>
+                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-7">
+                        @*<asp:DropDownList ID="ddlsignbysprvsr" runat="server" CssClass="form-control" AppendDataBoundItems="true"></asp:DropDownList>*@
+                        <select id="ddlsignbysprvsr" Class="form-control"></select>
+                    </div>
+                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1"></div>
+                </div>
+
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                        @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnlockedyes" runat="server" OnClick="btnlockedyes_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnlockedyes" OnClick="btnlockedyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnlockedno" runat="server" OnClick="btnlockedno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnlockedno" OnClick="btnlockedno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*<%--    Add New Popup for New Scaffold Owner Add By User 26 Aug 2019 Change Start --%>
+            <%--Discipline change Sub Owner Rep On 10 Sep 2019--%>*@
+        <div id="divCreatePopup" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 160px; width: 300px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h8"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Sub Owner Rep<a id="close" class="close" style="float: right; color: white" onclick="btnclose();">X</a></h4>
+                </header>
+                <div class="row">
+                    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                        <label id="lbldescription" style="font-size: 15px">Add New Sub Owner Rep<span style="color: red">&nbsp*</span></label>
+                        <input type="text" id="txtnewDiscipline" Class="form-control" />
+                        @*<asp:RequiredFieldValidator ID="rfv" runat="server" CssClass="rdf-initial rdf-text" Style="margin-top: 0px;" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtnewDiscipline" ValidationGroup="SaveDesc"></asp:RequiredFieldValidator>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        @*<asp:Button runat="server" ID="btnSaveDiscipline" ValidationGroup="SaveDesc" Width="100%" CssClass="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSaveDiscipline_Click" Text="Save" />*@
+                        <button id="btnSaveDiscipline" style="width:100px" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnSaveDiscipline_Click()">Save</button>
+                    </div>
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        @*<asp:Button runat="server" ID="btnClose" OnClientClick="btnclose();" Width="100%" CssClass="w3-btn w3-small w3-red btnheight imagesize" Text="Cancel" />*@
+                        <button id="btnClose" onclick="btnclose();" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*<%--Scaffold Owner Rep . change Sub Owner On 10 Sep 2019--%>*@
+        <div id="divCreateScaffoldOwnere" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 160px; width: 300px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h9"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Sub Owner<a id="closescaffoldOwner" class="close" style="float: right; color: white" onclick="btnScaffoldOwnerClose();">X</a></h4>
+                </header>
+                <div class="row">
+                    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                        <label id="Label1" runat="server" style="font-size: 15px">Add New Sub Owner<span style="color: red">&nbsp*</span></label>
+                        <input type="text" id="txtScaffoldOwnerRep" Class="form-control" />
+                        @*<asp:TextBox ID="txtScaffoldOwnerRep" CausesValidation="true" Class="form-control"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" CssClass="rdf-initial rdf-text" Style="margin-top: 0px;" ForeColor="Red" ErrorMessage="* Required" ControlToValidate="txtScaffoldOwnerRep" ValidationGroup="SaveScaf"></asp:RequiredFieldValidator>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        @*<asp:Button runat="server" ID="btnScaffoldOwnerSave" ValidationGroup="SaveScaf" Width="100%" CssClass="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnScaffoldOwnerSave_Click" Text="Save" />*@
+                        <button id="btnScaffoldOwnerSave" style="Width:100%" Class="w3-btn w3-small w3-green btnheight imagesize" OnClick="btnScaffoldOwnerSave_Click()">Save</button>
+                    </div>
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        @*<asp:Button runat="server" ID="btnScaffoldOwnerClose" OnClientClick="btnScaffoldOwnerClose();" Width="100%" CssClass="w3-btn w3-small w3-red btnheight imagesize" Text="Cancel" />*@
+                        <button id="btnScaffoldOwnerClose" onclick="btnScaffoldOwnerClose();" style="width:100px;" Class="w3-btn w3-small w3-red btnheight imagesize">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        @*<%--  Popup For Floor Image Pointer Add On 15 Oct 2019--%>*@
+        <div id="divFloorPopup" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h10" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="lblMessage">Are you sure you want to Change the Job Location ?</label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                        @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnFloorMarkYes" OnClientClick="btnFloorMarkYesClick();" OnClick="btnFloorMarkYes_Click" runat="server" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnFloorMarkYes" OnClick="btnFloorMarkYesClick()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnFloorMarkNo" OnClientClick="btnFloorMarkNoClick();return false;" runat="server"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnFloorMarkNo" onclick="btnFloorMarkNoClick();return false;"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="divAddBtnWorkGroupAlert" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 400px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h14" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="c2" style="font-size: 13px">Do you wish to Save Job Data before clicking on <b>+Add</b> Button ?</label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 23px">
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnAlertyes" OnClick="btnAlertWorkGroupsyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnAlertno" OnClick="addnewWorkGroups()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divAddBtnSubGroupsAlert" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 400px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h14" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="c2" style="font-size: 13px">Do you wish to Save Job Data before clicking on <b>+Add</b> Button ?</label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 23px">
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnAlertyes" OnClick="btnAlertSubGroupsyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnAlertno" OnClick="addnewSubGroups()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divAddBtnRequestedByAlert" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 400px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h14" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="c2" style="font-size: 13px">Do you wish to Save Job Data before clicking on <b>+Add</b> Button ?</label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 23px">
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnAlertyes" OnClick="btnAlertRequestedByyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnAlertno" OnClick="addRequestedBy()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        @*<%--  Popup For Floor Image Zoom Add On 11 May 2020--%>*@
+        <div id="divZoomFloorPopup" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: fit-content;">
+                <span class="crossbtn" style="cursor: pointer; color: Black; font-weight: bold; margin-right:0px; float: right; margin-top: -50px; background: white" onclick="document.getElementById('divZoomFloorPopup').style.display='none'"><a id="btncross"></a>&nbsp;&nbsp;X</span>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="divCanvasFloorZoomImage" style="margin-top: 0px">
+                    @*<canvas id="CanvasFloorZoomImage" runat="server" height="900" width="900" style="margin-left: 100px;margin-top: -50px; "></canvas>*@
+                    <canvas id="CanvasFloorZoomImage" height="900" width="900" style="margin-left: 100px;margin-top: -50px; "></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="divConformationforSiteFloor" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h11"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label runat="server" id="bllMessage"></label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnSiteFloorLevelChangeYes" OnClick="btnSiteFloorLevelChangeYes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnSiteFloorLevelChangeNo" OnClick="btnSiteFloorLevelChangeNo_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*<%--    Add New Popup for New Scaffold Owner Add By User 26 Aug 2019 Change End --%>*@
+
+        <div id="divCreateWorkGroups" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 160px; width: 300px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h12"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Work Groups<a id="btnCloseWorkGroups" class="close" style="float: right; color: white" onclick="btnCloseWorkGroups();">X</a></h4>
+                </header>
+                <div class="row">
+                    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                        <label id="Label9" style="font-size: 15px">Add New Work Groups<span style="color: red">&nbsp*</span></label>
+                        <input type="text" id="txtWorkGroups" Class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        <button id="btnSaveWorkGroups" style="Width:100%" Class="w3-btn w3-small w3-green btnheight imagesize" onclick="btnSaveWorkGroups_Click()">Save</button>
+                    </div>
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        <button id="btnclosed" onclick="btnCloseWorkGroups();" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divCreateSubGroups" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 160px; width: 300px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Sub Groups<a class="close" style="float: right; color: white" onclick="btnCloseSubGroups();">X</a></h4>
+                </header>
+                <div class="row">
+                    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12">
+                        <label id="Label10" style="font-size: 15px">Add New Sub Groups<span style="color: red">&nbsp*</span></label>
+                        <input type="text" id="txtSubGroups" Class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        <button id="btnSubGroupsSave" style="Width:100%" Class="w3-btn w3-small w3-green btnheight imagesize" onclick="btnSaveSubGroups_Click()">Save</button>
+                    </div>
+                    <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                        <button id="btnCloseSubGroups" onclick="btnCloseSubGroups();" style="Width:100%" Class="w3-btn w3-small w3-red btnheight imagesize">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divAddBtnAlert" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 400px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h14" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="c2" style="font-size: 13px">Do you wish to Save Job Data before clicking on <b>+Add</b> Button ?</label>
+                    </p>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 23px">
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnAlertyes" OnClick="btnAlertyes_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnAlertno" OnClick="btnAlertno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*start code for copy historical module*@
+        <div id="MyHistoricalJobModal" class="w3-modal" style="display: none !important">
+            <input type="hidden" id="hiddenOldRegid" />
+            <input type="hidden" id="hiddenOldLocId" />
+            <input type="hidden" id="hiddenOldSiteId" />
+            <input type="hidden" id="hiddenOldFloorid" />
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" @*style="height: 90%; width: 60%;"*@>
+                <div class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; text-align: right;">
+                    @*<button type="button" id="ExportToCsvButton" class="w3-btn w3-teal" style="Width:14%" onclick="ExportToCsvButton_Click()"><i class="fa fa-file-excel-o"></i>&nbsp;Export to CSV</button>
+                        <button ID="btnclose" class="w3-green w3-btn w3-teal" Style="color: black" OnClick="btnCONTINUE_Click()">CONTINUE</button>*@
+                    <button ID="btnclose" class="w3-red w3-btn" Style="color: black" OnClick="btnCANCEL_Click()">CANCEL</button>
+                </div>
+                @*<div class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; margin-left:10px;">
+                        <span class="Notes"> <b style="color:red;">Warning! There are insufficient Qty available for the following items on site. Please add to site inventory before copying historical data. </b></span>
+                    </div>*@
+                @*<div  class="modal-header" style="border-bottom: none; padding-bottom: 2px; padding-top: 7px; margin-left:10px;">
+
+                    </div>*@
+                <div class="w3-container">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div id="HistoricalJobGrid" style="color: black; width: 100%;margin-top:5px;">
+                                <table id="tblRegisterList" class="table table-striped " width="100%">
+                                    <thead style="background-color: #efefef; color: #716262;">
+                                        <tr>
+                                            <td style="display:none;"></td>
+                                            <td></td>
+                                            <td>Scaf Ref #</td>
+                                            <td>Site Location</td>
+                                            <td>Location</td>
+                                            <td>Building No</td>
+                                            <td>Floor Level</td>
+                                            <td>Asset No</td>
+                                            <td>Optimize Status</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyRegisterList" width="100%"></tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* Added on (09-03-2024) to take a confirmation do you want to copy job or not *@
+        <!--<div id="divCopyHistPopup" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 155px; width: 375px; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h10" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="lblMessagecopyhist"> </label>
+                    </p>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2" style="margin-right: -24px;margin-top:-2px;">
+                        <label> With Inventory </label>
+                    </div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2">-->
+        @*<input type="checkbox" checked id="CheckInvnt" />*@
+        @*commented as per the client request on  27-06-2024 by ssourabh*@
+
+        <!--<input type="checkbox" id="CheckInvnt" />
+                    </div>
+                </div>
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4"></div>
+                    <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnFloorMarkYes" OnClick="btncopyhistYesClick()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnFloorMarkNo" onclick="btncopyhistNoClick();return false;"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+
+        <div id="divCopyHistPopup" class="w3-modal" style="display: none">
+            <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 75%; margin-top: 86px;">
+                <header class="w3-container w3-dark-grey">
+                    <h4 class="w3-text-white" id="h10" runat="server"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Alert</h4>
+                </header>
+                <div class="w3-container">
+                    <p class="w3-padding-top w3-text-grey">
+                        <label id="lblMessagecopyhist"> </label>
+                    </p>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                        <div class="col-xs-6 col-lg-9 col-md-6 col-sm-6">
+                            <label style="margin-right:20px ;font-size:large"> As a Live Job ?</label>
+                        </div>
+                        <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3">
+                            <input type="radio" name="SelectJobType" value="0" style="vertical-align: -webkit-baseline-middle" />
+                        </div>
+                    </div>
+
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4">
+                        <div class="col-xs-6 col-lg-8 col-md-6 col-sm-6">
+                            <label style="font-size:large"> With Inventory ?</label>
+
+                        </div>
+                        <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1">
+
+                            <input type="checkbox" id="WithInventoryForLiveJob" value="1" style="vertical-align: -webkit-baseline-middle" />
+                        </div>
+
+                    </div>
+                    <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4">
+                        <div class="col-xs-6 col-lg-5 col-md-6 col-sm-6">
+                            <label style="font-size:large">Built Date </label>
+
+                        </div>
+                        <div class="col-xs-6 col-lg-7 col-md-6 col-sm-6">
+                            <div class="input-container">
+                                <input type="text" id="BuildDate" class="form-control" readonly />
+                                <span class="calendar-icon ClassA">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                                <label style="font-size:large"> Pipeline/Built Date </label>
+
+                            </div>
+                            <div class="col-xs-6 col-lg-6 col-md-6 col-sm-6">
+                                <div class="input-container">
+                                    <input type="text" id="PipelineStartDate" class="form-control" readonly />
+                                    <span class="calendar-icon">
+                                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>*@
+
+                </div>
+
+                <div class="row">
+
+                    <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4">
+                        <div class="col-xs-6 col-lg-9 col-md-6 col-sm-6">
+                            <label style="margin-right:20px;font-size:large;"> As a Pipeline Job ?</label>
+
+                        </div>
+                        <div class="col-xs-3 col-lg-3 col-md-3 col-sm-3">
+                            <input type="radio" name="SelectJobType" value="1" style="vertical-align: -webkit-baseline-middle" />
+
+                        </div>
+
+                    </div>
+                    <div class="col-xs-4 col-lg-3 col-md-4 col-sm-4">
+                        <div class="col-xs-6 col-lg-8 col-md-6 col-sm-6">
+                            <label style="font-size:large"> With Inventory ?</label>
+
+                        </div>
+                        <div class="col-xs-1 col-lg-1 col-md-1 col-sm-1">
+
+                            <input type="checkbox" id="WithInventoryForPipelineJob" value="1" style="vertical-align: -webkit-baseline-middle" />
+                        </div>
+
+                    </div>
+                    <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4">
+                        <div class="col-xs-6 col-lg-5 col-md-6 col-sm-6">
+                            <label style="font-size:large">Pipeline Start Date </label>
+
+                        </div>
+                        <div class="col-xs-6 col-lg-7 col-md-6 col-sm-6">
+                            <div class="input-container">
+                                <input type="text" id="PipelineStartDate" class="form-control" readonly />
+                                <span class="calendar-icon ClassB ">
+                                    <i class="fa fa-calendar" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <hr />
+                <div>
+                    <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12" style="text-align:center">
+                        <h4 style="margin-top:auto">Complete Job Copy ??</h4>
+                    </div>
+
+                </div>
+
+                <div class="row" style="padding-bottom: 20px">
+                    <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4">
+
+                    </div>
+                    <div class="col-xs-2 col-lg-1 col-md-2 col-sm-2">
+                        <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnFloorMarkYes" OnClick="btncopyhistYesClick()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                    </div>
+                    <div class="col-xs-2 col-lg-1 col-md-2 col-sm-2">
+                        <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnFloorMarkNo" onclick="btncopyhistNoClick();return false;"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                    </div>
+                    <div class="col-xs-4 col-lg-5 col-md-4 col-sm-4"></div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+        @*End*@
+    </div>
+
+    <div id="variationHoursModal" class="variationmodal" style="display:none; ">
+        <div class="variationmodal-content" style="padding: 0; border-radius: 5px;">
+            <div class="modal-header" style="background-color: #616161; color: #fff; padding: 6px; display: flex; align-items: center; border-radius: 5px 5px 0 0; margin: 0; ">
+                <span class="modal-icon" style="font-size: 24px; margin-right: 10px;">&#128337;</span>
+                <span class="modal-title" style="font-size: 18px; font-weight: bold;">Variation Hours</span>
+                <span class="close1" onclick="closeModal()" style="margin-left: auto; font-size: 30px; cursor: pointer; color: #fff;">&times;</span>
+            </div>
+
+            <div id="loaddata"></div>
+        </div>
+    </div>
+
+    <div id="addRecordModal" class="variationHoursModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+        <div class="variationmodal-content" style="background-color: #f9f9f9; padding:0px 0px 10px 0px; border-radius: 5px; width: 300px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); position: relative;">
+            <header class="w3-container w3-dark-grey" style="margin-bottom: 11px; height: 37px;">
+                <h4 class="w3-text-white" id="modalHeader" style=" font-size: 15px;"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp; Add New Record</h4>
+            </header>
+            <div id="modalAlert" style="display: none; background-color: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; border-radius: 4px; margin: 10px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="newWorkCarriedOut" style="display: block; font-weight: bold; margin-left:6px">Work Carried Out<span style="color: red">&nbsp*</span></label>
+                <input type="text" id="newWorkCarriedOut" name="workCarriedOut" required style="width: calc(100% - 20px); padding: 4px; border: 1px solid #ccc; border-radius: 4px; margin-left: 6px">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="newVariationInHrs" style="display: block; font-weight: bold; margin-left: 6px">Variation In Hours<span style="color: red">&nbsp*</span></label>
+                <input type="number" id="newVariationInHrs" name="variationInHrs" required style="width: calc(100% - 20px); padding: 4px; border: 1px solid #ccc; border-radius: 4px; margin-left: 6px" />
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="newWorkCarriedOutDate" style="display: block; font-weight: bold; margin-left: 6px">
+                    Date Work Carried Out<span style="color: red">&nbsp*</span>
+                </label>
+                <div style="position: relative; width: 93%; margin-left: 6px;">
+                    <input type="text"
+                           id="newWorkCarriedOutDate"
+                           placeholder="Select To Date"
+                           style="width: 100%; padding: 4px 30px 4px 10px; border: 1px solid #ccc; border-radius: 4px;" readonly />
+                    <span class="calendar-icon" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); cursor: pointer;">
+                        <i class="fa fa-calendar" aria-hidden="true"></i>
+                    </span>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                <button id="saveNewRecordBtn" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">Save </button>
+                <button id="cancelNewRecordBtn" onclick="CancelNewRecordBtn()" style="padding: 10px 20px; background-color: rgba(194, 41, 44, 1); color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="GetOfflineModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 128px; width: 365px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Offline Link</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label1">Do you want to go offline?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnofflineconfirm" runat="server" OnClientClick="if(!ChangeRID()){ return false}" OnClick="btnofflineconfirm_Click" CausesValidation="false"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" OnClick="btnofflineconfirm_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnofflinecancel" runat="server" OnClick="btnofflinecancel_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnofflinecancel" OnClick="btnGoOfflineNoClick()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="clearOfflineDatainspectionModal" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 537px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h6"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Would you like to clear offline job data?</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label id="Label1">
+                        If you clear it, you will not be able to save any Job  completed in offline mode.<br /><br /> 1. Click <b>Yes</b> to clear the offline data.<br />2. Click <b>No</b> to keep the offline data.
+                    </label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnofflineconfirm" OnClick="BtnClerdataClickyes()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnofflinecancel" OnClick="BtnClerdataClickNo()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divCloseOutJob" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: auto; width: 380px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white"><i class="fa fa-exclamation-circle w3-text-yellow"></i>&nbsp;Close Out Job</h4>
+            </header>
+            <div class="w3-container">
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <label>Dismantle Date<span style="color:red">&nbsp*</span></label>
+                        <input type="text" id="txtCloseOutDismantleDate" class="form-control" autocomplete="off" />
+                    </div>
+                </div>
+                <p class="w3-padding-top w3-text-grey">
+                    <label>This will finalize material, return all inventory and mark this job as Closed Out. Continue?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    <button class="w3-btn w3-green w3-hover-dark-grey" id="btnCloseOutJobYes" onclick="btnCloseOutJobConfirm_Click()"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    <button class="w3-btn nln-bg w3-hover-dark-grey" id="btnCloseOutJobNo" onclick="btnCloseOutJobCancel_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+

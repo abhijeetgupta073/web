@@ -1,0 +1,305 @@
+﻿
+@{
+    ViewBag.Title = "DamagedInventoryDetails";
+}
+
+@*<link href="Assets/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" />
+<script src="Assets/js/select2.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>*@
+<script src="~/Content/js/DamagedInventoryDetails.js?V1=6"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#txtto').val('@ViewBag.To');
+        $('#txtfrom').val('@ViewBag.From');
+        $('#txtdesc').val('@ViewBag.DamagedDescription'.replace('&#39;', "'"));
+        var UserRole = getParameterByName('UserRole');
+        var DecUserRole = parseInt(Decrypt(UserRole));
+        if (DecUserRole == 75) {
+            $('#AnchorYardInventory').css('display', 'none');
+            $('#AnchorDepotInventory').css('display', 'none');
+            $('#AnchorSiteInventory').css('display', 'none');
+            $('#AnchorJobInventory').css('display', 'none');
+            $('#AnchorReturnInventory').css('display', 'none');
+        }
+
+        var currentDate = new Date();
+        $('#txtreturndate').val(currentDate.DateMonthFormat());
+
+        $("#txtreturndate").datepicker({
+            dateFormat: 'dd-M-yy',
+            // maxDate: 0,
+            closeText: 'Close',
+
+        });
+
+    });
+</script>
+<style>
+    .w3-margin-top {
+        margin-top: 0px !important;
+    }
+
+    .dataTables_length {
+        display: none;
+    }
+
+    .invalidCol {
+        background-color: red !important;
+        color: white !important;
+    }
+
+    #txtreturndate {
+        border-radius: 4px;
+        height: 28px;
+        border-color: #e5e5e5 !important;
+    }
+
+    .invalidCol {
+        background-color: red !important;
+        color: white !important;
+    }
+</style>
+
+    <div class="clearfix"></div>
+    <div id="FormSection" class="row">
+        <div class="col-xs-12 col-lg-12 col-md-12 col-sm-12 xsformsection" style="padding-left: 1px;">
+            <ul id="UlNavTabSeciton" class="nav nav-tabs" style="margin-bottom: 0px;">
+                <li id="liYard">
+                    <a id="AnchorYardInventory" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Third Party Inventory</span>
+                    </a>
+                </li>
+                <li id="liDepotInventory" runat="server">
+                    <a id="AnchorDepotInventory" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Main Depot Inventory</span>
+                    </a>
+                </li>
+                <li id="liSiteInventory">
+                    <a id="AnchorSiteInventory" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Site Inventory</span>
+                    </a>
+                </li>
+                <li id="liJob">
+                    <a id="AnchorJobInventory" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Request Inventory / Deliveries</span>
+                    </a>
+                </li>
+                <li id="liSite" style="width: 161px">
+                    <a id="AnchorReturnInventory" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Return Inventory</span>
+                    </a>
+                </li>
+                <li id="LiDamaged" class="active">
+                    <a id="AnchorDamagedInventory" style="cursor: pointer;" data-toggle="tab">
+                        <span class="spancolorandsize"><i class="fa fa-tag"></i>&nbsp;Damaged Inventory</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <input type="hidden" id="hdnRid"  Value="0" />
+    <input type="hidden" id="hdnPage"  />
+    <input type="hidden" id="hdnQty"  />
+    <input type="hidden" id="hdnOldQty" />
+    <input type="hidden" id="hdnInvId" />
+    <input type="hidden" id="hdnid"  />
+    <input type="button" id="btnRedirect"  OnClick="btnRedirect_Click()" Style="display: none" />
+    <input type="button" id="btnedit"  OnClick="btnedit_Click()" Style="display: none" />
+    <input type="hidden" id="hdnUID"  />
+    <input type="hidden" id="hdnfrom"  />
+    <input type="hidden" id="hdnfromid"  />
+    <input type="hidden" id="hdnTo"  />
+    <input type="hidden" id="hdnToId"  />
+    <input type="hidden" id="hdnDamagedInvId"  />
+    <input type="hidden" id="hdnRInvId"  />
+    <input type="hidden" id="hdnfromtocheck" />
+    <input type="hidden" id="hdntextdisable"  Value="false" />
+    <input type="hidden" id="hdnDIdamagedID" />
+    <input type="hidden" id="hdnAvaQty" />
+    <input type="hidden" id="hdnDamagedQty" />
+    <input type="hidden" id="hdnGetMaterialType"/>
+
+   @*<asp:HiddenField ID="hdnRid" runat="server" Value="0" />
+    <asp:HiddenField ID="hdnPage" runat="server" />
+    <asp:HiddenField ID="hdnQty" runat="server" />
+    <asp:HiddenField ID="hdnOldQty" runat="server" />
+    <asp:HiddenField ID="hdnInvId" runat="server" />
+    <asp:HiddenField ID="hdnid" runat="server" />
+    <asp:Button ID="btnRedirect" runat="server" OnClick="btnRedirect_Click" Style="display: none" />
+    <asp:Button ID="btnedit" runat="server" OnClick="btnedit_Click" Style="display: none" />
+    <asp:HiddenField ID="hdnUID" runat="server" />
+    <asp:HiddenField ID="hdnfrom" runat="server" />
+    <asp:HiddenField ID="hdnfromid" runat="server" />
+    <asp:HiddenField ID="hdnTo" runat="server" />
+    <asp:HiddenField ID="hdnToId" runat="server" />
+    <asp:HiddenField ID="hdnDamagedInvId" runat="server" />
+    <asp:HiddenField ID="hdnRInvId" runat="server" />
+    <asp:HiddenField ID="hdnfromtocheck" runat="server" />
+    <asp:HiddenField ID="hdntextdisable" runat="server" Value="false" />
+    <asp:HiddenField ID="hdnDIdamagedID" runat="server" />
+    <asp:HiddenField ID="hdnAvaQty" runat="server" />
+    <asp:HiddenField ID="hdnDamagedQty" runat="server" />
+    <asp:HiddenField ID="hdnGetMaterialType" runat="server" />*@
+    <div class="tab-content">
+        <div id="custDetails" class="tab-pane fade in active table-bordered w3-padding w3-white" style="border-top: initial;">
+            <div class="row w3-margin-top">
+                <div class="row">
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                        @*<asp:Label ID="lblto" CssClass="labeltext" Text="To:" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtto" ReadOnly="true" CssClass="form-control labeltext" Style="color: black; font-size: 12px!important; border: 1px solid lightgray;" runat="server"></asp:TextBox>*@
+                        <label id="lblto" Class="labeltext" >To:</label>
+        <input type="text" id="txtto" disabled="disabled" Class="form-control labeltext" Style="color: black; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6">
+                        @*<asp:Label ID="lblfrom" CssClass="labeltext" Text="From:" runat="server"></asp:Label>
+                        <asp:TextBox ID="txtfrom" CssClass="form-control labeltext" ReadOnly="true" Style="color: black; font-size: 12px!important; border: 1px solid lightgray;" runat="server"></asp:TextBox>*@
+                        <label id="lblfrom" Class="labeltext">From:</label>
+        <input type="text" id="txtfrom" Class="form-control labeltext" disabled="disabled" Style="color: black; font-size: 12px!important; border: 1px solid lightgray;" />
+                    </div>
+
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                        @*<asp:Label ID="lblrequestdate" CssClass="labeltext" Text="Date:" runat="server"></asp:Label>*@
+                        <label id="lblrequestdate" Class="labeltext">Date:</label>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+                        @*<Telerik:RadDatePicker ID="txtreturndate" runat="server" CssClass="form" DateInput-DateFormat="dd-MMM-yyyy"></Telerik:RadDatePicker>*@
+                        <input type="text" id="txtreturndate"  Class="form-control" style="width:50%" />
+                    </div>
+
+                </div>
+                <div style="height: auto;" class="x_panel w3-padding-0 w3-card-4">
+                    <div class="x_title w3-light-grey w3-small" style="height: 34px">
+                        <h4 style="margin-top: 6px; font-size: 15px" id="H5"><i class="fa fa-list"></i>&nbsp;Damage Inventory Details <span style="margin-left: 5px;" id="Span5"></span></h4>
+                        <ul class="nav navbar-right panel_toolbox" style="min-width: 17px ! important; margin-top: -32px;">
+                            @*<asp:LinkButton CssClass="btn" Visible="true" CausesValidation="false" ID="Back" Style="width: 100%; background: none; color: black" OnClick="Back_Click" runat="server"><i class="fa fa-backward"></i>&nbsp;Back </asp:LinkButton>*@
+                            <li>
+                                <a Class="btn" id="Back" Style="width: 100%; background: none; color: black" OnClick="Back_Click()"><i class="fa fa-backward"></i>&nbsp;Back </a>
+                            </li>
+                        </ul>
+
+                    </div>
+                    @*<asp:HiddenField ID="hdnfild" runat="server" />*@
+                    <input type="hidden" id="hdnfild" />
+                    <div id="filtermattype" class="filter" style="display: block;">
+                        <div class="col-lg-4 col-md-4 col-xs-12 col-sm-6">
+                            @*<asp:Label ID="lbltab" runat="server" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE BUTTON to save data</asp:Label>*@
+                            <label id="lbltab" Style="font-size: 11px; color: #151414;"><strong style="color:red">* </strong> Press TAB, ENTER or SAVE BUTTON to save data</label>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12" style="margin-top: 10px;"></div>
+
+                        <div class="col-lg-1 col-md-2 col-sm-3 col-xs-5" id="txtitemsHide">
+                            <label># of Items</label>
+                            <input type="text" id="txtitems" class="form-control" disabled="disabled" />
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-4" id="txttotaltonnageHide">
+                            <label>Total Tonnage</label>
+                            <input type="text" id="txttotaltonnage" class="form-control" disabled="disabled" />
+                        </div>
+
+                        <div class="col-lg-3 col-sm-4 col-md-4 col-xs-12">
+
+                            <label style="font-size: 12px">Filter By MaterialType</label>
+                            @*<asp:DropDownList ID="ddlMaterialType" CssClass="form-control" runat="server" AutoPostBack="false" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="ddlChangeMaterialType()" AppendDataBoundItems="true">
+            </asp:DropDownList>*@
+                            <select ID="ddlMaterialType" Class="form-control" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important" onchange="ddlChangeMaterialType()">
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12" style="margin-top: 2px">
+                            @*<asp:Label ID="lbldesc" CssClass="labeltext" Text="Description" Style="display: block" runat="server"></asp:Label>
+            <asp:TextBox ID="txtdesc" CssClass="form-control labeltext" ReadOnly="false" AutoCompleteType="Disabled" Style="width: 100%; height: 25px !important; color: black; font-size: 12px!important; border: 1px solid lightgray;" runat="server"></asp:TextBox>*@
+                            <label id="lbldesc" Class="labeltext" Style="display: block">Description</label>
+                            <input type="text" id="txtdesc" Class="form-control labeltext" Style="width: 100%; height: 25px !important; color: black; font-size: 12px!important; border: 1px solid lightgray;" />
+
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12" style="margin-top: 20px">
+                            <button type="button" Class="w3-btn  w3-green buttonBlue" id="btnrefresh" Style="height: 26px !important; display: block; width: 105%; padding-top: 3px; color: black; background: #eee; margin-left: -5%;" onclick="btnrefresh_Click()">Refresh</button>
+                        </div>
+                        @*<%-- <div class="col-lg-3 col-sm-3 col-md-4 col-xs-4">
+            <asp:DropDownList ID="ddlMaterialType" CssClass="form-control" runat="server" AutoPostBack="false" Style="height: 26px !important; padding-top: 4px !important; width: 100% !important"
+                              onchange="selectmattype()" AppendDataBoundItems="true">
+
+            </asp:DropDownList>
+
+        </div>--%>*@
+                        @*<%--<div class="col-lg-4 col-md-2 col-sm-3 col-xs-1" id="blank" runat="server" style="display: none"></div>--%>*@
+
+
+
+                        <div class="col-lg-3 col-md-2 col-sm-4 col-xs-12">
+                            <label id="lblSavemsg" style="font-size: 15px;color:blue !important; float: right; display: none"><strong style="color:red !important">* </strong></label>
+                        </div>
+                    </div>
+
+
+
+
+                        <input type="hidden" id="hdnfield" />
+                        <input type="hidden" id="getgridcount" />
+                        <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6">
+                            @*<asp:LinkButton CssClass="w3-btn  w3-green buttonBlue" ID="btnconfirm" Style="width: 100%; display: none; float: right; height: 25px; padding-top: 3px;" OnClick="btnconfirm_Click" runat="server">&nbsp;Confirm Damaged </asp:LinkButton>*@
+                            <button Class="w3-btn  w3-green buttonBlue" id="btnconfirm" Style="width: 100%; display: none; float: right; height: 25px; padding-top: 3px;" OnClick="btnconfirm_Click()">&nbsp;Confirm Damaged </button>
+                        </div>
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 22px">
+
+                            <div class="clearfix"></div>
+
+                            <div id="damageLoadData"></div>
+
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    <div id="Damagedconfirm" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h1" runat="server">Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label runat="server" id="Label2">You have marked certain items for damage.Do you wish to damage them?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnDamagednyes" runat="server" OnClientClick="SaveChangesInGrid(); return false;"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnDamagednyes" OnClientClick="SaveChangesInGrid(); return false;"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnDamagednno" runat="server" OnClick="btnDamagednno_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnDamagednno"  OnClick="btnDamagednno_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divDmgConfirmItem" runat="server" class="w3-modal" style="display: none">
+        <div class="w3-modal-content w3-animate-zoom w3-card-8" style="height: 168px; width: 400px; margin-top: 86px;">
+            <header class="w3-container w3-dark-grey">
+                <h4 class="w3-text-white" id="h2" runat="server">Alert!</h4>
+            </header>
+            <div class="w3-container">
+                <p class="w3-padding-top w3-text-grey">
+                    <label runat="server" id="lbl">Do you want  to confirm damage Material list?</label>
+                </p>
+            </div>
+            <div class="row" style="padding-bottom: 20px">
+                <div class="col-xs-4 col-lg-4 col-md-4 col-sm-4"></div>
+                <div class="col-xs-2 col-lg-2 col-md-2 col-sm-2" style="margin-right: 21px">
+                    @*<asp:LinkButton CssClass="w3-btn w3-green w3-hover-dark-grey" ID="btnDmgConfirmYes" runat="server" OnClientClick="SaveChangesInGrid(); return false;"><i class="glyphicon glyphicon-ok-circle"></i> Yes</asp:LinkButton>*@
+                    <button Class="w3-btn w3-green w3-hover-dark-grey" id="btnDmgConfirmYes" OnClick="SaveChangesInGrid(); return false;"><i class="glyphicon glyphicon-ok-circle"></i> Yes</button>
+                </div>
+                <div class="col-xs-2 col-lg-4 col-md-2 col-sm-2">
+                    @*<asp:LinkButton CssClass="w3-btn nln-bg w3-hover-dark-grey" ID="btnDmgConfirmNo" runat="server" OnClick="btnDmgConfirmNo_Click"><i class="glyphicon glyphicon-remove-circle"></i> No</asp:LinkButton>*@
+                    <button Class="w3-btn nln-bg w3-hover-dark-grey" id="btnDmgConfirmNo" OnClick="btnDmgConfirmNo_Click()"><i class="glyphicon glyphicon-remove-circle"></i> No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
